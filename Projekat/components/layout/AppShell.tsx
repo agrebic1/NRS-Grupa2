@@ -7,7 +7,7 @@ import {
   Home, ShieldCheck, Wrench, Headphones,
   LayoutDashboard, ClipboardList, PlusCircle,
   Users, LogOut, Menu, X, ChevronRight,
-  UserCircle, ArrowLeftRight, ChevronDown,
+  UserCircle, ArrowLeftRight, ChevronDown, BarChart2,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
@@ -67,14 +67,14 @@ const NAVIGACIJA_PO_ULOZI: Record<UserRole, StavkaNavigacije[]> = {
     { href: '/korisnik/zahtjevi/novi', oznaka: 'Kreiraj zahtjev',  Ikona: PlusCircle },
   ],
   serviser: [
-    { href: '/serviser',               oznaka: 'Pregled',       Ikona: LayoutDashboard },
-    { href: '/serviser/zadaci',        oznaka: 'Moji zadaci',   Ikona: ClipboardList },
-    { href: '/serviser/intervencije',  oznaka: 'Intervencije',  Ikona: Wrench },
+    { href: '/serviser',               oznaka: 'Pregled',        Ikona: LayoutDashboard },
+    { href: '/serviser/intervencije',  oznaka: 'Intervencije',   Ikona: Wrench },
   ],
   dispecer: [
-    { href: '/dispecer',               oznaka: 'Kontrolna ploča', Ikona: LayoutDashboard },
-    { href: '/dispecer/zahtjevi',      oznaka: 'Pregled zahtjeva', Ikona: ClipboardList },
-    { href: '/dispecer/intervencije',  oznaka: 'Intervencije',  Ikona: Wrench },
+    { href: '/dispecer',                      oznaka: 'Kontrolna ploča',  Ikona: LayoutDashboard },
+    { href: '/dispecer/zahtjevi',             oznaka: 'Pregled zahtjeva', Ikona: ClipboardList },
+    { href: '/dispecer/intervencije',         oznaka: 'Intervencije',     Ikona: Wrench },
+    { href: '/dispecer/izvjestaj/odziva',     oznaka: 'Izvještaj odziva', Ikona: BarChart2 },
   ],
   admin: [
     { href: '/admin',                  oznaka: 'Pregled',       Ikona: LayoutDashboard },

@@ -20,8 +20,8 @@ interface SlikaPreview {
   greska?: string;
 }
 
-const DOZVOLJENI_TIPOVI = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-const MAX_MB = 5;
+const DOZVOLJENI_TIPOVI = ['image/jpeg', 'image/png', 'image/webp'];
+const MAX_MB = 10;
 
 function citat(bytes: number): string {
   if (bytes < 1024)       return `${bytes} B`;

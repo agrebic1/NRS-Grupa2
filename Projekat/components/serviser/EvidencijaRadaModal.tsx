@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { ClipboardCheck, X, Clock, Wrench, FileText } from 'lucide-react';
+import { ClipboardCheck, X, Clock, Wrench, FileText, Plus, Trash2 } from 'lucide-react';
+import type { MaterijalStavka } from '@/domain/types/servisirane';
 import { Button } from '@/components/ui/Button';
 
 interface EvidencijaRadaModalProps {
@@ -23,16 +24,18 @@ export function EvidencijaRadaModal({ zahtjevId, onZatvori, onUspjeh }: Evidenci
   const [opisRada,  setOpisRada]  = useState('');
   const [trajanje,  setTrajanje]  = useState('');
   const [materijal, setMaterijal] = useState('');
+  const [stavke,    setStavke]    = useState<MaterijalStavka[]>([]);
   const [napomene,  setNapomene]  = useState('');
   const [jeSlanje,  setJeSlanje]  = useState(false);
   const [greska,    setGreska]    = useState<string | null>(null);
   // Praćenje ID-a evidentiranog zapisa (za linkanje slika)
   const opisValid     = opisRada.trim().length >= MIN_OPIS;
   const trajanjeNum   = trajanje ? parseInt(trajanje, 10) : null;
-  const trajanjeValid = !trajanje || (trajanjeNum !== null && trajanjeNum > 0 && trajanjeNum <= 1440);
+  const trajanjeValid = trajanjeNum !== null && trajanjeNum > 0 && trajanjeNum <= 1440;
 
   async function posalji() {
     if (!opisValid)     { setGreska('Opis rada mora imati najmanje 5 karaktera.'); return; }
+    if (!trajanjeNum)   { setGreska('Trajanje je obavezno. Unesite broj minuta (1–1440).'); return; }
     if (!trajanjeValid) { setGreska('Trajanje mora biti između 1 i 1440 minuta.'); return; }
 
     setJeSlanje(true);
@@ -45,8 +48,9 @@ export function EvidencijaRadaModal({ zahtjevId, onZatvori, onUspjeh }: Evidenci
         body: JSON.stringify({
           opis_rada:       opisRada.trim(),
           trajanje_minuta: trajanjeNum,
-          materijal:       materijal.trim() || null,
-          napomene:        napomene.trim() || null,
+          materijal:           materijal.trim() || null,
+          stavke_materijala:   stavke.filter((s) => s.naziv.trim() && s.kolicina > 0),
+          napomene:            napomene.trim() || null,
         }),
       });
       const d = await r.json();
@@ -125,8 +129,8 @@ export function EvidencijaRadaModal({ zahtjevId, onZatvori, onUspjeh }: Evidenci
                 <div className="flex items-center gap-2">
                   <Clock className="h-4 w-4" style={{ color: 'var(--first-nonary)' }} />
                   <label className="text-sm font-semibold" style={{ color: 'var(--first-octonary)' }}>
-                    Trajanje
-                    <span className="ml-1 font-normal" style={{ color: 'var(--first-nonary)' }}>(minuta, opciono)</span>
+                    Trajanje *
+                    <span className="ml-1 font-normal" style={{ color: 'var(--first-nonary)' }}>(minuta)</span>
                   </label>
                 </div>
                 <input
@@ -156,6 +160,73 @@ export function EvidencijaRadaModal({ zahtjevId, onZatvori, onUspjeh }: Evidenci
                   className="w-full rounded-xl border px-4 py-2.5 text-sm focus:outline-none focus:ring-2"
                   style={INPUT_STIL}
                 />
+              </div>
+
+              {/* Stavke materijala / dijelova (US-46) */}
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-semibold" style={{ color: 'var(--first-octonary)' }}>
+                    Stavke materijala / dijelova
+                    <span className="ml-1 font-normal" style={{ color: 'var(--first-nonary)' }}>(opciono)</span>
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setStavke((s) => [...s, { naziv: '', kolicina: 1, jedinica: 'kom' }])}
+                    className="flex items-center gap-1 text-xs font-semibold"
+                    style={{ color: 'var(--first-secondary)' }}
+                  >
+                    <Plus className="h-3.5 w-3.5" /> Dodaj stavku
+                  </button>
+                </div>
+                {stavke.map((s, i) => (
+                  <div key={i} className="flex flex-wrap gap-2 rounded-xl border p-2"
+                    style={{ borderColor: 'rgb(var(--first-quaternary-rgb)/0.35)' }}>
+                    <input
+                      type="text"
+                      value={s.naziv}
+                      onChange={(e) => {
+                        const n = [...stavke];
+                        n[i] = { ...n[i], naziv: e.target.value };
+                        setStavke(n);
+                      }}
+                      placeholder="Naziv"
+                      className="min-w-[120px] flex-1 rounded-lg border px-2 py-1.5 text-sm"
+                      style={INPUT_STIL}
+                    />
+                    <input
+                      type="number"
+                      min={0.01}
+                      step={0.01}
+                      value={s.kolicina}
+                      onChange={(e) => {
+                        const n = [...stavke];
+                        n[i] = { ...n[i], kolicina: parseFloat(e.target.value) || 0 };
+                        setStavke(n);
+                      }}
+                      className="w-20 rounded-lg border px-2 py-1.5 text-sm"
+                      style={INPUT_STIL}
+                    />
+                    <input
+                      type="text"
+                      value={s.jedinica}
+                      onChange={(e) => {
+                        const n = [...stavke];
+                        n[i] = { ...n[i], jedinica: e.target.value };
+                        setStavke(n);
+                      }}
+                      className="w-16 rounded-lg border px-2 py-1.5 text-sm"
+                      style={INPUT_STIL}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setStavke((arr) => arr.filter((_, j) => j !== i))}
+                      className="p-1.5"
+                      aria-label="Ukloni stavku"
+                    >
+                      <Trash2 className="h-4 w-4" style={{ color: '#DC2626' }} />
+                    </button>
+                  </div>
+                ))}
               </div>
 
               {/* Napomene */}
@@ -189,7 +260,7 @@ export function EvidencijaRadaModal({ zahtjevId, onZatvori, onUspjeh }: Evidenci
                 type="button" size="md"
                 onClick={posalji}
                 isLoading={jeSlanje} loadingText="Snimanje..."
-                disabled={!opisValid}
+                disabled={!opisValid || !trajanjeValid}
               >
                 <ClipboardCheck className="h-4 w-4" />
                 Evidentiraj rad

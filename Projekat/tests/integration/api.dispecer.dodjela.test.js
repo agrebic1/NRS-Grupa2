@@ -161,13 +161,13 @@ describe('PATCH dodijeli servisera (dispečer)', () => {
     );
   });
 
-  test('blokira dodjelu u statusu pending_review → 400', async () => {
+  test('blokira dodjelu u statusu u_izvrsenju → 400', async () => {
     mockSessionGetUser.mockResolvedValue({ data: { user: { id: 'd1' } } });
     mockAssertDispatcherAccess.mockResolvedValue(true);
 
     mockFrom.mockImplementation((table) => {
       if (table === 'service_requests') {
-        return singleQuery({ status: 'pending_review', is_premium: false });
+        return singleQuery({ status: 'u_izvrsenju', is_premium: false });
       }
       return flexChain();
     });
@@ -322,7 +322,7 @@ describe('POST /api/serviser/intervencije/[id]/evidencija', () => {
       return flexChain();
     });
 
-    const res  = await EVIDENCIJA_POST(evidencijaPost({ opis_rada: 'Zamijenjena pumpa.' }), PARAMS);
+    const res  = await EVIDENCIJA_POST(evidencijaPost({ opis_rada: 'Zamijenjena pumpa.', trajanje_minuta: 60 }), PARAMS);
     expect(res.status).toBe(201);
     const body = await res.json();
     expect(body.success).toBe(true);

@@ -306,11 +306,11 @@ export default function ServiserPage() {
             )}
           </div>
           <Link
-            href="/serviser/zadaci"
+            href="/serviser/intervencije"
             className="flex items-center gap-1 text-sm font-medium transition-opacity hover:opacity-70"
             style={{ color: 'var(--first-secondary)' }}
           >
-            Svi zadaci <ChevronRight className="h-4 w-4" />
+            Sve intervencije <ChevronRight className="h-4 w-4" />
           </Link>
         </div>
 

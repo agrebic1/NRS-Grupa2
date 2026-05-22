@@ -6,6 +6,7 @@ module.exports = {
   moduleDirectories: ['node_modules', '<rootDir>'],
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
+    '^uuid$': '<rootDir>/tests/__mocks__/uuid.js',
   },
   testPathIgnorePatterns: ['<rootDir>/tests/e2e/'],
   transform: {

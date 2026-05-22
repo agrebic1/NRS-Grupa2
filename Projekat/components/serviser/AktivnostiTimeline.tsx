@@ -3,7 +3,7 @@
 import {
   ArrowRightLeft, MessageSquare, UserCheck, ClipboardCheck,
   UserX, Cog, Clock, Image as ImageIcon, Users, UserMinus, Lock, AlertTriangle,
-  Headphones, Wrench, User,
+  Headphones, Wrench, User, RotateCcw, ArrowRight,
 } from 'lucide-react';
 import type { InterventionActivity, TipAktivnosti } from '@/domain/types/servisirane';
 import type { LucideIcon } from 'lucide-react';
@@ -41,9 +41,33 @@ const TIP_CONFIG: Record<TipAktivnosti, {
   slika:             { Ikona: ImageIcon,      boja: '#7C3AED',                rgb: '124,58,237' },
   tim_dodjela:       { Ikona: Users,          boja: 'var(--first-secondary)', rgb: '45,91,159' },
   tim_uklanjanje:    { Ikona: UserMinus,      boja: '#D97706',                rgb: '217,119,6' },
-  zatvaranje:        { Ikona: Lock,           boja: 'var(--first-primary)',   rgb: '16,37,65' },
-  konflikt_override: { Ikona: AlertTriangle,  boja: '#D97706',                rgb: '217,119,6' },
+  zatvaranje:           { Ikona: Lock,           boja: 'var(--first-primary)',   rgb: '16,37,65' },
+  konflikt_override:    { Ikona: AlertTriangle,  boja: '#D97706',                rgb: '217,119,6' },
+  nije_rijeseno:        { Ikona: AlertTriangle,  boja: '#DC2626',                rgb: '220,38,38' },
+  promjena_izvrsioca:   { Ikona: ArrowRightLeft, boja: '#7C3AED',                rgb: '124,58,237' },
+  vracanje_na_dodjelu:  { Ikona: RotateCcw,      boja: '#D97706',                rgb: '217,119,6' },
+  sla_eskalacija:        { Ikona: AlertTriangle,  boja: '#DC2626',                rgb: '220,38,38' },
 };
+
+// ─── Status label ─────────────────────────────────────────────────────────────
+
+const STATUS_LABELE: Record<string, string> = {
+  na_cekanju:    'Na čekanju',
+  pending_review:'Na pregledu',
+  in_review:     'U pregledu',
+  potvrdeno:     'Potvrđeno',
+  dodijeljeno:   'Dodijeljeno',
+  u_radu:        'Na putu',
+  u_izvrsenju:   'Na terenu',
+  zavrseno:      'Završeno',
+  zatvoreno:     'Zatvoreno',
+  odbijeno:      'Odbijeno',
+  otkazano:      'Otkazano',
+};
+
+function statusLabel(v: string): string {
+  return STATUS_LABELE[v] ?? v;
+}
 
 // ─── Format vremena ───────────────────────────────────────────────────────────
 
@@ -130,6 +154,25 @@ export function AktivnostiTimeline({ aktivnosti, ucitava }: AktivnostiTimelinePr
                   {a.sadrzaj}
                 </p>
               </div>
+              {(a.old_value || a.new_value) && (
+                <div className="mt-1.5 flex items-center gap-1.5">
+                  {a.old_value && (
+                    <span className="rounded-md px-2 py-0.5 text-[11px] font-semibold"
+                      style={{ backgroundColor: 'rgba(156,163,175,0.12)', color: '#6B7280', border: '1px solid rgba(156,163,175,0.3)' }}>
+                      {statusLabel(a.old_value)}
+                    </span>
+                  )}
+                  {a.old_value && a.new_value && (
+                    <ArrowRight className="h-3 w-3 flex-shrink-0" style={{ color: 'var(--first-nonary)' }} />
+                  )}
+                  {a.new_value && (
+                    <span className="rounded-md px-2 py-0.5 text-[11px] font-semibold"
+                      style={{ backgroundColor: `rgba(${cfg.rgb},0.1)`, color: cfg.boja, border: `1px solid rgba(${cfg.rgb},0.25)` }}>
+                      {statusLabel(a.new_value)}
+                    </span>
+                  )}
+                </div>
+              )}
               <div className="mt-0.5 flex flex-wrap items-center gap-x-3 text-xs" style={{ color: 'var(--first-nonary)' }}>
                 <span className="flex items-center gap-1">
                   <AutorIkona className="h-3 w-3 flex-shrink-0" />

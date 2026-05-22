@@ -18,7 +18,8 @@ import { AlertMessage } from '@/components/ui/AlertMessage';
 import { MiniMapa } from '@/components/shared/MiniMapa';
 import { NapomeneThread } from '@/components/shared/NapomeneThread';
 import { ImageUploader } from '@/components/shared/ImageUploader';
-import { AktivnostiTimeline } from '@/components/serviser/AktivnostiTimeline';
+import { HistorijaAktivnostiSekcija } from '@/components/serviser/HistorijaAktivnostiSekcija';
+import { PonovniCiklusBadge } from '@/components/servisirane/PonovniCiklusBadge';
 import type { ServisniZahtjev, WorkEvidence, InterventionActivity } from '@/domain/types/servisirane';
 import { labelKategorije } from '@/lib/servisirane/kategorije';
 import { prioritetBoja, statusBoja, statusOznaka } from '@/lib/servisirane/statusBoja';
@@ -394,6 +395,116 @@ function ImageGallery({ slike }: { slike: string[] }) {
   );
 }
 
+// ─── Modal: Promijeni izvršioca ───────────────────────────────────────────────
+
+interface ServiserOpcija { id: string; ime: string; prezime: string; aktivnih_zadataka: number }
+
+function PromijeniIzvrsiocaModal({ zahtjevId, trenutniServIserId, onZatvori, onUspjeh }: {
+  zahtjevId:         number;
+  trenutniServIserId?: string | null;
+  onZatvori:         () => void;
+  onUspjeh:          () => void;
+}) {
+  const [serviseri,     setServiseri]     = useState<ServiserOpcija[]>([]);
+  const [ucitavaList,   setUcitavaList]   = useState(true);
+  const [noviId,        setNoviId]        = useState('');
+  const [razlog,        setRazlog]        = useState('');
+  const [jeSlanje,      setJeSlanje]      = useState(false);
+  const [greska,        setGreska]        = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch('/api/dispecer/serviseri')
+      .then(r => r.json())
+      .then(d => setServiseri((d.serviseri ?? []).filter((s: ServiserOpcija) => s.id !== trenutniServIserId)))
+      .finally(() => setUcitavaList(false));
+  }, [trenutniServIserId]);
+
+  async function potvrdi() {
+    if (!noviId) { setGreska('Odaberite novog servisera.'); return; }
+    if (razlog.trim().length < 10) { setGreska('Unesite razlog (min. 10 karaktera).'); return; }
+    setJeSlanje(true); setGreska(null);
+    try {
+      const r = await fetch(`/api/dispecer/zahtjevi/${zahtjevId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'promijeni_izvrsioca', novi_serviser_id: noviId, razlog: razlog.trim() }),
+      });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error ?? 'Greška pri promjeni servisera.');
+      onUspjeh();
+      onZatvori();
+    } catch (e) {
+      setGreska(e instanceof Error ? e.message : 'Greška.');
+    } finally { setJeSlanje(false); }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4"
+      style={{ backgroundColor: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(4px)' }}>
+      <div className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-xl">
+        <div className="px-6 py-5 border-b" style={{ borderColor: 'rgb(var(--first-quaternary-rgb)/0.25)' }}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <User className="h-4 w-4" style={{ color: 'var(--first-secondary)' }} />
+              <p className="font-bold" style={{ color: 'var(--first-octonary)' }}>Promijeni izvršioca</p>
+            </div>
+            <button type="button" onClick={onZatvori}
+              className="flex h-7 w-7 items-center justify-center rounded-lg transition hover:bg-black/[0.06]">
+              <X className="h-4 w-4" style={{ color: 'var(--first-nonary)' }} />
+            </button>
+          </div>
+        </div>
+        <div className="p-6 flex flex-col gap-4">
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-semibold" style={{ color: 'var(--first-octonary)' }}>
+              Novi serviser *
+            </label>
+            {ucitavaList ? (
+              <p className="text-sm" style={{ color: 'var(--first-nonary)' }}>Učitavanje servisera...</p>
+            ) : (
+              <select
+                value={noviId}
+                onChange={(e) => setNoviId(e.target.value)}
+                className="w-full rounded-xl border px-4 py-2.5 text-sm focus:outline-none focus:ring-2"
+                style={{ borderColor: 'rgb(var(--first-quaternary-rgb)/0.4)', color: 'var(--first-octonary)' }}>
+                <option value="">— Odaberite servisera —</option>
+                {serviseri.map(s => (
+                  <option key={s.id} value={s.id}>
+                    {s.ime} {s.prezime} ({s.aktivnih_zadataka} aktivnih)
+                  </option>
+                ))}
+              </select>
+            )}
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <label className="text-sm font-semibold" style={{ color: 'var(--first-octonary)' }}>
+              Razlog promjene *
+            </label>
+            <textarea
+              rows={3}
+              value={razlog}
+              onChange={(e) => setRazlog(e.target.value)}
+              placeholder="Npr. Serviser je nedostupan ili se nalazi na drugoj lokaciji..."
+              className="w-full resize-none rounded-xl border px-4 py-2.5 text-sm focus:outline-none focus:ring-2"
+              style={{ borderColor: 'rgb(var(--first-quaternary-rgb)/0.4)', color: 'var(--first-octonary)' }}
+            />
+            {greska && <p className="text-xs" style={{ color: '#DC2626' }}>{greska}</p>}
+          </div>
+          <div className="flex gap-2">
+            <Button type="button" variant="primary" size="md"
+              onClick={potvrdi} isLoading={jeSlanje} loadingText="Mijenjanje...">
+              <User className="h-4 w-4" />Promijeni servisera
+            </Button>
+            <Button type="button" variant="ghost" size="md" onClick={onZatvori} disabled={jeSlanje}>
+              Odustani
+            </Button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ─── Modal: Vrati u fazu ──────────────────────────────────────────────────────
 
 function VratiUFazuModal({ zahtjevId, onZatvori }: { zahtjevId: number; onZatvori: () => void }) {
@@ -472,10 +583,20 @@ function VratiUFazuModal({ zahtjevId, onZatvori }: { zahtjevId: number; onZatvor
 
 // ─── Desni operativni panel ───────────────────────────────────────────────────
 
-function DesniPanel({ zahtjev, sboja, onVratiUFazu }: {
+function DesniPanel({
+  zahtjev,
+  sboja,
+  aktivnosti,
+  ucitavaAktivnosti,
+  onVratiUFazu,
+  onPromijeniIzvrsioca,
+}: {
   zahtjev: IntervencijaDetalji;
   sboja: string;
+  aktivnosti: InterventionActivity[];
+  ucitavaAktivnosti?: boolean;
   onVratiUFazu: () => void;
+  onPromijeniIzvrsioca: () => void;
 }) {
   const jeZavrsena     = zahtjev.status === 'zavrseno';
   const jeAktivna      = ['dodijeljeno', 'u_radu', 'u_izvrsenju'].includes(zahtjev.status);
@@ -664,6 +785,16 @@ function DesniPanel({ zahtjev, sboja, onVratiUFazu }: {
               </a>
             )}
 
+            {/* Promijeni izvršioca (samo za aktivne s dodijeljenim serviserom) */}
+            {jeAktivna && zahtjev.serviser && (
+              <button type="button" onClick={onPromijeniIzvrsioca}
+                className="flex w-full items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all hover:opacity-80"
+                style={{ backgroundColor: 'rgb(var(--first-secondary-rgb)/0.06)', color: 'var(--first-secondary)', border: '1px solid rgb(var(--first-secondary-rgb)/0.2)' }}>
+                <User className="h-4 w-4" />
+                Promijeni izvršioca
+              </button>
+            )}
+
             {/* Vrati u planiranje (samo za aktivne) */}
             {jeAktivna && (
               <button type="button" onClick={onVratiUFazu}
@@ -674,6 +805,14 @@ function DesniPanel({ zahtjev, sboja, onVratiUFazu }: {
               </button>
             )}
           </div>
+        </div>
+
+        {/* Historija — uvijek vidljiva u sidebaru (desktop) */}
+        <div className="max-h-[min(480px,50vh)] overflow-y-auto">
+          <HistorijaAktivnostiSekcija
+            aktivnosti={aktivnosti}
+            ucitava={ucitavaAktivnosti}
+          />
         </div>
 
       </div>
@@ -689,9 +828,11 @@ export default function DispecerIntervencijaDetaljiPage() {
   const [zahtjev,         setZahtjev]         = useState<IntervencijaDetalji | null>(null);
   const [evidencije,      setEvidencije]      = useState<WorkEvidence[]>([]);
   const [aktivnosti,      setAktivnosti]      = useState<InterventionActivity[]>([]);
+  const [slikeIzBaze,     setSlikeIzBaze]     = useState<string[]>([]);
   const [ucitava,         setUcitava]         = useState(true);
   const [greska,          setGreska]          = useState<string | null>(null);
-  const [pokaziVrati,     setPokaziVrati]     = useState(false);
+  const [pokaziVrati,           setPokaziVrati]           = useState(false);
+  const [pokaziPromjenaIzvrsioca, setPokaziPromjenaIzvrsioca] = useState(false);
   const [closureNote,     setClosureNote]     = useState('');
   const [closureCheck,    setClosureCheck]    = useState(false);
   const [closureSlanje,   setClosureSlanje]   = useState(false);
@@ -700,12 +841,19 @@ export default function DispecerIntervencijaDetaljiPage() {
   async function ucitaj() {
     setUcitava(true); setGreska(null);
     try {
-      const r = await fetch(`/api/dispecer/zahtjevi/${id}`, { cache: 'no-store' });
-      const d = await r.json();
-      if (!r.ok) throw new Error(d.error ?? 'Intervencija nije pronađena.');
+      const [intR, slikeR] = await Promise.all([
+        fetch(`/api/dispecer/zahtjevi/${id}`, { cache: 'no-store' }),
+        fetch(`/api/slike?zahtjev_id=${id}`, { cache: 'no-store' }),
+      ]);
+      const d = await intR.json();
+      if (!intR.ok) throw new Error(d.error ?? 'Intervencija nije pronađena.');
       setZahtjev(d.zahtjev);
       setEvidencije(d.evidencije ?? []);
       setAktivnosti(d.aktivnosti ?? []);
+      if (slikeR.ok) {
+        const slikeD = await slikeR.json();
+        setSlikeIzBaze((slikeD.slike ?? []).map((s: { image_url: string }) => s.image_url));
+      }
     } catch (err) {
       setGreska(err instanceof Error ? err.message : 'Greška pri učitavanju.');
     } finally { setUcitava(false); }
@@ -765,7 +913,7 @@ export default function DispecerIntervencijaDetaljiPage() {
   const jeHitna  = (zahtjev.urgency_score ?? 0) >= 75 || Boolean(zahtjev.is_premium);
   const kasni    = jeKasni(zahtjev);
   const jeAktivna = ['u_radu', 'u_izvrsenju'].includes(zahtjev.status);
-  const slike    = pokupiSlike(zahtjev);
+  const slike    = [...pokupiSlike(zahtjev), ...slikeIzBaze];
 
   return (
     <AppShell uloga="dispecer">
@@ -835,6 +983,7 @@ export default function DispecerIntervencijaDetaljiPage() {
                 <Shield className="h-3 w-3" />Premium
               </span>
             )}
+            <PonovniCiklusBadge broj={zahtjev.broj_ponovnih_ciklusa ?? 0} />
             {kasni && (
               <span className="inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold"
                 style={{ backgroundColor: 'rgba(220,38,38,0.08)', color: '#DC2626', border: '1px solid rgba(220,38,38,0.2)' }}>
@@ -895,6 +1044,12 @@ export default function DispecerIntervencijaDetaljiPage() {
         status={zahtjev.status}
         terminPocetak={zahtjev.termin_planirani_pocetak}
         aktivnosti={aktivnosti}
+      />
+
+      <HistorijaAktivnostiSekcija
+        aktivnosti={aktivnosti}
+        ucitava={ucitava}
+        className="mb-2"
       />
 
       {/* ─── Dvostupčani layout ──────────────────────────────────────────────── */}
@@ -992,6 +1147,11 @@ export default function DispecerIntervencijaDetaljiPage() {
                           <Wrench className="h-3 w-3" />{e.materijal}
                         </span>
                       )}
+                      {(e.stavke_materijala?.length ?? 0) > 0 && (
+                        <span>
+                          Stavke: {e.stavke_materijala!.map((s) => `${s.naziv} (${s.kolicina} ${s.jedinica})`).join(', ')}
+                        </span>
+                      )}
                       {e.napomene && <span className="italic">{e.napomene}</span>}
                     </div>
                   </div>
@@ -1006,8 +1166,8 @@ export default function DispecerIntervencijaDetaljiPage() {
           </SekcijaKartica>
 
           {/* Upload slika (dispečer) */}
-          <SekcijaKartica Ikona={Upload} naslov="Dokumentacija — slike">
-            <ImageUploader zahtjevId={zahtjev.id} onUspjeh={ucitaj} />
+          <SekcijaKartica Ikona={Upload} naslov="Dodaj foto dokumentaciju">
+            <ImageUploader zahtjevId={zahtjev.id} onUspjeh={() => void ucitaj()} />
           </SekcijaKartica>
 
           {/* Formalno zatvaranje */}
@@ -1097,25 +1257,30 @@ export default function DispecerIntervencijaDetaljiPage() {
             </div>
           )}
 
-          {/* Historija aktivnosti */}
-          {aktivnosti.length > 0 && (
-            <SekcijaKartica Ikona={Activity} naslov="Historija aktivnosti">
-              <AktivnostiTimeline aktivnosti={aktivnosti} />
-            </SekcijaKartica>
-          )}
         </div>
 
         {/* ── Desni operativni panel ─────────────────────────────────────── */}
         <DesniPanel
           zahtjev={zahtjev}
           sboja={sboja}
+          aktivnosti={aktivnosti}
+          ucitavaAktivnosti={ucitava}
           onVratiUFazu={() => setPokaziVrati(true)}
+          onPromijeniIzvrsioca={() => setPokaziPromjenaIzvrsioca(true)}
         />
       </div>
 
       {/* ─── Modali ─────────────────────────────────────────────────────────── */}
       {pokaziVrati && (
         <VratiUFazuModal zahtjevId={zahtjev.id} onZatvori={() => setPokaziVrati(false)} />
+      )}
+      {pokaziPromjenaIzvrsioca && (
+        <PromijeniIzvrsiocaModal
+          zahtjevId={zahtjev.id}
+          trenutniServIserId={zahtjev.serviser_dodijeljen_id}
+          onZatvori={() => setPokaziPromjenaIzvrsioca(false)}
+          onUspjeh={ucitaj}
+        />
       )}
 
       {/* ─── Mobile akcije ──────────────────────────────────────────────────── */}

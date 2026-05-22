@@ -1153,12 +1153,18 @@ export function DispecerZahtjevDetaljSadrzaj({
   zahtjev,
   requestId,
   onRequestUpdated,
+  onOsvjezajDetalj,
   hrefNazad,
   fokusKorakTermin = false,
 }: {
   zahtjev: ZahtjevDetalj;
   requestId: string;
   onRequestUpdated?: (zahtjev: ZahtjevDetalj) => void;
+  /** Nakon PATCH-a — osvježi i historiju aktivnosti na roditeljskoj stranici. */
+  onOsvjezajDetalj?: (payload: {
+    zahtjev: ZahtjevDetalj;
+    aktivnosti?: import('@/domain/types/servisirane').InterventionActivity[];
+  }) => void;
   prikaziDugmeNazad?: boolean;
   hrefNazad?: string;
   fokusKorakTermin?: boolean;
@@ -1237,7 +1243,10 @@ export function DispecerZahtjevDetaljSadrzaj({
   async function osvjeziZahtjev() {
     const r = await fetch(`/api/dispecer/zahtjevi/${requestId}`, { cache: 'no-store' });
     const d = await r.json();
-    if (r.ok) onRequestUpdated?.(d.zahtjev as ZahtjevDetalj);
+    if (!r.ok) return;
+    const novi = d.zahtjev as ZahtjevDetalj;
+    onRequestUpdated?.(novi);
+    onOsvjezajDetalj?.({ zahtjev: novi, aktivnosti: d.aktivnosti });
   }
 
   async function sacuvajPrioritet(): Promise<boolean> {

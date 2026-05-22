@@ -119,11 +119,21 @@ export interface ServisniZahtjev {
   closed_by?:                string | null;
   /** Napomena dispečera pri formalnom zatvaranju. */
   closure_note?:             string | null;
+  /** US-47: broj operativnih ponovnih dodjela / nije riješeno. */
+  broj_ponovnih_ciklusa?:    number;
+  /** US-45: zadnja SLA eskalacija. */
+  sla_eskalacija_at?:        string | null;
   created_at:           string;
   updated_at:           string;
 }
 
 // ─── Sprint 8: Evidencija rada ───────────────────────────────────────────────
+
+export interface MaterijalStavka {
+  naziv:    string;
+  kolicina: number;
+  jedinica: string;
+}
 
 export interface WorkEvidence {
   id:               number;
@@ -132,6 +142,7 @@ export interface WorkEvidence {
   opis_rada:        string;
   trajanje_minuta:  number | null;
   materijal:        string | null;
+  stavke_materijala?: MaterijalStavka[];
   napomene:         string | null;
   created_at:       string;
 }
@@ -149,7 +160,11 @@ export type TipAktivnosti =
   | 'tim_dodjela'
   | 'tim_uklanjanje'
   | 'zatvaranje'
-  | 'konflikt_override';
+  | 'konflikt_override'
+  | 'nije_rijeseno'
+  | 'promjena_izvrsioca'
+  | 'vracanje_na_dodjelu'
+  | 'sla_eskalacija';
 
 export interface InterventionActivity {
   id:         number;
@@ -158,6 +173,10 @@ export interface InterventionActivity {
   tip:        TipAktivnosti;
   sadrzaj:    string;
   metadata:   Record<string, unknown> | null;
+  old_value:  string | null;
+  new_value:  string | null;
+  actor_role: string | null;
+  razlog:     string | null;
   created_at: string;
   autor?: {
     ime:     string;
@@ -251,7 +270,8 @@ export type TipNotifikacije =
   // Admin
   | 'promjena_uloge'
   | 'promjena_statusa_naloga'
-  | 'sistemska_obavijest';
+  | 'sistemska_obavijest'
+  | 'sla_eskalacija';
 
 export interface Notifikacija {
   id:                    number;

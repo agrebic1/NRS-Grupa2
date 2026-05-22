@@ -101,6 +101,7 @@ const sprintBreakdown = [
   'Sprint 6: korisnicki zahtjevi, admin kreiranje korisnika, onboarding partnera i premium tokovi.',
   'Sprint 7: dispecerski dashboard, liste, detalj intervencije, carobnjak, operativni prioritet, statusi i RBAC API provjere.',
   'Sprint 8: serviserski modul — dodjela, prihvatanje/odbijanje zadatka, statusni prelazi, evidencija rada, napomene, zatvaranje intervencije i RBAC provjere.',
+  'Sprint 9: preraspodjela (US-28/29/40), obavezno trajanje, audit trail, SLA, izvjestaj odziva, upload slika i regresija API testova.',
 ];
 
 const sprint7AddedTests = {
@@ -113,6 +114,13 @@ const sprint8AddedTests = {
   automatic: 63,
   manual:    20,
   note:      'Automatski zbir je porastao sa 111 u Sprintu 7 na 174 u Sprintu 8 (3 unit + 3 integration + 2 E2E fajla).',
+};
+
+const sprint9AddedTests = {
+  automatic: 18,
+  manual:    144,
+  manualId:  'SB-09-36',
+  note:      'Automatski zbir 286. Manuelno 144 TC: korisnik 24, dispecer 44, serviser 40, admin 18, E2E 18.',
 };
 
 const results = [];
@@ -185,6 +193,11 @@ summaryLines.push(
   `- Automatski testovi: +${sprint8AddedTests.automatic} (${sprint8AddedTests.note})`,
   `- Manuelni test scenariji: +${sprint8AddedTests.manual} za SB-08-01`,
   '',
+  '## Dodano u Sprintu 9',
+  '',
+  `- Automatski testovi: +${sprint9AddedTests.automatic} (${sprint9AddedTests.note})`,
+  `- Manuelni test scenariji: +${sprint9AddedTests.manual} za \`${sprint9AddedTests.manualId}\` (TC/EXEC u \`docs/testing/${sprint9AddedTests.manualId}/\`)`,
+  '',
   '## Broj pokrenutih testova',
   '',
   `- Unit testovi: ${formatCount(testCounts.unit)}`,
@@ -234,6 +247,8 @@ fs.writeFileSync(
     `Dodano u Sprintu 7: +${sprint7AddedTests.automatic} automatska testa; +${sprint7AddedTests.manual} manuelnih scenarija`,
     'Sprint 8: serviserski modul i zatvaranje intervencije',
     `Dodano u Sprintu 8: +${sprint8AddedTests.automatic} automatska testa; +${sprint8AddedTests.manual} manuelnih scenarija`,
+    'Sprint 9: preraspodjela, SLA, izvjestaj odziva, upload slika',
+    `Dodano u Sprintu 9: +${sprint9AddedTests.automatic} automatska testa; +${sprint9AddedTests.manual} manuelnih scenarija (${sprint9AddedTests.manualId})`,
     `Unit testovi: ${formatCount(testCounts.unit)}`,
     `Integration testovi: ${formatCount(testCounts.integration)}`,
     `Coverage run: ${formatCount(testCounts.coverage)}`,

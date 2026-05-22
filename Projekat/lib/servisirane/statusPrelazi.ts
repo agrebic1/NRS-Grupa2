@@ -8,9 +8,11 @@ export type ValidacijaPrelaza =
   | { ok: false; greska: string };
 
 // Serviser smije samo ove prijelaze (naprijed, nikad rollback)
+// 'vrati_na_dodjelu' i 'nije_rijeseno' su posebni slučajevi koji idu na 'potvrdeno'
 const SERVISER_PRELAZI: Record<string, string[]> = {
-  dodijeljeno: ['u_radu'],
-  u_radu:      ['u_izvrsenju'],
+  dodijeljeno: ['u_radu', 'potvrdeno'],   // potvrdeno = vrati_na_dodjelu
+  u_radu:      ['u_izvrsenju', 'potvrdeno'], // potvrdeno = vrati_na_dodjelu
+  u_izvrsenju: ['zavrseno', 'potvrdeno'], // potvrdeno = nije_rijeseno
 };
 
 // Dispečer smije prijelaze naprijed + rollback uz razlog

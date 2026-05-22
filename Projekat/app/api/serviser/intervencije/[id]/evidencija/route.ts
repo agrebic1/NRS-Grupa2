@@ -18,14 +18,14 @@ export async function POST(
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: 'Niste prijavljeni.' }, { status: 401 });
 
+    const imaPriv = await assertServiserAccess(supabase, user.id);
+    if (!imaPriv) return NextResponse.json({ error: 'Pristup odbijen.' }, { status: 403 });
+
     const resolved  = await params;
     const zahtjevId = parseInt(resolved.id, 10);
     if (!Number.isFinite(zahtjevId) || zahtjevId <= 0) {
       return NextResponse.json({ error: 'Neispravan ID.' }, { status: 400 });
     }
-
-    const imaPriv = await assertServiserAccess(supabase, user.id);
-    if (!imaPriv) return NextResponse.json({ error: 'Pristup odbijen.' }, { status: 403 });
 
     let db: any;
     try {
@@ -51,17 +51,19 @@ export async function POST(
       return NextResponse.json({ error: rezultat.error.errors[0].message }, { status: 400 });
     }
 
-    const { opis_rada, trajanje_minuta, materijal, napomene } = rezultat.data;
+    const { opis_rada, trajanje_minuta, materijal, stavke_materijala, napomene } = rezultat.data;
+    const stavke = stavke_materijala ?? [];
 
     const { data: evidencija, error: evErr } = await db
       .from('work_evidence')
       .insert({
-        zahtjev_id:      zahtjevId,
-        serviser_id:     user.id,
+        zahtjev_id:          zahtjevId,
+        serviser_id:         user.id,
         opis_rada,
-        trajanje_minuta: trajanje_minuta ?? null,
-        materijal:       materijal ?? null,
-        napomene:        napomene ?? null,
+        trajanje_minuta,
+        materijal:           materijal ?? null,
+        stavke_materijala:   stavke,
+        napomene:            napomene ?? null,
       })
       .select()
       .single();

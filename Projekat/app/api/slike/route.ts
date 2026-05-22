@@ -1,13 +1,14 @@
+import { randomUUID } from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { v4 as uuidv4 } from 'uuid';
+import { assertDispatcherAccess } from '@/lib/servisirane/dispecerPristup';
 
 export const dynamic = 'force-dynamic';
 
 const BUCKET           = 'intervencije-slike';
-const MAX_SIZE_BYTES   = 5 * 1024 * 1024; // 5 MB
-const DOZVOLJENI_TIPOVI = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+const MAX_SIZE_BYTES   = 10 * 1024 * 1024; // 10 MB
+const DOZVOLJENI_TIPOVI = ['image/jpeg', 'image/png', 'image/webp'];
 
 /** GET /api/slike?zahtjev_id=X — lista slika za intervenciju */
 export async function GET(request: NextRequest) {
@@ -59,15 +60,34 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Neispravan zahtjev_id.' }, { status: 400 });
     }
     if (!DOZVOLJENI_TIPOVI.includes(file.type)) {
-      return NextResponse.json({ error: 'Tip fajla nije podržan. Dozvoljeno: JPEG, PNG, WebP, GIF.' }, { status: 400 });
+      return NextResponse.json({ error: 'Tip fajla nije podržan. Dozvoljeno: JPEG, PNG, WebP.' }, { status: 400 });
     }
     if (file.size > MAX_SIZE_BYTES) {
-      return NextResponse.json({ error: 'Fajl je prevelik. Maksimalna veličina je 5 MB.' }, { status: 400 });
+      return NextResponse.json({ error: 'Fajl je prevelik. Maksimalna veličina je 10 MB.' }, { status: 400 });
+    }
+
+    // Provjera vlasništva: mora biti dodijeljeni serviser ili dispečer
+    const db = supabase as any;
+    const { data: zahtjev } = await db
+      .from('service_requests')
+      .select('serviser_dodijeljen_id')
+      .eq('id', zahtjev_id)
+      .single();
+
+    if (!zahtjev) {
+      return NextResponse.json({ error: 'Servisni zahtjev nije pronađen.' }, { status: 404 });
+    }
+
+    const jeServiser = zahtjev.serviser_dodijeljen_id === user.id;
+    const jeDispecer = await assertDispatcherAccess(supabase, user.id).catch(() => false);
+
+    if (!jeServiser && !jeDispecer) {
+      return NextResponse.json({ error: 'Nemate ovlaštenje za upload slika na ovoj intervenciji.' }, { status: 403 });
     }
 
     // Ekstenzija iz MIME tipa
     const ext = file.type.split('/')[1]?.replace('jpeg', 'jpg') ?? 'jpg';
-    const storagePath = `${zahtjev_id}/${uuidv4()}.${ext}`;
+    const storagePath = `${zahtjev_id}/${randomUUID()}.${ext}`;
 
     // Upload putem admin klijenta (zaobilazi storage RLS)
     const adminClient  = createAdminClient();
@@ -86,7 +106,6 @@ export async function POST(request: NextRequest) {
     const image_url = urlData.publicUrl;
 
     // Sačuvaj u bazu
-    const db = supabase as any;
     const { data: slika, error: dbError } = await db
       .from('slike_intervencija')
       .insert({

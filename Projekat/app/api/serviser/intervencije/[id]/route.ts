@@ -7,16 +7,20 @@ import {
   assertServiserVlasnistvo,
   serviserSmijeMijenjatiStatus,
 } from '@/lib/servisirane/serviserPristup';
-import { odbijZadatakSchema } from '@/lib/validations/servisirane';
+import { odbijZadatakSchema, razlogOperativniSchema } from '@/lib/validations/servisirane';
 import {
   notifPrihvatanjeZadatka,
   notifOdbijanjeZadatka,
+  notifVratanjaNaPonovnuDodjelu,
+  notifNijeRijesen,
   notifKorisnikusServiserNaPutu,
   notifKorisnikusServiserNaTerenu,
   notifNovaNapomenaDispecer,
   notifServiserNaTerenu,
   notifEvidencijaRada,
 } from '@/lib/servisirane/notifikacijeHelper';
+import { mapAktivnostiResponse, ucitajAktivnostiSaAutorom } from '@/lib/servisirane/aktivnostiQuery';
+import { inkrementirajPonovniCiklus } from '@/lib/servisirane/ponovniCiklus';
 
 export const dynamic = 'force-dynamic';
 
@@ -37,11 +41,11 @@ export async function GET(
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: 'Niste prijavljeni.' }, { status: 401 });
 
-    const zahtjevId = await resolveId(params);
-    if (!zahtjevId) return NextResponse.json({ error: 'Neispravan ID.' }, { status: 400 });
-
     const imaPriv = await assertServiserAccess(supabase, user.id);
     if (!imaPriv) return NextResponse.json({ error: 'Pristup odbijen.' }, { status: 403 });
+
+    const zahtjevId = await resolveId(params);
+    if (!zahtjevId) return NextResponse.json({ error: 'Neispravan ID.' }, { status: 400 });
 
     // Admin klijent zaobilazi RLS — serviseri moraju čitati redove gdje su
     // dodjeljeni (serviser_dodijeljen_id), što session klijent ne može vidjeti.
@@ -75,19 +79,12 @@ export async function GET(
       .eq('zahtjev_id', zahtjevId)
       .order('created_at', { ascending: false });
 
-    const { data: aktivnosti } = await db
-      .from('intervention_activities')
-      .select('*, autor:osoba!autor_id(ime, prezime, uloga)')
-      .eq('zahtjev_id', zahtjevId)
-      .order('created_at', { ascending: true });
+    const aktivnosti = await ucitajAktivnostiSaAutorom(db, zahtjevId);
 
     return NextResponse.json({
       zahtjev:    { ...zahtjev, podnosilac: osoba ?? null },
       evidencije: evidencije ?? [],
-      aktivnosti: (aktivnosti ?? []).map((a: Record<string, unknown>) => ({
-        ...a,
-        autor: Array.isArray(a.autor) ? a.autor[0] : a.autor,
-      })),
+      aktivnosti: mapAktivnostiResponse(aktivnosti),
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Greška servera.';
@@ -101,6 +98,8 @@ const akcijaPatchSchema = z.discriminatedUnion('action', [
   z.object({ action: z.literal('zavrsi') }),
   z.object({ action: z.literal('odbij'), razlog: odbijZadatakSchema.shape.razlog }),
   z.object({ action: z.literal('napomena'), sadrzaj: z.string().min(1).max(2000) }),
+  z.object({ action: z.literal('vrati_na_ponovnu_dodjelu'), razlog: razlogOperativniSchema }),
+  z.object({ action: z.literal('oznaci_nije_rijesen'), razlog: razlogOperativniSchema }),
 ]);
 
 export async function PATCH(
@@ -112,11 +111,11 @@ export async function PATCH(
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: 'Niste prijavljeni.' }, { status: 401 });
 
-    const zahtjevId = await resolveId(params);
-    if (!zahtjevId) return NextResponse.json({ error: 'Neispravan ID.' }, { status: 400 });
-
     const imaPriv = await assertServiserAccess(supabase, user.id);
     if (!imaPriv) return NextResponse.json({ error: 'Pristup odbijen.' }, { status: 403 });
+
+    const zahtjevId = await resolveId(params);
+    if (!zahtjevId) return NextResponse.json({ error: 'Neispravan ID.' }, { status: 400 });
 
     let db: any;
     try {
@@ -310,6 +309,98 @@ export async function PATCH(
       }
 
       return NextResponse.json({ success: true });
+    }
+
+    // ── US-29: Vraćanje na ponovnu dodjelu ──────────────────────────────────
+    if (podaci.action === 'vrati_na_ponovnu_dodjelu') {
+      const DOZVOLJENI = new Set(['dodijeljeno', 'u_radu']);
+      if (!DOZVOLJENI.has(trenutniStatus)) {
+        return NextResponse.json(
+          { error: 'Vraćanje na ponovnu dodjelu moguće je samo u statusu "dodijeljeno" ili "u_radu".' },
+          { status: 422 }
+        );
+      }
+
+      const { error: updErr } = await db
+        .from('service_requests')
+        .update({ status: 'potvrdeno', serviser_dodijeljen_id: null })
+        .eq('id', zahtjevId);
+      if (updErr) return NextResponse.json({ error: updErr.message }, { status: 500 });
+
+      await db.from('intervention_activities').insert({
+        zahtjev_id: zahtjevId,
+        autor_id:   user.id,
+        tip:        'vracanje_na_dodjelu',
+        sadrzaj:    `Serviser vratio zadatak na ponovnu dodjelu. Razlog: ${podaci.razlog}`,
+        old_value:  trenutniStatus,
+        new_value:  'potvrdeno',
+        actor_role: 'serviser',
+        razlog:     podaci.razlog,
+        metadata:   { iz: trenutniStatus, u: 'potvrdeno' },
+      });
+
+      // Notifikacija dispečeru
+      const { data: osobaVN } = await db
+        .from('osoba').select('ime, prezime').eq('id_osobe', user.id).maybeSingle();
+      const imeVN = osobaVN ? `${osobaVN.ime} ${osobaVN.prezime}` : 'Serviser';
+
+      const { data: dodjelaAktVN } = await db
+        .from('intervention_activities')
+        .select('autor_id').eq('zahtjev_id', zahtjevId).eq('tip', 'dodjela')
+        .order('created_at', { ascending: false }).limit(1).maybeSingle();
+      if (dodjelaAktVN?.autor_id) {
+        await notifVratanjaNaPonovnuDodjelu(db, dodjelaAktVN.autor_id, zahtjevId, imeVN, podaci.razlog);
+      }
+
+      const brojCiklusa = await inkrementirajPonovniCiklus(db, zahtjevId);
+      return NextResponse.json({ success: true, novi_status: 'potvrdeno', broj_ponovnih_ciklusa: brojCiklusa });
+    }
+
+    // ── US-40: Označi nije riješeno ──────────────────────────────────────────
+    if (podaci.action === 'oznaci_nije_rijesen') {
+      if (trenutniStatus !== 'u_izvrsenju') {
+        return NextResponse.json(
+          { error: 'Označavanje "nije riješeno" moguće je samo u statusu "u_izvrsenju".' },
+          { status: 422 }
+        );
+      }
+
+      const { error: updErr } = await db
+        .from('service_requests')
+        .update({ status: 'potvrdeno', serviser_dodijeljen_id: null })
+        .eq('id', zahtjevId);
+      if (updErr) return NextResponse.json({ error: updErr.message }, { status: 500 });
+
+      await db.from('intervention_activities').insert({
+        zahtjev_id: zahtjevId,
+        autor_id:   user.id,
+        tip:        'nije_rijeseno',
+        sadrzaj:    `Serviser označio intervenciju kao nerješenu. Razlog: ${podaci.razlog}`,
+        old_value:  'u_izvrsenju',
+        new_value:  'potvrdeno',
+        actor_role: 'serviser',
+        razlog:     podaci.razlog,
+        metadata:   { iz: 'u_izvrsenju', u: 'potvrdeno' },
+      });
+
+      const { data: osobaNR } = await db
+        .from('osoba').select('ime, prezime').eq('id_osobe', user.id).maybeSingle();
+      const imeNR = osobaNR ? `${osobaNR.ime} ${osobaNR.prezime}` : 'Serviser';
+
+      const { data: dodjelaAktNR } = await db
+        .from('intervention_activities')
+        .select('autor_id').eq('zahtjev_id', zahtjevId).eq('tip', 'dodjela')
+        .order('created_at', { ascending: false }).limit(1).maybeSingle();
+      if (dodjelaAktNR?.autor_id) {
+        await notifNijeRijesen(db, dodjelaAktNR.autor_id, zahtjevId, imeNR, podaci.razlog);
+      }
+
+      const brojCiklusaNR = await inkrementirajPonovniCiklus(db, zahtjevId);
+      return NextResponse.json({
+        success: true,
+        novi_status: 'potvrdeno',
+        broj_ponovnih_ciklusa: brojCiklusaNR,
+      });
     }
 
     if (podaci.action === 'odbij') {

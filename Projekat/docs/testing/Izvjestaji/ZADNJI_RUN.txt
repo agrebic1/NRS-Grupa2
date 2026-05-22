@@ -1,5 +1,5 @@
-Zadnji run: 2026-05-18_15-16-32
-Lokacija: docs/testing/Izvjestaji/2026-05-18_15-16-32
+Zadnji run: 2026-05-22_21-08-17
+Lokacija: docs/testing/Izvjestaji/2026-05-22_21-08-17
 Status: FAIL
 Sprint 5: auth/RBAC osnova
 Sprint 6: korisnicki/admin/premium tokovi
@@ -7,7 +7,9 @@ Sprint 7: dispecerski operativni tok
 Dodano u Sprintu 7: +42 automatska testa; +26 manuelnih scenarija
 Sprint 8: serviserski modul i zatvaranje intervencije
 Dodano u Sprintu 8: +63 automatska testa; +20 manuelnih scenarija
-Unit testovi: 145/145 passed
-Integration testovi: 80/80 passed
-Coverage run: 225/225 passed
-E2E testovi: 0/23 passed (6 failed, 17 skipped)
+Sprint 9: preraspodjela, SLA, izvjestaj odziva, upload slika
+Dodano u Sprintu 9: +18 automatska testa; +144 manuelnih scenarija (SB-09-36)
+Unit testovi: 174/174 passed
+Integration testovi: 112/112 passed
+Coverage run: 286/286 passed
+E2E testovi: 22/23 passed (1 failed)

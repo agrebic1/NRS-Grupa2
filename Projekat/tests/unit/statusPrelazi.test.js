@@ -8,13 +8,16 @@ const {
 describe('statusni prelazi — serviser', () => {
   test.each([
     ['dodijeljeno', 'u_radu'],
+    ['dodijeljeno', 'potvrdeno'],    // vrati_na_dodjelu
     ['u_radu',      'u_izvrsenju'],
+    ['u_radu',      'potvrdeno'],    // vrati_na_dodjelu
+    ['u_izvrsenju', 'zavrseno'],
+    ['u_izvrsenju', 'potvrdeno'],    // nije_rijeseno
   ])('dozvoljava serviser prelaz %s → %s', (iz, u) => {
     expect(validirajServiserPrelaz(iz, u)).toEqual({ ok: true });
   });
 
   test.each([
-    ['u_izvrsenju', 'zavrseno'],
     ['u_izvrsenju', 'zatvoreno'],
     ['dodijeljeno', 'u_izvrsenju'],
     ['u_radu',      'dodijeljeno'],
@@ -42,7 +45,8 @@ describe('statusni prelazi — serviser', () => {
   });
 
   test('greška za status bez dozvoljenih prelaza pominje nema', () => {
-    const rez = validirajServiserPrelaz('u_izvrsenju', 'u_radu');
+    // 'potvrdeno' nije u SERVISER_PRELAZI → lista dozvoljenih je prazna → "nema"
+    const rez = validirajServiserPrelaz('potvrdeno', 'u_radu');
     expect(rez.ok).toBe(false);
     expect(rez.greska).toMatch(/nema/i);
   });

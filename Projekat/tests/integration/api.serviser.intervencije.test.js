@@ -101,6 +101,7 @@ describe('GET /api/serviser/intervencije/[id]', () => {
 
   test('vraća 400 za nevažeći ID', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 's1' } } });
+    mockAssertServiserAccess.mockResolvedValue(true);
     const res = await GET(new Request('http://localhost/api/serviser/intervencije/x'), PARAMS_NEVAZECI);
     expect(res.status).toBe(400);
   });

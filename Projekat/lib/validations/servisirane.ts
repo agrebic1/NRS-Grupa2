@@ -189,17 +189,27 @@ export const premiumConfirmSchema = z.object({
 
 // ─── Sprint 8: Serviserski modul ──────────────────────────────────────────────
 
+export const razlogOperativniSchema = z.string()
+  .trim()
+  .min(10, 'Razlog mora imati minimalno 10 znakova')
+  .max(500, 'Razlog ne smije prelaziti 500 znakova');
+
+export const materijalStavkaSchema = z.object({
+  naziv:    z.string().min(1, 'Naziv je obavezan').max(200),
+  kolicina: z.number().positive('Količina mora biti pozitivna').max(99999),
+  jedinica: z.string().min(1, 'Jedinica je obavezna').max(20),
+});
+
 export const evidencijaRadaSchema = z.object({
   opis_rada:       z.string()
     .min(5,   'Opis mora imati najmanje 5 karaktera')
     .max(2000, 'Opis ne smije biti duži od 2000 karaktera'),
   trajanje_minuta: z.number()
     .int('Trajanje mora biti cijeli broj')
-    .min(1,    'Trajanje mora biti najmanje 1 minuta')
-    .max(1440, 'Trajanje ne može biti duže od 24 sata')
-    .optional()
-    .nullable(),
+    .min(1,    'Trajanje je obavezno. Unesite pozitivan broj minuta (minimalno 1).')
+    .max(1440, 'Trajanje ne može biti duže od 24 sata'),
   materijal: z.string().max(500).optional().nullable(),
+  stavke_materijala: z.array(materijalStavkaSchema).max(20).optional().default([]),
   napomene:  z.string().max(1000).optional().nullable(),
 });
 

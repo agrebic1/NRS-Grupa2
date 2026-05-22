@@ -8,15 +8,19 @@ import {
   ClipboardCheck, CheckCircle2, Truck, UserX,
   FileText, History, RefreshCw, ChevronRight,
   AlertTriangle, Radio, Navigation, Shield, User, Headphones, Users,
-  ClipboardList, Activity, Wrench,
+  ClipboardList, Activity, Wrench, RotateCcw, X,
+  Image as ImageIcon, ExternalLink,
 } from 'lucide-react';
 import { AppShell } from '@/components/layout/AppShell';
 import { Button } from '@/components/ui/Button';
 import { AlertMessage } from '@/components/ui/AlertMessage';
 import { MiniMapa } from '@/components/shared/MiniMapa';
 import { NapomeneThread } from '@/components/shared/NapomeneThread';
-import { AktivnostiTimeline } from '@/components/serviser/AktivnostiTimeline';
+import { ImageUploader } from '@/components/shared/ImageUploader';
+import { HistorijaAktivnostiSekcija } from '@/components/serviser/HistorijaAktivnostiSekcija';
 import { EvidencijaRadaModal } from '@/components/serviser/EvidencijaRadaModal';
+import { RazlogOperativniModal } from '@/components/servisirane/RazlogOperativniModal';
+import { PonovniCiklusBadge } from '@/components/servisirane/PonovniCiklusBadge';
 import { IntervencijaChecklist } from '@/components/serviser/IntervencijaChecklist';
 import type { ServisniZahtjev, WorkEvidence, InterventionActivity } from '@/domain/types/servisirane';
 import { labelKategorije } from '@/lib/servisirane/kategorije';
@@ -222,16 +226,28 @@ function TerminVizual({ zahtjev }: { zahtjev: IntervencijaDetalji }) {
   );
 }
 
+async function patchServiserAkcija(zahtjevId: number, action: string, razlog: string) {
+  const r = await fetch(`/api/serviser/intervencije/${zahtjevId}`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ action, razlog }),
+  });
+  const d = await r.json();
+  if (!r.ok) throw new Error(d.error ?? 'Greška.');
+}
+
 // ─── Akcije servisera ─────────────────────────────────────────────────────────
 
 function AkcijeServiser({
-  status, zahtjevId, onRefresh, onEvidencija, imaEvidenciju,
+  status, zahtjevId, onRefresh, onEvidencija, imaEvidenciju, onVratiNaDodjelu, onOznaciNijeRijesen,
 }: {
   status: string;
   zahtjevId: number;
   onRefresh: () => void;
   onEvidencija: () => void;
   imaEvidenciju: boolean;
+  onVratiNaDodjelu: () => void;
+  onOznaciNijeRijesen: () => void;
 }) {
   const [showOdbij, setShowOdbij] = useState(false);
   const [razlog,    setRazlog]    = useState('');
@@ -326,6 +342,14 @@ function AkcijeServiser({
             <UserX className="h-4 w-4" />Odbij
           </button>
         </div>
+        <button
+          type="button"
+          onClick={onVratiNaDodjelu}
+          disabled={jeSlanje}
+          className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all hover:opacity-80"
+          style={{ backgroundColor: 'rgba(217,119,6,0.06)', color: '#D97706', border: '1px solid rgba(217,119,6,0.2)' }}>
+          <RotateCcw className="h-4 w-4" />Vrati na ponovnu dodjelu
+        </button>
       </div>
     );
   }
@@ -357,6 +381,14 @@ function AkcijeServiser({
             <ClipboardCheck className="h-4 w-4" />Evidentiraj
           </button>
         </div>
+        <button
+          type="button"
+          onClick={onVratiNaDodjelu}
+          disabled={jeSlanje}
+          className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all hover:opacity-80"
+          style={{ backgroundColor: 'rgba(217,119,6,0.06)', color: '#D97706', border: '1px solid rgba(217,119,6,0.2)' }}>
+          <RotateCcw className="h-4 w-4" />Vrati na ponovnu dodjelu
+        </button>
       </div>
     );
   }
@@ -378,6 +410,14 @@ function AkcijeServiser({
           style={{ backgroundColor: 'var(--first-primary)', color: '#fff' }}>
           <ClipboardCheck className="h-5 w-5" />
           {imaEvidenciju ? 'Dodaj još evidencije' : 'Evidentiraj rad'}
+        </button>
+        <button
+          type="button"
+          onClick={onOznaciNijeRijesen}
+          disabled={jeSlanje}
+          className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all hover:opacity-80"
+          style={{ backgroundColor: 'rgba(220,38,38,0.06)', color: '#DC2626', border: '1px solid rgba(220,38,38,0.18)' }}>
+          <AlertTriangle className="h-4 w-4" />Nije riješeno
         </button>
       </div>
     );
@@ -506,19 +546,23 @@ export default function ServiserIntervencijaDetaljiPage() {
   const [evidencije, setEvidencije] = useState<WorkEvidence[]>([]);
   const [aktivnosti, setAktivnosti] = useState<InterventionActivity[]>([]);
   const [tim,        setTim]        = useState<Array<{ serviser_id: string; serviser?: { ime: string; prezime: string } | null }>>([]);
+  const [slike,      setSlike]      = useState<string[]>([]);
   const [ucitava,    setUcitava]    = useState(true);
   const [greska,     setGreska]     = useState<string | null>(null);
-  const [pokaziEvid,      setPokaziEvid]      = useState(false);
-  const [pokaziUspjeh,    setPokaziUspjeh]    = useState(false);
-  const [scrollToZavrsi,  setScrollToZavrsi]  = useState(false);
+  const [pokaziEvid,           setPokaziEvid]           = useState(false);
+  const [pokaziUspjeh,         setPokaziUspjeh]         = useState(false);
+  const [pokaziVratiNaDodjelu, setPokaziVratiNaDodjelu] = useState(false);
+  const [pokaziNijeRijesen,    setPokaziNijeRijesen]    = useState(false);
+  const [scrollToZavrsi,      setScrollToZavrsi]      = useState(false);
   const zavrsiRef = useRef<HTMLDivElement>(null);
 
   async function ucitaj() {
     setUcitava(true); setGreska(null);
     try {
-      const [intR, timR] = await Promise.all([
+      const [intR, timR, slikeR] = await Promise.all([
         fetch(`/api/serviser/intervencije/${id}`, { cache: 'no-store' }),
         fetch(`/api/dispecer/zahtjevi/${id}/tim`, { cache: 'no-store' }),
+        fetch(`/api/slike?zahtjev_id=${id}`, { cache: 'no-store' }),
       ]);
       const intD = await intR.json();
       if (!intR.ok) throw new Error(intD.error ?? 'Zahtjev nije pronađen.');
@@ -528,6 +572,10 @@ export default function ServiserIntervencijaDetaljiPage() {
       if (timR.ok) {
         const timD = await timR.json();
         setTim(timD.tim ?? []);
+      }
+      if (slikeR.ok) {
+        const slikeD = await slikeR.json();
+        setSlike((slikeD.slike ?? []).map((s: { image_url: string }) => s.image_url));
       }
     } catch (e) {
       setGreska(e instanceof Error ? e.message : 'Greška pri učitavanju.');
@@ -562,7 +610,7 @@ export default function ServiserIntervencijaDetaljiPage() {
     return (
       <AppShell uloga="serviser">
         <AlertMessage variant="error" message={greska ?? 'Intervencija nije pronađena.'} />
-        <Link href="/serviser/zadaci">
+        <Link href="/serviser/intervencije">
           <Button variant="secondary" size="md" className="mt-4">
             <ArrowLeft className="h-4 w-4" />Nazad
           </Button>
@@ -604,7 +652,7 @@ export default function ServiserIntervencijaDetaljiPage() {
       {/* ─── Breadcrumb ─────────────────────────────────────────────────────── */}
       <div className="mb-4 flex items-center justify-between">
         <div className="flex items-center gap-1.5 text-sm" style={{ color: 'var(--first-nonary)' }}>
-          <Link href="/serviser/zadaci"
+          <Link href="/serviser/intervencije"
             className="flex items-center gap-1 rounded-lg px-2 py-1 transition-all hover:bg-black/[0.04]">
             <ArrowLeft className="h-3.5 w-3.5" />Zadaci
           </Link>
@@ -668,6 +716,7 @@ export default function ServiserIntervencijaDetaljiPage() {
                 <AlertTriangle className="h-3 w-3" />Kasni
               </span>
             )}
+            <PonovniCiklusBadge broj={zahtjev.broj_ponovnih_ciklusa ?? 0} />
           </div>
 
           {/* Naslov */}
@@ -720,6 +769,8 @@ export default function ServiserIntervencijaDetaljiPage() {
               onRefresh={ucitaj}
               onEvidencija={() => setPokaziEvid(true)}
               imaEvidenciju={evidencije.length > 0}
+              onVratiNaDodjelu={() => setPokaziVratiNaDodjelu(true)}
+              onOznaciNijeRijesen={() => setPokaziNijeRijesen(true)}
             />
           )}
 
@@ -784,6 +835,52 @@ export default function ServiserIntervencijaDetaljiPage() {
             </div>
           )}
 
+          {/* Foto dokumentacija */}
+          {(slike.length > 0 || zahtjev.status === 'u_izvrsenju') && (
+            <div className="rounded-2xl p-5"
+              style={{ backgroundColor: 'rgb(255 255 255/0.85)', border: '1px solid rgb(var(--first-quaternary-rgb)/0.28)' }}>
+              <div className="mb-4 flex items-center gap-2">
+                <div className="flex h-7 w-7 items-center justify-center rounded-lg"
+                  style={{ backgroundColor: 'rgb(var(--first-secondary-rgb)/0.1)' }}>
+                  <ImageIcon className="h-3.5 w-3.5" style={{ color: 'var(--first-secondary)' }} />
+                </div>
+                <p className="text-[10px] font-bold uppercase tracking-wide" style={{ color: 'var(--first-nonary)' }}>
+                  Foto dokumentacija{slike.length > 0 ? ` (${slike.length})` : ''}
+                </p>
+              </div>
+
+              {slike.length > 0 && (
+                <div className="mb-4 grid grid-cols-3 gap-2">
+                  {slike.map((url, i) => (
+                    <a
+                      key={i}
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group relative aspect-square overflow-hidden rounded-xl border transition-all hover:shadow-md"
+                      style={{ borderColor: 'rgb(var(--first-quaternary-rgb)/0.3)' }}
+                    >
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={url} alt={`Slika ${i + 1}`}
+                        className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105" />
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-all group-hover:bg-black/20">
+                        <ExternalLink className="h-4 w-4 text-white opacity-0 transition-opacity group-hover:opacity-100" />
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              )}
+
+              {zahtjev.status === 'u_izvrsenju' && (
+                <ImageUploader
+                  zahtjevId={zahtjev.id}
+                  onUspjeh={() => void ucitaj()}
+                  maxFajlova={10}
+                />
+              )}
+            </div>
+          )}
+
           {/* Evidencija rada */}
           {evidencije.length > 0 && (
             <div className="rounded-2xl p-5"
@@ -809,6 +906,11 @@ export default function ServiserIntervencijaDetaljiPage() {
                         </span>
                       )}
                       {e.materijal && <span>Materijal: {e.materijal}</span>}
+                      {(e.stavke_materijala?.length ?? 0) > 0 && (
+                        <span>
+                          Stavke: {e.stavke_materijala!.map((s) => `${s.naziv} (${s.kolicina} ${s.jedinica})`).join(', ')}
+                        </span>
+                      )}
                       <span>{new Date(e.created_at).toLocaleDateString('bs-BA')}</span>
                     </div>
                   </div>
@@ -854,20 +956,7 @@ export default function ServiserIntervencijaDetaljiPage() {
             </div>
           )}
 
-          {/* Historija aktivnosti */}
-          {aktivnosti.length > 0 && (
-            <div className="rounded-2xl p-5"
-              style={{ backgroundColor: 'rgb(255 255 255/0.85)', border: '1px solid rgb(var(--first-quaternary-rgb)/0.28)' }}>
-              <div className="mb-4 flex items-center gap-2">
-                <div className="flex h-7 w-7 items-center justify-center rounded-lg"
-                  style={{ backgroundColor: 'rgb(var(--first-secondary-rgb)/0.1)' }}>
-                  <History className="h-3.5 w-3.5" style={{ color: 'var(--first-secondary)' }} />
-                </div>
-                <p className="text-[10px] font-bold uppercase tracking-wide" style={{ color: 'var(--first-nonary)' }}>Historija aktivnosti</p>
-              </div>
-              <AktivnostiTimeline aktivnosti={aktivnosti} />
-            </div>
-          )}
+          <HistorijaAktivnostiSekcija aktivnosti={aktivnosti} ucitava={ucitava} />
         </div>
 
         {/* ── Desni sidebar ────────────────────────────────────────────────── */}
@@ -971,6 +1060,41 @@ export default function ServiserIntervencijaDetaljiPage() {
             setPokaziEvid(false);
             setScrollToZavrsi(true);
             ucitaj();
+          }}
+        />
+      )}
+
+      {pokaziVratiNaDodjelu && (
+        <RazlogOperativniModal
+          naslov="Vrati na ponovnu dodjelu"
+          ikona={<RotateCcw className="h-4 w-4" style={{ color: '#D97706' }} />}
+          upozorenje='Intervencija će biti vraćena dispečeru na ponovnu dodjelu. Status će biti promijenjen u "Potvrđeno".'
+          labelRazloga="Razlog vraćanja"
+          placeholder="Npr. Nedostupnost alata, konflikt termina, hitna situacija..."
+          potvrdiTekst="Vrati na dodjelu"
+          onZatvori={() => setPokaziVratiNaDodjelu(false)}
+          onPotvrdi={async (razlog) => {
+            await patchServiserAkcija(zahtjev.id, 'vrati_na_ponovnu_dodjelu', razlog);
+            ucitaj();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }}
+        />
+      )}
+
+      {pokaziNijeRijesen && (
+        <RazlogOperativniModal
+          naslov="Nije riješeno"
+          ikona={<AlertTriangle className="h-4 w-4" style={{ color: '#DC2626' }} />}
+          upozorenje='Intervencija će biti vraćena dispečeru kao nerješena. Status će biti promijenjen u "Potvrđeno".'
+          labelRazloga="Razlog nerješavanja"
+          placeholder="Npr. Problem zahtijeva dodatnu opremu, potreban specijalistički uvid..."
+          potvrdiTekst="Potvrdi"
+          variantPotvrdi="danger"
+          onZatvori={() => setPokaziNijeRijesen(false)}
+          onPotvrdi={async (razlog) => {
+            await patchServiserAkcija(zahtjev.id, 'oznaci_nije_rijesen', razlog);
+            ucitaj();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
         />
       )}

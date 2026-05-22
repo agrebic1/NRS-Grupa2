@@ -14,6 +14,8 @@ import type { ServisniZahtjev } from '@/domain/types/servisirane';
 import { labelKategorije } from '@/lib/servisirane/kategorije';
 import { IntervencijaWorkflowProgress } from '@/components/dispecer/IntervencijaWorkflowProgress';
 import { prioritetBoja, statusBoja, statusOznaka } from '@/lib/servisirane/statusBoja';
+import { SlaStatusBadge } from '@/components/dispecer/SlaStatusBadge';
+import { getSlaStatus } from '@/lib/servisirane/slaPravila';
 
 // ─── Tipovi ───────────────────────────────────────────────────────────────────
 
@@ -22,7 +24,7 @@ interface IntervencijaRed extends ServisniZahtjev {
   serviser?:  { id: string; ime: string; prezime: string } | null;
 }
 
-type KpiFilter = 'sve' | 'hitno' | 'u_izvrsenju' | 'u_radu' | 'dodijeljeno' | 'kasni' | 'zavrseno';
+type KpiFilter = 'sve' | 'hitno' | 'u_izvrsenju' | 'u_radu' | 'dodijeljeno' | 'kasni' | 'zavrseno' | 'sla';
 
 // ─── Helperi ──────────────────────────────────────────────────────────────────
 
@@ -45,6 +47,7 @@ function filtrirajPoKpi(intervencije: IntervencijaRed[], filter: KpiFilter): Int
     case 'dodijeljeno': return intervencije.filter((z) => z.status === 'dodijeljeno');
     case 'kasni':       return intervencije.filter(jeKasni);
     case 'zavrseno':    return intervencije.filter((z) => z.status === 'zavrseno' && !(z as any).closed_at);
+    case 'sla':         return intervencije.filter((z) => getSlaStatus(z.created_at, z.final_priority, z.status) === 'prekoraceno');
     default:            return intervencije;
   }
 }
@@ -162,6 +165,12 @@ function IntervencijaKartica({ z }: { z: IntervencijaRed }) {
                   Kasni
                 </span>
               )}
+              <SlaStatusBadge
+                createdAt={z.created_at}
+                prioritet={z.final_priority}
+                status={z.status}
+                prikaziVrijeme
+              />
               <span
                 className="rounded-full px-2.5 py-0.5 text-[11px] font-bold"
                 style={{ backgroundColor: `color-mix(in srgb, ${sboja} 12%, transparent)`, color: sboja, border: `1px solid color-mix(in srgb, ${sboja} 30%, transparent)` }}
@@ -266,6 +275,7 @@ export default function DispecerIntervencijePage() {
   const brDodijeljeno = useMemo(() => intervencije.filter((z) => z.status === 'dodijeljeno').length, [intervencije]);
   const brKasni       = useMemo(() => intervencije.filter(jeKasni).length, [intervencije]);
   const brZavrseno    = useMemo(() => intervencije.filter((z) => z.status === 'zavrseno' && !(z as any).closed_at).length, [intervencije]);
+  const brSlaPrekoraceno = useMemo(() => intervencije.filter((z) => getSlaStatus(z.created_at, z.final_priority, z.status) === 'prekoraceno').length, [intervencije]);
 
   const filtriran = useMemo(() => filtrirajPoKpi(intervencije, aktivniKpi), [intervencije, aktivniKpi]);
 
@@ -285,7 +295,8 @@ export default function DispecerIntervencijePage() {
     { key: 'u_radu'      as KpiFilter, oznaka: 'Na putu',        v: brNaPutu,      boja: 'var(--first-secondary)',    Ikona: Truck         },
     { key: 'dodijeljeno' as KpiFilter, oznaka: 'Čekaju prihv.',  v: brDodijeljeno, boja: '#D97706',                   Ikona: Clock         },
     { key: 'kasni'       as KpiFilter, oznaka: 'Kašnjenja',      v: brKasni,       boja: brKasni > 0 ? '#DC2626' : 'var(--first-nonary)', Ikona: AlertCircle },
-    { key: 'zavrseno'   as KpiFilter, oznaka: 'Čeka zatvaranje', v: brZavrseno,    boja: brZavrseno > 0 ? '#D97706' : 'var(--first-nonary)', Ikona: CheckCircle2 },
+    { key: 'zavrseno'   as KpiFilter, oznaka: 'Čeka zatvaranje', v: brZavrseno,       boja: brZavrseno > 0 ? '#D97706' : 'var(--first-nonary)',       Ikona: CheckCircle2 },
+    { key: 'sla'        as KpiFilter, oznaka: 'Prekoračen SLA',  v: brSlaPrekoraceno, boja: brSlaPrekoraceno > 0 ? '#DC2626' : 'var(--first-nonary)', Ikona: AlertTriangle },
   ];
 
   const aktivniLabel = kpiKartice.find((k) => k.key === aktivniKpi)?.oznaka ?? 'Sve aktivne';
@@ -329,7 +340,7 @@ export default function DispecerIntervencijePage() {
       {greska && <div className="mb-5"><AlertMessage variant="error" message={greska} /></div>}
 
       {/* KPI kartice */}
-      <div className="mb-6 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-7">
+      <div className="mb-6 grid grid-cols-2 gap-2.5 sm:grid-cols-4 lg:grid-cols-8">
         {kpiKartice.map(({ key, oznaka, v, boja, Ikona }) => (
           <KpiKartica
             key={key}
