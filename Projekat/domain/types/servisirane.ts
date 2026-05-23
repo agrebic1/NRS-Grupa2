@@ -1,19 +1,19 @@
 // ─── Statusi zahtjeva — životni ciklus ───────────────────────────────────────
 
 export type StatusZahtjeva =
-  | 'pending_review' // Novi — prije dispečerskog čarobnjaka
-  | 'na_cekanju'    // Novi — korisnik može uređivati do ulaska u čarobnjak
-  | 'in_review'     // U čarobnjaku — dispečer u koracima Pregled … Potvrda
-  | 'potvrdeno'     // Potvrđeno u čarobnjaku — prioritet i termin
-  | 'dodijeljeno'   // Dodijeljen serviser
-  | 'u_radu'        // Serviser prihvatio — na putu
-  | 'u_izvrsenju'   // Serviser na terenu
-  | 'zavrseno'      // Operativno završeno (dispečer zatvorio)
+  | 'pending_review' // Novi — sinonim za na_cekanju; oba znače isti početni status
+  | 'na_cekanju'    // Novi — korisnik može uređivati; kanonski naziv za oba
+  | 'in_review'     // Dispečerski čarobnjak aktivan (faze: prioritet → termin → serviser → potvrda)
+  | 'potvrdeno'     // Čeka dodjelu/re-dodjelu servisera (serviser_dodijeljen_id može biti null)
+  | 'dodijeljeno'   // Serviser dodijeljen — čeka prihvatanje
+  | 'u_radu'        // Serviser prihvatio — na putu ka lokaciji
+  | 'u_izvrsenju'   // Serviser na terenu — rad u toku
+  | 'zavrseno'      // Operativno završeno — čeka formalno zatvaranje dispečera
   | 'zatvoreno'     // Formalno zatvoreno — read-only, audit finaliziran
-  | 'otkazano'      // Korisnik otkazao
+  | 'otkazano'      // Korisnik otkazao (cancel_reason + cancelled_at)
   | 'odbijeno';     // Dispečer odbio (rejection_reason obavezan)
 
-export type NivoHitnosti    = 'NISKO' | 'SREDNJE' | 'VISOKO' | 'KRITIČNO';
+export type NivoHitnosti    = 'NISKO' | 'SREDNJE' | 'VISOKO' | 'KRITIČNO' | 'HITNO';
 export type StatusAplikacije = 'na_cekanju' | 'odobreno' | 'odbijeno';
 export type TipUsluge        = 'serviser' | 'dispecer';
 export type StepenObrazovanja = 'SSS' | 'VŠS' | 'VSS' | 'Certifikovani majstor';

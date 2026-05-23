@@ -1,34 +1,17 @@
 type AnyDB = {
-  from: (t: string) => {
-    select: (c: string) => {
-      eq: (col: string, val: unknown) => { single: () => Promise<{ data: { broj_ponovnih_ciklusa?: number } | null }> };
-    };
-    update: (p: Record<string, unknown>) => {
-      eq: (col: string, val: unknown) => Promise<{ error: { message: string } | null }>;
-    };
-  };
+  rpc: (fn: string, params?: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }>;
 };
 
-/** US-47: povećaj brojač ponovnih operativnih ciklusa. */
+/**
+ * US-47: atomično povećaj brojač ponovnih operativnih ciklusa i vrati novi broj.
+ * Koristi DB funkciju fn_inkrementiraj_ponovni_ciklus (RETURNING) — nema race conditiona.
+ */
 export async function inkrementirajPonovniCiklus(
   db: AnyDB,
   zahtjevId: number,
 ): Promise<number> {
-  const { data } = await db
-    .from('service_requests')
-    .select('broj_ponovnih_ciklusa')
-    .eq('id', zahtjevId)
-    .single();
-
-  const trenutni = data?.broj_ponovnih_ciklusa ?? 0;
-  const novi = trenutni + 1;
-
-  await db
-    .from('service_requests')
-    .update({ broj_ponovnih_ciklusa: novi })
-    .eq('id', zahtjevId);
-
-  return novi;
+  const { data } = await db.rpc('fn_inkrementiraj_ponovni_ciklus', { p_zahtjev_id: zahtjevId });
+  return typeof data === 'number' ? data : 1;
 }
 
 export function labelPonovnogCiklusa(broj: number): string | null {

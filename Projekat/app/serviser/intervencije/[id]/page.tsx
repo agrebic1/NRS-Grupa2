@@ -24,7 +24,7 @@ import { PonovniCiklusBadge } from '@/components/servisirane/PonovniCiklusBadge'
 import { IntervencijaChecklist } from '@/components/serviser/IntervencijaChecklist';
 import type { ServisniZahtjev, WorkEvidence, InterventionActivity } from '@/domain/types/servisirane';
 import { labelKategorije } from '@/lib/servisirane/kategorije';
-import { prioritetBoja } from '@/lib/servisirane/statusBoja';
+import { prioritetBoja, statusBoja, statusOznaka } from '@/lib/servisirane/statusBoja';
 import { fmtSat, fmtDatumKratki } from '@/lib/format/datumi';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -625,26 +625,6 @@ export default function ServiserIntervencijaDetaljiPage() {
   const kasni  = jeKasni(zahtjev);
   const jeAktivna = ['dodijeljeno', 'u_radu', 'u_izvrsenju'].includes(zahtjev.status);
 
-  function statusLabel(s: string): string {
-    switch (s) {
-      case 'dodijeljeno':  return 'Dodijeljeno';
-      case 'u_radu':       return 'Na putu';
-      case 'u_izvrsenju':  return 'Na terenu';
-      case 'zavrseno':     return 'Završeno';
-      case 'otkazano':     return 'Otkazano';
-      case 'odbijeno':     return 'Odbijeno';
-      default:             return s;
-    }
-  }
-  function statusBoja(s: string): string {
-    switch (s) {
-      case 'dodijeljeno':  return 'var(--first-senary)';
-      case 'u_radu':       return 'var(--first-secondary)';
-      case 'u_izvrsenju':  return 'var(--first-secondary)';
-      case 'zavrseno':     return 'var(--first-nonary)';
-      default:             return 'var(--first-nonary)';
-    }
-  }
   const sboja = statusBoja(zahtjev.status);
 
   return (
@@ -696,7 +676,7 @@ export default function ServiserIntervencijaDetaljiPage() {
             <span className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold"
               style={{ backgroundColor: `${sboja}14`.replace('var(--first-secondary)', 'rgb(var(--first-secondary-rgb)').replace(')', '/0.08)'), color: sboja, border: `1.5px solid ${sboja}28`.replace('var(--first-secondary)', 'rgb(var(--first-secondary-rgb)/0.2)') }}>
               <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: sboja }} />
-              {statusLabel(zahtjev.status)}
+              {statusOznaka(zahtjev.status)}
             </span>
             {zahtjev.final_priority && (
               <span className="rounded-full px-2.5 py-1 text-xs font-bold"

@@ -9,6 +9,7 @@ import {
 import { AppShell } from '@/components/layout/AppShell';
 import { Button } from '@/components/ui/Button';
 import { AlertMessage } from '@/components/ui/AlertMessage';
+import { MiniKalendar } from '@/components/serviser/MiniKalendar';
 import { StatusBadge } from '@/components/servisirane/ZahtjevKartica';
 import type { ServisniZahtjev } from '@/domain/types/servisirane';
 import { labelKategorije } from '@/lib/servisirane/kategorije';
@@ -24,6 +25,10 @@ interface IntervencijaZaListu extends ServisniZahtjev {
 type KpiFilter = 'sve' | 'dodijeljeno' | 'u_radu' | 'u_izvrsenju' | 'zavrseno' | 'danas' | 'hitno';
 
 // ─── Helperi ──────────────────────────────────────────────────────────────────
+
+function dateToStr(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
 
 function jeIntervencijaZaDanas(z: IntervencijaZaListu): boolean {
   if (!z.termin_planirani_pocetak) return false;
@@ -41,7 +46,14 @@ function jeHitna(z: IntervencijaZaListu): boolean {
 function filtrirajPoKpi(
   intervencije: IntervencijaZaListu[],
   filter: KpiFilter,
+  selectedDatum: string | null,
 ): IntervencijaZaListu[] {
+  if (selectedDatum) {
+    return intervencije.filter((z) => {
+      if (!z.termin_planirani_pocetak) return false;
+      return dateToStr(new Date(z.termin_planirani_pocetak)) === selectedDatum;
+    });
+  }
   switch (filter) {
     case 'dodijeljeno': return intervencije.filter((z) => z.status === 'dodijeljeno');
     case 'u_radu':      return intervencije.filter((z) => z.status === 'u_radu');
@@ -60,7 +72,9 @@ function IntervencijaKartica({ z }: { z: IntervencijaZaListu }) {
   const naslov = kat.podkategorija ? `${kat.glavna} — ${kat.podkategorija}` : kat.glavna;
   const hitno  = jeHitna(z);
   const termin = z.termin_planirani_pocetak
-    ? new Date(z.termin_planirani_pocetak).toLocaleString('bs-BA', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' })
+    ? new Date(z.termin_planirani_pocetak).toLocaleString('bs-BA', {
+        day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit',
+      })
     : null;
 
   return (
@@ -159,6 +173,7 @@ export default function ServiserPage() {
   const [greska,       setGreska]       = useState<string | null>(null);
   const [imeKorisnika, setImeKorisnika] = useState('Korisnik');
   const [aktivniKpi,   setAktivniKpi]   = useState<KpiFilter>('sve');
+  const [selectedDatum, setSelectedDatum] = useState<string | null>(null);
 
   async function ucitaj() {
     setUcitava(true);
@@ -192,7 +207,7 @@ export default function ServiserPage() {
     return () => { mounted = false; };
   }, []);
 
-  // ─── Izračuni ─────────────────────────────────────────────────────────────
+  // ─── Izračuni ─────────────────────────────────────────────────────────
 
   const imeZaPozdrav = imeKorisnika.split(' ')[0]?.trim() || imeKorisnika;
 
@@ -204,8 +219,8 @@ export default function ServiserPage() {
   const hitno       = useMemo(() => intervencije.filter(jeHitna).length, [intervencije]);
 
   const filtriran = useMemo(
-    () => filtrirajPoKpi(intervencije, aktivniKpi),
-    [intervencije, aktivniKpi],
+    () => filtrirajPoKpi(intervencije, aktivniKpi, selectedDatum),
+    [intervencije, aktivniKpi, selectedDatum],
   );
 
   const sortirano = useMemo(
@@ -216,19 +231,33 @@ export default function ServiserPage() {
     [filtriran],
   );
 
-  // ─── Kpi definicije ───────────────────────────────────────────────────────
+  // ─── Kpi definicije ───────────────────────────────────────────────────
 
   const kpiKartice = [
-    { key: 'danas'       as KpiFilter, oznaka: 'Danas',       v: danas,     boja: 'var(--first-primary)',   Ikona: Calendar     },
-    { key: 'dodijeljeno' as KpiFilter, oznaka: 'Dodijeljeno', v: dodijeljeno, boja: '#D97706',              Ikona: Clock        },
-    { key: 'u_radu'      as KpiFilter, oznaka: 'Prihvaćeno',  v: uRadu,     boja: 'var(--first-secondary)', Ikona: ClipboardList },
-    { key: 'u_izvrsenju' as KpiFilter, oznaka: 'Na terenu',   v: naTermenu, boja: 'var(--first-secondary)', Ikona: Truck        },
-    { key: 'zavrseno'    as KpiFilter, oznaka: 'Završeno',    v: zavrseno,  boja: 'var(--first-nonary)',    Ikona: CheckCircle2 },
-    { key: 'hitno'       as KpiFilter, oznaka: 'Hitno',       v: hitno,     boja: '#DC2626',               Ikona: Zap          },
+    { key: 'danas'       as KpiFilter, oznaka: 'Danas',       v: danas,       boja: 'var(--first-primary)',   Ikona: Calendar      },
+    { key: 'dodijeljeno' as KpiFilter, oznaka: 'Dodijeljeno', v: dodijeljeno, boja: '#D97706',               Ikona: Clock         },
+    { key: 'u_radu'      as KpiFilter, oznaka: 'Prihvaćeno',  v: uRadu,       boja: 'var(--first-secondary)', Ikona: ClipboardList },
+    { key: 'u_izvrsenju' as KpiFilter, oznaka: 'Na terenu',   v: naTermenu,   boja: 'var(--first-secondary)', Ikona: Truck         },
+    { key: 'zavrseno'    as KpiFilter, oznaka: 'Završeno',    v: zavrseno,    boja: 'var(--first-nonary)',    Ikona: CheckCircle2  },
+    { key: 'hitno'       as KpiFilter, oznaka: 'Hitno',       v: hitno,       boja: '#DC2626',               Ikona: Zap           },
   ];
 
   const aktivniKpiUkupno = sortirano.length;
   const aktivniFilter = aktivniKpi === 'sve' ? null : kpiKartice.find((k) => k.key === aktivniKpi);
+
+  // Label za zaglavlje liste
+  function listaNaslov(): string {
+    if (selectedDatum) {
+      return new Date(`${selectedDatum}T12:00:00`).toLocaleDateString('bs-BA', { weekday: 'long', day: '2-digit', month: 'long' });
+    }
+    if (aktivniFilter) return aktivniFilter.oznaka;
+    return 'Aktivni zadaci';
+  }
+
+  function resetFilteri() {
+    setSelectedDatum(null);
+    setAktivniKpi('sve');
+  }
 
   return (
     <AppShell uloga="serviser" imeKorisnika={imeKorisnika}>
@@ -255,93 +284,121 @@ export default function ServiserPage() {
 
       {greska && <div className="mb-4"><AlertMessage variant="error" message={greska} /></div>}
 
-      {/* KPI kartice */}
-      <div className="mb-6 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-6">
-        {kpiKartice.map(({ key, oznaka, v, boja, Ikona }) => (
-          <KpiKartica
-            key={key}
-            oznaka={oznaka}
-            vrijednost={v}
-            boja={boja}
-            Ikona={Ikona}
-            aktivan={aktivniKpi === key}
-            onClick={() => setAktivniKpi(aktivniKpi === key ? 'sve' : key)}
-          />
-        ))}
-      </div>
+      {/* ─── Dvostupčani layout ──────────────────────────────────────────────── */}
+      <div className="flex flex-col gap-6 lg:flex-row lg:items-start">
 
-      {/* Lista intervencija */}
-      <div
-        className="rounded-2xl shadow-card"
-        style={{ backgroundColor: 'rgb(var(--first-quinary-rgb) / 0.22)', border: '1px solid rgb(var(--first-quaternary-rgb) / 0.35)' }}
-      >
-        <div
-          className="flex items-center justify-between px-5 py-4"
-          style={{ borderBottom: '1px solid rgb(var(--first-quaternary-rgb) / 0.3)' }}
-        >
-          <div className="flex items-center gap-2">
-            <h2 className="font-semibold" style={{ color: 'var(--first-octonary)' }}>
-              {aktivniFilter ? aktivniFilter.oznaka : 'Aktivni zadaci'}
-            </h2>
-            {!ucitava && (
-              <span
-                className="rounded-full px-2 py-0.5 text-xs font-bold tabular-nums"
-                style={{
-                  backgroundColor: 'rgb(var(--first-quaternary-rgb) / 0.3)',
-                  color: 'var(--first-nonary)',
+        {/* ── Lijevi stupac: KPI + lista ─────────────────────────────────── */}
+        <div className="min-w-0 flex-1">
+
+          {/* KPI kartice */}
+          <div className="mb-6 grid grid-cols-2 gap-2.5 sm:grid-cols-3">
+            {kpiKartice.map(({ key, oznaka, v, boja, Ikona }) => (
+              <KpiKartica
+                key={key}
+                oznaka={oznaka}
+                vrijednost={v}
+                boja={boja}
+                Ikona={Ikona}
+                aktivan={aktivniKpi === key && !selectedDatum}
+                onClick={() => {
+                  setSelectedDatum(null);
+                  setAktivniKpi(aktivniKpi === key ? 'sve' : key);
                 }}
-              >
-                {aktivniKpiUkupno}
-              </span>
-            )}
-            {aktivniFilter && (
-              <button
-                type="button"
-                onClick={() => setAktivniKpi('sve')}
-                className="ml-1 text-xs transition-opacity hover:opacity-70"
-                style={{ color: 'var(--first-nonary)' }}
-              >
-                × Ukloni filter
-              </button>
-            )}
+              />
+            ))}
           </div>
-          <Link
-            href="/serviser/intervencije"
-            className="flex items-center gap-1 text-sm font-medium transition-opacity hover:opacity-70"
-            style={{ color: 'var(--first-secondary)' }}
+
+          {/* Lista intervencija */}
+          <div
+            className="rounded-2xl shadow-card"
+            style={{
+              backgroundColor: 'rgb(var(--first-quinary-rgb) / 0.22)',
+              border: '1px solid rgb(var(--first-quaternary-rgb) / 0.35)',
+            }}
           >
-            Sve intervencije <ChevronRight className="h-4 w-4" />
-          </Link>
+            <div
+              className="flex items-center justify-between px-5 py-4"
+              style={{ borderBottom: '1px solid rgb(var(--first-quaternary-rgb) / 0.3)' }}
+            >
+              <div className="flex items-center gap-2">
+                <h2 className="font-semibold" style={{ color: 'var(--first-octonary)' }}>
+                  {listaNaslov()}
+                </h2>
+                {!ucitava && (
+                  <span
+                    className="rounded-full px-2 py-0.5 text-xs font-bold tabular-nums"
+                    style={{
+                      backgroundColor: 'rgb(var(--first-quaternary-rgb) / 0.3)',
+                      color: 'var(--first-nonary)',
+                    }}
+                  >
+                    {aktivniKpiUkupno}
+                  </span>
+                )}
+                {(aktivniFilter || selectedDatum) && (
+                  <button
+                    type="button"
+                    onClick={resetFilteri}
+                    className="ml-1 text-xs transition-opacity hover:opacity-70"
+                    style={{ color: 'var(--first-nonary)' }}
+                  >
+                    × Ukloni filter
+                  </button>
+                )}
+              </div>
+              <Link
+                href="/serviser/intervencije"
+                className="flex items-center gap-1 text-sm font-medium transition-opacity hover:opacity-70"
+                style={{ color: 'var(--first-secondary)' }}
+              >
+                Sve intervencije <ChevronRight className="h-4 w-4" />
+              </Link>
+            </div>
+
+            <ul className="divide-y" style={{ borderColor: 'rgb(var(--first-quaternary-rgb) / 0.25)' }}>
+              {ucitava && (
+                <li className="px-5 py-8 text-center text-sm" style={{ color: 'var(--first-nonary)' }}>
+                  Učitavanje...
+                </li>
+              )}
+              {!ucitava && sortirano.length === 0 && (
+                <li className="flex flex-col items-center gap-2 px-5 py-10 text-center">
+                  <CheckCircle2 className="h-8 w-8" style={{ color: 'var(--first-quinary)' }} />
+                  <p className="text-sm font-medium" style={{ color: 'var(--first-octonary)' }}>
+                    {selectedDatum
+                      ? 'Nema intervencija za odabrani datum.'
+                      : aktivniFilter
+                      ? `Nema intervencija za filter "${aktivniFilter.oznaka}".`
+                      : 'Nemate aktivnih zadataka. Odlično!'}
+                  </p>
+                  {(aktivniFilter || selectedDatum) && (
+                    <button
+                      type="button"
+                      onClick={resetFilteri}
+                      className="mt-1 text-sm transition-opacity hover:opacity-70"
+                      style={{ color: 'var(--first-secondary)' }}
+                    >
+                      Prikaži sve zadatke
+                    </button>
+                  )}
+                </li>
+              )}
+              {!ucitava && sortirano.map((z) => <IntervencijaKartica key={z.id} z={z} />)}
+            </ul>
+          </div>
         </div>
 
-        <ul className="divide-y" style={{ borderColor: 'rgb(var(--first-quaternary-rgb) / 0.25)' }}>
-          {ucitava && (
-            <li className="px-5 py-8 text-center text-sm" style={{ color: 'var(--first-nonary)' }}>
-              Učitavanje...
-            </li>
-          )}
-          {!ucitava && sortirano.length === 0 && (
-            <li className="flex flex-col items-center gap-2 px-5 py-10 text-center">
-              <CheckCircle2 className="h-8 w-8" style={{ color: 'var(--first-quinary)' }} />
-              <p className="font-medium text-sm" style={{ color: 'var(--first-octonary)' }}>
-                {aktivniFilter
-                  ? `Nema intervencija za filter "${aktivniFilter.oznaka}".`
-                  : 'Nemate aktivnih zadataka. Odlično!'}
-              </p>
-              {aktivniFilter && (
-                <button
-                  type="button"
-                  onClick={() => setAktivniKpi('sve')}
-                  className="mt-1 text-sm transition-opacity hover:opacity-70"
-                  style={{ color: 'var(--first-secondary)' }}
-                >
-                  Prikaži sve zadatke
-                </button>
-              )}
-            </li>
-          )}
-          {!ucitava && sortirano.map((z) => <IntervencijaKartica key={z.id} z={z} />)}
-        </ul>
+        {/* ── Desni stupac: Kalendar zauzetosti (sticky) ─────────────────── */}
+        <div className="lg:w-72 lg:flex-shrink-0 lg:sticky lg:top-4">
+          <MiniKalendar
+            intervencije={intervencije}
+            selectedDate={selectedDatum}
+            onSelectDate={(date) => {
+              setSelectedDatum(date);
+              if (date) setAktivniKpi('sve');
+            }}
+          />
+        </div>
       </div>
     </AppShell>
   );

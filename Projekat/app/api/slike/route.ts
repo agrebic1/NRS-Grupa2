@@ -10,6 +10,16 @@ const BUCKET           = 'intervencije-slike';
 const MAX_SIZE_BYTES   = 10 * 1024 * 1024; // 10 MB
 const DOZVOLJENI_TIPOVI = ['image/jpeg', 'image/png', 'image/webp'];
 
+/** SEC-T-3: Magic bytes provjera — sprječava upload preimenovanih non-image fajlova. */
+function provjeriMagicBytes(buffer: Buffer): 'image/jpeg' | 'image/png' | 'image/webp' | null {
+  if (buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[2] === 0xFF) return 'image/jpeg';
+  if (buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47) return 'image/png';
+  if (
+    buffer[8] === 0x57 && buffer[9] === 0x45 && buffer[10] === 0x42 && buffer[11] === 0x50
+  ) return 'image/webp';
+  return null;
+}
+
 /** GET /api/slike?zahtjev_id=X — lista slika za intervenciju */
 export async function GET(request: NextRequest) {
   try {
@@ -85,18 +95,26 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Nemate ovlaštenje za upload slika na ovoj intervenciji.' }, { status: 403 });
     }
 
-    // Ekstenzija iz MIME tipa
-    const ext = file.type.split('/')[1]?.replace('jpeg', 'jpg') ?? 'jpg';
-    const storagePath = `${zahtjev_id}/${randomUUID()}.${ext}`;
-
-    // Upload putem admin klijenta (zaobilazi storage RLS)
+    // SEC-T-3: pročitaj sadržaj i provjeri magic bytes (sprječava lažni Content-Type)
     const adminClient  = createAdminClient();
     const arrayBuffer  = await file.arrayBuffer();
     const buffer       = Buffer.from(arrayBuffer);
 
+    const stvarniTip = provjeriMagicBytes(buffer);
+    if (!stvarniTip) {
+      return NextResponse.json(
+        { error: 'Sadržaj fajla ne odgovara slici. Dozvoljeno: JPEG, PNG, WebP.' },
+        { status: 400 }
+      );
+    }
+
+    // Ekstenzija iz stvarnog MIME tipa (ne iz klijentskog)
+    const ext = stvarniTip.split('/')[1]?.replace('jpeg', 'jpg') ?? 'jpg';
+    const storagePath = `${zahtjev_id}/${randomUUID()}.${ext}`;
+
     const { error: uploadError } = await adminClient.storage
       .from(BUCKET)
-      .upload(storagePath, buffer, { contentType: file.type, upsert: false });
+      .upload(storagePath, buffer, { contentType: stvarniTip, upsert: false });
 
     if (uploadError) {
       return NextResponse.json({ error: `Storage greška: ${uploadError.message}` }, { status: 500 });

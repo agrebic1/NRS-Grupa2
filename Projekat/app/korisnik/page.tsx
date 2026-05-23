@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic';
+
 import { redirect } from 'next/navigation';
 import { AppShell } from '@/components/layout/AppShell';
 import {
@@ -8,7 +10,6 @@ import { createClient } from '@/lib/supabase/server';
 import { formatirajDatumPrikaz } from '@/lib/format/datumi';
 import { dodijeliKorisnickeBrojeveZahtjeva } from '@/lib/servisirane/korisnickiBrojZahtjeva';
 import { korisnickiDashboardStatus } from '@/lib/servisirane/statusZahtjeva';
-import { efektivniKorisnickiUrgencyScore } from '@/lib/servisirane/urgency';
 import { prviZakazaniTerminSlot } from '@/lib/servisirane/zahtjevPrikaz';
 import type { PreferredSchedule } from '@/domain/types/servisirane';
 
@@ -25,6 +26,7 @@ type KorisnikZahtjev = {
   final_priority: string | null;
   preferred_schedule: PreferredSchedule | null;
   dispecer_agreed_schedule: PreferredSchedule | null;
+  broj_ponovnih_ciklusa: number | null;
 };
 
 function izvuciPunoImeIzProfila(profil: unknown): string {
@@ -102,10 +104,6 @@ export default async function KorisnikPage() {
       naslov: (zahtjev.category ?? '').trim() || izvuciNaslov(zahtjev.description),
       status: korisnickiDashboardStatus(
         zahtjev.status,
-        efektivniKorisnickiUrgencyScore({
-          is_premium: Boolean(zahtjev.is_premium),
-          urgency_score: Number(zahtjev.urgency_score ?? 0),
-        }),
         zahtjev.final_priority,
       ),
       datum: formatirajDatumPrikaz(zahtjev.created_at, '-'),
@@ -114,6 +112,7 @@ export default async function KorisnikPage() {
       dolazakVrijemeOpis,
       is_premium: Boolean(zahtjev.is_premium),
       urgency_score: Number(zahtjev.urgency_score ?? 0),
+      broj_ponovnih_ciklusa: Number(zahtjev.broj_ponovnih_ciklusa ?? 0),
     };
   });
 

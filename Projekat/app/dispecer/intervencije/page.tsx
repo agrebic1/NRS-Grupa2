@@ -1,7 +1,8 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { useRouter, useSearchParams } from 'next/navigation';
 import {
   AlertTriangle, CheckCircle2, Clock, MapPin, User,
   RefreshCw, Calendar, Zap, Truck, ChevronRight, ArrowLeft,
@@ -234,13 +235,40 @@ function IntervencijaKartica({ z }: { z: IntervencijaRed }) {
   );
 }
 
+const URL_FILTER_MAP: Record<string, KpiFilter> = {
+  sla:         'sla',
+  hitno:       'hitno',
+  zavrseni:    'zavrseno',
+  u_radu:      'u_radu',
+  u_izvrsenju: 'u_izvrsenju',
+  dodijeljeno: 'dodijeljeno',
+  kasni:       'kasni',
+};
+
+const KPI_URL_PARAM: Partial<Record<KpiFilter, string>> = {
+  sla:         'sla',
+  hitno:       'hitno',
+  zavrseno:    'zavrseni',
+  u_radu:      'u_radu',
+  u_izvrsenju: 'u_izvrsenju',
+  dodijeljeno: 'dodijeljeno',
+  kasni:       'kasni',
+};
+
 // ─── Stranica ─────────────────────────────────────────────────────────────────
 
-export default function DispecerIntervencijePage() {
+const STRANICA_VELICINA = 20;
+
+function DispecerIntervencijePageContent() {
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const filterIzUrla = URL_FILTER_MAP[searchParams.get('filter') ?? ''] ?? 'sve';
+
   const [intervencije, setIntervencije] = useState<IntervencijaRed[]>([]);
   const [ucitava,      setUcitava]      = useState(true);
   const [greska,       setGreska]       = useState<string | null>(null);
-  const [aktivniKpi,   setAktivniKpi]   = useState<KpiFilter>('sve');
+  const [aktivniKpi,   setAktivniKpi]   = useState<KpiFilter>(filterIzUrla);
+  const [stranica,     setStranica]     = useState(1);
 
   const ucitaj = useCallback(async (tiho = false) => {
     if (!tiho) { setUcitava(true); setGreska(null); }
@@ -288,6 +316,11 @@ export default function DispecerIntervencijePage() {
     return (b.urgency_score ?? 0) - (a.urgency_score ?? 0);
   }), [filtriran]);
 
+  const ukupnoStranica = Math.max(1, Math.ceil(sortirano.length / STRANICA_VELICINA));
+  const trenutnaStranica = Math.min(stranica, ukupnoStranica);
+  const stranicaPocetak = (trenutnaStranica - 1) * STRANICA_VELICINA;
+  const sortiranoNaStranici = sortirano.slice(stranicaPocetak, stranicaPocetak + STRANICA_VELICINA);
+
   const kpiKartice = [
     { key: 'sve'         as KpiFilter, oznaka: 'Sve aktivne',    v: brSve,         boja: 'var(--first-secondary)',    Ikona: CheckCircle2  },
     { key: 'hitno'       as KpiFilter, oznaka: 'Hitne',          v: brHitnih,      boja: '#DC2626',                   Ikona: Zap           },
@@ -300,6 +333,17 @@ export default function DispecerIntervencijePage() {
   ];
 
   const aktivniLabel = kpiKartice.find((k) => k.key === aktivniKpi)?.oznaka ?? 'Sve aktivne';
+
+  const promijeniFilter = (kpi: KpiFilter) => {
+    const noviKpi = aktivniKpi === kpi ? 'sve' : kpi;
+    setAktivniKpi(noviKpi);
+    setStranica(1);
+    const param = KPI_URL_PARAM[noviKpi];
+    router.replace(
+      param ? `/dispecer/intervencije?filter=${param}` : '/dispecer/intervencije',
+      { scroll: false },
+    );
+  };
 
   return (
     <AppShell uloga="dispecer">
@@ -349,7 +393,7 @@ export default function DispecerIntervencijePage() {
             boja={boja}
             Ikona={Ikona}
             aktivan={aktivniKpi === key}
-            onClick={() => setAktivniKpi(aktivniKpi === key ? 'sve' : key)}
+            onClick={() => promijeniFilter(key)}
           />
         ))}
       </div>
@@ -366,7 +410,7 @@ export default function DispecerIntervencijePage() {
           </span>
           <button
             type="button"
-            onClick={() => setAktivniKpi('sve')}
+            onClick={() => promijeniFilter('sve')}
             className="text-xs transition-opacity hover:opacity-70"
             style={{ color: 'var(--first-nonary)' }}
           >
@@ -422,7 +466,7 @@ export default function DispecerIntervencijePage() {
               {aktivniKpi !== 'sve' && (
                 <button
                   type="button"
-                  onClick={() => setAktivniKpi('sve')}
+                  onClick={() => promijeniFilter('sve')}
                   className="text-sm font-medium transition-opacity hover:opacity-70"
                   style={{ color: 'var(--first-secondary)' }}
                 >
@@ -432,11 +476,57 @@ export default function DispecerIntervencijePage() {
             </li>
           )}
 
-          {!ucitava && sortirano.map((z) => (
+          {!ucitava && sortiranoNaStranici.map((z) => (
             <IntervencijaKartica key={z.id} z={z} />
           ))}
         </ul>
+
+        {/* Paginacija */}
+        {!ucitava && ukupnoStranica > 1 && (
+          <div
+            className="flex items-center justify-between px-5 py-3"
+            style={{ borderTop: '1px solid rgb(var(--first-quaternary-rgb)/0.28)' }}
+          >
+            <span className="text-xs" style={{ color: 'var(--first-nonary)' }}>
+              Stranica {trenutnaStranica} od {ukupnoStranica} ({sortirano.length} ukupno)
+            </span>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                disabled={trenutnaStranica <= 1}
+                onClick={() => setStranica((p) => Math.max(1, p - 1))}
+                className="rounded-lg px-3 py-1.5 text-xs font-medium transition-all disabled:opacity-40"
+                style={{ backgroundColor: 'rgb(var(--first-quinary-rgb)/0.4)', color: 'var(--first-octonary)' }}
+              >
+                ← Preth.
+              </button>
+              <button
+                type="button"
+                disabled={trenutnaStranica >= ukupnoStranica}
+                onClick={() => setStranica((p) => Math.min(ukupnoStranica, p + 1))}
+                className="rounded-lg px-3 py-1.5 text-xs font-medium transition-all disabled:opacity-40"
+                style={{ backgroundColor: 'rgb(var(--first-quinary-rgb)/0.4)', color: 'var(--first-octonary)' }}
+              >
+                Sljedeća →
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </AppShell>
+  );
+}
+
+export default function DispecerIntervencijePage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-[50vh] items-center justify-center p-8">
+          <p className="text-sm" style={{ color: 'var(--first-nonary)' }}>Učitavanje...</p>
+        </div>
+      }
+    >
+      <DispecerIntervencijePageContent />
+    </Suspense>
   );
 }

@@ -3,7 +3,7 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ClipboardList, ChevronRight,
-  RefreshCw, XCircle, BellOff,
+  RefreshCw, XCircle, Bell,
   AlertTriangle, CheckCircle2, UserCheck, Zap, Inbox, Clock,
 } from 'lucide-react';
 import { getSlaStatus } from '@/lib/servisirane/slaPravila';
@@ -376,6 +376,13 @@ function DispecerPageContent() {
             <p className="mt-1 text-sm" style={{ color: 'var(--first-nonary)' }}>
               Kada korisnik pošalje zahtjev, pojaviće se ovdje.
             </p>
+            <Link
+              href="/dispecer/zahtjevi"
+              className="mt-3 inline-flex items-center gap-1 text-sm font-medium transition-opacity hover:opacity-70"
+              style={{ color: 'var(--first-secondary)' }}
+            >
+              Pregled svih zahtjeva <ChevronRight className="h-3.5 w-3.5" />
+            </Link>
           </div>
         )}
         {!ucitava && zahtjevi.length > 0 && zahtjeviCekajuObradu.length === 0 && (
@@ -384,8 +391,15 @@ function DispecerPageContent() {
               Inbox je prazan
             </p>
             <p className="mt-1 text-sm" style={{ color: 'var(--first-nonary)' }}>
-              Nema zahtjeva koji čekaju prioritet ili čarobnjak. Ostali aktivni zahtjevi: lista zahtjeva.
+              Nema zahtjeva koji čekaju prioritet ili čarobnjak.
             </p>
+            <Link
+              href="/dispecer/zahtjevi"
+              className="mt-3 inline-flex items-center gap-1 text-sm font-medium transition-opacity hover:opacity-70"
+              style={{ color: 'var(--first-secondary)' }}
+            >
+              Pogledaj aktivne zahtjeve <ChevronRight className="h-3.5 w-3.5" />
+            </Link>
           </div>
         )}
         {!ucitava && zahtjeviCekajuObradu.length > 0 && (
@@ -595,7 +609,7 @@ function DispecerPageContent() {
             className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg"
             style={{ backgroundColor: `${toast.boja}15` }}
           >
-            <BellOff className="h-4 w-4" style={{ color: toast.boja }} />
+            <Bell className="h-4 w-4" style={{ color: toast.boja }} />
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-xs font-bold uppercase tracking-wide" style={{ color: toast.boja }}>

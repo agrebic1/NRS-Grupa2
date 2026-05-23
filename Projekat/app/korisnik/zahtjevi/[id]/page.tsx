@@ -418,6 +418,13 @@ export default function ZahtjevDetaljPage() {
                   <InlineNotice ton="danger">
                     <p className="font-semibold">Razlog odbijanja</p>
                     <p className="mt-1 leading-relaxed">{zahtjev.rejection_reason!.trim()}</p>
+                    <Link
+                      href="/korisnik/zahtjevi/novi"
+                      className="mt-3 inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors"
+                      style={{ backgroundColor: 'rgba(220,38,38,0.12)', color: '#B91C1C', border: '1px solid rgba(220,38,38,0.25)' }}
+                    >
+                      Pošalji novi zahtjev
+                    </Link>
                   </InlineNotice>
                 ) : null}
 

@@ -40,10 +40,11 @@ export function kategorizirajHitnost(score: number): NivoHitnosti {
 }
 
 const OZNAKA_HITNOSTI_ZA_KORISNIKA: Record<NivoHitnosti, string> = {
-  NISKO: 'Niska',
-  SREDNJE: 'Srednja',
-  VISOKO: 'Visoka',
+  NISKO:    'Niska',
+  SREDNJE:  'Srednja',
+  VISOKO:   'Visoka',
   KRITIČNO: 'Hitno',
+  HITNO:    'Hitno',
 };
 
 /** Korisnički čitljiva hitnost (bez enum vrijednosti i broja bodova). */
@@ -61,15 +62,16 @@ export function oznakaKorisnickeHitnostiTriRazine(score: number): 'Visoka' | 'Sr
 }
 
 /**
- * Tekst bedža na korisničkoj listi dok zahtjev čeka dispečera (umjesto „Novi“).
- * Tri razine kao inbox — usklađeno s {@link oznakaKorisnickeHitnostiTriRazine}.
+ * Tekst bedža na korisničkoj listi dok zahtjev čeka dispečera (umjesto „Novi”).
+ * Prefiksom „Vaša procjena:” jasno označava da je ovo korisnikova samoprocjena,
+ * a ne operativni prioritet dispečera (final_priority).
  */
 export function oznakaInboxHitnostiCekaObradu(zahtjev: {
   is_premium: boolean;
   urgency_score: number;
 }): string {
   const tri = oznakaKorisnickeHitnostiTriRazine(efektivniKorisnickiUrgencyScore(zahtjev));
-  return `${tri} hitnost (čeka obradu)`;
+  return `Vaša procjena: ${tri.toLowerCase()}`;
 }
 
 /** Tri inbox grupe na kontrolnoj tabli — iz korisničke procjene (upitnik + premium), ne iz `final_priority`. */
