@@ -149,7 +149,7 @@ export function SuccessModal({ onZatvori }: SuccessModalProps) {
             Vaš zahtjev je primljen i čeka pregled dispečera.
           </p>
 
-          {/* Žuta faza — objašnjenje */}
+          {/* Žuta faza - objašnjenje */}
           <div
             className="mb-5 rounded-2xl border p-4"
             style={{

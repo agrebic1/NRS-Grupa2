@@ -1,15 +1,26 @@
+import { randomUUID } from 'crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { v4 as uuidv4 } from 'uuid';
+import { assertDispatcherAccess } from '@/lib/servisirane/dispecerPristup';
 
 export const dynamic = 'force-dynamic';
 
 const BUCKET           = 'intervencije-slike';
-const MAX_SIZE_BYTES   = 5 * 1024 * 1024; // 5 MB
-const DOZVOLJENI_TIPOVI = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+const MAX_SIZE_BYTES   = 10 * 1024 * 1024; // 10 MB
+const DOZVOLJENI_TIPOVI = ['image/jpeg', 'image/png', 'image/webp'];
 
-/** GET /api/slike?zahtjev_id=X — lista slika za intervenciju */
+/** SEC-T-3: Magic bytes provjera - sprječava upload preimenovanih non-image fajlova. */
+function provjeriMagicBytes(buffer: Buffer): 'image/jpeg' | 'image/png' | 'image/webp' | null {
+  if (buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[2] === 0xFF) return 'image/jpeg';
+  if (buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47) return 'image/png';
+  if (
+    buffer[8] === 0x57 && buffer[9] === 0x45 && buffer[10] === 0x42 && buffer[11] === 0x50
+  ) return 'image/webp';
+  return null;
+}
+
+/** GET /api/slike?zahtjev_id=X - lista slika za intervenciju */
 export async function GET(request: NextRequest) {
   try {
     const supabase = createClient();
@@ -38,7 +49,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-/** POST /api/slike — upload slike za intervenciju (multipart/form-data) */
+/** POST /api/slike - upload slike za intervenciju (multipart/form-data) */
 export async function POST(request: NextRequest) {
   try {
     const supabase = createClient();
@@ -59,24 +70,51 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Neispravan zahtjev_id.' }, { status: 400 });
     }
     if (!DOZVOLJENI_TIPOVI.includes(file.type)) {
-      return NextResponse.json({ error: 'Tip fajla nije podržan. Dozvoljeno: JPEG, PNG, WebP, GIF.' }, { status: 400 });
+      return NextResponse.json({ error: 'Tip fajla nije podržan. Dozvoljeno: JPEG, PNG, WebP.' }, { status: 400 });
     }
     if (file.size > MAX_SIZE_BYTES) {
-      return NextResponse.json({ error: 'Fajl je prevelik. Maksimalna veličina je 5 MB.' }, { status: 400 });
+      return NextResponse.json({ error: 'Fajl je prevelik. Maksimalna veličina je 10 MB.' }, { status: 400 });
     }
 
-    // Ekstenzija iz MIME tipa
-    const ext = file.type.split('/')[1]?.replace('jpeg', 'jpg') ?? 'jpg';
-    const storagePath = `${zahtjev_id}/${uuidv4()}.${ext}`;
+    // Provjera vlasništva: mora biti dodijeljeni serviser ili dispečer
+    const db = supabase as any;
+    const { data: zahtjev } = await db
+      .from('service_requests')
+      .select('serviser_dodijeljen_id')
+      .eq('id', zahtjev_id)
+      .single();
 
-    // Upload putem admin klijenta (zaobilazi storage RLS)
+    if (!zahtjev) {
+      return NextResponse.json({ error: 'Servisni zahtjev nije pronađen.' }, { status: 404 });
+    }
+
+    const jeServiser = zahtjev.serviser_dodijeljen_id === user.id;
+    const jeDispecer = await assertDispatcherAccess(supabase, user.id).catch(() => false);
+
+    if (!jeServiser && !jeDispecer) {
+      return NextResponse.json({ error: 'Nemate ovlaštenje za upload slika na ovoj intervenciji.' }, { status: 403 });
+    }
+
+    // SEC-T-3: pročitaj sadržaj i provjeri magic bytes (sprječava lažni Content-Type)
     const adminClient  = createAdminClient();
     const arrayBuffer  = await file.arrayBuffer();
     const buffer       = Buffer.from(arrayBuffer);
 
+    const stvarniTip = provjeriMagicBytes(buffer);
+    if (!stvarniTip) {
+      return NextResponse.json(
+        { error: 'Sadržaj fajla ne odgovara slici. Dozvoljeno: JPEG, PNG, WebP.' },
+        { status: 400 }
+      );
+    }
+
+    // Ekstenzija iz stvarnog MIME tipa (ne iz klijentskog)
+    const ext = stvarniTip.split('/')[1]?.replace('jpeg', 'jpg') ?? 'jpg';
+    const storagePath = `${zahtjev_id}/${randomUUID()}.${ext}`;
+
     const { error: uploadError } = await adminClient.storage
       .from(BUCKET)
-      .upload(storagePath, buffer, { contentType: file.type, upsert: false });
+      .upload(storagePath, buffer, { contentType: stvarniTip, upsert: false });
 
     if (uploadError) {
       return NextResponse.json({ error: `Storage greška: ${uploadError.message}` }, { status: 500 });
@@ -86,7 +124,6 @@ export async function POST(request: NextRequest) {
     const image_url = urlData.publicUrl;
 
     // Sačuvaj u bazu
-    const db = supabase as any;
     const { data: slika, error: dbError } = await db
       .from('slike_intervencija')
       .insert({
@@ -124,7 +161,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-/** DELETE /api/slike?id=X — brisanje slike */
+/** DELETE /api/slike?id=X - brisanje slike */
 export async function DELETE(request: NextRequest) {
   try {
     const supabase = createClient();

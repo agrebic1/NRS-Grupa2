@@ -58,7 +58,7 @@ export default function AdminServiseriPage() {
             Serviseri
           </h1>
           <p className="mt-1 text-sm" style={{ color: 'var(--first-nonary)' }}>
-            Pregled servisera kroz grid kartica sa statusom i osnovnim podacima.
+            Pregled servisera kroz grid kartice sa statusom i osnovnim podacima.
           </p>
         </div>
         <Button
@@ -67,10 +67,10 @@ export default function AdminServiseriPage() {
           size="md"
           onClick={ucitajKorisnike}
           isLoading={ucitava}
-          loadingText="Ucitavanje..."
+          loadingText="Učitavanje..."
         >
           <RefreshCw className="h-4 w-4" />
-          Osvjezi
+          Osvježi
         </Button>
       </div>
 
@@ -196,7 +196,7 @@ export default function AdminServiseriPage() {
 
       {ucitava && (
         <p className="py-8 text-center text-sm" style={{ color: 'var(--first-nonary)' }}>
-          Ucitavanje servisera...
+          Učitavanje servisera...
         </p>
       )}
       {!ucitava && serviseri.length === 0 && !greska && (

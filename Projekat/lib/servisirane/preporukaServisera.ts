@@ -4,7 +4,7 @@ import type { ServiserZaDodjelu } from '@/domain/types/servisirane';
 
 export interface PreporukaServisera {
   serviser:     ServiserZaDodjelu;
-  score:        number;      // 0–100 (weighted composite)
+  score:        number;      // 0-100 (weighted composite)
   razlozi:      string[];    // human-readable reasons shown in UI
   jePreporucen: boolean;     // true only for the top-ranked entry
 }
@@ -15,7 +15,7 @@ export interface PreporukaServisera {
 // Opterećenje (active-task inverse):  35 %
 // Verifikacija:                       25 %
 //
-// Proximity & experience are omitted — no location/rating data in current model.
+// Proximity & experience are omitted - no location/rating data in current model.
 
 const W_STRUCNOST    = 0.40;
 const W_OPTERECENJE  = 0.35;

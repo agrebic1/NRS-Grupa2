@@ -1,27 +1,27 @@
-// ─── Statusi zahtjeva — životni ciklus ───────────────────────────────────────
+// ─── Statusi zahtjeva - životni ciklus ───────────────────────────────────────
 
 export type StatusZahtjeva =
-  | 'pending_review' // Novi — prije dispečerskog čarobnjaka
-  | 'na_cekanju'    // Novi — korisnik može uređivati do ulaska u čarobnjak
-  | 'in_review'     // U čarobnjaku — dispečer u koracima Pregled … Potvrda
-  | 'potvrdeno'     // Potvrđeno u čarobnjaku — prioritet i termin
-  | 'dodijeljeno'   // Dodijeljen serviser
-  | 'u_radu'        // Serviser prihvatio — na putu
-  | 'u_izvrsenju'   // Serviser na terenu
-  | 'zavrseno'      // Operativno završeno (dispečer zatvorio)
-  | 'zatvoreno'     // Formalno zatvoreno — read-only, audit finaliziran
-  | 'otkazano'      // Korisnik otkazao
+  | 'pending_review' // Novi - sinonim za na_cekanju; oba znače isti početni status
+  | 'na_cekanju'    // Novi - korisnik može uređivati; kanonski naziv za oba
+  | 'in_review'     // Dispečerski čarobnjak aktivan (faze: prioritet → termin → serviser → potvrda)
+  | 'potvrdeno'     // Čeka dodjelu/re-dodjelu servisera (serviser_dodijeljen_id može biti null)
+  | 'dodijeljeno'   // Serviser dodijeljen - čeka prihvatanje
+  | 'u_radu'        // Serviser prihvatio - na putu ka lokaciji
+  | 'u_izvrsenju'   // Serviser na terenu - rad u toku
+  | 'zavrseno'      // Operativno završeno - čeka formalno zatvaranje dispečera
+  | 'zatvoreno'     // Formalno zatvoreno - read-only, audit finaliziran
+  | 'otkazano'      // Korisnik otkazao (cancel_reason + cancelled_at)
   | 'odbijeno';     // Dispečer odbio (rejection_reason obavezan)
 
-export type NivoHitnosti    = 'NISKO' | 'SREDNJE' | 'VISOKO' | 'KRITIČNO';
+export type NivoHitnosti    = 'NISKO' | 'SREDNJE' | 'VISOKO' | 'KRITIČNO' | 'HITNO';
 export type StatusAplikacije = 'na_cekanju' | 'odobreno' | 'odbijeno';
 export type TipUsluge        = 'serviser' | 'dispecer';
 export type StepenObrazovanja = 'SSS' | 'VŠS' | 'VSS' | 'Certifikovani majstor';
 
 export type VremenslotTip =
-  | 'jutro'       // 08:00 – 12:00  🟠 Narandžasta
-  | 'dan'         // 12:00 – 16:00  🟡 Žuta
-  | 'vece'        // 16:00 – 20:00  🔵 Plava
+  | 'jutro'       // 08:00 - 12:00  🟠 Narandžasta
+  | 'dan'         // 12:00 - 16:00  🟡 Žuta
+  | 'vece'        // 16:00 - 20:00  🔵 Plava
   | 'cijeli_dan'  // Po dogovoru    🟢 Zelena
   | 'custom';     // Prilagođeno    🟣 Ljubičasta
 
@@ -35,7 +35,7 @@ export interface TriageOdgovori {
   obuhvat:        boolean;
 }
 
-// ─── Termin slot — V5.0 range-based scheduling ───────────────────────────────
+// ─── Termin slot - V5.0 range-based scheduling ───────────────────────────────
 
 export interface TerminSlot {
   date: string;  // 'YYYY-MM-DD'
@@ -47,7 +47,7 @@ export interface TerminSlot {
 
 export interface PreferredSchedule {
   termini: TerminSlot[];
-  /** Korisnik nema preferenciju — dispečer dogovara termin. */
+  /** Korisnik nema preferenciju - dispečer dogovara termin. */
   no_preferred_time?: boolean;
   /** Oznaka brzog izbora (npr. Jutro, Cijeli dan) ili prilagođeno. */
   preferred_time_label?: string | null;
@@ -92,7 +92,7 @@ export interface ServisniZahtjev {
   cancel_reason:        string | null;
   /** Postavljeno pri otkazivanju od strane korisnika. */
   cancelled_at:         string | null;
-  /** `true` kad je serviser potvrdio dogovoreni termin — u pregledu zahtjeva prelazi iz „Novi“ u „U obradi“. */
+  /** `true` kad je serviser potvrdio dogovoreni termin - u pregledu zahtjeva prelazi iz „Novi“ u „U obradi“. */
   is_verified_assigned: boolean;
   /**
    * Dogovoreni termin u čarobnjaku (dispečer); NULL dok termin nije potvrđen u koraku „Termin i serviser“.
@@ -119,11 +119,21 @@ export interface ServisniZahtjev {
   closed_by?:                string | null;
   /** Napomena dispečera pri formalnom zatvaranju. */
   closure_note?:             string | null;
+  /** US-47: broj operativnih ponovnih dodjela / nije riješeno. */
+  broj_ponovnih_ciklusa?:    number;
+  /** US-45: zadnja SLA eskalacija. */
+  sla_eskalacija_at?:        string | null;
   created_at:           string;
   updated_at:           string;
 }
 
 // ─── Sprint 8: Evidencija rada ───────────────────────────────────────────────
+
+export interface MaterijalStavka {
+  naziv:    string;
+  kolicina: number;
+  jedinica: string;
+}
 
 export interface WorkEvidence {
   id:               number;
@@ -132,6 +142,7 @@ export interface WorkEvidence {
   opis_rada:        string;
   trajanje_minuta:  number | null;
   materijal:        string | null;
+  stavke_materijala?: MaterijalStavka[];
   napomene:         string | null;
   created_at:       string;
 }
@@ -149,7 +160,11 @@ export type TipAktivnosti =
   | 'tim_dodjela'
   | 'tim_uklanjanje'
   | 'zatvaranje'
-  | 'konflikt_override';
+  | 'konflikt_override'
+  | 'nije_rijeseno'
+  | 'promjena_izvrsioca'
+  | 'vracanje_na_dodjelu'
+  | 'sla_eskalacija';
 
 export interface InterventionActivity {
   id:         number;
@@ -158,6 +173,10 @@ export interface InterventionActivity {
   tip:        TipAktivnosti;
   sadrzaj:    string;
   metadata:   Record<string, unknown> | null;
+  old_value:  string | null;
+  new_value:  string | null;
+  actor_role: string | null;
+  razlog:     string | null;
   created_at: string;
   autor?: {
     ime:     string;
@@ -251,7 +270,8 @@ export type TipNotifikacije =
   // Admin
   | 'promjena_uloge'
   | 'promjena_statusa_naloga'
-  | 'sistemska_obavijest';
+  | 'sistemska_obavijest'
+  | 'sla_eskalacija';
 
 export interface Notifikacija {
   id:                    number;

@@ -5,7 +5,7 @@ export const dynamic = 'force-dynamic';
 
 type RouteParams = { id: string } | Promise<{ id: string }>;
 
-/** PATCH /api/notifikacije/[id] — označi jednu notifikaciju kao pročitanu */
+/** PATCH /api/notifikacije/[id] - označi jednu notifikaciju kao pročitanu */
 export async function PATCH(
   _req: Request,
   { params }: { params: RouteParams }

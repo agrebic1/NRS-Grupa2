@@ -232,7 +232,7 @@ export function notifServiserNaTerenu(
     uloga_korisnika: 'Dispečer',
     tip:             'promjena_statusa',
     naslov:          'Serviser stigao na lokaciju',
-    poruka:          `${ime_servisera} je stigao na lokaciju — intervencija #${zahtjev_id} u toku.`,
+    poruka:          `${ime_servisera} je stigao na lokaciju - intervencija #${zahtjev_id} u toku.`,
     zahtjev_id,
   });
 }
@@ -314,7 +314,7 @@ export function notifKorisnikusServiserNaTerenu(
     uloga_korisnika: 'Korisnik usluge',
     tip:             'promjena_statusa',
     naslov:          'Serviser na lokaciji',
-    poruka:          `${ime_servisera} je stigao na vašu lokaciju — intervencija #${zahtjev_id} je u toku.`,
+    poruka:          `${ime_servisera} je stigao na vašu lokaciju - intervencija #${zahtjev_id} je u toku.`,
     zahtjev_id,
   });
 }
@@ -382,6 +382,58 @@ export function notifAdminPromjenaStatusaNaloga(
     poruka:               `Korisnički nalog je ${novi_status}.`,
     povezani_entitet_tip: 'user',
     povezani_entitet_id:  ciljni_id,
+  });
+}
+
+// ─── Sprint 9: Nove notifikacije ─────────────────────────────────────────────
+
+export function notifPromjenaIzvrsioca(
+  db:              AnyDB,
+  noviServiser_id: string,
+  zahtjev_id:      number,
+  imeStarogServs:  string
+) {
+  return kreirajNotifikaciju(db, {
+    korisnik_id:     noviServiser_id,
+    uloga_korisnika: 'Serviser',
+    tip:             'dodjela_intervencije',
+    naslov:          'Dodijeljeni ste na intervenciju',
+    poruka:          `Preuzimate intervenciju #${zahtjev_id} od servisera ${imeStarogServs}.`,
+    zahtjev_id,
+  });
+}
+
+export function notifVratanjaNaPonovnuDodjelu(
+  db:            AnyDB,
+  dispecer_id:   string,
+  zahtjev_id:    number,
+  imeServisera:  string,
+  razlog:        string
+) {
+  return kreirajNotifikaciju(db, {
+    korisnik_id:     dispecer_id,
+    uloga_korisnika: 'Dispečer',
+    tip:             'odbijanje_zadatka',
+    naslov:          'Serviser vratio zadatak na ponovnu dodjelu',
+    poruka:          `${imeServisera} je vratio intervenciju #${zahtjev_id} na ponovnu dodjelu. Razlog: ${razlog}`,
+    zahtjev_id,
+  });
+}
+
+export function notifNijeRijesen(
+  db:            AnyDB,
+  dispecer_id:   string,
+  zahtjev_id:    number,
+  imeServisera:  string,
+  razlog:        string
+) {
+  return kreirajNotifikaciju(db, {
+    korisnik_id:     dispecer_id,
+    uloga_korisnika: 'Dispečer',
+    tip:             'odbijanje_zadatka',
+    naslov:          'Intervencija označena kao nije riješena',
+    poruka:          `${imeServisera} je označio intervenciju #${zahtjev_id} kao nije riješenu. Razlog: ${razlog}`,
+    zahtjev_id,
   });
 }
 

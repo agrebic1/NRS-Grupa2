@@ -5,11 +5,13 @@ import { assertDispatcherAccess } from '@/lib/servisirane/dispecerPristup';
 import { korisnickiBrojZahtjevaZaId } from '@/lib/servisirane/korisnickiBrojZahtjeva';
 import { premiumZahtijevaObrazlozenjeSmanjenjaPrioriteta } from '@/lib/servisirane/operativniPrioritet';
 import { dispecerSmijeMijenjatiOperativniPrioritet } from '@/lib/servisirane/statusZahtjeva';
-import { dodijelijeSchema } from '@/lib/validations/servisirane';
+import { dodijelijeSchema, razlogOperativniSchema } from '@/lib/validations/servisirane';
 import { provjeriKonfliktServiseraNaTerminu } from '@/lib/servisirane/konfliktiTermina';
 import {
   notifDodjelaIntervencije,
   notifZatvaranjeIntervencije,
+  notifUklanjanjeServisera,
+  notifPromjenaIzvrsioca,
   notifKorisnikusServiserDodijeljen,
   notifKorisnikusIntervencijaZavrsena,
   notifKorisnikusIntervencijaZatvorena,
@@ -17,6 +19,7 @@ import {
   notifNovaNapomenaServiser,
 } from '@/lib/servisirane/notifikacijeHelper';
 import { z } from 'zod';
+import { mapAktivnostiResponse, ucitajAktivnostiSaAutorom } from '@/lib/servisirane/aktivnostiQuery';
 
 export const dynamic = 'force-dynamic';
 
@@ -52,6 +55,12 @@ const zatvoriFormalnoSchema = z.object({
   closure_note: z.string().max(1000).optional().nullable(),
 });
 
+const promijeniIzvrsiocaSchema = z.object({
+  action:           z.literal('promijeni_izvrsioca'),
+  novi_serviser_id: z.string().uuid('Neispravan ID servisera'),
+  razlog:           razlogOperativniSchema,
+});
+
 const actionSchema = z.discriminatedUnion('action', [
   potvrdiSchema,
   odbijSchema,
@@ -60,11 +69,12 @@ const actionSchema = z.discriminatedUnion('action', [
   zatvorSchema,
   napomenaDispeSchema,
   zatvoriFormalnoSchema,
+  promijeniIzvrsiocaSchema,
 ]);
 /** Statusi u kojima dispečer može potvrditi/odbiti (MVP: uključuje in_review ako je u inboxu). */
 const PENDING_STATUSES = new Set(['na_cekanju', 'pending_review', 'in_review']);
 
-/** Kad dispečer prvi put snimi operativni prioritet, zahtjev prelazi u čarobnjak — korisnik više ne smije uređivati. */
+/** Kad dispečer prvi put snimi operativni prioritet, zahtjev prelazi u čarobnjak - korisnik više ne smije uređivati. */
 const STATUS_PRE_CAROBNJAKA = new Set(['na_cekanju', 'pending_review']);
 type RouteParams = { id: string } | Promise<{ id: string }>;
 
@@ -145,12 +155,7 @@ export async function GET(
       if (sp) serviserProfil = { id: sp.id_osobe, ime: sp.ime, prezime: sp.prezime, broj_telefona: sp.broj_telefona };
     }
 
-    // Aktivnosti intervencije
-    const { data: aktivnosti } = await db
-      .from('intervention_activities')
-      .select('*, autor:osoba!autor_id(ime, prezime, uloga)')
-      .eq('zahtjev_id', requestId)
-      .order('created_at', { ascending: true });
+    const aktivnosti = await ucitajAktivnostiSaAutorom(db, requestId);
 
     // Evidencija rada
     const { data: evidencije } = await db
@@ -166,10 +171,7 @@ export async function GET(
         serviser:                 serviserProfil,
         korisnicki_broj_zahtjeva: korisnicki_broj_zahtjeva ?? undefined,
       },
-      aktivnosti: (aktivnosti ?? []).map((a: Record<string, unknown>) => ({
-        ...a,
-        autor: Array.isArray(a.autor) ? a.autor[0] : a.autor,
-      })),
+      aktivnosti: mapAktivnostiResponse(aktivnosti),
       evidencije: evidencije  ?? [],
     });
   } catch (err) {
@@ -220,7 +222,7 @@ export async function PATCH(
 
     const { data: zahtjev } = await db
       .from('service_requests')
-      .select('status, is_premium, closed_at')
+      .select('status, is_premium, closed_at, serviser_dodijeljen_id, final_priority')
       .eq('id', requestId)
       .single();
 
@@ -229,6 +231,64 @@ export async function PATCH(
     }
 
     const podaci = rezultat.data;
+
+    // ── US-28: Promjena izvršioca ─────────────────────────────────────────────
+    if (podaci.action === 'promijeni_izvrsioca') {
+      const DOZVOLJENI_STATUSI = new Set(['dodijeljeno', 'u_radu', 'u_izvrsenju']);
+      if (!DOZVOLJENI_STATUSI.has(zahtjev.status)) {
+        return NextResponse.json(
+          { error: 'Promjena izvršioca moguća je samo za aktivne intervencije (dodijeljeno, u_radu, u_izvrsenju).' },
+          { status: 422 }
+        );
+      }
+
+      const stariServIserId = zahtjev.serviser_dodijeljen_id as string | null;
+
+      // Provjeri da novi serviser postoji
+      const { data: noviServiser } = await db
+        .from('osoba')
+        .select('ime, prezime')
+        .eq('id_osobe', podaci.novi_serviser_id)
+        .maybeSingle();
+      if (!noviServiser) {
+        return NextResponse.json({ error: 'Novi serviser nije pronađen.' }, { status: 404 });
+      }
+
+      const { error: updErr } = await db
+        .from('service_requests')
+        .update({ serviser_dodijeljen_id: podaci.novi_serviser_id })
+        .eq('id', requestId);
+      if (updErr) return NextResponse.json({ error: updErr.message }, { status: 500 });
+
+      // Audit zapis sa old/new vrijednostima
+      await db.from('intervention_activities').insert({
+        zahtjev_id: requestId,
+        autor_id:   user.id,
+        tip:        'promjena_izvrsioca',
+        sadrzaj:    `Dispečer promijenio izvršioca. Razlog: ${podaci.razlog}`,
+        old_value:  stariServIserId,
+        new_value:  podaci.novi_serviser_id,
+        actor_role: 'dispecer',
+        razlog:     podaci.razlog,
+        metadata:   { iz_servisera: stariServIserId, na_servisera: podaci.novi_serviser_id },
+      });
+
+      // Notifikacija novom serviseru
+      let imeStarogServs = 'prethodnog servisera';
+      if (stariServIserId) {
+        const { data: stariOsoba } = await db
+          .from('osoba').select('ime, prezime').eq('id_osobe', stariServIserId).maybeSingle();
+        if (stariOsoba) imeStarogServs = `${stariOsoba.ime} ${stariOsoba.prezime}`;
+      }
+      await notifPromjenaIzvrsioca(db, podaci.novi_serviser_id, requestId, imeStarogServs);
+
+      // Notifikacija starom serviseru (uklanjanje)
+      if (stariServIserId && stariServIserId !== podaci.novi_serviser_id) {
+        await notifUklanjanjeServisera(db, stariServIserId, requestId);
+      }
+
+      return NextResponse.json({ success: true, novi_serviser_id: podaci.novi_serviser_id });
+    }
 
     if (podaci.action === 'promijeni_prioritet') {
       if (!dispecerSmijeMijenjatiOperativniPrioritet(zahtjev.status)) {
@@ -343,13 +403,16 @@ export async function PATCH(
         autor_id:   user.id,
         tip:        'dodjela',
         sadrzaj:    'Dispečer dodijelio intervenciju serviseru.',
+        old_value:  zahtjev.status,
+        new_value:  'dodijeljeno',
+        actor_role: 'dispecer',
         metadata:   { serviser_id: podaci.serviser_id, iz: zahtjev.status, u: 'dodijeljeno' },
       });
 
       // Notifikacija serviseru
       await notifDodjelaIntervencije(db, podaci.serviser_id, requestId);
 
-      // Notifikacija korisniku — serviser dodijeljen
+      // Notifikacija korisniku - serviser dodijeljen
       const { data: zahtjevUser } = await db
         .from('service_requests').select('user_id').eq('id', requestId).maybeSingle();
       const { data: serviserOsoba } = await db
@@ -410,10 +473,13 @@ export async function PATCH(
         sadrzaj:    podaci.napomene?.trim()
           ? `Dispečer zatvorio intervenciju. Napomena: ${podaci.napomene.trim()}`
           : 'Dispečer zatvorio intervenciju.',
+        old_value:  zahtjev.status,
+        new_value:  'zavrseno',
+        actor_role: 'dispecer',
         metadata:   { iz: zahtjev.status, u: 'zavrseno' },
       });
 
-      // Notify korisnik — intervention complete
+      // Notify korisnik - intervention complete
       const { data: zahtjevZav } = await db
         .from('service_requests').select('user_id').eq('id', requestId).maybeSingle();
       if (zahtjevZav?.user_id) {
@@ -469,6 +535,9 @@ export async function PATCH(
         sadrzaj:    podaci.closure_note?.trim()
           ? `Intervencija formalno zatvorena. Napomena: ${podaci.closure_note.trim()}`
           : 'Intervencija formalno zatvorena.',
+        old_value:  'zavrseno',
+        new_value:  'zatvoreno',
+        actor_role: 'dispecer',
         metadata:   { iz: 'zavrseno', u: 'zavrseno_zatvoreno' },
       });
 
@@ -493,7 +562,7 @@ export async function PATCH(
         await notifZatvaranjeIntervencije(db, clan.serviser_id, requestId);
       }
 
-      // Notify korisnik — formally closed
+      // Notify korisnik - formally closed
       const { data: zahtjevZatv } = await db
         .from('service_requests').select('user_id').eq('id', requestId).maybeSingle();
       if (zahtjevZatv?.user_id) {
@@ -540,7 +609,18 @@ export async function PATCH(
 
       if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
-      // Notify korisnik — request in processing
+      await db.from('intervention_activities').insert({
+        zahtjev_id: requestId,
+        autor_id:   user.id,
+        tip:        'status_promjena',
+        sadrzaj:    `Dispečer potvrdio zahtjev. Prioritet: ${podaci.final_priority}`,
+        old_value:  zahtjev.status,
+        new_value:  'potvrdeno',
+        actor_role: 'dispecer',
+        metadata:   { iz: zahtjev.status, u: 'potvrdeno', final_priority: podaci.final_priority },
+      });
+
+      // Notify korisnik - request in processing
       const { data: zahtjevPotv } = await db
         .from('service_requests').select('user_id').eq('id', requestId).maybeSingle();
       if (zahtjevPotv?.user_id) {
@@ -560,6 +640,18 @@ export async function PATCH(
         .eq('id', requestId);
 
       if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+      await db.from('intervention_activities').insert({
+        zahtjev_id: requestId,
+        autor_id:   user.id,
+        tip:        'odbijanje',
+        sadrzaj:    `Dispečer odbio zahtjev. Razlog: ${podaci.rejection_reason}`,
+        old_value:  zahtjev.status,
+        new_value:  'odbijeno',
+        actor_role: 'dispecer',
+        metadata:   { iz: zahtjev.status, u: 'odbijeno' },
+      });
+
       return NextResponse.json({ success: true, novi_status: 'odbijeno' });
     }
 

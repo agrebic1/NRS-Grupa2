@@ -32,7 +32,7 @@ import {
   ZahtjevMiniTimeline,
 } from '@/components/servisirane/ZahtjevTimelineIPoruka';
 
-// Re-export helper-a — ostaje stabilan import za potrošače.
+// Re-export helper-a - ostaje stabilan import za potrošače.
 export {
   korisnikDonjiStatusObjasnjenje,
   korisnikHeroTekst,
@@ -92,7 +92,7 @@ export function InlineNotice({
   );
 }
 
-/** Donja napomena (ostavljena radi backward kompatibilnosti — sada je samo `InlineNotice` info ton). */
+/** Donja napomena (ostavljena radi backward kompatibilnosti - sada je samo `InlineNotice` info ton). */
 export function KorisnikZahtjevDonjaNapomena({ children }: { children: ReactNode }) {
   return <InlineNotice ton="info">{children}</InlineNotice>;
 }
@@ -130,7 +130,7 @@ export function KorisnikZahtjevDetaljPanel({
       : opis;
 
   const telefonSirovo = zahtjev.contact_phone?.trim() || '';
-  const telefon = telefonSirovo || '—';
+  const telefon = telefonSirovo || '-';
   const telefonHref = telefonSirovo ? hrefZaTelefon(telefonSirovo) : null;
 
   const slike = urlsPrilozenihSlika(
@@ -146,7 +146,7 @@ export function KorisnikZahtjevDetaljPanel({
 
   return (
     <div className="min-w-0 space-y-5">
-      {/* Zaglavlje kartice — id, premium, naslov, kategorija */}
+      {/* Zaglavlje kartice - id, premium, naslov, kategorija */}
       <header className="min-w-0">
         <div className="flex flex-wrap items-center gap-x-2 gap-y-1.5">
           <span
@@ -179,7 +179,7 @@ export function KorisnikZahtjevDetaljPanel({
         ) : null}
       </header>
 
-      {/* Status row — tok bedž + hitnost chip + jedna rečenica opisa stanja */}
+      {/* Status row - tok bedž + hitnost chip + jedna rečenica opisa stanja */}
       <section className="min-w-0">
         <div className="flex flex-wrap items-center gap-2">
           <span
@@ -226,7 +226,7 @@ export function KorisnikZahtjevDetaljPanel({
                   Adresa
                 </p>
                 <p className="break-words font-medium leading-snug" style={{ color: 'var(--first-octonary)' }}>
-                  {(zahtjev.address ?? '').trim() || '—'}
+                  {(zahtjev.address ?? '').trim() || '-'}
                 </p>
                 {imaPreciznuLokaciju ? (
                   <div className="mt-2">
@@ -301,7 +301,7 @@ export function KorisnikZahtjevDetaljPanel({
         </section>
       </div>
 
-      {/* Termin — kompaktni mini timeline kao na dispečerskom detalju */}
+      {/* Termin - kompaktni mini timeline kao na dispečerskom detalju */}
       <section
         className="min-w-0 border-t pt-4"
         style={{ borderColor: SEKCIJA_RAZDJELNIK_BOJA }}

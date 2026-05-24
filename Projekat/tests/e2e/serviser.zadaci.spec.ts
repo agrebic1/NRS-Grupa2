@@ -18,7 +18,7 @@ async function prijaviSe(page: Page, creds: RoleCreds) {
   await expect(page).not.toHaveURL(/\/auth\/login/);
 }
 
-test.describe('Serviser — pregled zadataka i RBAC', () => {
+test.describe('Serviser - pregled zadataka i RBAC', () => {
   const serviser = ucitajKredencijale('serviser');
   const dispecer = ucitajKredencijale('dispecer');
 

@@ -42,7 +42,7 @@ export async function GET(
     const izuzetiParam = url.searchParams.get('izuzeti') ?? '';
     const izuzeti = izuzetiParam.split(',').filter(Boolean);
 
-    // Fetch all verified servicers — two-step: lookup role ID first to avoid
+    // Fetch all verified servicers - two-step: lookup role ID first to avoid
     // unreliable .eq('uloga.naziv', ...) filter on PostgREST embedded resources.
     const { data: ulogaPodaci, error: ulogaError } = await dbEmp
       .from('uloga')

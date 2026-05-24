@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 
 export const dynamic = 'force-dynamic';
 
-/** GET /api/notifikacije — lista notifikacija za prijavljenog korisnika */
+/** GET /api/notifikacije - lista notifikacija za prijavljenog korisnika */
 export async function GET(request: Request) {
   try {
     const supabase = createClient();
@@ -42,7 +42,7 @@ export async function GET(request: Request) {
   }
 }
 
-/** PATCH /api/notifikacije — označi sve kao pročitano */
+/** PATCH /api/notifikacije - označi sve kao pročitano */
 export async function PATCH() {
   try {
     const supabase = createClient();

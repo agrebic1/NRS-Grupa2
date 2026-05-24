@@ -8,7 +8,7 @@ const RAZLOZI = [
   'Kvar je riješen na drugi način',
   'Pogrešno prijavljen kvar',
   'Promjena planova',
-  'Nije hitno — odgađam',
+  'Nije hitno - odgađam',
   'Drugo',
 ] as const;
 

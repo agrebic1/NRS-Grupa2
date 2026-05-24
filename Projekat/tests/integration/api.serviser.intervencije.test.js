@@ -101,6 +101,7 @@ describe('GET /api/serviser/intervencije/[id]', () => {
 
   test('vraća 400 za nevažeći ID', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 's1' } } });
+    mockAssertServiserAccess.mockResolvedValue(true);
     const res = await GET(new Request('http://localhost/api/serviser/intervencije/x'), PARAMS_NEVAZECI);
     expect(res.status).toBe(400);
   });
@@ -145,7 +146,7 @@ describe('GET /api/serviser/intervencije/[id]', () => {
   });
 });
 
-// ─── PATCH — prihvati ─────────────────────────────────────────────────────────
+// ─── PATCH - prihvati ─────────────────────────────────────────────────────────
 
 describe('PATCH prihvati (dodijeljeno → u_radu)', () => {
   beforeEach(() => {
@@ -199,7 +200,7 @@ describe('PATCH prihvati (dodijeljeno → u_radu)', () => {
   });
 });
 
-// ─── PATCH — pocni ────────────────────────────────────────────────────────────
+// ─── PATCH - pocni ────────────────────────────────────────────────────────────
 
 describe('PATCH pocni (u_radu → u_izvrsenju)', () => {
   beforeEach(() => {
@@ -232,7 +233,7 @@ describe('PATCH pocni (u_radu → u_izvrsenju)', () => {
   });
 });
 
-// ─── PATCH — odbij ────────────────────────────────────────────────────────────
+// ─── PATCH - odbij ────────────────────────────────────────────────────────────
 
 describe('PATCH odbij zadatak', () => {
   beforeEach(() => {

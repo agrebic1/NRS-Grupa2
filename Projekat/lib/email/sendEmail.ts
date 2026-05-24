@@ -1,4 +1,4 @@
-// Email utility — koristi Resend API ako je RESEND_API_KEY konfigurisan,
+// Email utility - koristi Resend API ako je RESEND_API_KEY konfigurisan,
 // inače loguje email sadržaj u konzolu (development fallback).
 
 interface EmailOpcije {
@@ -12,8 +12,8 @@ export async function sendEmail(opcije: EmailOpcije): Promise<{ success: boolean
   const fromAddr = process.env.EMAIL_FROM ?? 'InterServ <noreply@interserv.ba>';
 
   if (!apiKey) {
-    // Fallback: ispis u konzolu — za development bez konfiguriranog email servisa
-    console.log('\n━━━ [EMAIL — RESEND_API_KEY nije konfigurisan] ━━━');
+    // Fallback: ispis u konzolu - za development bez konfiguriranog email servisa
+    console.log('\n━━━ [EMAIL - RESEND_API_KEY nije konfigurisan] ━━━');
     console.log(`  TO:      ${opcije.to}`);
     console.log(`  SUBJECT: ${opcije.subject}`);
     console.log(`  SADRŽAJ: ${opcije.html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()}`);
@@ -69,7 +69,7 @@ export function kreirajEmailOdobrenja(params: {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Prijava odobrena — InterServ</title>
+  <title>Prijava odobrena - InterServ</title>
 </head>
 <body style="margin:0;padding:0;background:#f5f3ee;font-family:'Segoe UI',Arial,sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f3ee;padding:32px 16px;">
@@ -163,7 +163,7 @@ export function kreirajEmailOdobrenja(params: {
             <td style="background:#f5f3ee;padding:16px 32px;
                        border-top:1px solid #dfe7f2;text-align:center;">
               <p style="margin:0;font-size:11px;color:#617089;">
-                © ${new Date().getFullYear()} InterServ — Automatska obavijest. Molimo ne odgovarajte na ovaj email.
+                © ${new Date().getFullYear()} InterServ - Automatska obavijest. Molimo ne odgovarajte na ovaj email.
               </p>
             </td>
           </tr>
@@ -189,7 +189,7 @@ export function kreirajEmailInternogNaloga(params: {
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Kreiran interni nalog — InterServ</title>
+  <title>Kreiran interni nalog - InterServ</title>
 </head>
 <body style="margin:0;padding:0;background:#f5f3ee;font-family:'Segoe UI',Arial,sans-serif;">
   <table width="100%" cellpadding="0" cellspacing="0" style="background:#f5f3ee;padding:32px 16px;">

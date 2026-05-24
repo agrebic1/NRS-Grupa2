@@ -9,9 +9,11 @@ jest.mock('@/lib/supabase/server', () => ({
   }),
 }));
 
-// createAdminClient no longer used in this route; mock kept for compat
 jest.mock('@/lib/supabase/admin', () => ({
-  createAdminClient: () => ({ from: jest.fn() }),
+  createAdminClient: () => ({
+    auth: { getUser: mockSessionGetUser },
+    from: mockFrom,
+  }),
 }));
 
 jest.mock('@/lib/servisirane/dispecerPristup', () => ({

@@ -13,20 +13,20 @@ export function efektivniKorisnickiUrgencyScore(zahtjev: {
 export function izracunajUrgency(triage: TriageOdgovori): number {
   let score = 0;
 
-  // Sigurnost — max 50
+  // Sigurnost - max 50
   if (triage.opasnost) score += 50;
 
-  // Zastoj / funkcionalnost — max 25
+  // Zastoj / funkcionalnost - max 25
   if (triage.funkcionalnost === 'potpuni_prekid') score += 25;
   else if (triage.funkcionalnost === 'otezana') score += 10;
 
-  // Rizik od sekundarne štete — max 15
+  // Rizik od sekundarne štete - max 15
   if (triage.steta) score += 15;
 
-  // Ranjivost — max 10
+  // Ranjivost - max 10
   if (triage.ranjivost) score += 10;
 
-  // Obuhvat — max 10
+  // Obuhvat - max 10
   if (triage.obuhvat) score += 10;
 
   return score; // max 110
@@ -40,10 +40,11 @@ export function kategorizirajHitnost(score: number): NivoHitnosti {
 }
 
 const OZNAKA_HITNOSTI_ZA_KORISNIKA: Record<NivoHitnosti, string> = {
-  NISKO: 'Niska',
-  SREDNJE: 'Srednja',
-  VISOKO: 'Visoka',
+  NISKO:    'Niska',
+  SREDNJE:  'Srednja',
+  VISOKO:   'Visoka',
   KRITIČNO: 'Hitno',
+  HITNO:    'Hitno',
 };
 
 /** Korisnički čitljiva hitnost (bez enum vrijednosti i broja bodova). */
@@ -61,18 +62,19 @@ export function oznakaKorisnickeHitnostiTriRazine(score: number): 'Visoka' | 'Sr
 }
 
 /**
- * Tekst bedža na korisničkoj listi dok zahtjev čeka dispečera (umjesto „Novi“).
- * Tri razine kao inbox — usklađeno s {@link oznakaKorisnickeHitnostiTriRazine}.
+ * Tekst bedža na korisničkoj listi dok zahtjev čeka dispečera (umjesto „Novi”).
+ * Prefiksom „Vaša procjena:” jasno označava da je ovo korisnikova samoprocjena,
+ * a ne operativni prioritet dispečera (final_priority).
  */
 export function oznakaInboxHitnostiCekaObradu(zahtjev: {
   is_premium: boolean;
   urgency_score: number;
 }): string {
   const tri = oznakaKorisnickeHitnostiTriRazine(efektivniKorisnickiUrgencyScore(zahtjev));
-  return `${tri} hitnost (čeka obradu)`;
+  return `Vaša procjena: ${tri.toLowerCase()}`;
 }
 
-/** Tri inbox grupe na kontrolnoj tabli — iz korisničke procjene (upitnik + premium), ne iz `final_priority`. */
+/** Tri inbox grupe na kontrolnoj tabli - iz korisničke procjene (upitnik + premium), ne iz `final_priority`. */
 export type DispecerskaInboxGrupaPoKorisniku = 'Hitno' | 'Srednja' | 'Niska';
 
 export function inboxGrupaIzKorisnickeProcjene(zahtjev: {

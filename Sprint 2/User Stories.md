@@ -84,7 +84,10 @@ THEME (Tema)
     │   │
     │   ├── FEATURE: Pregled operativnog statusa na kontrolnoj tabli (PBI-009)
     │   │   │
-    │   │   └── Story: US-31 Pregled sažetog operativnog statusa intervencija
+    │   │   ├── Story: US-31 Pregled sažetog operativnog statusa intervencija
+    │   │   ├── Story: US-41 SLA praćenje
+    │   │   ├── Story: US-45 SLA eskalacije
+    │   │   └── Story: US-42 Izvještaj odziva servisera
     │   │
     │   └── FEATURE: Određivanje prioriteta intervencije (PBI-010)
     │       │
@@ -104,7 +107,9 @@ THEME (Tema)
     │   └── FEATURE: Preraspodjela i ponovna dodjela intervencije (PBI-013)
     │       │
     │       ├── Story: US-28 Promjena izvršioca intervencije
-    │       └── Story: US-29 Vraćanje zadatka na ponovnu dodjelu
+    │       ├── Story: US-29 Vraćanje zadatka na ponovnu dodjelu
+    │       ├── Story: US-40 Označavanje intervencije kao nije riješena
+    │       └── Story: US-47 Praćenje intervencije nije riješene iz prve
     │
     ├── EPIC: Izvršenje intervencija od strane servisera
     │   │
@@ -124,7 +129,10 @@ THEME (Tema)
     │   │
     │   └── FEATURE: Evidentiranje izvršenog rada (PBI-017)
     │       │
-    │       └── Story: US-17 Evidentiranje izvršenog rada
+    │       ├── Story: US-17 Evidentiranje izvršenog rada
+    │       ├── Story: US-38 Obavezno trajanje pri evidentiranju rada
+    │       ├── Story: US-46 Evidencija materijala i dijelova
+    │       └── Story: US-43 Upload fotografije intervencije
     │
     ├── EPIC: Zatvaranje i kontrola intervencije
     │   │
@@ -144,7 +152,9 @@ THEME (Tema)
         │
         ├── FEATURE: Historija aktivnosti intervencije (PBI-021)
         │   │
-        │   └── Story: US-32 Pregled historije aktivnosti intervencije
+        │   ├── Story: US-32 Pregled historije aktivnosti intervencije
+        │   ├── Story: US-39 Audit trail sa starim i novim vrijednostima
+        │   └── Story: US-44 Tabelarni pregled historije aktivnosti
         │
         └── FEATURE: Sistemske notifikacije (PBI-022)
             │
@@ -192,6 +202,16 @@ Sažeti pregled user story-a u okviru MVP-a:
 | US-32 | Pregled historije aktivnosti intervencije | Kao dispečer, želim vidjeti listu svih prethodnih promjena i aktivnosti na zahtjevu, kako bih imao jasan uvid u hronologiju obrade od trenutka prijave do trenutnog statusa. | - transparentnost procesa<br>- praćenje toka rada<br>- audit trag | Srednji | 
 | US-34 | Aktivacija Premium usluge | Kao korisnik usluge, želim aktivirati Premium paket kroz sistem, kako bih mogao koristiti opciju premium zahtjeva i dobiti prioritetnu obradu intervencija. | - jasan tok aktivacije<br>- kontrola prava na premium<br>- pouzdana naplata | Visok |
 | US-33 |	Zahtjev za Premium (Hitnom) uslugom	| Kao korisnik usluge, želim odabrati "Premium/Hitno" opciju prilikom prijave kvara, kako bih osigurao prioritetnu obradu zahtjeva bez obzira na vrstu kvara.	|- prioritetna obrada <br> - veće zadovoljstvo korisnika <br> - dodatni prihod za servis | Visok |
+| US-38 | Obavezno trajanje pri evidentiranju rada | Kao serviser, želim biti obavezan unijeti trajanje izvršenog rada, kako bi sistem imao tačne podatke o utrošenom vremenu. | - tačna evidencija vremena<br>- osnova za fakturisanje<br>- analiza efikasnosti | Visok |
+| US-39 | Audit trail sa starim i novim vrijednostima | Kao dispečer, želim vidjeti stare i nove vrijednosti u historiji aktivnosti, kako bih mogao pratiti tačne promjene na intervenciji. | - transparentnost promjena<br>- praćenje životnog ciklusa<br>- osnova za kontrolu | Srednji |
+| US-40 | Označavanje intervencije kao nije riješena | Kao serviser, želim označiti intervenciju kao nije riješena, kako bi dispečer bio obaviješten i mogao poduzeti daljnje korake. | - sprječavanje zastoja<br>- pravovremena reakcija dispečera<br>- nastavak toka | Srednji |
+| US-41 | SLA praćenje | Kao dispečer, želim da sistem automatski prati SLA rokove, kako bih mogao reagovati na kašnjenja i osigurati poštivanje dogovorenih nivoa usluge. | - poštivanje rokova<br>- proaktivno upravljanje<br>- bolja usluga korisnicima | Srednji |
+| US-42 | Izvještaj odziva servisera | Kao dispečer, želim pregledati izvještaj o odzivnim vremenima servisera, kako bih mogao pratiti performanse tima i identifikovati probleme u efikasnosti. | - praćenje performansi tima<br>- identifikacija problema<br>- osnova za odluke | Nizak |
+| US-43 | Upload fotografije intervencije | Kao serviser, želim uploadovati fotografiju vezanu za intervenciju, kako bih dokumentovao stanje na terenu. | - vizuelna dokumentacija<br>- dokaz obavljenog rada<br>- bolja kontrola kvaliteta | Nizak |
+| US-44 | Tabelarni pregled historije aktivnosti | Kao dispečer, želim pregledati historiju aktivnosti u tabelarnom obliku, kako bih brzo analizirao promjene na intervenciji. | - transparentnost<br>- audit trag<br>- brza analiza | Srednji |
+| US-45 | SLA eskalacije | Kao dispečer, želim da sistem eskalira prekoračene SLA rokove, kako bih pravovremeno reagovao na kašnjenja. | - proaktivna reakcija<br>- poštivanje SLA | Srednji |
+| US-46 | Evidencija materijala i dijelova | Kao serviser, želim evidentirati utrošeni materijal i dijelove strukturirano, kako bi evidencija bila tačna za kontrolu i izvještaje. | - tačna evidencija<br>- kontrola troškova | Srednji |
+| US-47 | Praćenje intervencije nije riješene iz prve | Kao dispečer, želim vidjeti da intervencija nije riješena iz prvog pokušaja, kako bih pratio kvalitet rješavanja. | - kvalitet usluge<br>- ponovna dodjela | Srednji |
 
 U sljedećoj tabeli je prikazana povezanost konkretnog User Story-a sa itemima iz Product Backloga:
 | User Story | Naziv user storyja                                    | Feature / PBI                                                       | Epic                                                    |
@@ -231,6 +251,16 @@ U sljedećoj tabeli je prikazana povezanost konkretnog User Story-a sa itemima i
 | US-32      | Pregled historije aktivnosti intervencije             | **PBI-021 – Historija aktivnosti intervencije**                     | **Komunikacija i historija aktivnosti**                 |
 | US-34      | Aktivacija Premium usluge                             | **PBI-004 – Kreiranje zahtjeva za servisnu intervenciju**           | **Upravljanje zahtjevima za servisne intervencije**     |
 | US-33      | Zahtjev za Premium (Hitnom) uslugom                   | **PBI-004 – Kreiranje zahtjeva za servisnu intervenciju**           | **Upravljanje zahtjevima za servisne intervencije**     |
+| US-38      | Obavezno trajanje pri evidentiranju rada              | **PBI-017 – Evidentiranje izvršenog rada**                          | **Izvršenje intervencija od strane servisera**          |
+| US-39      | Audit trail sa starim i novim vrijednostima           | **PBI-021 – Historija aktivnosti intervencije**                     | **Komunikacija, notifikacije i historija aktivnosti**   |
+| US-40      | Označavanje intervencije kao nije riješena            | **PBI-013 – Preraspodjela i ponovna dodjela intervencije**          | **Planiranje i dodjela intervencija**                   |
+| US-41      | SLA praćenje                                          | **PBI-009 – Pregled operativnog statusa na kontrolnoj tabli**       | **Operativni pregled intervencija od strane dispečera** |
+| US-42      | Izvještaj odziva servisera                            | **PBI-009 – Pregled operativnog statusa na kontrolnoj tabli**       | **Operativni pregled intervencija od strane dispečera** |
+| US-43      | Upload fotografije intervencije                       | **PBI-017 – Evidentiranje izvršenog rada**                          | **Izvršenje intervencija od strane servisera**          |
+| US-44      | Tabelarni pregled historije aktivnosti                 | **PBI-021 – Historija aktivnosti intervencije**                     | **Komunikacija, notifikacije i historija aktivnosti** |
+| US-45      | SLA eskalacije                                          | **PBI-009 – Pregled operativnog statusa na kontrolnoj tabli**       | **Operativni pregled intervencija od strane dispečera** |
+| US-46      | Evidencija materijala i dijelova                        | **PBI-017 – Evidentiranje izvršenog rada**                          | **Izvršenje intervencija od strane servisera**          |
+| US-47      | Praćenje intervencije nije riješene iz prve             | **PBI-013 – Preraspodjela i ponovna dodjela intervencije**          | **Planiranje i dodjela intervencija**                   |
 ---
 
 ## US-01 — Samostalna registracija korisnika usluge
@@ -1316,6 +1346,142 @@ Zavisi od storyja za pregled detalja zadatka na terenu (US-16) i povezan je sa s
 
 ---
 
+## US-38 — Obavezno trajanje pri evidentiranju rada
+
+**Opis:**  
+Kao serviser, želim biti obavezan unijeti trajanje izvršenog rada pri evidentiranju, kako bi sistem imao tačne podatke o utrošenom vremenu za potrebe fakturisanja i analize.
+
+**Poslovna vrijednost:**  
+Bez obaveznog trajanja, sistem ne može pouzdano pratiti produktivnost servisera niti generisati tačne izvještaje o utrošenom vremenu. Obaveznost polja eliminira nepotpune evidencije.
+
+**Prioritet:**  
+*Visok*
+
+**Veze sa drugim storyjima:**  
+Povezan sa storyjem za evidentiranje izvršenog rada (US-17) i pregled evidentiranog rada (US-24).
+
+**Acceptance Criteria:**  
+- AC1: Sistem ne dozvoljava slanje evidencije bez unesenog trajanja u minutama
+- AC2: Sistem validira da trajanje mora biti pozitivan cijeli broj (≥ 1 minuta, ≤ 1440 minuta)
+- AC3: Sistem prikazuje poruku greške ako trajanje nije uneseno ili nije validno
+- AC4: Nakon uspješnog unosa, trajanje se prikazuje u detaljima intervencije
+- AC5: Dispečer vidi trajanje rada u pregledu evidencije
+
+---
+
+## US-43 — Upload fotografije intervencije
+
+**Opis:**  
+Kao serviser, želim uploadovati fotografiju vezanu za intervenciju, kako bih dokumentovao stanje na terenu i osigurao vizuelni dokaz obavljenog rada.
+
+**Poslovna vrijednost:**  
+Fotografska dokumentacija smanjuje sporove s klijentima o stanju opreme prije i poslije intervencije, te pruža dispečeru vizuelni uvid bez potrebe za dodatnom komunikacijom.
+
+**Prioritet:**  
+*Nizak*
+
+**Veze sa drugim storyjima:**  
+Povezan sa storyjem za evidentiranje izvršenog rada (US-17) i pregled detalja intervencije (US-08, US-16).
+
+**Acceptance Criteria:**  
+- AC1: Serviser može uploadovati jednu ili više fotografija na intervenciju
+- AC2: Sistem prihvata formate JPG, PNG i WebP; maksimalna veličina 10 MB po slici
+- AC3: Slike se čuvaju u Supabase Storage bucket `intervencije-slike`, reference u tablici `slike_intervencija`
+- AC4: Dispečer može pregledati uploadovane slike u detaljima intervencije
+- AC5: Sistem prikazuje grid pregled uploadovanih slika s linkom na puni prikaz
+- AC6: Serviser može uploadovati slike samo na intervencije koje su mu dodijeljene (`serviser_dodijeljen_id`)
+
+---
+
+## US-44 — Tabelarni pregled historije aktivnosti
+
+**Opis:**  
+Kao dispečer, želim pregledati historiju aktivnosti intervencije u tabelarnom, hronološkom obliku, kako bih brzo analizirao promjene polja, stare i nove vrijednosti te odgovornu osobu.
+
+**Poslovna vrijednost:**  
+Tabelarni prikaz smanjuje kognitivni napor pri analizi složenih intervencija i dopunjava vizuelni timeline (US-32, US-39).
+
+**Prioritet:**  
+*Srednji*
+
+**Veze sa drugim storyjima:**  
+US-32, US-39, US-14, US-28, US-40.
+
+**Acceptance Criteria:**  
+- AC1: Dispečer i admin vide tabelu aktivnosti na detalju intervencije  
+- AC2: Kolone: vrijeme, tip, opis, stara vrijednost, nova vrijednost, izvršilac  
+- AC3: Najnovije aktivnosti na vrhu liste  
+- AC4: Moguć prebacivanja prikaza timeline / tabela  
+
+---
+
+## US-45 — SLA eskalacije
+
+**Opis:**  
+Kao dispečer, želim da sistem automatski eskalira intervencije s prekoračenim SLA rokom, kako bih pravovremeno reagovao i smanjio rizik kašnjenja.
+
+**Poslovna vrijednost:**  
+Eskalacija povezuje SLA indikatore (US-41) s operativnom reakcijom tima i notifikacijama (US-37).
+
+**Prioritet:**  
+*Srednji*
+
+**Veze sa drugim storyjima:**  
+US-41, US-37, US-31, US-07.
+
+**Acceptance Criteria:**  
+- AC1: Prekoračen SLA pokreće notifikaciju dispečerima  
+- AC2: Audit zapis tipa eskalacije SLA  
+- AC3: Ponovna eskalacija iste intervencije nije češća od definisanog cooldown perioda  
+- AC4: Eskalacija se ne primjenjuje na zatvorene/otkazane intervencije  
+
+---
+
+## US-46 — Evidencija materijala i dijelova
+
+**Opis:**  
+Kao serviser, želim unijeti strukturirane stavke utrošenog materijala ili dijelova, kako bi evidencija rada bila potpuna i pogodna za kontrolu.
+
+**Poslovna vrijednost:**  
+Strukturirani unos omogućava tačnije izvještaje i kontrolu troškova uz obavezno trajanje (US-38).
+
+**Prioritet:**  
+*Srednji*
+
+**Veze sa drugim storyjima:**  
+US-17, US-38, US-24.
+
+**Acceptance Criteria:**  
+- AC1: Serviser može dodati jednu ili više stavki (naziv, količina, jedinica)  
+- AC2: Validacija: pozitivna količina, obavezan naziv i jedinica  
+- AC3: Maksimalno 20 stavki po evidenciji  
+- AC4: Stavke su vidljive dispečeru u pregledu evidencije  
+- AC5: Opcionalno tekstualno polje materijal ostaje podržano  
+
+---
+
+## US-47 — Praćenje intervencije nije riješene iz prve
+
+**Opis:**  
+Kao dispečer, želim vidjeti kada intervencija nije riješena iz prvog operativnog ciklusa, kako bih pratio kvalitet rješavanja i organizovao ponovnu dodjelu.
+
+**Poslovna vrijednost:**  
+Metrika ponovnih ciklusa povezuje akcije servisera (US-40, US-29) s dispečerskom kontrolom kvaliteta.
+
+**Prioritet:**  
+*Srednji*
+
+**Veze sa drugim storyjima:**  
+US-40, US-29, US-28, US-08.
+
+**Acceptance Criteria:**  
+- AC1: Sistem povećava brojač pri vraćanju na ponovnu dodjelu ili oznaci nije riješeno  
+- AC2: Dispečer vidi badge/indikator na detalju intervencije  
+- AC3: Brojač je vidljiv u API odgovoru zahtjeva  
+- AC4: Prvi ciklus (broj 0) nema indikator ponovnog otvaranja  
+
+---
+
 ## US-35 — Podnosenje zahtjeva za internu ulogu (dispecer/serviser)
 
 **Opis:**  
@@ -1843,6 +2009,7 @@ Zavisi od storyja za dodjelu intervencije odgovornom serviseru (US-09) i povezan
   - **GIVEN** intervencija je već u statusu "Zatvoreno" ili "Otkazano"  
   - **WHEN** dispečer pokuša pristupiti opciji promjene izvršioca  
   - **THEN** sistem onemogućava tu opciju i prikazuje poruku da se izvršilac ne može mijenjati na arhiviranim zahtjevima
+
     
 ---
 
@@ -1875,7 +2042,7 @@ Zavisi od storyja za prihvatanje dodijeljenog zadatka (US-22) i povezan je sa st
 - **AC2: Automatska promjena statusa i oslobađanje servisera**  
   - **GIVEN** serviser je potvrdio vraćanje zadatka s obrazloženjem  
   - **WHEN** sistem obradi zahtjev  
-  - **THEN** status zadatka se mijenja u "Čeka ponovnu dodjelu", a zadatak se uklanja iz liste aktivnih zaduženja tog servisera
+  - **THEN** status zadatka se mijenja u stanje spremno za ponovnu dodjelu (`potvrdeno` u MVP implementaciji), a zadatak se uklanja iz liste aktivnih zaduženja tog servisera (`serviser_dodijeljen_id = null`)
 
 - **AC3: Prioritetna notifikacija dispečeru**  
   - **GIVEN** zadatak je vraćen na ponovnu dodjelu  
@@ -1886,7 +2053,31 @@ Zavisi od storyja za prihvatanje dodijeljenog zadatka (US-22) i povezan je sa st
   - **GIVEN** intervencija je već u statusu "Zatvoreno" ili "Izvršeno - čeka potvrdu"  
   - **WHEN** korisnik pokuša pristupiti opciji vraćanja  
   - **THEN** sistem sakriva opciju vraćanja ili onemogućava akciju jer zadatak više nije u fazi aktivne obrade na terenu
-    
+
+---
+
+## US-40 — Označavanje intervencije kao nije riješena
+
+**Opis:**  
+Kao serviser, želim označiti intervenciju kao nije riješena, kako bi dispečer bio obaviješten i mogao poduzeti daljnje korake.
+
+**Poslovna vrijednost:**  
+Serviser ponekad ne može završiti intervenciju (nedostupna oprema, odsutan korisnik, iznenadni tehnički problemi). Bez ove funkcionalnosti, intervencija bi ostala zapela u statusu `u_izvrsenju` bez mogućnosti ponovne dodjele.
+
+**Prioritet:**  
+*Srednji*
+
+**Veze sa drugim storyjima:**  
+Povezan sa storyjima za vraćanje zadatka na ponovnu dodjelu (US-29), ažuriranje statusa intervencije (US-14) i promjenu izvršioca (US-28).
+
+**Acceptance Criteria:**  
+- AC1: Serviser može označiti intervenciju u statusu `u_izvrsenju` kao nije riješena
+- AC2: Sistem zahtijeva unos razloga (min 10, max 500 znakova)
+- AC3: Sistem mijenja status intervencije u `potvrdeno`, serviser_dodijeljen_id se briše
+- AC4: Evidencija se bilježi u `intervention_activities` sa tipom `nije_rijeseno`
+- AC5: Dispečer prima notifikaciju i vidi razlog u historiji aktivnosti
+- AC6: Serviser ne može označiti kao nije riješeno intervenciju koja nije u statusu `u_izvrsenju`
+
 ---
 
 ## US-30 — Razmjena napomena na intervenciji  
@@ -1981,6 +2172,53 @@ Srednji
 
 ---
 
+## US-41 — SLA praćenje
+
+**Opis:**  
+Kao dispečer, želim da sistem automatski prati SLA rokove za svaku intervenciju, kako bih mogao reagovati na kašnjenja i osigurati poštivanje dogovorenih nivoa usluge.
+
+**Poslovna vrijednost:**  
+Bez vidljivosti u SLA status, dispečer ne može proaktivno reagovati na intervencije koje kasne. Vizualni indikatori smanjuju rizik od kršenja dogovorenih rokova s klijentima.
+
+**Prioritet:**  
+*Srednji*
+
+**Veze sa drugim storyjima:**  
+Povezan sa storyjima za pregled sažetog operativnog statusa (US-31), određivanje prioriteta intervencije (US-12) i pregled otvorenih intervencija (US-07).
+
+**Acceptance Criteria:**  
+- AC1: Sistem automatski izračunava SLA rok na osnovu prioriteta intervencije i `created_at`
+- AC2: Sistem vizualno označava intervencije kojima SLA ističe u roku od 2 sata (upozorenje)
+- AC3: Sistem vizualno označava intervencije kod kojih je SLA prekoračen (crveno)
+- AC4: Dispečer dashboard prikazuje broj intervencija sa prekoračenim SLA
+- AC5: SLA rokovi po prioritetu: HITNO/KRITIČNO = 2h, VISOKO = 8h, SREDNJE = 24h, NISKO = 72h
+- AC6: SLA se ne primjenjuje na zatvorene, otkazane ili odbijene intervencije
+
+---
+
+## US-42 — Izvještaj odziva servisera
+
+**Opis:**  
+Kao dispečer, želim pregledati izvještaj o odzivnim vremenima servisera, kako bih mogao pratiti performanse tima i identifikovati probleme u efikasnosti.
+
+**Poslovna vrijednost:**  
+Dispečer bez agregiranih metrika ne može objektivno ocjenjivati performanse servisera niti donositi informisane odluke o raspoređivanju. Izvještaj omogućava mjerenje odzivnosti tima.
+
+**Prioritet:**  
+*Nizak*
+
+**Veze sa drugim storyjima:**  
+Povezan sa storyjima za dodjelu intervencije (US-09), prihvatanje zadatka (US-22) i evidentiranje izvršenog rada (US-17).
+
+**Acceptance Criteria:**  
+- AC1: Sistem prikazuje prosječno vrijeme odziva po serviseru (od dodjele do prihvatanja)
+- AC2: Sistem prikazuje prosječno trajanje izvršenja po serviseru
+- AC3: Izvještaj je filtrabilan po vremenskom periodu (`od`/`do` query parametri)
+- AC4: Izvještaj je dostupan samo dispečeru i adminu (RBAC)
+- AC5: Sistem prikazuje ukupan broj intervencija po serviseru u odabranom periodu
+
+---
+
 ## US-32 — Pregled historije aktivnosti intervencije  
 
 **Opis:** 
@@ -2021,6 +2259,31 @@ Zavisi od svih storyja koji mijenjaju stanje intervencije: prijava zahtjeva za s
   - **GIVEN** zapisi u historiji su jednom kreirani  
   - **WHEN** bilo koji korisnik pokuša obrisati ili izmijeniti zapis u historiji  
   - **THEN** sistem onemogućava takve akcije i garantuje integritet audit trail-a kao trajnog dokaza o radu
+
+---
+
+## US-39 — Audit trail sa starim i novim vrijednostima
+
+**Opis:**  
+Kao dispečer, želim vidjeti stare i nove vrijednosti u historiji aktivnosti, kako bih mogao pratiti tačne promjene koje su se desile tokom životnog ciklusa intervencije.
+
+**Poslovna vrijednost:**  
+Prikaz samo tipa promjene nije dovoljan za efikasnu kontrolu — dispečer mora vidjeti konkretne vrijednosti (npr. status: dodijeljeno → u_radu) kako bi mogao brzo razumjeti tok bez čitanja narativnih opisa.
+
+**Prioritet:**  
+*Srednji*
+
+**Veze sa drugim storyjima:**  
+Proširenje storyja za pregled historije aktivnosti (US-32); povezan sa promjenom statusa (US-14), dodjelom servisera (US-09) i određivanjem prioriteta (US-12).
+
+**Acceptance Criteria:**  
+- AC1: Svaka promjena statusa bilježi stari i novi status u `old_value`/`new_value`
+- AC2: Promjena servisera bilježi ID starog i novog servisera
+- AC3: Promjena prioriteta bilježi staru i novu vrijednost prioriteta
+- AC4: Historija aktivnosti prikazuje `old_value → new_value` za relevantne promjene
+- AC5: Audit trail je dostupan samo dispečeru i adminu (RBAC)
+
+---
 
 ## US-34 — Aktivacija Premium usluge
 **Opis:** Kao korisnik usluge, želim aktivirati Premium paket kroz sistem, kako bih mogao koristiti opciju premium zahtjeva i dobiti prioritetnu obradu intervencija.
@@ -2301,21 +2564,23 @@ Ovaj plan je organizovan tako da se razvoj sistema odvija **postepeno, smisleno 
 **Omogućiti dispečeru da pregleda i obradi zahtjev te odredi njegov prioritet.**
 
 ### **Ključne stavke koje tim želi završiti**
-- pregled otvorenih zahtjeva / intervencija (**US-07**) 
-- pregled detalja pojedinačne intervencije (**US-08**) 
+- pregled otvorenih zahtjeva / intervencija (**US-07**)
+- pregled detalja pojedinačne intervencije (**US-08**)
 - pregled statusa intervencija od strane dispečera (**US-13**)
-- pregled sažetog operativnog statusa intervencija na kontrolnoj tabli (US-31)
-- određivanje prioriteta intervencije (**US-12**) 
-- izmjena vlastitog zahtjeva (**US-26**) 
-- otkazivanje vlastitog zahtjeva (**US-27**) 
+- pregled sažetog operativnog statusa intervencija na kontrolnoj tabli (**US-31**)
+- SLA praćenje i vizualni indikatori (**US-41**)
+- izvještaj odziva servisera (**US-42**)
+- određivanje prioriteta intervencije (**US-12**)
+- izmjena vlastitog zahtjeva (**US-26**)
+- otkazivanje vlastitog zahtjeva (**US-27**)
 
 ### **Rizici i zavisnosti**
-- Sprint 8 zavisi od toga da su zahtjevi iz Sprinta 7 već **ispravno evidentirani u bazi** i prikazani korisniku i dispečeru.  
-- Pregled otvorenih zahtjeva i detalja intervencije predstavlja osnovu za svu dalju dispečersku obradu, pa njihov prikaz mora biti **jasan, stabilan i usklađen sa stanjem u bazi**.  
-- Određivanje prioriteta može postati rizično ako se pokuša napraviti previše složeno, pa ga treba zadržati na **jednostavnom i pouzdanom modelu**, uz mogućnost kasnijeg proširenja.  
-- Izmjena i otkazivanje zahtjeva moraju biti **vremenski i statusno ograničeni**, kako korisnik ne bi mogao mijenjati ili povlačiti zahtjev nakon što je već prešao u internu obradu ili dodjelu.  
-- Ovaj sprint treba zatvoriti **korisničke alternativne tokove** prije nego što zahtjev pređe u fazu dodjele serviseru.  
-- Završetkom ovog sprinta sistem mora biti spreman da dispečer iz zahtjeva pređe na **operativnu dodjelu zadatka** u narednom sprintu.  
+- Sprint 8 zavisi od toga da su zahtjevi iz Sprinta 7 već ispravno evidentirani u bazi i prikazani korisniku i dispečeru.
+- Pregled otvorenih zahtjeva i detalja intervencije predstavlja osnovu za svu dalju dispečersku obradu, pa njihov prikaz mora biti jasan, stabilan i usklađen sa stanjem u bazi.
+- Određivanje prioriteta i SLA indikatori moraju ostati na jednostavnom i pouzdanom modelu, uz mogućnost kasnijeg proširenja.
+- Izmjena i otkazivanje zahtjeva moraju biti vremenski i statusno ograničeni, kako korisnik ne bi mogao mijenjati ili povlačiti zahtjev nakon što je već prešao u internu obradu ili dodjelu.
+- Ovaj sprint treba zatvoriti korisničke alternativne tokove prije nego što zahtjev pređe u fazu dodjele serviseru.
+- Završetkom ovog sprinta sistem mora biti spreman da dispečer iz zahtjeva pređe na operativnu dodjelu zadatka u narednom sprintu.
 
 ---
 
@@ -2325,26 +2590,23 @@ Ovaj plan je organizovan tako da se razvoj sistema odvija **postepeno, smisleno 
 **9**
 
 ### **Sprint cilj**
-**Omogućiti dodjelu zadatka serviseru i serviserski prijem zadatka.**
+**Zatvoriti kompletan MVP tok servisnih intervencija (operativni tok, kvaliteta, evidencija, administracija, izvještaji).**
 
 ### **Ključne stavke koje tim želi završiti**
-- dodjela intervencije odgovornom serviseru (**US-09**) 
-- dodjela intervencije timu servisera (**US-10**)  
-- planiranje intervencije (**US-11**) 
-- pregled dodijeljenih intervencija za servisera (**US-15**) 
-- pregled detalja zadatka na terenu (**US-16**)  
-- prihvatanje dodijeljenog zadatka (**US-22**) 
-- odbijanje dodijeljenog zadatka (**US-23**) 
-- promjena izvršioca intervencije (**US-28**)  
-- vraćanje zadatka na ponovnu dodjelu (**US-29**) 
+- preraspodjela i alternativni tokovi (**US-28**, **US-29**, **US-40**, **US-47**)
+- evidencija rada, trajanje i materijal (**US-38**, **US-46**, **US-17**)
+- historija aktivnosti i audit (**US-32**, **US-39**, **US-44**)
+- SLA i eskalacije (**US-41**, **US-45**)
+- izvještaj performansi (**US-42**)
+- foto dokumentacija (**US-43**)
+- administracija naloga i notifikacije (**US-19–21**, **US-36**, **US-37**)
+- regresija zatvaranja toka (**US-14–25**, **US-30**)
+- QA SB-09-36 i automatski testovi
 
 ### **Rizici i zavisnosti**
-- Sprint 9 zavisi od toga da dispečer u Sprintu 8 već može **pregledati, razumjeti i pripremiti zahtjev za izvršenje**.  
-- Dodjela serviseru predstavlja ključni prelaz iz dispečerskog dijela sistema u serviserski tok rada, pa mora biti **jednostavna, pregledna i pouzdana**.  
-- Dodjela timu servisera i planiranje intervencije mogu lako preopteretiti sprint ako se pokušaju implementirati previše detaljno, pa ih treba ograničiti na **minimalnu funkcionalnu verziju**.  
-- Prihvatanje, odbijanje i vraćanje zadatka moraju biti dio jednog **jednostavnog i logičnog toka**, kako bi serviser mogao jasno reagovati na dodijeljeni zadatak bez nepotrebne složenosti.  
-- Promjena izvršioca zavisi od već funkcionalne osnovne dodjele i mora se oslanjati na **jednostavan model reasignacije**, bez komplikovanih dodatnih pravila.  
-- Ovaj sprint treba zatvoriti fazu prijema zadatka i sve glavne alternativne tokove vezane za samu dodjelu, kako bi Sprint 10 mogao biti fokusiran isključivo na **izvršenje rada i završetak intervencije**.  
+- Sprint 9 nadograđuje Sprint 8 (dodjela, serviserski tok).
+- Potrebna konzistentnost dokumentacije i test paketa za US-01–US-47.
+- Završetkom Sprinta 9 MVP Inkrement 2 je spreman za demonstraciju.
 
 ---
 
@@ -2354,26 +2616,17 @@ Ovaj plan je organizovan tako da se razvoj sistema odvija **postepeno, smisleno 
 **10**
 
 ### **Sprint cilj**
-**Omogućiti izvršenje intervencije, evidenciju rada i zatvaranje kompletnog toka.**
+**Organizaciona faza projekta (stabilizacija, testiranje, predaja) — implementacioni scope je u Sprintu 9.**
 
 ### **Ključne stavke koje tim želi završiti**
-- ažuriranje statusa intervencije od strane servisera (**US-14**) 
-- evidentiranje izvršenog rada (**US-17**)  
-- pregled evidentiranog izvršenog rada (**US-24**) 
-- potvrda i zatvaranje intervencije (**US-25**)  
-- razmjena napomena na intervenciji (**US-30**)  
-- pregled historije aktivnosti intervencije (**US-32**)  
-- pregled postojećih korisničkih naloga (**US-19**)  
-- promjena korisničke uloge (**US-20**)  
-- deaktivacija korisničkog naloga (**US-21**)  
+- završno integraciono i regresijsko testiranje MVP toka
+- ručno testiranje ključnih scenarija (SB-09-36)
+- dorada korisničkog interfejsa gdje je potrebno
+- završna priprema dokumentacije i demonstracije
 
 ### **Rizici i zavisnosti**
-- Sprint 10 zavisi od toga da su tok dodjele i serviserski prijem zadatka iz Sprinta 9 već **funkcionalni i stabilni**.  
-- Ažuriranje statusa mora ostati **jasno definisano i ograničeno na jednostavan operativni tok**, kako bi sistem pouzdano pratio prelaz iz rada na terenu u završetak intervencije.  
-- Evidentiranje izvršenog rada i zatvaranje intervencije čine završni dio glavnog procesa, pa njihova povezanost mora biti **posebno pažljivo implementirana i testirana**.  
-- Napomene i historija aktivnosti treba da budu **podrška glavnom toku**, a ne da usporavaju njegov završetak, pa ih treba realizovati u jednostavnoj i preglednoj formi.  
-- Administratorske funkcionalnosti pregleda korisnika, promjene uloge i deaktivacije naloga treba implementirati u **osnovnoj verziji**, bez nepotrebnog proširivanja logike.  
-- Završetkom Sprinta 10 treba biti pokriven **kompletan happy path i svi glavni alternativni putevi**, tako da Sprint 11 ostane rezervisan samo za ispravke, testiranje, tehnički dug i završnu pripremu.  
+- Sprint 10 zavisi od završetka implementacionog opsega Sprinta 9.
+- U ovoj fazi ne uvoditi nove funkcionalnosti — fokus na kvalitetu i predaju.
 
 ---
 
@@ -2397,8 +2650,8 @@ Stabilizovati sistem, otkloniti greške i pripremiti ga za završnu demonstracij
 - Završna priprema sistema za demonstraciju i predaju  
 
 ### **Rizici i zavisnosti:**
-- Sprint 11 zavisi od toga da su sve glavne funkcionalnosti završene najkasnije do kraja Sprinta 10.  
-- U ovom sprintu ne bi trebalo uvoditi velike nove funkcionalnosti, jer bi to povećalo rizik od novih grešaka i destabilizacije sistema.  
+- Sprint 11 zavisi od završetka MVP implementacije u Sprintu 9 i stabilizacije u Sprintu 10.  
+- U ovoj fazi ne uvoditi nove funkcionalnosti — fokus na predaju i demonstraciju.  
 - Najveći fokus treba biti na stabilnosti sistema, usklađenosti postojećih modula i uklanjanju problema uočenih tokom ranijeg razvoja i testiranja.  
 - Tehnički dug treba rješavati samo u mjeri koja ne ugrožava završetak projekta i spremnost sistema za demonstraciju.  
-- Završno testiranje mora obuhvatiti kompletan *happy path* i najvažnije alternativne scenarije, kako bi sistem bio pouzdan za predaju i prezentaciju.  
+- Završno testiranje mora obuhvatiti kompletan *happy path* i najvažnije alternativne scenarije, kako bi sistem bio pouzdan za predaju i prezentaciju.

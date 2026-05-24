@@ -37,7 +37,7 @@ export type ZahtjevZaExpand = ServisniZahtjev & {
   podnosilac: { ime: string; prezime: string; broj_telefona: string | null } | null;
 };
 
-/** Oznake polja (Korisnik, Kontakt, …) — tipografija + 2px do vrijednosti */
+/** Oznake polja (Korisnik, Kontakt, …) - tipografija + 2px do vrijednosti */
 const POLJE_OZNAKA_KLASA =
   'mb-0.5 text-[11px] font-medium uppercase [letter-spacing:0.4px]';
 const POLJE_OZNAKA_BOJA = { color: 'var(--first-nonary)' } as const;
@@ -81,7 +81,7 @@ export function ZahtjevExpandSadrzaj({
   const opisSirovo = (zahtjev.description ?? '').trim();
   const opis = uRecenicu(skratiOpis ? skracenTekst(opisSirovo) : opisSirovo);
   const telefonSirovo = podnosilac?.broj_telefona?.trim() || zahtjev.contact_phone?.trim() || '';
-  const telefon = telefonSirovo || '—';
+  const telefon = telefonSirovo || '-';
   const telefonHref = telefonSirovo ? hrefZaTelefon(telefonSirovo) : null;
   const imePrezime = imePrezimePodnosioca(podnosilac);
   const imaOperativni = Boolean(zahtjev.final_priority?.trim());
@@ -156,7 +156,7 @@ export function ZahtjevExpandSadrzaj({
                       Adresa
                     </p>
                     <p className="break-words font-medium leading-snug" style={{ color: 'var(--first-octonary)' }}>
-                      {(zahtjev.address ?? '').trim() || '—'}
+                      {(zahtjev.address ?? '').trim() || '-'}
                     </p>
                     {imaKoordinate && (
                       <div className="mt-1">
@@ -289,7 +289,7 @@ export function ZahtjevExpandSadrzaj({
                   Adresa
                 </p>
                 <p className="break-words font-medium leading-snug" style={{ color: 'var(--first-octonary)' }}>
-                  {(zahtjev.address ?? '').trim() || '—'}
+                  {(zahtjev.address ?? '').trim() || '-'}
                 </p>
                 {imaKoordinate && (
                   <div className="mt-1">

@@ -1,4 +1,4 @@
-// ─── Status korisničkog naloga — dijeli admin/korisnici i admin/serviseri ─────
+// ─── Status korisničkog naloga - dijeli admin/korisnici i admin/serviseri ─────
 
 export type StatusKorisnika = 'aktivan' | 'neaktivan' | 'suspendovan';
 

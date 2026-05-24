@@ -7,7 +7,7 @@ import {
   Home, ShieldCheck, Wrench, Headphones,
   LayoutDashboard, ClipboardList, PlusCircle,
   Users, LogOut, Menu, X, ChevronRight,
-  UserCircle, ArrowLeftRight, ChevronDown,
+  UserCircle, ArrowLeftRight, ChevronDown, BarChart2,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
@@ -21,28 +21,28 @@ const ROLE_IDENTITET: Record<
   UserRole,
   { boja: string; pozadina: string; oznaka: string; LogoIkona: LucideIcon }
 > = {
-  // Plava (#2D5B9F) — konzistentna s KPI "Aktivnih zahtjeva"
+  // Plava (#2D5B9F) - konzistentna s KPI "Aktivnih zahtjeva"
   korisnik: {
     boja:      'var(--first-secondary)',
     pozadina:  'rgb(var(--first-secondary-rgb) / 0.12)',
     oznaka:    'Korisnički nalog',
     LogoIkona: Home,
   },
-  // Indigo — autoritetna, tamna boja za administraciju
+  // Indigo - autoritetna, tamna boja za administraciju
   admin: {
     boja:      '#4F46E5',
     pozadina:  'rgba(79,70,229,0.12)',
     oznaka:    'Admin Panel',
     LogoIkona: ShieldCheck,
   },
-  // Narandžasta (#D98400) — konzistentna s KPI "Hitnih slučajeva"
+  // Narandžasta (#D98400) - konzistentna s KPI "Hitnih slučajeva"
   serviser: {
     boja:      'var(--first-senary)',
     pozadina:  'rgb(var(--first-senary-rgb) / 0.12)',
     oznaka:    'Servisni nalog',
     LogoIkona: Wrench,
   },
-  // Zlatna (#F2C94C) — dispečer = koordinator, akcentna boja
+  // Zlatna (#F2C94C) - dispečer = koordinator, akcentna boja
   dispecer: {
     boja:      'var(--first-septenary)',
     pozadina:  'rgb(var(--first-septenary-rgb) / 0.15)',
@@ -67,14 +67,14 @@ const NAVIGACIJA_PO_ULOZI: Record<UserRole, StavkaNavigacije[]> = {
     { href: '/korisnik/zahtjevi/novi', oznaka: 'Kreiraj zahtjev',  Ikona: PlusCircle },
   ],
   serviser: [
-    { href: '/serviser',               oznaka: 'Pregled',       Ikona: LayoutDashboard },
-    { href: '/serviser/zadaci',        oznaka: 'Moji zadaci',   Ikona: ClipboardList },
-    { href: '/serviser/intervencije',  oznaka: 'Intervencije',  Ikona: Wrench },
+    { href: '/serviser',               oznaka: 'Pregled',        Ikona: LayoutDashboard },
+    { href: '/serviser/intervencije',  oznaka: 'Intervencije',   Ikona: Wrench },
   ],
   dispecer: [
-    { href: '/dispecer',               oznaka: 'Kontrolna ploča', Ikona: LayoutDashboard },
-    { href: '/dispecer/zahtjevi',      oznaka: 'Pregled zahtjeva', Ikona: ClipboardList },
-    { href: '/dispecer/intervencije',  oznaka: 'Intervencije',  Ikona: Wrench },
+    { href: '/dispecer',                      oznaka: 'Kontrolna ploča',  Ikona: LayoutDashboard },
+    { href: '/dispecer/zahtjevi',             oznaka: 'Pregled zahtjeva', Ikona: ClipboardList },
+    { href: '/dispecer/intervencije',         oznaka: 'Intervencije',     Ikona: Wrench },
+    { href: '/dispecer/izvjestaj/odziva',     oznaka: 'Izvještaj odziva', Ikona: BarChart2 },
   ],
   admin: [
     { href: '/admin',                  oznaka: 'Pregled',       Ikona: LayoutDashboard },
@@ -266,7 +266,7 @@ export function AppShell({ children, uloga, imeKorisnika }: AppShellProps) {
           borderBottom:    `1px solid ${boja}25`,
         }}
       >
-        {/* Brand — logo ikon se mijenja po ulozi */}
+        {/* Brand - logo ikon se mijenja po ulozi */}
         <Link href={`/${uloga}`} className="flex items-center gap-2">
           <div
             className="flex h-7 w-7 items-center justify-center rounded-lg"

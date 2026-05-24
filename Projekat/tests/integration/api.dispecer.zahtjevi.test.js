@@ -110,7 +110,7 @@ describe('/api/dispecer/zahtjevi route', () => {
     const body = await response.json();
 
     expect(response.status).toBe(200);
-    expect(serviceQuery.not).toHaveBeenCalledWith('status', 'in', '("zavrseno","otkazano","odbijeno")');
+    expect(serviceQuery.not).toHaveBeenCalledWith('status', 'in', '("zavrseno","zatvoreno","otkazano","odbijeno")');
     expect(body.zahtjevi).toHaveLength(2);
     expect(body.zahtjevi[0].podnosilac).toEqual({
       ime: 'A',

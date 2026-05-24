@@ -23,7 +23,7 @@ export const INITIAL_TRIAGE: TriageFormState = {
 };
 
 // ─── Pitanja ──────────────────────────────────────────────────────────────────
-// Ikone ShieldAlert i AlertTriangle su amber — standardni UI znak upozorenja.
+// Ikone ShieldAlert i AlertTriangle su amber - standardni UI znak upozorenja.
 // Sve ostale ikone su neutralno sive. Boja interakcije je plava (var(--first-primary)).
 
 const PITANJA = [
@@ -85,7 +85,7 @@ const PITANJA = [
   },
 ] as const;
 
-// ─── Opcija gumb — plava kad je odabrana ─────────────────────────────────────
+// ─── Opcija gumb - plava kad je odabrana ─────────────────────────────────────
 
 function OpcijaBtn({
   oznaka,
@@ -169,8 +169,8 @@ export function KorakTrijaza({
         </h2>
         <p className="text-sm" style={{ color: 'var(--first-nonary)' }}>
           {trijažaPreskočena
-            ? 'Uz uključenu premium hitnu intervenciju upitnik se ne popunjava — zahtjev se obrađuje kao hitan prema pravilima paketa.'
-            : 'Odgovorite na sva pitanja — sistem automatski određuje prioritet zahtjeva.'}
+            ? 'Uz uključenu premium hitnu intervenciju upitnik se ne popunjava - zahtjev se obrađuje kao hitan prema pravilima paketa.'
+            : 'Odgovorite na sva pitanja - sistem automatski određuje prioritet zahtjeva.'}
         </p>
       </div>
 
@@ -263,9 +263,9 @@ export function KorakTrijaza({
           <div className="mt-3 space-y-2 text-xs font-medium" style={{ color: 'var(--first-senary)' }}>
             <p>
               {premiumLifecycleStatus === 'pending_payment' &&
-                'Premium čeka potvrdu simulirane uplate — prvo dovršite korake na stranici Premium usluge.'}
-              {premiumLifecycleStatus === 'expired' && 'Premium je istekao — obnovite ga na stranici Premium usluge.'}
-              {premiumLifecycleStatus === 'cancelled' && 'Premium je otkazan — možete ga ponovo aktivirati na stranici Premium usluge.'}
+                'Premium čeka potvrdu simulirane uplate - prvo dovršite korake na stranici Premium usluge.'}
+              {premiumLifecycleStatus === 'expired' && 'Premium je istekao - obnovite ga na stranici Premium usluge.'}
+              {premiumLifecycleStatus === 'cancelled' && 'Premium je otkazan - možete ga ponovo aktivirati na stranici Premium usluge.'}
               {(premiumLifecycleStatus === 'inactive' || premiumLifecycleStatus === null) &&
                 'Ova opcija je dostupna samo sa aktivnim premium statusom.'}
             </p>
@@ -312,7 +312,7 @@ export function KorakTrijaza({
                   backgroundColor: 'rgb(var(--first-quinary-rgb) / 0.08)',
                 }}
               >
-                {/* Redni broj — plavi */}
+                {/* Redni broj - plavi */}
                 <div
                   className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full
                     text-xs font-bold"

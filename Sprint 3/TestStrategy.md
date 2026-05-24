@@ -244,6 +244,10 @@ Pojedini acceptance kriteriji mogu se provjeravati na više nivoa testiranja, u 
 | **US-30** | Učesnici procesa mogu razmjenjivati napomene na intervenciji | Sistemsko, UI | test unosa i prikaza napomena | napomena je uspješno spremljena i vidljiva na intervenciji |
 | **US-31** | Dispečer može pregledati sažeti operativni status intervencija na kontrolnoj tabli | Sistemsko, UI | test prikaza kontrolne table i operativnog statusa | prikazan je tačan i pregledan operativni status intervencija |
 | **US-32** | Ovlašteni korisnik može pregledati historiju aktivnosti intervencije | Sistemsko, UI | test audit traga i prikaza historije aktivnosti | prikazana je hronološka historija aktivnosti i promjena |
+| **US-44** | Tabelarni pregled historije aktivnosti | Sistemsko, UI | test toggle tabele/timeline i kolona polje/stara/nova vrijednost | tabela prikazuje audit zapise s autorom i ulogom |
+| **US-45** | SLA eskalacije | Integraciono, sistemsko | test batch eskalacije i notifikacije dispečeru | prekoračen SLA generiše aktivnost i obavijest (cooldown) |
+| **US-46** | Evidencija materijala i dijelova | Unit, integraciono, UI | test JSONB stavki u evidenciji rada | stavke (naziv, količina, jedinica) spremljene i vidljive |
+| **US-47** | Praćenje intervencije nije riješene iz prve | Integraciono, UI | test brojača ponovnog ciklusa i badge-a | broj ciklusa raste na vrati/nije riješeno; KPI reflektira |
 
 ### Veza testiranja sa nefunkcionalnim zahtjevima
 | ID zahtjeva | Oblast | Šta se provjerava | Nivo / vrsta testiranja | Način provjere | Očekivani rezultat |

@@ -9,7 +9,7 @@ export function jeDispecerIliAdmin(nazivUloge: string): boolean {
   return ['dispečer', 'dispecer', 'administrator', 'admin'].includes(n);
 }
 
-// supabase: any — izbjegava nekompatibilnost između @supabase/ssr i @supabase/supabase-js generičkih parametara
+// supabase: any - izbjegava nekompatibilnost između @supabase/ssr i @supabase/supabase-js generičkih parametara
 export async function assertDispatcherAccess(
   supabase: any,
   userId: string,

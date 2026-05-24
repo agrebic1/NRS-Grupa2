@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { assertDispatcherAccess } from '@/lib/servisirane/dispecerPristup';
 import { korisnickiBrojeviMapPoKorisniku } from '@/lib/servisirane/korisnickiBrojZahtjeva';
+import { obradiSlaEskalacijeBatch } from '@/lib/servisirane/slaEskalacije';
 
 export const dynamic = 'force-dynamic';
 
@@ -73,6 +74,18 @@ export async function GET(request: Request) {
         profili[o.id_osobe] = { ime: o.ime, prezime: o.prezime, broj_telefona: o.broj_telefona };
       }
     }
+
+    await obradiSlaEskalacijeBatch(
+      db,
+      (data ?? []).map((z: any) => ({
+        id:                    z.id,
+        status:                z.status,
+        created_at:            z.created_at,
+        operativni_prioritet:  z.operativni_prioritet ?? null,
+        sla_eskalacija_at:     z.sla_eskalacija_at ?? null,
+      })),
+      user.id,
+    );
 
     const zahtjeviSaPodnosiocima = (data ?? []).map((z: any, indeks: number) => ({
       ...z,

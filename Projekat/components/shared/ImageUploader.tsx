@@ -20,8 +20,8 @@ interface SlikaPreview {
   greska?: string;
 }
 
-const DOZVOLJENI_TIPOVI = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
-const MAX_MB = 5;
+const DOZVOLJENI_TIPOVI = ['image/jpeg', 'image/png', 'image/webp'];
+const MAX_MB = 10;
 
 function citat(bytes: number): string {
   if (bytes < 1024)       return `${bytes} B`;
@@ -145,7 +145,7 @@ export function ImageUploader({
               Prevuci slike ili klikni za odabir
             </p>
             <p className="text-xs mt-0.5" style={{ color: 'var(--first-nonary)' }}>
-              JPEG, PNG, WebP, GIF — max {MAX_MB} MB po slici
+              JPEG, PNG, WebP, GIF - max {MAX_MB} MB po slici
             </p>
           </div>
           <input

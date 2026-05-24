@@ -11,7 +11,7 @@ export type RazlozenaAdresa = {
   cjelovita: string;
   /** Ono što kartica/lista prikazuje odmah */
   skraceniPrikaz: string;
-  /** Nakon drugog zareza — općina, kanton, FBiH, BiH … */
+  /** Nakon drugog zareza - općina, kanton, FBiH, BiH … */
   administrativniNastavak: string | null;
   /** Treba li tooltip ili <details> (duga jedna linija ili 3+ segmenta) */
   imaSkriveno: boolean;
@@ -22,7 +22,7 @@ export function razloziAdresu(cjelovita: string | null | undefined): RazlozenaAd
   if (!puna) {
     return {
       cjelovita: '',
-      skraceniPrikaz: '—',
+      skraceniPrikaz: '-',
       administrativniNastavak: null,
       imaSkriveno: false,
     };
@@ -33,7 +33,7 @@ export function razloziAdresu(cjelovita: string | null | undefined): RazlozenaAd
   if (dijelovi.length === 0) {
     return {
       cjelovita: puna,
-      skraceniPrikaz: '—',
+      skraceniPrikaz: '-',
       administrativniNastavak: null,
       imaSkriveno: false,
     };

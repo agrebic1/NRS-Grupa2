@@ -3,9 +3,10 @@
 import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ClipboardList, ChevronRight,
-  RefreshCw, XCircle, BellOff,
-  AlertTriangle, CheckCircle2, UserCheck, Zap, Inbox,
+  RefreshCw, XCircle, Bell,
+  AlertTriangle, CheckCircle2, UserCheck, Zap, Inbox, Clock,
 } from 'lucide-react';
+import { getSlaStatus } from '@/lib/servisirane/slaPravila';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { AppShell } from '@/components/layout/AppShell';
@@ -229,7 +230,7 @@ function DispecerPageContent() {
     setOdabraniZahtjevId(prikazaniZahtjevId);
   }, [prikazaniZahtjevId, odabraniZahtjevId]);
 
-  /** Samo ukloni ?z kad inbox postane prazan — bez stalnog replace() koji uzrokuje trešnju. */
+  /** Samo ukloni ?z kad inbox postane prazan - bez stalnog replace() koji uzrokuje trešnju. */
   useEffect(() => {
     if (!splitPanelAktivan || ucitava) return;
     if (zahtjeviCekajuObradu.length === 0 && zIzUrl) {
@@ -289,6 +290,7 @@ function DispecerPageContent() {
     const n = new Date();
     return d.getFullYear() === n.getFullYear() && d.getMonth() === n.getMonth() && d.getDate() === n.getDate();
   }).length;
+  const slaPrekoracenoBr = zahtjevi.filter((z) => getSlaStatus(z.created_at, z.final_priority, z.status) === 'prekoraceno').length;
 
   return (
     <>
@@ -312,14 +314,15 @@ function DispecerPageContent() {
         </Button>
       </div>
 
-      <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+      <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
         {[
-          { oznaka: 'Novi zahtjevi',    v: noviPregledBr,   boja: DISPECER_PALETA_STATUS.inbox.kpi,           Ikona: Inbox,        href: '/dispecer/zahtjevi?filter=novi'      },
-          { oznaka: 'U obradi',         v: uObradiPregledBr, boja: DISPECER_PALETA_STATUS.uObradi.kpi,        Ikona: ClipboardList, href: '/dispecer/zahtjevi?filter=u_obradi' },
-          { oznaka: 'Hitni',            v: hitniB,           boja: '#DC2626',                                  Ikona: Zap,           href: '/dispecer/zahtjevi'                 },
-          { oznaka: 'Potvrđeni',        v: potvrdenoBr,      boja: DISPECER_PALETA_STATUS.terminPotvrden.kpi, Ikona: CheckCircle2,  href: '/dispecer/zahtjevi?filter=potvrdeni'},
-          { oznaka: 'Na terenu',        v: dodijeljeniiBr,   boja: DISPECER_PALETA_STATUS.uToku.kpi,           Ikona: UserCheck,     href: '/dispecer/zahtjevi'                 },
-          { oznaka: 'Završeni danas',   v: zavrsenoDanaBr,   boja: DISPECER_PALETA_STATUS.zavrseno.kpi,        Ikona: CheckCircle2,  href: '/dispecer/zahtjevi?filter=zavrseni' },
+          { oznaka: 'Novi zahtjevi',    v: noviPregledBr,      boja: DISPECER_PALETA_STATUS.inbox.kpi,                                          Ikona: Inbox,        href: '/dispecer/zahtjevi?filter=novi'      },
+          { oznaka: 'U obradi',         v: uObradiPregledBr,   boja: DISPECER_PALETA_STATUS.uObradi.kpi,                                        Ikona: ClipboardList, href: '/dispecer/zahtjevi?filter=u_obradi' },
+          { oznaka: 'Hitni',            v: hitniB,             boja: '#DC2626',                                                                  Ikona: Zap,           href: '/dispecer/zahtjevi'                 },
+          { oznaka: 'Potvrđeni',        v: potvrdenoBr,        boja: DISPECER_PALETA_STATUS.terminPotvrden.kpi,                                  Ikona: CheckCircle2,  href: '/dispecer/zahtjevi?filter=potvrdeni'},
+          { oznaka: 'Na terenu',        v: dodijeljeniiBr,     boja: DISPECER_PALETA_STATUS.uToku.kpi,                                           Ikona: UserCheck,     href: '/dispecer/zahtjevi'                 },
+          { oznaka: 'Završeni danas',   v: zavrsenoDanaBr,     boja: DISPECER_PALETA_STATUS.zavrseno.kpi,                                        Ikona: CheckCircle2,  href: '/dispecer/zahtjevi?filter=zavrseni' },
+          { oznaka: 'Prekoračen SLA',   v: slaPrekoracenoBr,   boja: slaPrekoracenoBr > 0 ? '#DC2626' : DISPECER_PALETA_STATUS.zavrseno.kpi,     Ikona: Clock,         href: '/dispecer/intervencije?filter=sla'  },
         ].map(({ oznaka, v, boja, Ikona, href }) => (
           <Link
             key={oznaka}
@@ -373,6 +376,13 @@ function DispecerPageContent() {
             <p className="mt-1 text-sm" style={{ color: 'var(--first-nonary)' }}>
               Kada korisnik pošalje zahtjev, pojaviće se ovdje.
             </p>
+            <Link
+              href="/dispecer/zahtjevi"
+              className="mt-3 inline-flex items-center gap-1 text-sm font-medium transition-opacity hover:opacity-70"
+              style={{ color: 'var(--first-secondary)' }}
+            >
+              Pregled svih zahtjeva <ChevronRight className="h-3.5 w-3.5" />
+            </Link>
           </div>
         )}
         {!ucitava && zahtjevi.length > 0 && zahtjeviCekajuObradu.length === 0 && (
@@ -381,8 +391,15 @@ function DispecerPageContent() {
               Inbox je prazan
             </p>
             <p className="mt-1 text-sm" style={{ color: 'var(--first-nonary)' }}>
-              Nema zahtjeva koji čekaju prioritet ili čarobnjak. Ostali aktivni zahtjevi: lista zahtjeva.
+              Nema zahtjeva koji čekaju prioritet ili wizard.
             </p>
+            <Link
+              href="/dispecer/zahtjevi"
+              className="mt-3 inline-flex items-center gap-1 text-sm font-medium transition-opacity hover:opacity-70"
+              style={{ color: 'var(--first-secondary)' }}
+            >
+              Pogledaj aktivne zahtjeve <ChevronRight className="h-3.5 w-3.5" />
+            </Link>
           </div>
         )}
         {!ucitava && zahtjeviCekajuObradu.length > 0 && (
@@ -403,7 +420,7 @@ function DispecerPageContent() {
                       </p>
                       {noviInboxPodaci.uredjeni.length === 0 ? (
                         <p className="text-xs leading-relaxed" style={{ color: 'var(--first-nonary)' }}>
-                          Nema novih — svi imaju potvrđen operativni prioritet.
+                          Nema novih - svi imaju potvrđen operativni prioritet.
                         </p>
                       ) : (
                         <div className="flex min-w-0 flex-col gap-4">
@@ -453,7 +470,7 @@ function DispecerPageContent() {
                       </p>
                       {uObradiInboxPodaci.uredjeni.length === 0 ? (
                         <p className="text-xs leading-relaxed" style={{ color: 'var(--first-nonary)' }}>
-                          Nema zahtjeva u čarobnjaku — svi još čekaju prioritet (Novi).
+                          Nema zahtjeva u wizardu - svi još čekaju prioritet (Novi).
                         </p>
                       ) : (
                         <div className="flex min-w-0 flex-col gap-4">
@@ -555,7 +572,7 @@ function DispecerPageContent() {
                   </p>
                   {uObradiInboxPodaci.uredjeni.length === 0 ? (
                     <p className="text-xs" style={{ color: 'var(--first-nonary)' }}>
-                      Nema zahtjeva u čarobnjaku.
+                      Nema zahtjeva u wizardu.
                     </p>
                   ) : (
                     <ul className="flex min-w-0 flex-col gap-3">
@@ -592,7 +609,7 @@ function DispecerPageContent() {
             className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg"
             style={{ backgroundColor: `${toast.boja}15` }}
           >
-            <BellOff className="h-4 w-4" style={{ color: toast.boja }} />
+            <Bell className="h-4 w-4" style={{ color: toast.boja }} />
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-xs font-bold uppercase tracking-wide" style={{ color: toast.boja }}>

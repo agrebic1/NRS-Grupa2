@@ -247,7 +247,7 @@ export default function ServiserIntervencijaListaPage() {
             Intervencije
           </h1>
           <p className="mt-1 text-sm" style={{ color: 'var(--first-nonary)' }}>
-            Sve vaše intervencije — kao glavni i pomoćni serviser
+            Sve vaše intervencije - kao glavni i pomoćni serviser
           </p>
         </div>
         <button type="button" onClick={ucitaj} disabled={ucitava}

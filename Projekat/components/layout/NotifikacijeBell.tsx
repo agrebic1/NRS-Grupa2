@@ -36,6 +36,7 @@ const TIP_CFG: Record<TipNotifikacije | string, TipConfig> = {
   promjena_uloge:         { Ikona: Shield,          boja: '#7C3AED'                },
   promjena_statusa_naloga:{ Ikona: ShieldCheck,     boja: 'var(--first-secondary)' },
   sistemska_obavijest:    { Ikona: AlertCircle,     boja: '#D97706'                },
+  sla_eskalacija:         { Ikona: AlertCircle,     boja: '#DC2626'                },
 };
 
 const FALLBACK_CFG: TipConfig = { Ikona: Bell, boja: 'var(--first-nonary)' };

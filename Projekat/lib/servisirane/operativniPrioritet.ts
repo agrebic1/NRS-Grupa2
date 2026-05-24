@@ -1,4 +1,4 @@
-/** Tri grupe u inboxu / sortiranju — isključivo iz `final_priority`, ne iz korisničke hitnosti. */
+/** Tri grupe u inboxu / sortiranju - isključivo iz `final_priority`, ne iz korisničke hitnosti. */
 export type DispecerskaOperativnaGrupa = 'Hitno' | 'Srednja' | 'Niska';
 
 /**

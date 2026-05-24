@@ -40,7 +40,7 @@ export default function RegistracijaPage() {
       <Link
         href="/#hero"
         className="relative z-10 mb-7 flex w-fit items-center gap-2.5 rounded-xl p-1 -m-1 outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[rgb(var(--first-septenary-rgb)/0.45)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--first-tertiary)]"
-        aria-label="InterServ — povratak na početnu stranicu"
+        aria-label="InterServ - povratak na početnu stranicu"
       >
         <div
           className="flex h-9 w-9 items-center justify-center rounded-xl"

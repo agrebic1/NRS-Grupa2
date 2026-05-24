@@ -18,7 +18,7 @@ const dodajSchema = z.object({
   serviser_id: z.string().uuid('Neispravan UUID servisera.'),
 });
 
-/** GET /api/dispecer/zahtjevi/[id]/tim — lista pomoćnih servisera */
+/** GET /api/dispecer/zahtjevi/[id]/tim - lista pomoćnih servisera */
 export async function GET(
   _req: Request,
   { params }: { params: RouteParams }
@@ -57,7 +57,7 @@ export async function GET(
   }
 }
 
-/** POST /api/dispecer/zahtjevi/[id]/tim — dodaj pomoćnog servisera */
+/** POST /api/dispecer/zahtjevi/[id]/tim - dodaj pomoćnog servisera */
 export async function POST(
   request: Request,
   { params }: { params: RouteParams }
@@ -151,7 +151,7 @@ export async function POST(
   }
 }
 
-/** DELETE /api/dispecer/zahtjevi/[id]/tim?serviser_id=UUID — ukloni pomoćnog servisera */
+/** DELETE /api/dispecer/zahtjevi/[id]/tim?serviser_id=UUID - ukloni pomoćnog servisera */
 export async function DELETE(
   request: Request,
   { params }: { params: RouteParams }

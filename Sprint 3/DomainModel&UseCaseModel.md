@@ -581,3 +581,47 @@ U sljedećoj tabeli su prikazani svi entiteti i svi atributi koji im pripadaju:
 | **Glavni tok** | 1. Dispečer otvara listu intervencija.<br>2. Dispečer bira intervenciju.<br>3. Dispečer otvara sekciju historije aktivnosti.<br>4. Sistem prikazuje hronološki zapis svih aktivnosti (statusi, promjene, dodjele itd.).<br>5. Sistem prikazuje dodatne informacije (vrijeme, korisnik, opis aktivnosti).<br>6. Dispečer pregledava historiju i analizira tok obrade. |
 | **Alternativni tokovi** | **A1: Nema historije aktivnosti**<br>3a. Intervencija nema evidentiranu historiju.<br>4a. Sistem prikazuje poruku da nema dostupnih podataka.<br><br>**A2: Greška pri učitavanju**<br>4a. Sistem ne može učitati podatke.<br>5a. Sistem prikazuje poruku o grešci.<br><br>**A3: Neovlašten pristup**<br>2a. Korisnik bez odgovarajuće uloge pokuša pristupiti.<br>3a. Sistem blokira pristup.<br>4a. Sistem prikazuje poruku o zabrani pristupa. |
 | **Ishod** | Dispečer ima potpun uvid u tok obrade intervencije.<br>Osigurana je transparentnost procesa.<br>Omogućeno je praćenje svih promjena.<br>Sistem podržava audit i kontrolu rada. |
+
+## Use Case 44 (US-44)
+
+| Stavka | Sadržaj |
+|--------|--------|
+| **Aktor** | Dispečer, Serviser |
+| **Naziv use case-a** | Tabelarni pregled historije aktivnosti |
+| **Kratak opis** | Ovlašteni korisnik pregledava audit zapise u tabelarnom prikazu uz timeline (polje, stara/nova vrijednost, autor, uloga). |
+| **Preduslovi** | Korisnik je prijavljen; postoji intervencija s historijom aktivnosti. |
+| **Glavni tok** | 1. Korisnik otvara detalj intervencije.<br>2. Otvara historiju.<br>3. Prebacuje na Tabelu.<br>4. Sistem prikazuje audit redove.<br>5. Korisnik analizira promjene. |
+| **Ishod** | Transparentan tabelarni audit pregled. |
+
+## Use Case 45 (US-45)
+
+| Stavka | Sadržaj |
+|--------|--------|
+| **Aktor** | Sistem, Dispečer |
+| **Naziv use case-a** | SLA eskalacija |
+| **Kratak opis** | Prekoračen SLA prag pokreće aktivnost i notifikaciju dispečeru (cooldown 6h). |
+| **Preduslovi** | Aktivna intervencija; SLA prekoračen. |
+| **Glavni tok** | 1. Sistem detektuje prekoračenje.<br>2. Bilježi sla_eskalacija.<br>3. Šalje notifikaciju.<br>4. Ažurira sla_eskalacija_at. |
+| **Ishod** | Pravovremena reakcija na prekoračenje. |
+
+## Use Case 46 (US-46)
+
+| Stavka | Sadržaj |
+|--------|--------|
+| **Aktor** | Serviser |
+| **Naziv use case-a** | Evidencija materijala i dijelova |
+| **Kratak opis** | Strukturirane stavke (naziv, količina, jedinica) uz evidenciju rada. |
+| **Preduslovi** | Intervencija u izvršenju. |
+| **Glavni tok** | 1. Serviser otvara evidenciju.<br>2. Unosi stavke.<br>3. Sistem sprema stavke_materijala. |
+| **Ishod** | Materijal strukturirano evidentiran. |
+
+## Use Case 47 (US-47)
+
+| Stavka | Sadržaj |
+|--------|--------|
+| **Aktor** | Serviser, Dispečer |
+| **Naziv use case-a** | Praćenje intervencije nije riješene iz prve |
+| **Kratak opis** | Brojač ponovnih ciklusa i badge na detalju/KPI. |
+| **Preduslovi** | Dozvoljen alternativni tok. |
+| **Glavni tok** | 1. Serviser vrati/nije riješeno.<br>2. Sistem inkrementira broj_ponovnih_ciklusa.<br>3. Prikazuje badge. |
+| **Ishod** | Vidljivost ponovnih pokušaja rješavanja. |

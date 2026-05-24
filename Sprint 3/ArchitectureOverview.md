@@ -111,7 +111,10 @@ Svaka cjelina sadrži module koji su raspoređeni po slojevima arhitekture.
         ├── Pregled evidentiranog rada — dispečer (US-24)
         ├── Potvrda i zatvaranje intervencije (US-25)
         ├── Napomene na intervenciji (US-30)
-        └── Historija aktivnosti / audit trail (US-32)
+        ├── Historija aktivnosti / audit trail (US-32, US-39, US-44)
+        ├── SLA eskalacije (US-41, US-45)
+        ├── Evidencija materijala — stavke (US-46)
+        └── Praćenje ponovnog ciklusa — FTR (US-47)
 ```
 
 ## 3. Odgovornosti komponenti

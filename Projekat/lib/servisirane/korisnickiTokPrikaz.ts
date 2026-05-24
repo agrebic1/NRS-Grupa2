@@ -1,6 +1,7 @@
 import type { CSSProperties } from 'react';
 import type { ServisniZahtjev } from '@/domain/types/servisirane';
 import { DISPECER_PALETA_HITNOST } from '@/lib/servisirane/dispecerPaleta';
+import { KORISNIK_PALETA_DASHBOARD_STATUS } from '@/lib/servisirane/statusBoja';
 import {
   korisnickiDashboardStatus,
   type KorisnickiDashboardStatus,
@@ -12,24 +13,25 @@ import {
 } from '@/lib/servisirane/urgency';
 
 /**
- * Isti smisao kao bedž na početnoj / listi zahtjeva — jedna oznaka životnog ciklusa.
+ * Tekst bedža u korisničkoj listi/detalju - jedna oznaka životnog ciklusa.
  */
 export function korisnickiTokBedzTekst(zahtjev: ServisniZahtjev): string {
-  const d = korisnickiDashboardStatus(zahtjev.status, zahtjev.urgency_score, zahtjev.final_priority);
+  const d = korisnickiDashboardStatus(zahtjev.status, zahtjev.final_priority);
   if (d === 'novi') return oznakaInboxHitnostiCekaObradu(zahtjev);
   const MAP: Record<KorisnickiDashboardStatus, string> = {
-    novi: '',
-    hitno: 'Visoka hitnost (čeka obradu)',
-    u_obradi: 'Dispečer obrađuje',
-    u_toku: 'Na terenu',
-    zavrseno: 'Završeno',
-    otkazano: 'Otkazano',
-    odbijeno: 'Odbijeno',
+    novi:      '',
+    u_obradi:  'Dispečer obrađuje',
+    potvrdeno: 'Serviser dodijeljen',
+    u_toku:    'Na terenu',
+    zavrseno:  'Završeno',
+    zatvoreno: 'Zatvoreno',
+    otkazano:  'Otkazano',
+    odbijeno:  'Odbijeno',
   };
   return MAP[d] ?? d;
 }
 
-function stilHitnostiZaNovuIHitnu(zahtjev: ServisniZahtjev): CSSProperties {
+function stilHitnostiZaNovi(zahtjev: ServisniZahtjev): CSSProperties {
   const tri = oznakaKorisnickeHitnostiTriRazine(efektivniKorisnickiUrgencyScore(zahtjev));
   const kljuc = tri === 'Niska' ? 'Niska' : tri === 'Srednja' ? 'Srednja' : 'Hitno';
   const cfg = DISPECER_PALETA_HITNOST[kljuc];
@@ -40,35 +42,12 @@ function stilHitnostiZaNovuIHitnu(zahtjev: ServisniZahtjev): CSSProperties {
   };
 }
 
-/** Stil bedža — usklađeno s `stilStatusBedzaZaDashboard` na početnoj korisnika. */
+/** Stil bedža - usklađeno s `stilStatusBedzaZaDashboard` na početnoj korisnika. */
 export function korisnickiTokBedzStil(zahtjev: ServisniZahtjev): CSSProperties {
-  const d = korisnickiDashboardStatus(zahtjev.status, zahtjev.urgency_score, zahtjev.final_priority);
-  if (d === 'novi' || d === 'hitno') return stilHitnostiZaNovuIHitnu(zahtjev);
+  const d = korisnickiDashboardStatus(zahtjev.status, zahtjev.final_priority);
+  if (d === 'novi') return stilHitnostiZaNovi(zahtjev);
 
-  const B: Record<
-    Exclude<KorisnickiDashboardStatus, 'novi' | 'hitno'>,
-    CSSProperties
-  > = {
-    u_obradi: { backgroundColor: 'rgba(202,138,4,0.12)', color: '#A16207' },
-    u_toku: {
-      backgroundColor: 'rgb(var(--first-secondary-rgb) / 0.14)',
-      color:             'var(--first-secondary)',
-    },
-    zavrseno: {
-      backgroundColor: 'rgb(var(--first-septenary-rgb) / 0.18)',
-      color:             'var(--first-septenary)',
-    },
-    otkazano: {
-      backgroundColor: 'rgb(var(--first-quinary-rgb) / 0.3)',
-      color:             'var(--first-nonary)',
-    },
-    odbijeno: {
-      backgroundColor: 'rgb(var(--first-senary-rgb) / 0.2)',
-      color:             'var(--first-senary)',
-    },
-  };
-  return B[d as keyof typeof B] ?? {
-    backgroundColor: 'rgb(var(--first-quinary-rgb) / 0.22)',
-    color:           'var(--first-nonary)',
-  };
+  const slot = KORISNIK_PALETA_DASHBOARD_STATUS[d as keyof typeof KORISNIK_PALETA_DASHBOARD_STATUS];
+  if (!slot) return { backgroundColor: 'rgb(var(--first-quinary-rgb) / 0.22)', color: 'var(--first-nonary)' };
+  return { backgroundColor: slot.pozadina, color: slot.boja };
 }

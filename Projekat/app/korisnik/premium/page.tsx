@@ -167,7 +167,16 @@ export default function KorisnikPremiumPage() {
       await ucitajProfil();
       await ucitajEvente();
     } catch (err) {
-      setGreska(err instanceof Error ? err.message : 'Akcija nije uspjela.');
+      const rawMsg = err instanceof Error ? err.message : 'Akcija nije uspjela.';
+      const jeSirovaDatabaseGreska =
+        rawMsg.includes('row-level security') ||
+        rawMsg.includes('violates') ||
+        rawMsg.includes('policy for table');
+      setGreska(
+        jeSirovaDatabaseGreska
+          ? 'Došlo je do greške prilikom otkazivanja premium usluge. Pokušajte ponovo.'
+          : rawMsg
+      );
     } finally {
       setAkcijaUToku(null);
     }

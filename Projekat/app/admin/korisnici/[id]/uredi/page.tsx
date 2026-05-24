@@ -74,7 +74,7 @@ const AKCIJA_CFG: Record<string, { oznaka: string; boja: string }> = {
 };
 
 function fmtDatumVrijeme(iso: string | null | undefined): string {
-  if (!iso) return '—';
+  if (!iso) return '-';
   return new Date(iso).toLocaleString('bs-BA', {
     day: '2-digit', month: '2-digit', year: 'numeric',
     hour: '2-digit', minute: '2-digit',
@@ -82,7 +82,7 @@ function fmtDatumVrijeme(iso: string | null | undefined): string {
 }
 
 function fmtDatum(iso: string | null | undefined): string {
-  if (!iso) return '—';
+  if (!iso) return '-';
   return new Date(iso).toLocaleDateString('bs-BA', { day: '2-digit', month: '2-digit', year: 'numeric' });
 }
 
@@ -531,7 +531,7 @@ export default function UrediKorisnikaPage() {
       {/* ── Two-column layout ────────────────────────────────────────────── */}
       <div className="flex flex-col gap-5 lg:flex-row lg:items-start">
 
-        {/* ══ LEFT — forms ═══════════════════════════════════════════════ */}
+        {/* ══ LEFT - forms ═══════════════════════════════════════════════ */}
         <div className="min-w-0 flex-1 flex flex-col gap-5">
 
           {/* Osnovni podaci */}
@@ -575,7 +575,7 @@ export default function UrediKorisnikaPage() {
                 />
               </div>
 
-              {/* Email — read-only */}
+              {/* Email - read-only */}
               <div className="flex flex-col gap-1.5 sm:col-span-2">
                 <div className="flex items-center gap-2">
                   <label className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--first-nonary)' }}>
@@ -716,7 +716,7 @@ export default function UrediKorisnikaPage() {
           </div>
         </div>
 
-        {/* ══ RIGHT — operational panel ═══════════════════════════════════ */}
+        {/* ══ RIGHT - operational panel ═══════════════════════════════════ */}
         <div className="lg:w-80 xl:w-88 flex-shrink-0 flex flex-col gap-4">
 
           {/* Status naloga */}
@@ -803,7 +803,7 @@ export default function UrediKorisnikaPage() {
                 </button>
               )}
 
-              {/* Password reset — informational (no backend yet) */}
+              {/* Password reset - informational (no backend yet) */}
               <div className="flex w-full items-center gap-3 rounded-xl p-3.5 opacity-50"
                 style={{ backgroundColor: 'rgb(var(--first-quinary-rgb)/0.15)', border: '1px dashed rgb(var(--first-quaternary-rgb)/0.4)' }}>
                 <KeyRound className="h-4 w-4 flex-shrink-0" style={{ color: 'var(--first-nonary)' }} />

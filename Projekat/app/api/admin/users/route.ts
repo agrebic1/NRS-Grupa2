@@ -437,7 +437,7 @@ export async function POST(request: Request) {
           email_sent: false,
         });
       } catch {
-        // audit nije kritičan — nastavi s greškom
+        // audit nije kritičan - nastavi s greškom
       }
     }
     const message = error instanceof Error ? error.message : 'Neočekivana greška pri kreiranju korisnika.';

@@ -30,7 +30,7 @@ type ZahtjevSaSlikama = {
 };
 
 /**
- * URL-ovi priloženih slika — spaja photo_url, poznata polja i uobičajene JSON ključeve.
+ * URL-ovi priloženih slika - spaja photo_url, poznata polja i uobičajene JSON ključeve.
  */
 export function urlsPrilozenihSlika(zahtjev: ZahtjevSaSlikama & Record<string, unknown>): string[] {
   const out: string[] = [];

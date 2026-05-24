@@ -9,7 +9,7 @@ Ovaj initial release plan izrađen je na osnovu product backloga, user storyja, 
 | Inkrement | Fokus | Sprintovi | Release tačka |
 |---|---|---|---|
 | **Inkrement 1** | osnovni korisnički i dispečerski tok | 5-8 | kraj Sprinta 8 |
-| **Inkrement 2** | izvršenje intervencije, zatvaranje i administrativna kontrola | 9-10 | kraj Sprinta 10 |
+| **Inkrement 2** | izvršenje intervencije, zatvaranje i administrativna kontrola | 9 | kraj Sprinta 9 |
 
 ---
 
@@ -54,7 +54,7 @@ Ovaj initial release plan izrađen je na osnovu product backloga, user storyja, 
 | **Glavne funkcionalnosti** | **Dodjela i operativna organizacija rada**<br>- dodjela intervencije glavnom izvršiocu<br>- dodjela intervencije timu servisera<br>- promjena izvršioca intervencije<br>- vraćanje zadatka na ponovnu dodjelu<br><br>**Serviserski tok izvršenja**<br>- pregled dodijeljenih intervencija od strane servisera<br>- pregled detalja zadatka na terenu<br>- prihvatanje zadatka<br>- odbijanje zadatka<br>- ažuriranje statusa intervencije od strane servisera<br>- evidentiranje izvršenog rada<br><br>**Zatvaranje i praćenje intervencije**<br>- pregled evidentiranog rada od strane dispečera<br>- potvrda i zatvaranje intervencije<br>- razmjena napomena na intervenciji<br>- pregled historije aktivnosti intervencije<br><br>**Administrativna i nadzorna kontrola**<br>- pregled korisničkih naloga<br>- promjena korisničke uloge<br>- deaktivacija korisničkog naloga<br>- pregled sažetog operativnog statusa na kontrolnoj tabli |
 | **Zavisnosti** | - stabilno implementiran prvi inkrement<br>- jasno definisana pravila statusnih prelaza<br>- konzistentan model intervencije, dodjele i izvršioca<br>- funkcionalna veza između korisničkog, dispečerskog i serviserskog dijela sistema<br>- osnovna podrška za evidenciju aktivnosti i audit trag |
 | **Glavni rizici** | - visoka složenost alternativnih i operativnih tokova<br>- ograničeno backend znanje u timu i oslanjanje na manji broj ključnih članova<br>- problemi pri dodjeli, odbijanju i preraspodjeli zadataka<br>- regresije ranije implementiranih funkcionalnosti<br>- greške u evidenciji rada, historiji aktivnosti i zatvaranju intervencije<br>- prenatrpanost sprintova 9 i 10 ako se previše složenih funkcionalnosti razvija paralelno |
-| **Okvirni sprintovi realizacije** | **Sprint 9-10**<br>**Planirana release tačka:** kraj Sprinta 10 |
+| **Okvirni sprintovi realizacije** | **Sprint 9**<br>**Planirana release tačka:** kraj Sprinta 9 |
 
 ---
 
@@ -81,10 +81,17 @@ Ovaj initial release plan izrađen je na osnovu product backloga, user storyja, 
 | PBI-019 | Potvrda i zatvaranje intervencije | US-25 Potvrda i zatvaranje intervencije |
 | PBI-020 | Napomene na intervenciji | US-30 Razmjena napomena na intervenciji |
 | PBI-021 | Historija aktivnosti intervencije | US-32 Pregled historije aktivnosti intervencije |
+| PBI-021 | Historija aktivnosti intervencije | US-39 Audit trail sa starim i novim vrijednostima |
+| PBI-021 | Historija aktivnosti intervencije | US-44 Tabelarni pregled historije aktivnosti |
+| PBI-009 | Pregled operativnog statusa na kontrolnoj tabli | US-41 SLA praćenje |
+| PBI-009 | Pregled operativnog statusa na kontrolnoj tabli | US-45 SLA eskalacije |
+| PBI-017 | Evidentiranje izvršenog rada | US-38 Obavezno trajanje pri evidentiranju rada |
+| PBI-017 | Evidentiranje izvršenog rada | US-43 Upload fotografije intervencije |
+| PBI-017 | Evidentiranje izvršenog rada | US-46 Evidencija materijala i dijelova |
+| PBI-013 | Preraspodjela i ponovna dodjela intervencije | US-40 Označavanje intervencije kao nije riješena |
+| PBI-013 | Preraspodjela i ponovna dodjela intervencije | US-47 Praćenje nije riješeno iz prve |
 
----
-
-> **Napomena:** Iz prikazanih kontrolnih tabela vidi se da su svi definisani PBI-jevi i svih 32 user storyja obuhvaćeni release planom i raspoređeni u jedan od dva planirana inkrementa. Na taj način osigurana je potpuna pokrivenost product backloga kroz planirane release cjeline.
+> **Napomena:** Kontrolne tabele obuhvataju PBI-jeve i user storyje US-01–US-47 raspoređene u dva planirana inkrementa. Sprint 9 zatvara Inkrement 2.
 
 ## Završna stabilizacija
 

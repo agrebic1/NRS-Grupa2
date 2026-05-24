@@ -26,7 +26,7 @@ import {
 import { DispecerPremiumKruna } from '@/components/servisirane/zahtjevBadgeovi';
 import { KorisnikPregledTokaBadzevi } from '@/components/korisnik/KorisnikPregledTokaBadzevi';
 
-// ─── Životni ciklus statusa — Triple Coding ───────────────────────────────────
+// ─── Životni ciklus statusa - Triple Coding ───────────────────────────────────
 
 export const STATUS_LIFECYCLE: Record<
   StatusZahtjeva,
@@ -38,7 +38,7 @@ export const STATUS_LIFECYCLE: Record<
     Ikona: ComponentType<{ className?: string; style?: CSSProperties }>;
   }
 > = {
-  // Čekanje — amber (potrebna akcija dispečera)
+  // Čekanje - amber (potrebna akcija dispečera)
   pending_review: {
     oznaka: 'Novi',
     boja: 'var(--first-senary)',
@@ -60,7 +60,7 @@ export const STATUS_LIFECYCLE: Record<
     border: 'rgb(var(--first-senary-rgb) / 0.28)',
     Ikona: Clock,
   },
-  // Potvrđeno/dodijeljeno — plava (na putu k rješavanju)
+  // Potvrđeno/dodijeljeno - plava (na putu k rješavanju)
   potvrdeno: {
     oznaka: 'Potvrđeno',
     boja: 'var(--first-secondary)',
@@ -75,7 +75,7 @@ export const STATUS_LIFECYCLE: Record<
     border: 'rgb(var(--first-secondary-rgb) / 0.22)',
     Ikona: CheckCircle2,
   },
-  // Aktivna intervencija — plava (u tijeku)
+  // Aktivna intervencija - plava (u tijeku)
   u_radu: {
     oznaka: 'Na putu',
     boja: 'var(--first-secondary)',
@@ -90,7 +90,7 @@ export const STATUS_LIFECYCLE: Record<
     border: 'rgb(var(--first-secondary-rgb) / 0.22)',
     Ikona: Truck,
   },
-  // Završeno/arhivirano — neutralno (bez potrebne akcije)
+  // Završeno/arhivirano - neutralno (bez potrebne akcije)
   zavrseno: {
     oznaka: 'Završeno',
     boja: 'var(--first-nonary)',
@@ -160,7 +160,7 @@ export function StatusBadge({
   );
 }
 
-// ─── Kartica zahtjeva — isti raspored kao DispecerskaZahtjevKartica (rub, chipovi, datum) ─
+// ─── Kartica zahtjeva - isti raspored kao DispecerskaZahtjevKartica (rub, chipovi, datum) ─
 
 interface ZahtjevKarticaProps {
   zahtjev: ServisniZahtjev;
@@ -199,7 +199,7 @@ export function ZahtjevKartica({ zahtjev, onUredi, onOtkazi }: ZahtjevKarticaPro
           : DISPECER_PALETA_HITNOST[grupaInboxaPoKorisniku].border,
       }}
     >
-      <div className="flex min-w-0 flex-col gap-0 px-3 py-3 sm:px-4">
+      <div className="flex min-w-0 flex-1 flex-col gap-0 px-3 py-3 sm:px-4">
         <div className="flex min-w-0 items-start justify-between gap-2">
           <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1.5">
             <span className="inline-flex max-w-full shrink-0 items-center gap-1.5">
@@ -239,7 +239,7 @@ export function ZahtjevKartica({ zahtjev, onUredi, onOtkazi }: ZahtjevKarticaPro
             </p>
           ) : null}
           <p className="break-words text-sm font-medium leading-snug" style={{ color: 'var(--first-nonary)' }}>
-            {(zahtjev.address ?? '').trim() || '—'}
+            {(zahtjev.address ?? '').trim() || '-'}
           </p>
         </div>
 

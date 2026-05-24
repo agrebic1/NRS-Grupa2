@@ -570,7 +570,7 @@ export function KorakLokacija({
           locationError:          null,
           locationSuccessMessage: adresa
             ? 'Lokacija je pronađena. Provjerite adresu prije nastavka.'
-            : 'Lokacija je određena (koordinate će biti sačuvane uz zahtjev). Unesite adresu intervencije u polje iznad — obavezna je prije nastavka.',
+            : 'Lokacija je određena (koordinate će biti sačuvane uz zahtjev). Unesite adresu intervencije u polje iznad - obavezna je prije nastavka.',
           ...(adresa ? { address: adresa } : {}),
         });
       },

@@ -9,6 +9,7 @@ import { izracunajUrgency, URGENCY_SCORE_MAKS } from '@/lib/servisirane/urgency'
 import type { TriageOdgovori } from '@/domain/types/servisirane';
 import { serializujKategoriju, validnaKombinacijaKategorije } from '@/lib/servisirane/kategorije';
 import { dodijeliKorisnickeBrojeveZahtjeva } from '@/lib/servisirane/korisnickiBrojZahtjeva';
+import { checkRateLimit } from '@/lib/rateLimiter';
 import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
@@ -93,6 +94,22 @@ export async function POST(request: Request) {
       return NextResponse.json(
         { error: 'Potvrdite email adresu prije slanja zahtjeva.' },
         { status: 403 }
+      );
+    }
+
+    // API-RISK-6: max 5 novih zahtjeva po korisniku u 60 sekundi
+    const rl = checkRateLimit(`service-request:${user.id}`, { windowMs: 60_000, max: 5 });
+    if (!rl.allowed) {
+      return NextResponse.json(
+        { error: 'Previše zahtjeva. Pričekajte minutu i pokušajte ponovo.' },
+        {
+          status: 429,
+          headers: {
+            'Retry-After':        String(Math.ceil((rl.resetAt - Date.now()) / 1000)),
+            'X-RateLimit-Limit':  '5',
+            'X-RateLimit-Remaining': '0',
+          },
+        }
       );
     }
 

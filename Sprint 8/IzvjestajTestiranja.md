@@ -77,7 +77,6 @@ Izvor: `Projekat/docs/testing/SB-08-XX/BUG_SB-08-XX_Sprint8_ServiserManualFlows.
 
 - Otvoreni bugovi: 0
 
-
 ## Zaključak
 
 Sprint 8 automatsko i manuelno testiranje je uspješno završeno. Svi automatski testovi prolaze (225/225), nema otvorenih bugova u evidenciji, a pokrivenost kritićnih modula je iznad traženog praga. Svi manualni testovi za serviserski operativni tok (SB-08-XX) izvršeni su sa statusom PASSED; QA sign-off: Ajna Ičić, 18/05/2026. Detalji u `Projekat/docs/testing/SB-08-XX/`.

@@ -37,7 +37,7 @@ const PRIORITETI = [
   { kljuc: 'SREDNJE',  boja: '#D97706', pozadina: 'rgba(217,119,6,0.07)',   opis: 'Umjerena hitnost, riješiti u roku jednog radnog dana' },
   { kljuc: 'VISOKO',   boja: '#EA580C', pozadina: 'rgba(234,88,12,0.07)',   opis: 'Povećana hitnost, riješiti što brže moguće' },
   { kljuc: 'KRITIČNO', boja: '#991B1B', pozadina: 'rgba(153,27,27,0.07)',   opis: 'Kritično stanje, odmah dodijeliti servisera' },
-  { kljuc: 'HITNO',    boja: '#DC2626', pozadina: 'rgba(220,38,38,0.07)',   opis: 'Premium hitna intervencija — momentalna reakcija' },
+  { kljuc: 'HITNO',    boja: '#DC2626', pozadina: 'rgba(220,38,38,0.07)',   opis: 'Premium hitna intervencija - momentalna reakcija' },
 ] as const;
 
 const PRIORITETI_RANG: Record<string, number> = {
@@ -105,7 +105,7 @@ function WizardProgressBar({ korak }: { korak: KorakBroj }) {
         })}
       </div>
       <p className="mt-3 text-center text-sm font-semibold sm:hidden" style={{ color: 'var(--first-primary)' }}>
-        Korak {korak}/{KORACI.length} — {KORACI[korak - 1].naziv}
+        Korak {korak}/{KORACI.length} - {KORACI[korak - 1].naziv}
       </p>
     </div>
   );
@@ -205,12 +205,12 @@ function SummarySidebar({
         {[
           { label: 'Zahtjev',     value: naslov,                 show: true },
           { label: 'Status',      value: <StatusBadge status={zahtjev.status} />, show: true },
-          { label: 'Prioritet',   value: wz.odabraniPrioritet || zahtjev.final_priority || '—', show: true },
-          { label: 'Korisnik',    value: zahtjev.podnosilac ? `${zahtjev.podnosilac.ime} ${zahtjev.podnosilac.prezime}` : '—', show: !!zahtjev.podnosilac },
+          { label: 'Prioritet',   value: wz.odabraniPrioritet || zahtjev.final_priority || '-', show: true },
+          { label: 'Korisnik',    value: zahtjev.podnosilac ? `${zahtjev.podnosilac.ime} ${zahtjev.podnosilac.prezime}` : '-', show: !!zahtjev.podnosilac },
           { label: 'Lokacija',    value: zahtjev.address, show: true },
-          { label: 'Termin',      value: wz.termin_pocetak_datum ? `${wz.termin_pocetak_datum}${wz.termin_pocetak_vrijemeOd ? ` · ${wz.termin_pocetak_vrijemeOd}` : ''}${wz.termin_pocetak_vrijemeDo ? `–${wz.termin_pocetak_vrijemeDo}` : ''}` : '—', show: true },
-          { label: 'Trajanje',    value: wz.procijenjeno_trajanje ? trajanjeLabel(wz.procijenjeno_trajanje) : '—', show: true },
-          { label: 'Serviser',    value: serviser ? `${serviser.ime} ${serviser.prezime}` : '—', show: true },
+          { label: 'Termin',      value: wz.termin_pocetak_datum ? `${wz.termin_pocetak_datum}${wz.termin_pocetak_vrijemeOd ? ` · ${wz.termin_pocetak_vrijemeOd}` : ''}${wz.termin_pocetak_vrijemeDo ? `-${wz.termin_pocetak_vrijemeDo}` : ''}` : '-', show: true },
+          { label: 'Trajanje',    value: wz.procijenjeno_trajanje ? trajanjeLabel(wz.procijenjeno_trajanje) : '-', show: true },
+          { label: 'Serviser',    value: serviser ? `${serviser.ime} ${serviser.prezime}` : '-', show: true },
         ].map(({ label, value, show }) => !show ? null : (
           <div key={label} className="py-2" style={{ borderBottom: '1px solid rgb(var(--first-quaternary-rgb)/0.18)' }}>
             <p className="text-[10px] font-bold uppercase tracking-wide" style={{ color: 'var(--first-nonary)' }}>{label}</p>
@@ -297,7 +297,7 @@ export default function DispecerPlaniranjePage() {
     if (k === 3) {
       if (!wz.termin_pocetak_datum) return 'Odaberite datum termina.';
       if (!wz.termin_pocetak_vrijemeOd || !wz.termin_pocetak_vrijemeDo)
-        return 'Unesite vremenski raspon (od — do).';
+        return 'Unesite vremenski raspon (od - do).';
       if (wz.termin_pocetak_vrijemeOd >= wz.termin_pocetak_vrijemeDo)
         return '"Kraj" mora biti nakon "Početka".';
       if (!wz.serviser_id) return 'Odaberite servisera.';
@@ -408,7 +408,7 @@ export default function DispecerPlaniranjePage() {
   if (jeUspjelo && zahtjev) {
     const s = serviseri.find((x) => x.id === wz.serviser_id);
     const kat    = labelKategorije(zahtjev);
-    const naslov = kat.podkategorija ? `${kat.glavna} — ${kat.podkategorija}` : kat.glavna;
+    const naslov = kat.podkategorija ? `${kat.glavna} - ${kat.podkategorija}` : kat.glavna;
 
     return (
       <AppShell uloga="dispecer">
@@ -427,7 +427,7 @@ export default function DispecerPlaniranjePage() {
               {[
                 { Ikona: FileText,  label: 'Intervencija', v: naslov },
                 s ? { Ikona: Users, label: 'Serviser', v: `${s.ime} ${s.prezime}` } : null,
-                wz.termin_pocetak_datum ? { Ikona: Calendar, label: 'Termin', v: `${wz.termin_pocetak_datum}${wz.termin_pocetak_vrijemeOd ? ` · ${wz.termin_pocetak_vrijemeOd}` : ''}${wz.termin_pocetak_vrijemeDo ? ` – ${wz.termin_pocetak_vrijemeDo}` : ''}` } : null,
+                wz.termin_pocetak_datum ? { Ikona: Calendar, label: 'Termin', v: `${wz.termin_pocetak_datum}${wz.termin_pocetak_vrijemeOd ? ` · ${wz.termin_pocetak_vrijemeOd}` : ''}${wz.termin_pocetak_vrijemeDo ? ` - ${wz.termin_pocetak_vrijemeDo}` : ''}` } : null,
               ].filter(Boolean).map((row) => {
                 if (!row) return null;
                 const { Ikona, label, v } = row as { Ikona: typeof FileText; label: string; v: string };
@@ -460,7 +460,7 @@ export default function DispecerPlaniranjePage() {
   if (!zahtjev) return null;
 
   const kat    = labelKategorije(zahtjev);
-  const naslov = kat.podkategorija ? `${kat.glavna} — ${kat.podkategorija}` : kat.glavna;
+  const naslov = kat.podkategorija ? `${kat.glavna} - ${kat.podkategorija}` : kat.glavna;
   const odabraniServiser = serviseri.find((s) => s.id === wz.serviser_id) ?? null;
   const preporucenoKljuc = preporuciPrioritet(zahtjev);
   const smanjenjePrioriteta = wz.odabraniPrioritet
@@ -596,7 +596,7 @@ export default function DispecerPlaniranjePage() {
                       style={{ backgroundColor: 'rgb(var(--first-septenary-rgb)/0.1)', border: '1px solid rgb(var(--first-septenary-rgb)/0.22)' }}>
                       <Calendar className="h-3.5 w-3.5 flex-shrink-0" style={{ color: 'var(--first-senary)' }} />
                       <span className="text-sm font-medium" style={{ color: 'var(--first-octonary)' }}>
-                        {t.date} · {t.from} – {t.to}
+                        {t.date} · {t.from} - {t.to}
                       </span>
                     </div>
                   ))}
@@ -730,7 +730,7 @@ export default function DispecerPlaniranjePage() {
                     <p className="mb-1 text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--first-senary)' }}>Korisnik predlaže</p>
                     {zahtjev.preferred_schedule.termini.map((t, i) => (
                       <p key={i} className="text-xs font-medium" style={{ color: 'var(--first-octonary)' }}>
-                        {t.date} · {t.from} – {t.to}
+                        {t.date} · {t.from} - {t.to}
                       </p>
                     ))}
                   </div>
@@ -776,7 +776,7 @@ export default function DispecerPlaniranjePage() {
                       style={{ backgroundColor: 'rgb(var(--first-primary-rgb)/0.06)', border: '1px solid rgb(var(--first-primary-rgb)/0.18)' }}>
                       <CheckCircle2 className="h-4 w-4 flex-shrink-0" style={{ color: 'var(--first-secondary)' }} />
                       <p className="text-sm font-semibold" style={{ color: 'var(--first-octonary)' }}>
-                        {wz.termin_pocetak_datum} · {wz.termin_pocetak_vrijemeOd}{wz.termin_pocetak_vrijemeDo ? ` – ${wz.termin_pocetak_vrijemeDo}` : ''}
+                        {wz.termin_pocetak_datum} · {wz.termin_pocetak_vrijemeOd}{wz.termin_pocetak_vrijemeDo ? ` - ${wz.termin_pocetak_vrijemeDo}` : ''}
                       </p>
                     </div>
                   )}
@@ -923,7 +923,7 @@ export default function DispecerPlaniranjePage() {
                           <p className="text-sm font-bold" style={{ color: p.boja }}>{p.kljuc}</p>
                           {smanjenjePrioriteta && (
                             <p className="text-xs mt-0.5" style={{ color: 'var(--first-nonary)' }}>
-                              Smanjeno s {preporucenoKljuc} — obrazloženje evidentirano
+                              Smanjeno s {preporucenoKljuc} - obrazloženje evidentirano
                             </p>
                           )}
                         </div>
@@ -944,7 +944,7 @@ export default function DispecerPlaniranjePage() {
                         <p className="text-sm font-bold" style={{ color: 'var(--first-octonary)' }}>
                           {wz.termin_pocetak_datum}
                           {wz.termin_pocetak_vrijemeOd ? ` · ${wz.termin_pocetak_vrijemeOd}` : ''}
-                          {wz.termin_pocetak_vrijemeDo ? ` – ${wz.termin_pocetak_vrijemeDo}` : ''}
+                          {wz.termin_pocetak_vrijemeDo ? ` - ${wz.termin_pocetak_vrijemeDo}` : ''}
                         </p>
                         {wz.procijenjeno_trajanje && (
                           <p className="text-xs" style={{ color: 'var(--first-nonary)' }}>Trajanje: {trajanjeLabel(wz.procijenjeno_trajanje)}</p>
@@ -979,7 +979,7 @@ export default function DispecerPlaniranjePage() {
                           {odabraniServiser.ime} {odabraniServiser.prezime}
                         </p>
                         <p className="text-xs" style={{ color: 'var(--first-nonary)' }}>
-                          {odabraniServiser.aktivnih_zadataka === 0 ? 'Slobodan' : `${odabraniServiser.aktivnih_zadataka} aktivnih zadataka`}
+                          {odabraniServiser.aktivnih_zadataka === 0 ? 'Slobodan' : odabraniServiser.aktivnih_zadataka === 1 ? '1 aktivni zadatak' : odabraniServiser.aktivnih_zadataka < 5 ? `${odabraniServiser.aktivnih_zadataka} aktivna zadatka` : `${odabraniServiser.aktivnih_zadataka} aktivnih zadataka`}
                         </p>
                       </div>
                     </div>
@@ -1026,9 +1026,9 @@ export default function DispecerPlaniranjePage() {
                   style={{ backgroundColor: 'rgb(255 255 255 / 0.65)', border: '1px solid rgb(var(--first-quaternary-rgb)/0.3)' }}>
                   {[
                     { label: 'Intervencija', value: naslov },
-                    { label: 'Prioritet', value: wz.odabraniPrioritet || '—' },
-                    { label: 'Termin', value: wz.termin_pocetak_datum ? `${wz.termin_pocetak_datum}${wz.termin_pocetak_vrijemeOd ? ` ${wz.termin_pocetak_vrijemeOd}` : ''}` : '—' },
-                    { label: 'Serviser', value: odabraniServiser ? `${odabraniServiser.ime} ${odabraniServiser.prezime}` : '—' },
+                    { label: 'Prioritet', value: wz.odabraniPrioritet || '-' },
+                    { label: 'Termin', value: wz.termin_pocetak_datum ? `${wz.termin_pocetak_datum}${wz.termin_pocetak_vrijemeOd ? ` ${wz.termin_pocetak_vrijemeOd}` : ''}` : '-' },
+                    { label: 'Serviser', value: odabraniServiser ? `${odabraniServiser.ime} ${odabraniServiser.prezime}` : '-' },
                   ].map(({ label, value }) => (
                     <div key={label}>
                       <p className="text-[10px] font-bold uppercase tracking-wide" style={{ color: 'var(--first-nonary)' }}>{label}</p>
@@ -1083,7 +1083,7 @@ export default function DispecerPlaniranjePage() {
                   <div className="mt-4 flex items-center gap-2 rounded-xl px-4 py-3"
                     style={{ backgroundColor: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.22)', color: '#DC2626' }}>
                     <AlertTriangle className="h-4 w-4 flex-shrink-0" />
-                    <p className="text-sm font-semibold">Serviser nije odabran — nije moguće dodijeliti intervenciju.</p>
+                    <p className="text-sm font-semibold">Serviser nije odabran - nije moguće dodijeliti intervenciju.</p>
                   </div>
                 )}
               </div>

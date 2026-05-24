@@ -67,7 +67,7 @@ function DashboardVisualPanel() {
         <Link
           href="/#hero"
           className="group flex w-fit items-center gap-3 rounded-xl p-1 -m-1 outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[rgb(var(--first-septenary-rgb)/0.55)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--first-primary)]"
-          aria-label="InterServ — povratak na početnu stranicu"
+          aria-label="InterServ - povratak na početnu stranicu"
         >
           <div
             className="flex h-9 w-9 items-center justify-center rounded-xl"
@@ -86,7 +86,7 @@ function DashboardVisualPanel() {
             Servisni menadžment sistem
           </h2>
           <p className="mt-3 text-sm leading-relaxed" style={{ color: 'rgb(var(--first-quaternary-rgb) / 0.75)' }}>
-            Upravljanje intervencijama, serviseri na terenu i kompletna historija rada — sve na jednom mjestu.
+            Upravljanje intervencijama, serviseri na terenu i kompletna historija rada - sve na jednom mjestu.
           </p>
         </div>
 
@@ -108,10 +108,10 @@ function DashboardVisualPanel() {
           >
             Nedavne intervencije
           </p>
-          <JobRow title="Električni kvar — Objekat A"        time="2 min"  status="hitno"    />
-          <JobRow title="HVAC servis — Zona 3"               time="18 min" status="u_toku"   />
-          <JobRow title="Vodoinstalaterski popravak — St. 204" time="1 sat" status="zavrseno" />
-          <JobRow title="Lift — Toranj B"                    time="3 sata" status="zavrseno" />
+          <JobRow title="Električni kvar - Objekat A"        time="2 min"  status="hitno"    />
+          <JobRow title="HVAC servis - Zona 3"               time="18 min" status="u_toku"   />
+          <JobRow title="Vodoinstalaterski popravak - St. 204" time="1 sat" status="zavrseno" />
+          <JobRow title="Lift - Toranj B"                    time="3 sata" status="zavrseno" />
         </div>
 
         {/* Trust signal */}
@@ -130,12 +130,12 @@ function DashboardVisualPanel() {
 export default function LoginPage() {
   return (
     <div className="flex min-h-screen" style={{ backgroundColor: 'var(--first-tertiary)' }}>
-      {/* Left — visual panel (hidden below lg) */}
+      {/* Left - visual panel (hidden below lg) */}
       <div className="hidden w-[58%] lg:block xl:w-[60%]">
         <DashboardVisualPanel />
       </div>
 
-      {/* Right — form */}
+      {/* Right - form */}
       <div
         className="relative isolate flex w-full flex-col items-center justify-center overflow-hidden px-5 py-12 sm:px-8 lg:w-[42%] xl:w-[40%]"
         style={{ backgroundColor: 'var(--first-tertiary)' }}
@@ -164,7 +164,7 @@ export default function LoginPage() {
         <Link
           href="/#hero"
           className="relative z-10 mb-8 flex w-fit items-center gap-2 rounded-xl p-1 -m-1 outline-none transition-opacity hover:opacity-90 focus-visible:ring-2 focus-visible:ring-[rgb(var(--first-septenary-rgb)/0.45)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--first-tertiary)] lg:hidden"
-          aria-label="InterServ — povratak na početnu stranicu"
+          aria-label="InterServ - povratak na početnu stranicu"
         >
           <div className="flex h-8 w-8 items-center justify-center rounded-lg" style={{ backgroundColor: 'var(--first-primary)' }}>
             <Settings className="h-4 w-4 text-white" />

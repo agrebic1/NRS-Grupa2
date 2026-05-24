@@ -11,6 +11,8 @@ import { DispecerZahtjevDetaljSadrzaj } from '@/components/dispecer/DispecerZaht
 import type { ServisniZahtjev } from '@/domain/types/servisirane';
 import { labelKategorije } from '@/lib/servisirane/kategorije';
 import { oznakaZaDispecerskiPrikazBroja } from '@/lib/servisirane/korisnickiBrojZahtjeva';
+import { HistorijaAktivnostiSekcija } from '@/components/serviser/HistorijaAktivnostiSekcija';
+import type { InterventionActivity } from '@/domain/types/servisirane';
 
 type ZahtjevDetalj = ServisniZahtjev & {
   podnosilac: { ime: string; prezime: string; broj_telefona: string | null } | null;
@@ -22,10 +24,12 @@ function DispecerZahtjevDetaljSaUpitom({
   zahtjev,
   requestId,
   setZahtjev,
+  setAktivnosti,
 }: {
   zahtjev: ZahtjevDetalj;
   requestId: string;
   setZahtjev: (z: ZahtjevDetalj) => void;
+  setAktivnosti: (a: InterventionActivity[]) => void;
 }) {
   const searchParams = useSearchParams();
   const fokusKorakTermin = searchParams.get('korak') === 'termin';
@@ -35,6 +39,10 @@ function DispecerZahtjevDetaljSaUpitom({
       zahtjev={zahtjev}
       requestId={requestId}
       onRequestUpdated={(noviZahtjev) => setZahtjev(noviZahtjev)}
+      onOsvjezajDetalj={({ zahtjev: z, aktivnosti: a }) => {
+        setZahtjev(z);
+        if (a) setAktivnosti(a);
+      }}
       prikaziDugmeNazad
       hrefNazad={`/dispecer?z=${zahtjev.id}`}
       fokusKorakTermin={fokusKorakTermin}
@@ -208,7 +216,7 @@ function ZatvoriFormalnoPanel({
             style={{ backgroundColor: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.2)' }}>
             <AlertTriangle className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: '#DC2626' }} />
             <p className="text-sm" style={{ color: '#DC2626' }}>
-              Zatvaranje nije moguće — serviser još nije evidentirao obavljeni rad.
+              Zatvaranje nije moguće - serviser još nije evidentirao obavljeni rad.
             </p>
           </div>
         )}
@@ -258,6 +266,7 @@ export default function DispecerZahtjevDetaljPage() {
   const { id } = useParams<{ id: string }>();
   const [zahtjev,    setZahtjev]    = useState<ZahtjevDetalj | null>(null);
   const [evidencije, setEvidencije] = useState<unknown[]>([]);
+  const [aktivnosti, setAktivnosti] = useState<InterventionActivity[]>([]);
   const [ucitava,    setUcitava]    = useState(true);
   const [greska,     setGreska]     = useState<string | null>(null);
 
@@ -268,6 +277,7 @@ export default function DispecerZahtjevDetaljPage() {
       if (!r.ok) throw new Error(d.error ?? 'Zahtjev nije pronađen.');
       setZahtjev(d.zahtjev);
       setEvidencije(d.evidencije ?? []);
+      setAktivnosti(d.aktivnosti ?? []);
     } catch (err) {
       setGreska(err instanceof Error ? err.message : 'Greška pri učitavanju podataka.');
     } finally {
@@ -350,11 +360,18 @@ export default function DispecerZahtjevDetaljPage() {
 
         {zahtjev && (
           <>
+            <HistorijaAktivnostiSekcija
+              aktivnosti={aktivnosti}
+              ucitava={ucitava}
+              className="mb-6"
+            />
+
             <Suspense fallback={null}>
               <DispecerZahtjevDetaljSaUpitom
                 zahtjev={zahtjev}
                 requestId={String(id)}
                 setZahtjev={setZahtjev}
+                setAktivnosti={setAktivnosti}
               />
             </Suspense>
 
@@ -372,6 +389,7 @@ export default function DispecerZahtjevDetaljPage() {
                 onUspjeh={ucitaj}
               />
             )}
+
           </>
         )}
       </div>

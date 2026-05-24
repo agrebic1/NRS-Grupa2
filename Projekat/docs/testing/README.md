@@ -22,6 +22,7 @@ Ovaj dokument je jedinstven vodič za testiranje: šta je pokriveno, kada se tes
 - **SB-05-13**: `ACCESS`, `SEC`, `SIGNOFF`
 - **SB-06-20**: `TC_SB-06-20_Sprint6_ManualFlows.csv`, `EXEC`, `BUG`, `SIGNOFF`
 - **SB-07-35**: `TC_SB-07-35_Sprint7_DispecerManualFlows.csv`, `EXEC`, `BUG`, `SIGNOFF`
+- **SB-09-36** (Sprint 9): [ovdje ubaciti manuelne testove]
 
 ## Kada se pokreće
 
@@ -68,12 +69,12 @@ E2E_KORISNIK_EMAIL=test@gmail.com
 E2E_KORISNIK_PASSWORD=123456789Aa@
 ```
 
-## Trenutni status (10.05.2026)
+## Trenutni status (Sprint 9 — automatski)
 
-- `npm test`: 95/95 passed
-- `npm run test:coverage`: Statements 99.61%, Lines 100%, Functions 100%, Branches 87.39%
-- `npm run test:e2e`: 16/16 passed
-- cilj pokrivenosti: **minimum 98%** (ispunjen)
+- `npm test`: 286/286 passed (174 unit + 112 integration)
+- `npm run test:e2e`: 23/23 passed (popravka DLI-021: RBAC prije validacije ID na serviserskom API)
+- `npm run test:izvjestaj`: generiše `docs/testing/Izvjestaji/<run>/IZVJESTAJ.md`
+- cilj pokrivenosti: **minimum 98%**
 
 ## Izvještaji i artefakti
 
@@ -83,4 +84,4 @@ E2E_KORISNIK_PASSWORD=123456789Aa@
 - Sprint 7 izvještaj: `docs/testing/SB-07-35/IZVJESTAJ_SB-07-35_Sprint7_Testiranje.md`
 - Sprint 7 sign-off: `docs/testing/SB-07-35/SIGNOFF_SB-07-35_QA-SA.md`
 - Sprint 7 manual execution: `docs/testing/SB-07-35/EXEC_SB-07-35_Sprint7_DispecerManualFlows.csv`
-
+- Sprint 9 manual (SB-09-36): [ovdje ubaciti manuelne testove]

@@ -66,9 +66,9 @@ function setupAuth(status = 'u_radu') {
   mockFrom.mockImplementation(() => flexChain());
 }
 
-// ─── Napomene — serviser ──────────────────────────────────────────────────────
+// ─── Napomene - serviser ──────────────────────────────────────────────────────
 
-describe('PATCH napomena — serviser dodaje internu napomenu', () => {
+describe('PATCH napomena - serviser dodaje internu napomenu', () => {
   beforeEach(() => {
     mockGetUser.mockReset();
     mockFrom.mockReset();

@@ -19,7 +19,7 @@ function uDatumZaPrikaz(vrijednost: string | Date): Date | null {
 
 export function formatirajDatumPrikaz(
   vrijednost: string | Date | null | undefined,
-  prazno = '—'
+  prazno = '-'
 ): string {
   if (vrijednost == null || vrijednost === '') return prazno;
   const d = uDatumZaPrikaz(vrijednost);
@@ -33,7 +33,7 @@ export function formatirajDatumPrikaz(
 /** Primjer: `02. 05. 2026. 14:30` */
 export function formatirajDatumVrijemeZaPrikaz(
   vrijednost: string | Date | null | undefined,
-  prazno = '—'
+  prazno = '-'
 ): string {
   if (vrijednost == null || vrijednost === '') return prazno;
   const d = vrijednost instanceof Date ? vrijednost : new Date(vrijednost);
