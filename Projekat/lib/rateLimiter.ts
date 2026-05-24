@@ -1,6 +1,6 @@
 /**
  * In-memory sliding-window rate limiter za Next.js API rute.
- * Svaki serverless restart resetuje brojač — za produkciju koristiti Redis.
+ * Svaki serverless restart resetuje brojač - za produkciju koristiti Redis.
  *
  * API-RISK-6: sprječava flood kreiranje zahtjeva i triage spam.
  */

@@ -62,7 +62,7 @@ const SERVISER_A = '11111111-1111-1111-1111-111111111101';
 const SERVISER_B = '11111111-1111-1111-1111-111111111102';
 const SERVISER_UNKNOWN = '00000000-0000-0000-0000-000000000099';
 
-describe('/api/dispecer/zahtjevi/[id] — Sprint 9 (US-28)', () => {
+describe('/api/dispecer/zahtjevi/[id] - Sprint 9 (US-28)', () => {
   beforeEach(() => {
     mockSessionGetUser.mockReset();
     mockFrom.mockReset();

@@ -1,4 +1,4 @@
-// Tipovi za izvještaj odziva servisera — US-42
+// Tipovi za izvještaj odziva servisera - US-42
 
 export interface ServiserOdzivaRed {
   serviser_id:           string;

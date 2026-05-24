@@ -69,7 +69,7 @@ function filtrirajPoKpi(
 
 function IntervencijaKartica({ z }: { z: IntervencijaZaListu }) {
   const kat    = labelKategorije(z);
-  const naslov = kat.podkategorija ? `${kat.glavna} — ${kat.podkategorija}` : kat.glavna;
+  const naslov = kat.podkategorija ? `${kat.glavna} - ${kat.podkategorija}` : kat.glavna;
   const hitno  = jeHitna(z);
   const termin = z.termin_planirani_pocetak
     ? new Date(z.termin_planirani_pocetak).toLocaleString('bs-BA', {
@@ -270,8 +270,8 @@ export default function ServiserPage() {
           <p className="mt-1 text-sm" style={{ color: 'var(--first-nonary)' }}>
             {formatirajDatumPrikaz(new Date())}
             {dodijeljeno + uRadu + naTermenu > 0 && (
-              <> — <span className="font-medium" style={{ color: 'var(--first-octonary)' }}>
-                {dodijeljeno + uRadu + naTermenu} aktivnih zadataka
+              <> - <span className="font-medium" style={{ color: 'var(--first-octonary)' }}>
+                {dodijeljeno + uRadu + naTermenu === 1 ? '1 aktivni zadatak' : dodijeljeno + uRadu + naTermenu < 5 ? `${dodijeljeno + uRadu + naTermenu} aktivna zadatka` : `${dodijeljeno + uRadu + naTermenu} aktivnih zadataka`}
               </span></>
             )}
           </p>

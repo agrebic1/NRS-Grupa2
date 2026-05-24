@@ -37,7 +37,7 @@
   --text-primary: var(--first-octonary);
   --text-secondary: var(--first-nonary);
 
-  /* Semantičke boje (UI komponente — bubble, spojnice) */
+  /* Semantičke boje (UI komponente - bubble, spojnice) */
   --color-background-secondary: rgb(var(--first-quaternary-rgb) / 0.42);
   --color-border-secondary: rgb(var(--first-nonary-rgb) / 0.42);
   --color-border-tertiary: rgb(var(--first-quaternary-rgb) / 0.72);

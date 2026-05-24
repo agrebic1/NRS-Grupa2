@@ -63,7 +63,7 @@ const PRIORITETI = [
   { kljuc: 'SREDNJE' as NivoOp,  boja: '#D97706', pozadina: 'rgba(217,119,6,0.08)',   opis: 'Umjerena hitnost, riješiti u roku radnog dana' },
   { kljuc: 'VISOKO' as NivoOp,   boja: '#EA580C', pozadina: 'rgba(234,88,12,0.08)',   opis: 'Povećana hitnost, riješiti što brže moguće' },
   { kljuc: 'KRITIČNO' as NivoOp, boja: '#991B1B', pozadina: 'rgba(153,27,27,0.08)',   opis: 'Kritično stanje, odmah dodijeliti servisera' },
-  { kljuc: 'HITNO' as NivoOp,    boja: '#DC2626', pozadina: 'rgba(220,38,38,0.08)',   opis: 'Premium hitna intervencija — momentalna reakcija' },
+  { kljuc: 'HITNO' as NivoOp,    boja: '#DC2626', pozadina: 'rgba(220,38,38,0.08)',   opis: 'Premium hitna intervencija - momentalna reakcija' },
 ] as const;
 
 const PRIORITETI_RANG: Record<NivoOp, number> = {
@@ -71,10 +71,10 @@ const PRIORITETI_RANG: Record<NivoOp, number> = {
 };
 
 const SLOTOVI: SlotDef[] = [
-  { id: 'jutro',        naziv: 'Jutarnji',        opis: '08:00 – 12:00', od: '08:00', do: '12:00' },
-  { id: 'poslijepodne', naziv: 'Poslijepodnevni', opis: '12:00 – 16:00', od: '12:00', do: '16:00' },
-  { id: 'vece',         naziv: 'Večernji',        opis: '16:00 – 20:00', od: '16:00', do: '20:00' },
-  { id: 'cijeli_dan',   naziv: 'Cijeli dan',      opis: '08:00 – 20:00', od: '08:00', do: '20:00' },
+  { id: 'jutro',        naziv: 'Jutarnji',        opis: '08:00 - 12:00', od: '08:00', do: '12:00' },
+  { id: 'poslijepodne', naziv: 'Poslijepodnevni', opis: '12:00 - 16:00', od: '12:00', do: '16:00' },
+  { id: 'vece',         naziv: 'Večernji',        opis: '16:00 - 20:00', od: '16:00', do: '20:00' },
+  { id: 'cijeli_dan',   naziv: 'Cijeli dan',      opis: '08:00 - 20:00', od: '08:00', do: '20:00' },
 ];
 
 
@@ -258,8 +258,8 @@ function SummarniPanel({ zahtjev, prioritet, odabraniServiser, odabraniDatum, od
         <p className="mt-0.5 truncate text-xs" style={{ color: 'rgba(255,255,255,0.75)' }}>{podkategorija || glavna}</p>
       </div>
       <div className="px-4 py-1">
-        <Red Ikona={User} label="Korisnik">{imePrezime || '—'}</Red>
-        <Red Ikona={MapPin} label="Adresa"><span className="line-clamp-2">{zahtjev.address || '—'}</span></Red>
+        <Red Ikona={User} label="Korisnik">{imePrezime || '-'}</Red>
+        <Red Ikona={MapPin} label="Adresa"><span className="line-clamp-2">{zahtjev.address || '-'}</span></Red>
         <Red Ikona={Calendar} label="Prijavljeno">{formatPrijavljenoDatumVrijeme(zahtjev.created_at)}</Red>
         <Red Ikona={Clock} label="Pref. termini">
           {sviTermini.length > 0 ? (
@@ -267,11 +267,11 @@ function SummarniPanel({ zahtjev, prioritet, odabraniServiser, odabraniDatum, od
               {sviTermini.map((t, i) => (
                 <span key={i}>
                   <span className="font-normal" style={{ color: 'var(--first-nonary)' }}>{t.tip}: </span>
-                  {t.datum}{t.od && t.do ? `, ${t.od}–${t.do}` : ''}
+                  {t.datum}{t.od && t.do ? `, ${t.od}-${t.do}` : ''}
                 </span>
               ))}
             </div>
-          ) : terminTekst || '—'}
+          ) : terminTekst || '-'}
         </Red>
         <Red Ikona={Zap} label="Hitnost korisnika">
           <span style={{ color: urgencyBoja(score) }}>{urgencyLabel(score)} ({score})</span>
@@ -317,7 +317,7 @@ function SummarniPanel({ zahtjev, prioritet, odabraniServiser, odabraniDatum, od
   );
 }
 
-// ─── KORAK 1 — Pregled zahtjeva ───────────────────────────────────────────────
+// ─── KORAK 1 - Pregled zahtjeva ───────────────────────────────────────────────
 
 function KorakPregled({ zahtjev }: { zahtjev: ZahtjevDetalj }) {
   const { glavna, podkategorija } = labelKategorije(zahtjev);
@@ -348,14 +348,14 @@ function KorakPregled({ zahtjev }: { zahtjev: ZahtjevDetalj }) {
             </div>
             <p className="text-[10px] font-bold uppercase tracking-wide" style={{ color: 'var(--first-nonary)' }}>Korisnik</p>
           </div>
-          <p className="font-bold leading-snug" style={{ color: 'var(--first-octonary)' }}>{imePrezime || '—'}</p>
+          <p className="font-bold leading-snug" style={{ color: 'var(--first-octonary)' }}>{imePrezime || '-'}</p>
           {telefon ? (
             <a href={telefonHref ?? '#'} className="mt-1 flex items-center gap-1 text-sm font-medium hover:opacity-70"
               style={{ color: 'var(--first-secondary)' }}>
               <Phone className="h-3 w-3" />{telefon}
             </a>
           ) : (
-            <p className="mt-1 text-sm" style={{ color: 'var(--first-nonary)' }}>—</p>
+            <p className="mt-1 text-sm" style={{ color: 'var(--first-nonary)' }}>-</p>
           )}
           {zahtjev.is_premium && (
             <div className="mt-2 flex items-center gap-1">
@@ -391,12 +391,12 @@ function KorakPregled({ zahtjev }: { zahtjev: ZahtjevDetalj }) {
                 {sviTerminiKorak.map((t, i) => (
                   <p key={i} className="text-xs" style={{ color: 'var(--first-octonary)' }}>
                     <span className="font-semibold">{t.tip}:</span>{' '}
-                    {t.datum}{t.od && t.do ? `, ${t.od}–${t.do}` : ''}
+                    {t.datum}{t.od && t.do ? `, ${t.od}-${t.do}` : ''}
                   </p>
                 ))}
               </div>
             ) : (
-              <p className="text-xs font-medium" style={{ color: 'var(--first-octonary)' }}>{terminTekst || '—'}</p>
+              <p className="text-xs font-medium" style={{ color: 'var(--first-octonary)' }}>{terminTekst || '-'}</p>
             )}
           </div>
         </div>
@@ -469,7 +469,7 @@ function KorakPregled({ zahtjev }: { zahtjev: ZahtjevDetalj }) {
   );
 }
 
-// ─── KORAK 2 — Operativni prioritet ───────────────────────────────────────────
+// ─── KORAK 2 - Operativni prioritet ───────────────────────────────────────────
 
 function KorakPrioritet({ zahtjev, prioritet, setPrioritet, downgradeRazlog, setDowngradeRazlog, mozeMijenjati }: {
   zahtjev: ZahtjevDetalj;
@@ -497,7 +497,7 @@ function KorakPrioritet({ zahtjev, prioritet, setPrioritet, downgradeRazlog, set
           style={{ backgroundColor: 'rgb(var(--first-quinary-rgb)/0.28)', border: '1px solid rgb(var(--first-quaternary-rgb)/0.25)' }}>
           <Zap className="h-3.5 w-3.5" style={{ color: urgencyBoja(score) }} />
           <span className="text-xs font-bold" style={{ color: urgencyBoja(score) }}>
-            {urgencyLabel(score)} — {score}
+            {urgencyLabel(score)} - {score}
           </span>
         </div>
       </div>
@@ -591,7 +591,7 @@ function KorakPrioritet({ zahtjev, prioritet, setPrioritet, downgradeRazlog, set
   );
 }
 
-// ─── KORAK 3 — Termin i serviser ──────────────────────────────────────────────
+// ─── KORAK 3 - Termin i serviser ──────────────────────────────────────────────
 
 function KorakTerminIServiser({ zahtjev: _zahtjev, odabraniDatum, setDatum, odabraniSlot, setSlot, napomene, setNapomene, preporuke, odabraniServiser, setServiser, ucitavaServisere, pomocniServiseri, setPomocniServiseri, konfliktUpozorenje, onOverrideKonflikt }: {
   zahtjev: ZahtjevDetalj;
@@ -685,7 +685,7 @@ function KorakTerminIServiser({ zahtjev: _zahtjev, odabraniDatum, setDatum, odab
             rows={3}
             value={napomene}
             onChange={e => setNapomene(e.target.value)}
-            placeholder="Operativne napomene za servisera — pristup, posebna oprema, kontakt na licu mjesta..."
+            placeholder="Operativne napomene za servisera - pristup, posebna oprema, kontakt na licu mjesta..."
             className="w-full resize-none rounded-xl border px-4 py-3 text-sm focus:outline-none focus:ring-2"
             style={{
               borderColor: 'rgb(var(--first-quaternary-rgb)/0.4)',
@@ -720,7 +720,7 @@ function KorakTerminIServiser({ zahtjev: _zahtjev, odabraniDatum, setDatum, odab
           </div>
         )}
 
-        {/* Sekcija 1 — Glavni serviser */}
+        {/* Sekcija 1 - Glavni serviser */}
         <div className="rounded-2xl p-5" style={sekcija}>
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -826,7 +826,7 @@ function KorakTerminIServiser({ zahtjev: _zahtjev, odabraniDatum, setDatum, odab
           )}
         </div>
 
-        {/* Sekcija 2 — Pomoćni serviseri */}
+        {/* Sekcija 2 - Pomoćni serviseri */}
         <div className="rounded-2xl p-5" style={sekcija}>
           <div className="mb-3 flex items-center gap-2">
             <div className="flex h-7 w-7 items-center justify-center rounded-lg"
@@ -898,7 +898,7 @@ function KorakTerminIServiser({ zahtjev: _zahtjev, odabraniDatum, setDatum, odab
   );
 }
 
-// ─── KORAK 4 — Pregled naloga ─────────────────────────────────────────────────
+// ─── KORAK 4 - Pregled naloga ─────────────────────────────────────────────────
 
 function KorakPregledNaloga({ zahtjev, prioritet, odabraniServiser, odabraniDatum, odabraniSlot, napomene, onUredi }: {
   zahtjev: ZahtjevDetalj;
@@ -935,14 +935,6 @@ function KorakPregledNaloga({ zahtjev, prioritet, odabraniServiser, odabraniDatu
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center gap-2 rounded-xl px-4 py-3"
-        style={{ backgroundColor: 'rgba(34,197,94,0.06)', border: '1px solid rgba(34,197,94,0.2)' }}>
-        <CheckCircle2 className="h-4 w-4 flex-shrink-0" style={{ color: '#16A34A' }} />
-        <p className="text-sm font-semibold" style={{ color: '#16A34A' }}>
-          Pregled kompletnog naloga — provjerite sve detalje prije finalne potvrde
-        </p>
-      </div>
-
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <NalogKartica naslov="Korisnik" korak={0}>
           <div className="flex items-center gap-3">
@@ -951,7 +943,7 @@ function KorakPregledNaloga({ zahtjev, prioritet, odabraniServiser, odabraniDatu
               {(imePrezime || '?').charAt(0)}
             </div>
             <div>
-              <p className="font-bold" style={{ color: 'var(--first-octonary)' }}>{imePrezime || '—'}</p>
+              <p className="font-bold" style={{ color: 'var(--first-octonary)' }}>{imePrezime || '-'}</p>
               {telefon && <p className="text-xs" style={{ color: 'var(--first-nonary)' }}>{telefon}</p>}
               {zahtjev.is_premium && (
                 <span className="flex items-center gap-1 text-[11px] font-bold" style={{ color: '#DC2626' }}>
@@ -1048,7 +1040,7 @@ function KorakPregledNaloga({ zahtjev, prioritet, odabraniServiser, odabraniDatu
   );
 }
 
-// ─── KORAK 5 — Potvrda ────────────────────────────────────────────────────────
+// ─── KORAK 5 - Potvrda ────────────────────────────────────────────────────────
 
 function KorakPotvrda({ zahtjev, prioritet, odabraniServiser, odabraniDatum, odabraniSlot, potvrdjeno, setPotvrdjeno, imeDispecera }: {
   zahtjev: ZahtjevDetalj;
@@ -1085,13 +1077,13 @@ function KorakPotvrda({ zahtjev, prioritet, odabraniServiser, odabraniDatum, oda
       {/* Summary compact */}
       <div className="overflow-hidden rounded-2xl" style={{ border: '1px solid rgb(var(--first-quaternary-rgb)/0.28)' }}>
         {[
-          { label: 'Korisnik', value: imePrezime || '—' },
+          { label: 'Korisnik', value: imePrezime || '-' },
           { label: 'Zahtjev', value: podkategorija || glavna },
           { label: 'Prioritet', value: <span style={{ color: pDef.boja, fontWeight: 700 }}>{prioritet}</span> },
           { label: 'Serviser', value: odabraniServiser ? `${odabraniServiser.ime} ${odabraniServiser.prezime}` : <span style={{ color: '#DC2626' }}>Nije odabran</span> },
           {
             label: 'Termin', value: odabraniDatum && odabraniSlot
-              ? `${fmtDatum(odabraniDatum + 'T00:00:00')} — ${odabraniSlot.opis}`
+              ? `${fmtDatum(odabraniDatum + 'T00:00:00')} - ${odabraniSlot.opis}`
               : <span style={{ color: '#DC2626' }}>Nije odabran</span>
           },
         ].map(({ label, value }, i) => (
@@ -1160,7 +1152,7 @@ export function DispecerZahtjevDetaljSadrzaj({
   zahtjev: ZahtjevDetalj;
   requestId: string;
   onRequestUpdated?: (zahtjev: ZahtjevDetalj) => void;
-  /** Nakon PATCH-a — osvježi i historiju aktivnosti na roditeljskoj stranici. */
+  /** Nakon PATCH-a - osvježi i historiju aktivnosti na roditeljskoj stranici. */
   onOsvjezajDetalj?: (payload: {
     zahtjev: ZahtjevDetalj;
     aktivnosti?: import('@/domain/types/servisirane').InterventionActivity[];
@@ -1333,7 +1325,7 @@ export function DispecerZahtjevDetaljSadrzaj({
     try {
       // `potvrdi` akcija radi samo za inbox statuse. Ako je zahtjev već prošao
       // inbox (dodjelaUspjela = true) ili ima potvrđeni/dodijeljeni status,
-      // nalog je sačuvan — navigiraj na dispatcher pregled.
+      // nalog je sačuvan - navigiraj na dispatcher pregled.
       const inboxStatusi = new Set(['na_cekanju', 'pending_review', 'in_review']);
       if (dodjelaUspjela || !inboxStatusi.has(zahtjev.status)) {
         router.push(hrefNazad ?? '/dispecer');

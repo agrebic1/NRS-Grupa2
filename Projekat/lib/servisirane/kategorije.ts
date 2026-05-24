@@ -153,7 +153,7 @@ function parseLegacyCategory(category: string | null | undefined): {
 } {
   const trimmed = (category ?? '').trim();
   if (!trimmed) return { glavnaLabel: 'Zahtjev', podkategorijaLabel: null };
-  const match = trimmed.match(/^(.+?)\s*[—–-]\s*(.+)$/);
+  const match = trimmed.match(/^(.+?)\s*[-\u2013\u2014]\s*(.+)$/);
   if (match) return { glavnaLabel: match[1].trim(), podkategorijaLabel: match[2].trim() || null };
   return { glavnaLabel: trimmed, podkategorijaLabel: null };
 }
@@ -191,7 +191,7 @@ export function serializujKategoriju(mainId: string, subId?: string | null): {
   const glavnaLabel = glavna?.label ?? mainId;
   const podLabel = pod?.label ?? null;
   return {
-    category: podLabel ? `${glavnaLabel} — ${podLabel}` : glavnaLabel,
+    category: podLabel ? `${glavnaLabel} - ${podLabel}` : glavnaLabel,
     category_main: mainId,
     category_sub: subId ?? null,
   };

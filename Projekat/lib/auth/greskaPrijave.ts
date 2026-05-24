@@ -1,4 +1,4 @@
-/** Korisničke poruke za prijavu — neutralne (bez otkrivanja stanja naloga). */
+/** Korisničke poruke za prijavu - neutralne (bez otkrivanja stanja naloga). */
 
 export const PORUKA_NEISPRAVNA_PRIJAVA =
   'Neispravni podaci za prijavu.';

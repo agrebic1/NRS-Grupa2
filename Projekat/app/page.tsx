@@ -71,10 +71,10 @@ function StatusBadge({ variant }: { variant: BadgeVariant }) {
 
 function DashboardIllustration() {
   const tasks: { title: string; technician: string; status: BadgeVariant }[] = [
-    { title: 'Električni kvar — Objekat A', technician: 'M. Jovanović', status: 'hitno' },
-    { title: 'HVAC servis — Zona 3',        technician: 'L. Torić',     status: 'u_toku' },
-    { title: 'Vodoinstalaterski — St. 204', technician: 'R. Patel',     status: 'zavrseno' },
-    { title: 'Lift — godišnji pregled',     technician: 'S. Kim',       status: 'zavrseno' },
+    { title: 'Električni kvar - Objekat A', technician: 'M. Jovanović', status: 'hitno' },
+    { title: 'HVAC servis - Zona 3',        technician: 'L. Torić',     status: 'u_toku' },
+    { title: 'Vodoinstalaterski - St. 204', technician: 'R. Patel',     status: 'zavrseno' },
+    { title: 'Lift - godišnji pregled',     technician: 'S. Kim',       status: 'zavrseno' },
   ];
 
   return (
@@ -138,7 +138,7 @@ function DashboardIllustration() {
           </div>
           <div>
             <p className="text-xs font-semibold" style={{ color: 'var(--first-octonary)' }}>Novi zadatak dodijeljen</p>
-            <p className="text-xs" style={{ color: 'var(--first-nonary)' }}>HVAC — Nivo 4</p>
+            <p className="text-xs" style={{ color: 'var(--first-nonary)' }}>HVAC - Nivo 4</p>
           </div>
         </div>
       </div>
@@ -188,7 +188,7 @@ function HeroSection() {
             Servisne intervencije pod kontrolom, od prijave do izvještaja.
           </h1>
           <p className="text-lg leading-relaxed" style={{ color: 'var(--first-nonary)' }}>
-            Od prijave kvara do gotovog izvještaja — bez izgubljenih poziva i ručnih tabela.
+            Od prijave kvara do gotovog izvještaja - bez izgubljenih poziva i ručnih tabela.
           </p>
           <div className="flex flex-wrap gap-3">
             <Link
@@ -403,7 +403,7 @@ function CtaSection() {
           }}
         >
           <div className="rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-wide" style={{ backgroundColor: 'rgb(var(--first-septenary-rgb) / 0.2)', color: 'var(--first-septenary)' }}>
-            Počnite danas — bez kreditne kartice
+            Počnite danas - bez kreditne kartice
           </div>
           <h2 className="max-w-2xl text-3xl font-bold leading-tight text-white sm:text-4xl">
             Spremni da uvedete red u vaše servisne operacije?

@@ -360,7 +360,7 @@ function AkcijeServiser({
         style={{ backgroundColor: 'rgb(var(--first-secondary-rgb)/0.05)', border: '1px solid rgb(var(--first-secondary-rgb)/0.2)' }}>
         <div className="mb-4 flex items-center gap-2">
           <Truck className="h-4 w-4" style={{ color: 'var(--first-secondary)' }} />
-          <p className="text-sm font-bold" style={{ color: 'var(--first-secondary)' }}>Prihvaćeno — na putu ste</p>
+          <p className="text-sm font-bold" style={{ color: 'var(--first-secondary)' }}>Prihvaćeno - na putu ste</p>
         </div>
         {greska && <p className="mb-3 text-xs" style={{ color: '#DC2626' }}>{greska}</p>}
         <div className="flex flex-col gap-2 sm:flex-row">
@@ -371,7 +371,7 @@ function AkcijeServiser({
             className="flex flex-1 items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-bold transition-all hover:opacity-90 disabled:opacity-60"
             style={{ backgroundColor: 'var(--first-primary)', color: '#fff' }}>
             <MapPin className="h-4 w-4" />
-            {jeSlanje ? 'Ažuriranje...' : 'Stigao sam — počni intervenciju'}
+            {jeSlanje ? 'Ažuriranje...' : 'Stigao sam - počni intervenciju'}
           </button>
           <button
             type="button"
@@ -399,7 +399,7 @@ function AkcijeServiser({
         style={{ backgroundColor: 'rgb(var(--first-secondary-rgb)/0.05)', border: '1px solid rgb(var(--first-secondary-rgb)/0.2)' }}>
         <div className="mb-4 flex items-center gap-2">
           <MapPin className="h-4 w-4" style={{ color: 'var(--first-secondary)' }} />
-          <p className="text-sm font-bold" style={{ color: 'var(--first-secondary)' }}>Na terenu — intervencija u toku</p>
+          <p className="text-sm font-bold" style={{ color: 'var(--first-secondary)' }}>Na terenu - intervencija u toku</p>
         </div>
         {greska && <p className="mb-3 text-xs font-medium" style={{ color: '#DC2626' }}>{greska}</p>}
         <button
@@ -490,7 +490,7 @@ function SidebarPanel({ zahtjev, tim }: {
         </div>
       )}
 
-      {/* Tim — pomoćni serviseri */}
+      {/* Tim - pomoćni serviseri */}
       {tim.length > 0 && (
         <div className="rounded-2xl p-4" style={kartica}>
           <div className="mb-3 flex items-center gap-2">
@@ -718,7 +718,7 @@ export default function ServiserIntervencijaDetaljiPage() {
                 <Calendar className="h-3.5 w-3.5 flex-shrink-0" />
                 <span>{fmtKratki(zahtjev.termin_planirani_pocetak)} · {fmtSat(zahtjev.termin_planirani_pocetak)}</span>
                 {zahtjev.termin_planirani_kraj && (
-                  <span>– {fmtSat(zahtjev.termin_planirani_kraj)}</span>
+                  <span>- {fmtSat(zahtjev.termin_planirani_kraj)}</span>
                 )}
               </div>
             )}
@@ -800,7 +800,7 @@ export default function ServiserIntervencijaDetaljiPage() {
             disabled={!jeAktivna}
           />
 
-          {/* Kontrolna lista — samo korak 3 (na terenu) */}
+          {/* Kontrolna lista - samo korak 3 (na terenu) */}
           {zahtjev.status === 'u_izvrsenju' && (
             <div className="rounded-2xl p-5"
               style={{ backgroundColor: 'rgb(255 255 255/0.85)', border: '1px solid rgb(var(--first-quaternary-rgb)/0.28)' }}>
@@ -899,14 +899,14 @@ export default function ServiserIntervencijaDetaljiPage() {
             </div>
           )}
 
-          {/* Završi intervenciju — zadnji korak (samo kad ima evidencija i status u_izvrsenju) */}
+          {/* Završi intervenciju - zadnji korak (samo kad ima evidencija i status u_izvrsenju) */}
           {zahtjev.status === 'u_izvrsenju' && evidencije.length > 0 && (
             <div ref={zavrsiRef} className="rounded-2xl overflow-hidden scroll-mt-4"
               style={{ border: '2px solid var(--first-primary)', backgroundColor: 'rgb(255 255 255/0.92)' }}>
               <div className="px-5 py-4" style={{ backgroundColor: 'var(--first-primary)' }}>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-white" />
-                  <p className="text-sm font-bold text-white">Zadnji korak — završi intervenciju</p>
+                  <p className="text-sm font-bold text-white">Zadnji korak - završi intervenciju</p>
                 </div>
                 <p className="text-xs mt-0.5" style={{ color: 'rgba(255,255,255,0.75)' }}>
                   Nakon što ste završili sve radove i evidentirali ih, označite intervenciju kao završenu.

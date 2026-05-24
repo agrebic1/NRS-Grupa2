@@ -14,7 +14,7 @@ interface HistorijaAktivnostiSekcijaProps {
   defaultPrikaz?: 'tabela' | 'timeline';
 }
 
-/** Historija aktivnosti — tabela i timeline (US-32, US-39, US-44). */
+/** Historija aktivnosti - tabela i timeline (US-32, US-39, US-44). */
 export function HistorijaAktivnostiSekcija({
   aktivnosti,
   ucitava,

@@ -20,7 +20,7 @@ export function ServiserOdabirKartica({
   const statusBoja =
     aktivnih === 0 ? '#22C55E' : aktivnih <= 2 ? '#D97706' : '#DC2626';
   const statusOznaka =
-    aktivnih === 0 ? 'Slobodan' : aktivnih <= 2 ? `${aktivnih} aktivna` : `${aktivnih} aktivnih`;
+    aktivnih === 0 ? 'Slobodan' : aktivnih === 1 ? '1 aktivni' : aktivnih < 5 ? `${aktivnih} aktivna` : `${aktivnih} aktivnih`;
 
   return (
     <button

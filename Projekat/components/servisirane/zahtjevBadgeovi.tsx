@@ -25,7 +25,7 @@ import {
 
 type StatusCfg = {
   oznaka: string;
-  /** Tooltip — faza u odnosu na čarobnjak obrade. */
+  /** Tooltip - faza u odnosu na čarobnjak obrade. */
   title: string;
   boja: string;
   pozadina: string;
@@ -44,24 +44,24 @@ function statusBadgeCfg(
 
 const PS = DISPECER_PALETA_STATUS;
 
-/** Status zahtjeva — `DISPECER_PALETA_STATUS`; nazivi usklađeni s čarobnjakom obrade (bosanski). */
+/** Status zahtjeva - `DISPECER_PALETA_STATUS`; nazivi usklađeni s čarobnjakom obrade (bosanski). */
 const DISPECER_STATUS_BADGE: Record<string, StatusCfg> = {
   pending_review: statusBadgeCfg(
     PS.inbox,
     'Novi',
-    'Još nije otvoren čarobnjak. Naredno: Pregled → Prioritet → Termin i serviser → Potvrda.',
+    'Još nije otvoren wizard. Naredno: Pregled → Prioritet → Termin i serviser → Potvrda.',
     Clock,
   ),
   na_cekanju: statusBadgeCfg(
     PS.inbox,
     'Novi',
-    'Još nije otvoren čarobnjak (korisnik još može uređivati zahtjev).',
+    'Još nije otvoren wizard (korisnik još može uređivati zahtjev).',
     Clock,
   ),
   in_review: statusBadgeCfg(
     PS.uObradi,
-    'U čarobnjaku',
-    'Dispečer radi u čarobnjaku: Pregled, Prioritet, Termin i serviser, Pregled naloga, Potvrda.',
+    'U wizardu',
+    'Dispečer radi u wizardu: Pregled, Prioritet, Termin i serviser, Pregled naloga, Potvrda.',
     Clock,
   ),
   assigned: statusBadgeCfg(PS.dodijeljeno, 'Dodijeljeno serviseru', 'Serviser dodijeljen; prije odlaska na teren.', CheckCircle2),
@@ -69,13 +69,13 @@ const DISPECER_STATUS_BADGE: Record<string, StatusCfg> = {
   scheduled: statusBadgeCfg(
     PS.terminPotvrden,
     'Potvrđeno',
-    'Prioritet i termin potvrđeni u čarobnjaku; naredno je dodjela ili teren.',
+    'Prioritet i termin potvrđeni u wizardu; naredno je dodjela ili teren.',
     CheckCircle2,
   ),
   potvrdeno: statusBadgeCfg(
     PS.terminPotvrden,
     'Potvrđeno',
-    'Završena obrada u čarobnjaku; naredno je intervencija (dodjela ili teren). Korisnik prati tijek na stranici intervencije.',
+    'Završena obrada u wizardu; naredno je intervencija (dodjela ili teren). Korisnik prati tijek na stranici intervencije.',
     CheckCircle2,
   ),
   in_progress: statusBadgeCfg(PS.uToku, 'Na terenu', 'Izvršavanje na lokaciji korisnika.', Truck),
@@ -130,7 +130,7 @@ export function DispecerStatusBadge({
   );
 }
 
-/** Hitna intervencija (premium) — kruna uz naziv; korisnička visoka hitnost kao kontekst. */
+/** Hitna intervencija (premium) - kruna uz naziv; korisnička visoka hitnost kao kontekst. */
 export function PremiumHitnaBadge({ className = '' }: { className?: string }) {
   return (
     <span
@@ -156,7 +156,7 @@ export function PremiumHitnaBadge({ className = '' }: { className?: string }) {
 /** Mala kruna uz premium zahtjev na dispečerskim listama i sažetku. */
 export function DispecerPremiumKruna({
   className = '',
-  title = 'Premium hitna intervencija — visoka hitnost od strane korisnika',
+  title = 'Premium hitna intervencija - visoka hitnost od strane korisnika',
 }: {
   className?: string;
   title?: string;
@@ -173,7 +173,7 @@ export function DispecerPremiumKruna({
   );
 }
 
-/** Korisnička hitnost — `DISPECER_PALETA_HITNOST` (hitno = rose, srednje = amber, nisko = slate). */
+/** Korisnička hitnost - `DISPECER_PALETA_HITNOST` (hitno = rose, srednje = amber, nisko = slate). */
 export const KORISNICKA_HITNOST_CHIP: Record<
   'Hitno' | 'Srednja' | 'Niska',
   { boja: string; pozadina: string; border: string }
@@ -271,7 +271,7 @@ export function OperativniPrioritetChip({
   );
 }
 
-/** Operativni nivo (enum u bazi) — ista paleta kao {@link OperativniPrioritetChip} (ne korisnička procjena). */
+/** Operativni nivo (enum u bazi) - ista paleta kao {@link OperativniPrioritetChip} (ne korisnička procjena). */
 export function NivoHitnostiOutlinedChip({ nivo }: { nivo: NivoHitnosti }) {
   const pal = vizuelOperativnogPrioriteta(nivo);
   return (
@@ -326,7 +326,7 @@ export function PreciznaLokacijaChip({
   );
 }
 
-/** Evidencijski tagovi u expand panelu (preferirani termin / precizna lokacija) — isti outlined stil. */
+/** Evidencijski tagovi u expand panelu (preferirani termin / precizna lokacija) - isti outlined stil. */
 export function ExpandEvidenceChip({
   Ikona,
   children,

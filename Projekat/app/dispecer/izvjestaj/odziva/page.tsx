@@ -14,7 +14,7 @@ import type { IzvjestajOdzivaOdgovor, ServiserOdzivaRed } from '@/lib/servisiran
 // ─── Helperi ──────────────────────────────────────────────────────────────────
 
 function formatMin(min: number | null): string {
-  if (min == null) return '—';
+  if (min == null) return '-';
   if (min < 60) return `${min} min`;
   const h = Math.floor(min / 60), m = min % 60;
   return m ? `${h}h ${m}min` : `${h}h`;
@@ -175,7 +175,7 @@ export default function IzvjestajOdzivaPage() {
           />
           <KpiKartica
             oznaka="SLA compliance"
-            vrijednost={uk.sla_compliance_posto != null ? `${uk.sla_compliance_posto}%` : '—'}
+            vrijednost={uk.sla_compliance_posto != null ? `${uk.sla_compliance_posto}%` : '-'}
             boja={slaBoja(uk.sla_compliance_posto)}
             Ikona={uk.sla_compliance_posto != null && uk.sla_compliance_posto < 70 ? AlertTriangle : CheckCircle2}
           />
@@ -200,7 +200,7 @@ export default function IzvjestajOdzivaPage() {
               Serviseri
               {podaci && (
                 <span className="ml-2 text-sm font-normal" style={{ color: 'var(--first-nonary)' }}>
-                  {podaci.period.od} – {podaci.period.do}
+                  {podaci.period.od} - {podaci.period.do}
                 </span>
               )}
             </h2>
@@ -321,7 +321,7 @@ export default function IzvjestajOdzivaPage() {
                           </span>
                         </div>
                       ) : (
-                        <span style={{ color: 'var(--first-nonary)' }}>—</span>
+                        <span style={{ color: 'var(--first-nonary)' }}>-</span>
                       )}
                     </td>
                   </tr>

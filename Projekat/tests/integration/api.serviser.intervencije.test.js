@@ -146,7 +146,7 @@ describe('GET /api/serviser/intervencije/[id]', () => {
   });
 });
 
-// ─── PATCH — prihvati ─────────────────────────────────────────────────────────
+// ─── PATCH - prihvati ─────────────────────────────────────────────────────────
 
 describe('PATCH prihvati (dodijeljeno → u_radu)', () => {
   beforeEach(() => {
@@ -200,7 +200,7 @@ describe('PATCH prihvati (dodijeljeno → u_radu)', () => {
   });
 });
 
-// ─── PATCH — pocni ────────────────────────────────────────────────────────────
+// ─── PATCH - pocni ────────────────────────────────────────────────────────────
 
 describe('PATCH pocni (u_radu → u_izvrsenju)', () => {
   beforeEach(() => {
@@ -233,7 +233,7 @@ describe('PATCH pocni (u_radu → u_izvrsenju)', () => {
   });
 });
 
-// ─── PATCH — odbij ────────────────────────────────────────────────────────────
+// ─── PATCH - odbij ────────────────────────────────────────────────────────────
 
 describe('PATCH odbij zadatak', () => {
   beforeEach(() => {

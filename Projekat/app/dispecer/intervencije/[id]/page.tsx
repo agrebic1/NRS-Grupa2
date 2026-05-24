@@ -467,10 +467,10 @@ function PromijeniIzvrsiocaModal({ zahtjevId, trenutniServIserId, onZatvori, onU
                 onChange={(e) => setNoviId(e.target.value)}
                 className="w-full rounded-xl border px-4 py-2.5 text-sm focus:outline-none focus:ring-2"
                 style={{ borderColor: 'rgb(var(--first-quaternary-rgb)/0.4)', color: 'var(--first-octonary)' }}>
-                <option value="">— Odaberite servisera —</option>
+                <option value="">- Odaberite servisera -</option>
                 {serviseri.map(s => (
                   <option key={s.id} value={s.id}>
-                    {s.ime} {s.prezime} ({s.aktivnih_zadataka} aktivnih)
+                    {s.ime} {s.prezime} ({s.aktivnih_zadataka === 1 ? '1 aktivni' : s.aktivnih_zadataka < 5 ? `${s.aktivnih_zadataka} aktivna` : `${s.aktivnih_zadataka} aktivnih`})
                   </option>
                 ))}
               </select>
@@ -807,7 +807,7 @@ function DesniPanel({
           </div>
         </div>
 
-        {/* Historija — uvijek vidljiva u sidebaru (desktop) */}
+        {/* Historija - uvijek vidljiva u sidebaru (desktop) */}
         <div className="max-h-[min(480px,50vh)] overflow-y-auto">
           <HistorijaAktivnostiSekcija
             aktivnosti={aktivnosti}
@@ -1014,7 +1014,7 @@ export default function DispecerIntervencijaDetaljiPage() {
               <div className="flex items-center gap-1.5">
                 <Calendar className="h-3.5 w-3.5 flex-shrink-0" />
                 {fmtDatumVrijeme(zahtjev.termin_planirani_pocetak)}
-                {zahtjev.termin_planirani_kraj && <span>– {fmtSat(zahtjev.termin_planirani_kraj)}</span>}
+                {zahtjev.termin_planirani_kraj && <span>- {fmtSat(zahtjev.termin_planirani_kraj)}</span>}
               </div>
             )}
             <div className="flex items-center gap-1.5">
@@ -1032,7 +1032,7 @@ export default function DispecerIntervencijaDetaljiPage() {
               style={{ backgroundColor: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.2)' }}>
               <CircleAlert className="h-4 w-4 flex-shrink-0" style={{ color: '#DC2626' }} />
               <p className="text-sm font-semibold" style={{ color: '#DC2626' }}>
-                Intervencija kasni — planirani termin je prošao a status još nije ažuriran
+                Intervencija kasni - planirani termin je prošao a status još nije ažuriran
               </p>
             </div>
           )}
@@ -1070,7 +1070,7 @@ export default function DispecerIntervencijaDetaljiPage() {
             />
           )}
 
-          {/* Incident kartica — opis problema */}
+          {/* Incident kartica - opis problema */}
           <SekcijaKartica Ikona={MessageSquare} naslov="Opis problema">
             <div className="rounded-xl border-l-4 px-5 py-4"
               style={{ borderLeftColor: 'var(--first-secondary)', backgroundColor: 'rgb(var(--first-secondary-rgb)/0.04)' }}>
@@ -1121,7 +1121,7 @@ export default function DispecerIntervencijaDetaljiPage() {
             </div>
           )}
 
-          {/* Servisni log — evidencija rada */}
+          {/* Servisni log - evidencija rada */}
           {evidencije.length > 0 && (
             <SekcijaKartica Ikona={Wrench} naslov={`Servisni log (${evidencije.length} unos${evidencije.length > 1 ? 'a' : ''})`}>
               <div className="flex flex-col gap-3">
@@ -1189,7 +1189,7 @@ export default function DispecerIntervencijaDetaljiPage() {
                     style={{ backgroundColor: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.2)' }}>
                     <AlertTriangle className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: '#DC2626' }} />
                     <p className="text-sm" style={{ color: '#DC2626' }}>
-                      Zatvaranje nije moguće — serviser još nije evidentirao obavljeni rad.
+                      Zatvaranje nije moguće - serviser još nije evidentirao obavljeni rad.
                     </p>
                   </div>
                 )}
@@ -1237,7 +1237,7 @@ export default function DispecerIntervencijaDetaljiPage() {
             </div>
           )}
 
-          {/* Zatvorena — read-only badge */}
+          {/* Zatvorena - read-only badge */}
           {zahtjev.status === 'zavrseno' && zahtjev.closed_at && (
             <div className="flex items-center gap-3 rounded-2xl px-5 py-4"
               style={{ backgroundColor: 'rgb(var(--first-primary-rgb)/0.04)', border: '2px solid rgb(var(--first-primary-rgb)/0.18)' }}>
@@ -1251,7 +1251,7 @@ export default function DispecerIntervencijaDetaljiPage() {
                   {zahtjev.closed_at
                     ? `Zatvoreno ${new Date(zahtjev.closed_at).toLocaleString('bs-BA', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}`
                     : 'Arhivirano'}
-                  {zahtjev.closure_note ? ` — ${zahtjev.closure_note}` : ''}
+                  {zahtjev.closure_note ? ` - ${zahtjev.closure_note}` : ''}
                 </p>
               </div>
             </div>

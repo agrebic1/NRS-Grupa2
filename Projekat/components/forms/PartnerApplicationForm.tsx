@@ -42,7 +42,7 @@ type PartnerApiResponse = {
   error?: string;
 };
 
-// ─── Uloge — Action kartice ───────────────────────────────────────────────────
+// ─── Uloge - Action kartice ───────────────────────────────────────────────────
 
 const ULOGE = [
   {
@@ -446,7 +446,7 @@ export function PartnerApplicationForm() {
         <label className="text-sm font-semibold" style={{ color: 'var(--first-octonary)' }}>
           Dokaz o stručnosti{' '}
           <span className="font-normal" style={{ color: 'var(--first-nonary)' }}>
-            (diploma, certifikat — PDF ili slika)
+            (diploma, certifikat - PDF ili slika)
           </span>
         </label>
         {dokument ? (
@@ -483,7 +483,7 @@ export function PartnerApplicationForm() {
               Kliknite za odabir dokumenta
             </p>
             <p className="text-xs" style={{ color: 'var(--first-quinary)' }}>
-              PDF, JPG, PNG — max 10 MB
+              PDF, JPG, PNG - max 10 MB
             </p>
             <input
               id="partner-doc-input"

@@ -40,10 +40,10 @@ const SERVICE_REQUEST_PHOTOS_BUCKET = 'service-request-photos';
 // ─── Wizard state ─────────────────────────────────────────────────────────────
 
 interface WizardState {
-  // Step 1 — Kategorija
+  // Step 1 - Kategorija
   selectedCategory:    string | null;
   selectedSubcategory: string | null;
-  // Step 2 — Lokacija
+  // Step 2 - Lokacija
   address:                  string;
   latitude:                 number | null;
   longitude:                number | null;
@@ -52,17 +52,17 @@ interface WizardState {
   hasSelectedMapLocation:   boolean;
   isMapVisible:             boolean;
   locationSuccessMessage:   string | null;
-  // Step 3 — Preferirani termini (do 3 slota)
+  // Step 3 - Preferirani termini (do 3 slota)
   termini:             TerminSlot[];
   noPreferredTime:     boolean;
   timeValidationError: string | null;
-  // Step 4 — Opis
+  // Step 4 - Opis
   description:      string;
   contactPhone:     string;
   accountPhone:     string;
   useAccountPhone:  boolean;
   photoFile:        File | null;
-  // Step 5 — Trijaža
+  // Step 5 - Trijaža
   triage:           TriageFormState;
   isPremiumUser:    boolean;
   /** Lifecycle iz /api/profil (za poruke kada nije `active`). */
@@ -151,7 +151,7 @@ export function porukaValidacijePreferiranogTermina(s: StanjePreferiranogTermina
   const t = s.termini[0];
   if (!t?.date) return 'Odaberite datum ili označite da nemate preferirani termin.';
   if (t.date < danasIsoLokalno()) return 'Primarni datum ne smije biti u prošlosti.';
-  if (!t.from || !t.to) return 'Odaberite vremenski raspon primarnog termina (od — do).';
+  if (!t.from || !t.to) return 'Odaberite vremenski raspon primarnog termina (od - do).';
   if (t.from >= t.to) return '"Vrijeme do" mora biti nakon "Vrijeme od".';
   return null;
 }
@@ -261,7 +261,7 @@ function validirajKorak(k: number, s: WizardState): string | null {
   return null;
 }
 
-/** Blokira „Dalje” dok korak nije ispunjen (uključujući korak 1 — kategorija). */
+/** Blokira „Dalje” dok korak nije ispunjen (uključujući korak 1 - kategorija). */
 function jeKorakBlokiran(k: number, s: WizardState): boolean {
   if (k === 1) return !isStepOneValid(s);
   if (k === 2) return !isStepTwoValid(s);
@@ -278,9 +278,9 @@ function porukaBlokiranja(k: number): string {
   if (k === 1) return 'Odaberite vrstu zahtjeva prije nastavka.';
   if (k === 2) return 'Unesite adresu intervencije prije nastavka.';
   if (k === 3) {
-    return '"Dalje" je onemogućen — odaberite preferirani termin (datum i raspon) ili opciju bez preferencije.';
+    return '"Dalje" je onemogućen - odaberite preferirani termin (datum i raspon) ili opciju bez preferencije.';
   }
-  return '"Dalje" je onemogućen — unesite opis (min. 20) i ispravan kontakt telefon.';
+  return '"Dalje" je onemogućen - unesite opis (min. 20) i ispravan kontakt telefon.';
 }
 
 function naslovDaljeDugmeta(k: number, s: WizardState): string | undefined {
@@ -325,14 +325,14 @@ function formatirajTermin(state: WizardState): string {
   const oznake = ['Primarni', 'Alt. 1', 'Alt. 2'];
   return state.termini
     .filter(t => t?.date)
-    .map((t, i) => `${oznake[i]}: ${formatirajDatumPrikaz(t.date)}${t.from && t.to ? ` (${t.from}–${t.to})` : ''}`)
+    .map((t, i) => `${oznake[i]}: ${formatirajDatumPrikaz(t.date)}${t.from && t.to ? ` (${t.from}-${t.to})` : ''}`)
     .join(' · ');
 }
 
 function formatirajStatusZaPrikaz(status: string): string {
   const s = status.toLowerCase();
   if (s === 'pending_review' || s === 'na_cekanju') return 'Novi';
-  if (s === 'in_review') return 'U čarobnjaku';
+  if (s === 'in_review') return 'U wizardu';
   if (s === 'potvrdeno') return 'Potvrđeno';
   if (s === 'dodijeljeno') return 'Dodijeljeno serviseru';
   if (s === 'u_radu' || s === 'u_izvrsenju') return 'Na terenu';
@@ -402,7 +402,7 @@ function PregledZahtjevaKorak({
           <Button type="button" variant="ghost" size="sm" onClick={() => onEditStep(1)}>Uredi</Button>
         </div>
         <p className="text-sm" style={{ color: 'var(--first-octonary)' }}>
-          {kategorija.podkategorija ? `${kategorija.glavna} — ${kategorija.podkategorija}` : kategorija.glavna}
+          {kategorija.podkategorija ? `${kategorija.glavna} - ${kategorija.podkategorija}` : kategorija.glavna}
         </p>
       </div>
 
@@ -415,7 +415,7 @@ function PregledZahtjevaKorak({
           <Button type="button" variant="ghost" size="sm" onClick={() => onEditStep(2)}>Uredi</Button>
         </div>
         <p className="text-sm break-words [overflow-wrap:anywhere]" style={{ color: 'var(--first-octonary)' }}>
-          {(state.address ?? '').trim() || '—'}
+          {(state.address ?? '').trim() || '-'}
         </p>
         {imaKoordinate && (
           <div className="mt-2">
@@ -481,7 +481,7 @@ function PregledZahtjevaKorak({
         <p className="text-sm font-semibold" style={{ color: 'var(--first-octonary)' }}>{hitnost}</p>
         {state.premiumRequested && state.isPremiumUser && (
           <p className="mt-2 text-xs" style={{ color: 'var(--first-nonary)' }}>
-            Trijaža nije potrebna — prioritet određuje premium paket.
+            Trijaža nije potrebna - prioritet određuje premium paket.
           </p>
         )}
       </div>

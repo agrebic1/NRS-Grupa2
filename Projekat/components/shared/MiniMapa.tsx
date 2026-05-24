@@ -1,7 +1,7 @@
 'use client';
 
 /**
- * MiniMapa — shared read-only tile map.
+ * MiniMapa - shared read-only tile map.
  *
  * Koristi isti pristup kao KorakLokacija (custom OSM tile rendering bez
  * eksternih biblioteka). Nominatim geocodira adresu ako koordinate nisu
@@ -313,7 +313,7 @@ export function MiniMapa({
           <div className="flex min-w-0 items-start gap-2">
             <MapPin className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" style={{ color: 'var(--first-primary)' }} />
             <p className="truncate text-xs font-medium leading-snug" style={{ color: 'var(--first-octonary)' }}>
-              {adresa || '—'}
+              {adresa || '-'}
             </p>
           </div>
           <a

@@ -136,7 +136,7 @@ type OkvirGalerijeProps = {
   className?: string;
 };
 
-/** Istovjetan okvir kao glavna slika u PrilogGaleriji — za blob pregled u čarobnjaku / kartice. */
+/** Istovjetan okvir kao glavna slika u PrilogGaleriji - za blob pregled u čarobnjaku / kartice. */
 export function OkvirGalerije({ children, className = '' }: OkvirGalerijeProps) {
   return (
     <div className={`rounded-2xl p-[3px] shadow-md ${className}`} style={{ background: GALERIJA_GRADIJENT }}>

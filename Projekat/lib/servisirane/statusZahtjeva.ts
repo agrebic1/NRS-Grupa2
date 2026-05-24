@@ -1,9 +1,9 @@
 /**
- * Re-export barrel — backward-kompatibilnost.
+ * Re-export barrel - backward-kompatibilnost.
  * Logika je razdvojena u tri fajla prema SRP:
- *   statusTypes.ts       — tipovi, konstante
- *   statusMapping.ts     — mapiranje DB statusa → KorisnickiDashboardStatus
- *   statusPermissions.ts — provjere dozvola po ulozi
+ *   statusTypes.ts       - tipovi, konstante
+ *   statusMapping.ts     - mapiranje DB statusa → KorisnickiDashboardStatus
+ *   statusPermissions.ts - provjere dozvola po ulozi
  */
 export type { KorisnickiDashboardStatus } from './statusTypes';
 export {

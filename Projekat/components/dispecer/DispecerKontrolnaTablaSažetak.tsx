@@ -33,7 +33,7 @@ export function DispecerKontrolnaTablaSažetak({ zahtjev }: { zahtjev: ZahtjevZa
   const terminPrikaz = terminTekst.includes(',') ? terminTekst.replace(',', ' ·') : terminTekst;
 
   const telefonSirovo = podnosilac?.broj_telefona?.trim() || zahtjev.contact_phone?.trim() || '';
-  const telefon = telefonSirovo || '—';
+  const telefon = telefonSirovo || '-';
   const telefonHref = telefonSirovo ? hrefZaTelefon(telefonSirovo) : null;
   const imePrezime = imePrezimePodnosioca(podnosilac);
   const opisSirovo = (zahtjev.description ?? '').trim();
@@ -121,7 +121,7 @@ export function DispecerKontrolnaTablaSažetak({ zahtjev }: { zahtjev: ZahtjevZa
             Adresa
           </p>
           <p className="break-words text-sm font-medium leading-snug" style={{ color: 'var(--first-octonary)' }}>
-            {(zahtjev.address ?? '').trim() || '—'}
+            {(zahtjev.address ?? '').trim() || '-'}
           </p>
         </div>
 

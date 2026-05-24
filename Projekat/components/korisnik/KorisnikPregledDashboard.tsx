@@ -40,14 +40,14 @@ export interface KorisnikDashboardZahtjev {
   status: KorisnickiDashboardStatus;
   datum: string;
   lokacija: string;
-  /** yyyy-mm-dd — prikaz u sidebaru „Sljedeći dolazak“. */
+  /** yyyy-mm-dd - prikaz u sidebaru „Sljedeći dolazak“. */
   dolazakDatumIso: string;
-  /** Opseg sati npr. „08:00–12:00“ ili null → „Vrijeme nije potvrđeno“. */
+  /** Opseg sati npr. „08:00-12:00“ ili null → „Vrijeme nije potvrđeno“. */
   dolazakVrijemeOpis: string | null;
   /** Za prikaz „X hitnost (čeka obradu)” kad je {@link KorisnickiDashboardStatus} `novi`. */
   is_premium: boolean;
   urgency_score: number;
-  /** US-47: broj operativnih ponovnih dodjela — prikazuje se kad je status `potvrdeno` i > 0. */
+  /** US-47: broj operativnih ponovnih dodjela - prikazuje se kad je status `potvrdeno` i > 0. */
   broj_ponovnih_ciklusa?: number;
 }
 
@@ -77,7 +77,7 @@ function tekstOznakeBedzaDashboard(z: KorisnikDashboardZahtjev): string {
   return BADGE_OZNAKE[z.status];
 }
 
-/** Bedž statusa — za `novi` hitnosna paleta po urgency_score-u korisnika. */
+/** Bedž statusa - za `novi` hitnosna paleta po urgency_score-u korisnika. */
 function stilStatusBedzaZaDashboard(z: KorisnikDashboardZahtjev): CSSProperties {
   if (z.status === 'novi') {
     const score = efektivniKorisnickiUrgencyScore(z);
@@ -89,7 +89,7 @@ function stilStatusBedzaZaDashboard(z: KorisnikDashboardZahtjev): CSSProperties 
   return { backgroundColor: slot.pozadina, color: slot.boja };
 }
 
-/** Lijevi rub kartice — kao {@link ZahtjevKartica}: premium ili inbox grupa po procjeni. */
+/** Lijevi rub kartice - kao {@link ZahtjevKartica}: premium ili inbox grupa po procjeni. */
 function lijeviRubKorisnickaKartica(z: KorisnikDashboardZahtjev): string {
   if (z.is_premium) return DISPECER_PALETA_PREMIUM.akcent;
   const grupa = inboxGrupaIzKorisnickeProcjene(z);
@@ -104,7 +104,7 @@ function jeTerminalniKorisnicki(status: KorisnickiDashboardStatus) {
   return status === 'zavrseno' || status === 'zatvoreno' || status === 'otkazano' || status === 'odbijeno';
 }
 
-/** Kartice u „Moji zahtjevi” — sve aktivne (čeka obradu, potvrđeno, na terenu); bez završenih i terminalnih. */
+/** Kartice u „Moji zahtjevi” - sve aktivne (čeka obradu, potvrđeno, na terenu); bez završenih i terminalnih. */
 function jeZahtjevCekaObraduZaPregled(status: KorisnickiDashboardStatus): boolean {
   return status === 'novi' || status === 'u_obradi' || status === 'potvrdeno' || status === 'u_toku';
 }
@@ -161,7 +161,7 @@ function sortirajZahtjeve(zahtjevi: KorisnikDashboardZahtjev[]) {
   return [...zahtjevi].sort((a, b) => prioritet[a.status] - prioritet[b.status]);
 }
 
-/** Kartica za pregled dashboarda — layout kao {@link ZahtjevKartica} na stranici „Moji zahtjevi“. */
+/** Kartica za pregled dashboarda - layout kao {@link ZahtjevKartica} na stranici „Moji zahtjevi“. */
 function ZahtjevPregledKartica({ zahtjev }: { zahtjev: KorisnikDashboardZahtjev }) {
   const oznakaStatusa = tekstOznakeBedzaDashboard(zahtjev);
   const rubLijevo = lijeviRubKorisnickaKartica(zahtjev);
@@ -212,17 +212,17 @@ function ZahtjevPregledKartica({ zahtjev }: { zahtjev: KorisnikDashboardZahtjev 
             </p>
           ) : zahtjev.status === 'potvrdeno' && (zahtjev.broj_ponovnih_ciklusa ?? 0) > 0 ? (
             <p className="mt-2 text-[11px] leading-snug" style={{ color: '#B45309' }}>
-              Prethodni serviser nije riješio zahtjev — dispečer traži novog servisera.
+              Prethodni serviser nije riješio zahtjev - dispečer traži novog servisera.
             </p>
           ) : zahtjev.status === 'potvrdeno' ? (
             <p className="mt-2 text-[11px] leading-snug" style={{ color: 'rgb(0,100,160 / 0.85)' }}>
-              Serviser je dodijeljen — uskoro ćete dobiti potvrdu termina.
+              Serviser je dodijeljen - uskoro ćete dobiti potvrdu termina.
             </p>
           ) : null}
 
           <div className="mt-2 min-w-0">
             <p className="break-words text-sm font-medium leading-snug" style={{ color: 'var(--first-nonary)' }}>
-              {(zahtjev.lokacija ?? '').trim() || '—'}
+              {(zahtjev.lokacija ?? '').trim() || '-'}
             </p>
           </div>
 
@@ -235,7 +235,7 @@ function ZahtjevPregledKartica({ zahtjev }: { zahtjev: KorisnikDashboardZahtjev 
           </div>
 
           <div
-            className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-deep-teal px-4 py-2 text-sm font-semibold text-white transition-colors duration-200 group-hover:bg-celestial-teal"
+            className="mt-auto pt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-deep-teal px-4 py-2 text-sm font-semibold text-white transition-colors duration-200 group-hover:bg-celestial-teal"
           >
             Detalji
             <ChevronRight className="h-4 w-4" aria-hidden />
@@ -252,7 +252,7 @@ const cardShell = {
   boxShadow: '0 10px 28px rgb(var(--first-primary-rgb) / 0.06)',
 } as const;
 
-/** Broj kartica po stranici na pregledu (iznad toga — paginacija). */
+/** Broj kartica po stranici na pregledu (iznad toga - paginacija). */
 const ZAHTJEVI_PO_STRANICI_PREGLED = 4;
 
 export function KorisnikPregledDashboard({
@@ -273,7 +273,7 @@ export function KorisnikPregledDashboard({
   );
   const [stranicaMojiZahtjevi, setStranicaMojiZahtjevi] = useState(1);
 
-  /** Koriguje indeks ako je izvan raspona (npr. manje zahtjeva nakon osvježavanja) — inače slice() može biti prazan. */
+  /** Koriguje indeks ako je izvan raspona (npr. manje zahtjeva nakon osvježavanja) - inače slice() može biti prazan. */
   const aktivnaStranicaMojiZahtjevi = Math.min(
     Math.max(1, stranicaMojiZahtjevi),
     ukupnoStranicaMojiZahtjevi,
@@ -341,7 +341,7 @@ export function KorisnikPregledDashboard({
               Dobrodošli, {imeKorisnika}!
             </h1>
             <p className="mt-1.5 max-w-xl text-sm leading-relaxed" style={{ color: 'var(--first-nonary)' }}>
-              Ovdje pratite svoje zahtjeve, hitne slučajeve i zakazane dolazake servisera — bez poziva i ručnih tablica.
+              Ovdje pratite svoje zahtjeve, hitne slučajeve i zakazane dolaske servisera - bez poziva i ručnih tablica.
             </p>
           </div>
           <Link href="/korisnik/zahtjevi/novi" className="shrink-0">
@@ -352,7 +352,7 @@ export function KorisnikPregledDashboard({
           </Link>
         </div>
 
-        {/* KPI — ista skala boja kao dispečerski inbox / hitnost / termin; 4 kolone na lg */}
+        {/* KPI - ista skala boja kao dispečerski inbox / hitnost / termin; 4 kolone na lg */}
         <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {KPI.map(({ oznaka, vrijednost, boja, Ikona }) => (
             <div
@@ -401,7 +401,7 @@ export function KorisnikPregledDashboard({
                     Moji zahtjevi
                   </h2>
                   <p className="mt-0.5 text-xs" style={{ color: 'var(--first-nonary)' }}>
-                    Samo zahtjevi koji čekaju obradu (red čekanja i dispečer). Na terenu i završeni — u „Svi zahtjevi“.
+                    Samo zahtjevi koji čekaju obradu (red čekanja i dispečer). Na terenu i završeni - u „Svi zahtjevi“.
                   </p>
                 </div>
                 <Link
@@ -429,7 +429,7 @@ export function KorisnikPregledDashboard({
                 <div className="flex flex-col items-center gap-3 px-5 py-12 text-center">
                   <FileText className="h-10 w-10" style={{ color: 'var(--first-quinary)' }} />
                   <p className="max-w-md text-sm leading-relaxed" style={{ color: 'var(--first-nonary)' }}>
-                    Trenutno nemate zahtjeva koji čekaju obradu — svi su na terenu ili završeni. Pogledajte cjelokupnu
+                    Trenutno nemate zahtjeva koji čekaju obradu - svi su na terenu ili završeni. Pogledajte cjelokupnu
                     historiju na listi zahtjeva.
                   </p>
                   <Link href="/korisnik/zahtjevi">
@@ -562,7 +562,7 @@ export function KorisnikPregledDashboard({
                       className="mt-1 text-2xl font-bold tabular-nums leading-tight tracking-tight sm:text-[1.65rem]"
                       style={{ color: 'var(--first-octonary)' }}
                     >
-                      {formatirajDatumPrikaz(sljedeci.dolazakDatumIso, '—')}
+                      {formatirajDatumPrikaz(sljedeci.dolazakDatumIso, '-')}
                     </p>
                     <p className="mt-1.5 text-sm font-medium" style={{ color: 'rgb(var(--first-nonary-rgb) / 0.9)' }}>
                       {sljedeci.dolazakVrijemeOpis ?? 'Vrijeme nije potvrđeno'}

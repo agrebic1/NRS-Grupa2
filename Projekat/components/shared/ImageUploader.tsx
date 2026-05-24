@@ -145,7 +145,7 @@ export function ImageUploader({
               Prevuci slike ili klikni za odabir
             </p>
             <p className="text-xs mt-0.5" style={{ color: 'var(--first-nonary)' }}>
-              JPEG, PNG, WebP, GIF — max {MAX_MB} MB po slici
+              JPEG, PNG, WebP, GIF - max {MAX_MB} MB po slici
             </p>
           </div>
           <input

@@ -18,7 +18,7 @@ async function prijaviSe(page: Page, creds: RoleCreds) {
   await expect(page).not.toHaveURL(/\/auth\/login/);
 }
 
-test.describe('Dispečer — dodjela i zatvaranje intervencije', () => {
+test.describe('Dispečer - dodjela i zatvaranje intervencije', () => {
   const dispecer = ucitajKredencijale('dispecer');
 
   test.skip(!dispecer, 'Missing E2E dispatcher credentials in environment variables.');

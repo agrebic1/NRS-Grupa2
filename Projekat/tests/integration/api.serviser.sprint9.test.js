@@ -92,7 +92,7 @@ function patchRequest(body) {
 const RAZLOG_VALIDAN = 'Nema odgovarajuće opreme za ovu intervenciju.';
 const PARAMS = { params: { id: '1' } };
 
-// ─── PATCH — vrati_na_ponovnu_dodjelu ─────────────────────────────────────────
+// ─── PATCH - vrati_na_ponovnu_dodjelu ─────────────────────────────────────────
 
 describe('PATCH vrati_na_ponovnu_dodjelu (US-29)', () => {
   beforeEach(() => {
@@ -187,7 +187,7 @@ describe('PATCH vrati_na_ponovnu_dodjelu (US-29)', () => {
   });
 });
 
-// ─── PATCH — oznaci_nije_rijesen ──────────────────────────────────────────────
+// ─── PATCH - oznaci_nije_rijesen ──────────────────────────────────────────────
 
 describe('PATCH oznaci_nije_rijesen (US-40)', () => {
   beforeEach(() => {

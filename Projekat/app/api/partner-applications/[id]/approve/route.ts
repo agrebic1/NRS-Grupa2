@@ -59,7 +59,7 @@ export async function POST(
     const ulogaMetadata =
       aplikacija.service_type === 'serviser' ? 'Serviser' : 'Dispečer';
 
-    // Kreiraj auth korisnika — zahtijeva service role key
+    // Kreiraj auth korisnika - zahtijeva service role key
     let adminClient: ReturnType<typeof createAdminClient>;
     try {
       adminClient = createAdminClient();
@@ -112,7 +112,7 @@ export async function POST(
 
     const emailRezultat = await sendEmail({
       to:      aplikacija.email,
-      subject: 'Vaša prijava je odobrena — Pristupni podaci | InterServ',
+      subject: 'Vaša prijava je odobrena - Pristupni podaci | InterServ',
       html:    emailHtml,
     });
 

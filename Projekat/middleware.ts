@@ -73,7 +73,7 @@ export async function middleware(zahtjev: NextRequest) {
       },
     });
 
-    // Must use getUser(), not getSession() — prevents CSRF token spoofing
+    // Must use getUser(), not getSession() - prevents CSRF token spoofing
     const {
       data: { user: authUser },
     } = await supabase.auth.getUser();
@@ -140,7 +140,7 @@ export async function middleware(zahtjev: NextRequest) {
   const jeJavniApiZaPartnerAplikaciju =
     method === 'POST' &&
     (pathname === PARTNER_APPLICATIONS_API || pathname.startsWith(`${PARTNER_APPLICATIONS_API}/`));
-  /** API rute moraju vratiti JSON (401/403), ne HTML redirect — inače klijent baca „Unexpected token '<'”. */
+  /** API rute moraju vratiti JSON (401/403), ne HTML redirect - inače klijent baca „Unexpected token '<'”. */
   const jeApiRuta = pathname.startsWith('/api/');
 
   if (!user && !jeJavnaRuta && !jeJavniApiZaPartnerAplikaciju && !jeApiRuta) {

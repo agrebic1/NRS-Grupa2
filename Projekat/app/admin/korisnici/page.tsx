@@ -70,10 +70,10 @@ export default function AdminKorisniciPage() {
           size="md"
           onClick={ucitajKorisnike}
           isLoading={ucitava}
-          loadingText="Ucitavanje..."
+          loadingText="Učitavanje..."
         >
           <RefreshCw className="h-4 w-4" />
-          Osvjezi
+          Osvježi
         </Button>
       </div>
 
@@ -213,7 +213,7 @@ export default function AdminKorisniciPage() {
 
       {ucitava && (
         <p className="py-8 text-center text-sm" style={{ color: 'var(--first-nonary)' }}>
-          Ucitavanje korisnika...
+          Učitavanje korisnika...
         </p>
       )}
       {!ucitava && korisniciUsluge.length === 0 && !greska && (

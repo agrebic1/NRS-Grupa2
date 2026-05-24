@@ -230,7 +230,7 @@ function DispecerPageContent() {
     setOdabraniZahtjevId(prikazaniZahtjevId);
   }, [prikazaniZahtjevId, odabraniZahtjevId]);
 
-  /** Samo ukloni ?z kad inbox postane prazan — bez stalnog replace() koji uzrokuje trešnju. */
+  /** Samo ukloni ?z kad inbox postane prazan - bez stalnog replace() koji uzrokuje trešnju. */
   useEffect(() => {
     if (!splitPanelAktivan || ucitava) return;
     if (zahtjeviCekajuObradu.length === 0 && zIzUrl) {
@@ -391,7 +391,7 @@ function DispecerPageContent() {
               Inbox je prazan
             </p>
             <p className="mt-1 text-sm" style={{ color: 'var(--first-nonary)' }}>
-              Nema zahtjeva koji čekaju prioritet ili čarobnjak.
+              Nema zahtjeva koji čekaju prioritet ili wizard.
             </p>
             <Link
               href="/dispecer/zahtjevi"
@@ -420,7 +420,7 @@ function DispecerPageContent() {
                       </p>
                       {noviInboxPodaci.uredjeni.length === 0 ? (
                         <p className="text-xs leading-relaxed" style={{ color: 'var(--first-nonary)' }}>
-                          Nema novih — svi imaju potvrđen operativni prioritet.
+                          Nema novih - svi imaju potvrđen operativni prioritet.
                         </p>
                       ) : (
                         <div className="flex min-w-0 flex-col gap-4">
@@ -470,7 +470,7 @@ function DispecerPageContent() {
                       </p>
                       {uObradiInboxPodaci.uredjeni.length === 0 ? (
                         <p className="text-xs leading-relaxed" style={{ color: 'var(--first-nonary)' }}>
-                          Nema zahtjeva u čarobnjaku — svi još čekaju prioritet (Novi).
+                          Nema zahtjeva u wizardu - svi još čekaju prioritet (Novi).
                         </p>
                       ) : (
                         <div className="flex min-w-0 flex-col gap-4">
@@ -572,7 +572,7 @@ function DispecerPageContent() {
                   </p>
                   {uObradiInboxPodaci.uredjeni.length === 0 ? (
                     <p className="text-xs" style={{ color: 'var(--first-nonary)' }}>
-                      Nema zahtjeva u čarobnjaku.
+                      Nema zahtjeva u wizardu.
                     </p>
                   ) : (
                     <ul className="flex min-w-0 flex-col gap-3">

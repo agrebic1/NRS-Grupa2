@@ -32,7 +32,7 @@ export function statusBoja(s: string): string {
 }
 
 /**
- * Korisničke dashboard badge boje po `KorisnickiDashboardStatus` (bez 'novi' — dinamično).
+ * Korisničke dashboard badge boje po `KorisnickiDashboardStatus` (bez 'novi' - dinamično).
  * Jedinstven izvor istine; importovati u `korisnickiTokPrikaz.ts` i `KorisnikPregledDashboard.tsx`.
  */
 export const KORISNIK_PALETA_DASHBOARD_STATUS: Record<

@@ -13,7 +13,7 @@ import {
 } from '@/lib/servisirane/urgency';
 
 /**
- * Tekst bedža u korisničkoj listi/detalju — jedna oznaka životnog ciklusa.
+ * Tekst bedža u korisničkoj listi/detalju - jedna oznaka životnog ciklusa.
  */
 export function korisnickiTokBedzTekst(zahtjev: ServisniZahtjev): string {
   const d = korisnickiDashboardStatus(zahtjev.status, zahtjev.final_priority);
@@ -42,7 +42,7 @@ function stilHitnostiZaNovi(zahtjev: ServisniZahtjev): CSSProperties {
   };
 }
 
-/** Stil bedža — usklađeno s `stilStatusBedzaZaDashboard` na početnoj korisnika. */
+/** Stil bedža - usklađeno s `stilStatusBedzaZaDashboard` na početnoj korisnika. */
 export function korisnickiTokBedzStil(zahtjev: ServisniZahtjev): CSSProperties {
   const d = korisnickiDashboardStatus(zahtjev.status, zahtjev.final_priority);
   if (d === 'novi') return stilHitnostiZaNovi(zahtjev);

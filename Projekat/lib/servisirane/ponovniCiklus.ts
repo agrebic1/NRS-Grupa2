@@ -4,7 +4,7 @@ type AnyDB = {
 
 /**
  * US-47: atomično povećaj brojač ponovnih operativnih ciklusa i vrati novi broj.
- * Koristi DB funkciju fn_inkrementiraj_ponovni_ciklus (RETURNING) — nema race conditiona.
+ * Koristi DB funkciju fn_inkrementiraj_ponovni_ciklus (RETURNING) - nema race conditiona.
  */
 export async function inkrementirajPonovniCiklus(
   db: AnyDB,

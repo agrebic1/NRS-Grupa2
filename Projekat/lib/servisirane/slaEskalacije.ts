@@ -28,7 +28,7 @@ interface ZahtjevZaEskalaciju {
   sla_eskalacija_at: string | null;
 }
 
-/** US-45: eskalacija prekoračenog SLA — notifikacija dispečerima + audit. */
+/** US-45: eskalacija prekoračenog SLA - notifikacija dispečerima + audit. */
 export async function obradiSlaEskalacijuZaZahtjev(
   db: AnyDB,
   zahtjev: ZahtjevZaEskalaciju,
@@ -62,7 +62,7 @@ export async function obradiSlaEskalacijuZaZahtjev(
       korisnik_id:     id,
       uloga_korisnika: 'Dispečer',
       tip:             'sla_eskalacija',
-      naslov:          'SLA prekoračen — potrebna reakcija',
+      naslov:          'SLA prekoračen - potrebna reakcija',
       poruka:          `Intervencija #${zahtjev.id} prekoračila je dogovoreni SLA rok. Provjerite prioritet i dodjelu.`,
       zahtjev_id:      zahtjev.id,
     })));

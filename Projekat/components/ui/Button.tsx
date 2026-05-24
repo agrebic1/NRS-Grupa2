@@ -13,7 +13,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   loadingText?: string;
 }
 
-// All hover states handled via Tailwind — no JS event handlers needed.
+// All hover states handled via Tailwind - no JS event handlers needed.
 const VARIANT_CLASSES: Record<ButtonVariant, string> = {
   primary: [
     'bg-deep-teal text-white',

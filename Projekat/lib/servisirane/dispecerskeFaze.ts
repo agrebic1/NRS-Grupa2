@@ -45,13 +45,13 @@ export function zahtjevJeNoviUPregleduDispecera(zahtjev: ServisniZahtjev): boole
 }
 
 /**
- * Pregled zahtjeva: **U obradi** — prioritet je postavljen; još u inboxu (prije statusa `potvrdeno`).
+ * Pregled zahtjeva: **U obradi** - prioritet je postavljen; još u inboxu (prije statusa `potvrdeno`).
  */
 export function zahtjevJeUObradiUPregleduDispecera(zahtjev: ServisniZahtjev): boolean {
   return zahtjevCekaObraduUInboxuDispecera(zahtjev.status) && zahtjevImaOperativniPrioritet(zahtjev);
 }
 
-/** 1. U čarobnjaku — još nema operativnog prioriteta (korak Prioritet). */
+/** 1. U čarobnjaku - još nema operativnog prioriteta (korak Prioritet). */
 export function zahtjevCekaOperativniPrioritetDispecera(zahtjev: ServisniZahtjev): boolean {
   return zahtjevCekaObraduUInboxuDispecera(zahtjev.status) && !zahtjevImaOperativniPrioritet(zahtjev);
 }
@@ -92,7 +92,7 @@ export function zahtjevCekaZavrsnuPotvrduCarobnjaka(zahtjev: ServisniZahtjev): b
   return true;
 }
 
-/** Cijeli inbox dispečera (faze 1–4 prije `potvrdeno`). */
+/** Cijeli inbox dispečera (faze 1-4 prije `potvrdeno`). */
 export function zahtjevJeUReduObradeDispecera(zahtjev: ServisniZahtjev): boolean {
   return zahtjevCekaObraduUInboxuDispecera(zahtjev.status);
 }
@@ -163,7 +163,7 @@ export function zahtjevJeUFaziIntervencije(zahtjev: { status: string }): boolean
 }
 
 /**
- * Svi zahtjevi koji su u inboxu dispečera — i oni bez prioriteta (Novi) i oni s prioritetom (U obradi).
+ * Svi zahtjevi koji su u inboxu dispečera - i oni bez prioriteta (Novi) i oni s prioritetom (U obradi).
  * Koristi se za novi glavni status filter "U obradi" koji obuhvata cijeli inbox.
  */
 export function zahtjevJeUObradiSirokoGledano(zahtjev: ServisniZahtjev): boolean {
@@ -171,7 +171,7 @@ export function zahtjevJeUObradiSirokoGledano(zahtjev: ServisniZahtjev): boolean
 }
 
 /**
- * Naziv faze obrade za prikaz na kartici — radi za sve statuse.
+ * Naziv faze obrade za prikaz na kartici - radi za sve statuse.
  * Vraća `null` za terminal statuse (zavrseno, otkazano, odbijeno).
  */
 export function fazaObradeNazivZaKarticu(zahtjev: ServisniZahtjev): string | null {
@@ -185,7 +185,7 @@ export function fazaObradeNazivZaKarticu(zahtjev: ServisniZahtjev): string | nul
 }
 
 /**
- * Synonymi za `?filter=` — stari i skraćeni ključevi preusmjeravaju na kanonske nazive.
+ * Synonymi za `?filter=` - stari i skraćeni ključevi preusmjeravaju na kanonske nazive.
  * Kanon (novi): svi, novi, u_obradi, potvrdeni, zavrseni, otkazani.
  * Stari kanon (za backward compat): zakazivanje_termina, dodjela_servisera, korak_potvrde, potvrdeno.
  */

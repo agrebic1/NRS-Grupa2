@@ -41,7 +41,7 @@ function inChain(result = { data: [], error: null }) {
   return chain;
 }
 
-describe('/api/dispecer/izvjestaj/odziva — Sprint 9 (US-42)', () => {
+describe('/api/dispecer/izvjestaj/odziva - Sprint 9 (US-42)', () => {
   beforeEach(() => {
     mockSessionGetUser.mockReset();
     mockFrom.mockReset();

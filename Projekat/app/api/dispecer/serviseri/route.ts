@@ -16,7 +16,7 @@ export async function GET() {
 
     const db = supabase as any;
 
-    // Admin klijent zaobilazi RLS — dispečer mora vidjeti sve zaposlenike,
+    // Admin klijent zaobilazi RLS - dispečer mora vidjeti sve zaposlenike,
     // ne samo vlastiti red. Fallback na session klijent ako ključ nije postavljen.
     let adminClient: ReturnType<typeof createAdminClient> | null = null;
     let dbEmp: any;

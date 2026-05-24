@@ -29,10 +29,10 @@ const DISPECER_PRELAZI: Record<string, string[]> = {
   u_radu:      ['potvrdeno'],
 };
 
-// Potpuno zaključani statusi — nijedna uloga ne može mijenjati status
+// Potpuno zaključani statusi - nijedna uloga ne može mijenjati status
 const TERMINALNI_ZAKLJUCANI = new Set(['zatvoreno', 'otkazano', 'odbijeno']);
 
-// Operativno završeni — serviser ne može mijenjati; dispečer može → zatvoreno
+// Operativno završeni - serviser ne može mijenjati; dispečer može → zatvoreno
 const TERMINALNI_SERVISER = new Set(['zavrseno', 'zatvoreno', 'otkazano', 'odbijeno']);
 
 export function validirajServiserPrelaz(iz: string, u: string): ValidacijaPrelaza {
@@ -66,12 +66,12 @@ export function jeTerminalniStatus(status: string): boolean {
   return TERMINALNI_ZAKLJUCANI.has(status);
 }
 
-/** Vraća true samo za `zatvoreno` — jedini istinski read-only status. */
+/** Vraća true samo za `zatvoreno` - jedini istinski read-only status. */
 export function jeReadOnly(status: string): boolean {
   return status === 'zatvoreno';
 }
 
-/** Vraća true za `zavrseno` i `zatvoreno` — serviser ne može mijenjati. */
+/** Vraća true za `zavrseno` i `zatvoreno` - serviser ne može mijenjati. */
 export function jeZavrsenoIliZatvoreno(status: string): boolean {
   return status === 'zavrseno' || status === 'zatvoreno';
 }

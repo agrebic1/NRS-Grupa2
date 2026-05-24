@@ -108,7 +108,7 @@ export function korisnikHeroTekst(
   return {
     naslov: 'Zahtjev je u procesu',
     podnaslov:
-      'Zahtjev je u kasnijoj fazi servisa — izmjena prijave više nije dostupna.',
+      'Zahtjev je u kasnijoj fazi servisa - izmjena prijave više nije dostupna.',
   };
 }
 

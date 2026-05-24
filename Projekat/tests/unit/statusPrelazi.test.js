@@ -5,7 +5,7 @@ const {
   jeReadOnly,
 } = require('@/lib/servisirane/statusPrelazi');
 
-describe('statusni prelazi — serviser', () => {
+describe('statusni prelazi - serviser', () => {
   test.each([
     ['dodijeljeno', 'u_radu'],
     ['dodijeljeno', 'potvrdeno'],    // vrati_na_dodjelu
@@ -52,7 +52,7 @@ describe('statusni prelazi — serviser', () => {
   });
 });
 
-describe('statusni prelazi — dispečer', () => {
+describe('statusni prelazi - dispečer', () => {
   test.each([
     ['u_izvrsenju', 'zavrseno'],
     ['u_izvrsenju', 'potvrdeno'],

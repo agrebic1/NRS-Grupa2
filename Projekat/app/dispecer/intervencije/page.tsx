@@ -432,7 +432,7 @@ function DispecerIntervencijePageContent() {
           style={{ borderBottom: '1px solid rgb(var(--first-quaternary-rgb)/0.28)' }}
         >
           <h2 className="font-semibold" style={{ color: 'var(--first-octonary)' }}>
-            Intervencije — {aktivniLabel}
+            Intervencije - {aktivniLabel}
           </h2>
           {!ucitava && (
             <span className="text-xs" style={{ color: 'var(--first-nonary)' }}>

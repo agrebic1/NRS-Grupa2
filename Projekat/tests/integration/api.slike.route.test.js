@@ -42,7 +42,7 @@ function listChain(data = []) {
   };
 }
 
-describe('/api/slike — Sprint 9 (US-43)', () => {
+describe('/api/slike - Sprint 9 (US-43)', () => {
   beforeEach(() => {
     mockSessionGetUser.mockReset();
     mockFrom.mockReset();

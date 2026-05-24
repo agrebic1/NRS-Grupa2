@@ -1,4 +1,4 @@
-// SLA engine — US-41
+// SLA engine - US-41
 
 export type SlaPrioritet = 'NISKO' | 'SREDNJE' | 'VISOKO' | 'KRITIČNO' | 'HITNO';
 export type SlaStatus    = 'ok' | 'upozorenje' | 'prekoraceno';

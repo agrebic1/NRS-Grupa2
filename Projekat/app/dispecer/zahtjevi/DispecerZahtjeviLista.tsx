@@ -30,20 +30,20 @@ const ZAHTJEVA_PO_STRANICI = 12;
 const STATUS_FILTRI = [
   { value: 'svi',       label: 'Sve',       title: 'Svi aktivni zahtjevi bez obzira na status.' },
   { value: 'novi',      label: 'Novi',       title: 'Zahtjevi koji još čekaju procjenu dispečera (nije postavljen operativni prioritet).' },
-  { value: 'u_obradi',  label: 'U obradi',  title: 'Svi zahtjevi u obradi — od procjene do dodjele servisera.' },
+  { value: 'u_obradi',  label: 'U obradi',  title: 'Svi zahtjevi u obradi - od procjene do dodjele servisera.' },
   { value: 'potvrdeni', label: 'Potvrđeni', title: 'Zahtjevi kojima je završena obrada i čekaju dodjelu servisera.' },
   { value: 'zavrseni',  label: 'Završeni',  title: 'Uspješno završene intervencije.' },
 ] as const;
 
 type StatusFilter = typeof STATUS_FILTRI[number]['value'];
 
-/** Opcije filtera faze obrade — prikazuju se samo kada je odabran status "U obradi". */
+/** Opcije filtera faze obrade - prikazuju se samo kada je odabran status "U obradi". */
 const FAZA_FILTRI = [
   { value: 'sve_faze',         label: 'Sve faze',         title: 'Prikaz svih zahtjeva u obradi bez obzira na fazu.' },
-  { value: 'procjena_zahtjeva', label: 'Procjena zahtjeva', title: 'Faza 1 — Dispečer još nije postavio operativni prioritet.' },
-  { value: 'dogovor_termina',  label: 'Dogovor termina',   title: 'Faza 2 — Prioritet je postavljen; treba dogovoriti termin s korisnikom.' },
-  { value: 'izbor_servisera',  label: 'Izbor servisera',   title: 'Faza 3 — Termin je unesen; treba odabrati servisera.' },
-  { value: 'potvrda_termina',  label: 'Potvrda termina',   title: 'Faza 4 — Serviser je odabran; čeka se završna potvrda u čarobnjaku.' },
+  { value: 'procjena_zahtjeva', label: 'Procjena zahtjeva', title: 'Faza 1 - Dispečer još nije postavio operativni prioritet.' },
+  { value: 'dogovor_termina',  label: 'Dogovor termina',   title: 'Faza 2 - Prioritet je postavljen; treba dogovoriti termin s korisnikom.' },
+  { value: 'izbor_servisera',  label: 'Izbor servisera',   title: 'Faza 3 - Termin je unesen; treba odabrati servisera.' },
+  { value: 'potvrda_termina',  label: 'Potvrda termina',   title: 'Faza 4 - Serviser je odabran; čeka se završna potvrda u wizardu.' },
 ] as const;
 
 type FazaFilter = typeof FAZA_FILTRI[number]['value'];
@@ -437,14 +437,14 @@ export function DispecerZahtjeviLista() {
 
         {!ucitava && (
           <div className="mb-5 space-y-0 overflow-x-auto">
-            {/* Primarni filter — status */}
+            {/* Primarni filter - status */}
             <StatusFilterTraka
               aktivan={aktivniStatus}
               zahtjevi={zahtjevi}
               onPromjena={promijeniStatus}
             />
 
-            {/* Sekundarni filter — faza (samo za "U obradi") */}
+            {/* Sekundarni filter - faza (samo za "U obradi") */}
             {aktivniStatus === 'u_obradi' && (
               <FazaFilterTraka
                 aktivan={aktivnaFaza}
@@ -483,7 +483,7 @@ export function DispecerZahtjeviLista() {
                   Prikazano{' '}
                   <span className="font-semibold tabular-nums" style={{ color: 'var(--first-octonary)' }}>
                     {(aktivnaStranica - 1) * ZAHTJEVA_PO_STRANICI + 1}
-                    –
+                    -
                     {Math.min(aktivnaStranica * ZAHTJEVA_PO_STRANICI, ukupnoZahtjeva)}
                   </span>{' '}
                   od{' '}

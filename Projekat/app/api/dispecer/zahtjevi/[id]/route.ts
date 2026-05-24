@@ -74,7 +74,7 @@ const actionSchema = z.discriminatedUnion('action', [
 /** Statusi u kojima dispečer može potvrditi/odbiti (MVP: uključuje in_review ako je u inboxu). */
 const PENDING_STATUSES = new Set(['na_cekanju', 'pending_review', 'in_review']);
 
-/** Kad dispečer prvi put snimi operativni prioritet, zahtjev prelazi u čarobnjak — korisnik više ne smije uređivati. */
+/** Kad dispečer prvi put snimi operativni prioritet, zahtjev prelazi u čarobnjak - korisnik više ne smije uređivati. */
 const STATUS_PRE_CAROBNJAKA = new Set(['na_cekanju', 'pending_review']);
 type RouteParams = { id: string } | Promise<{ id: string }>;
 
@@ -412,7 +412,7 @@ export async function PATCH(
       // Notifikacija serviseru
       await notifDodjelaIntervencije(db, podaci.serviser_id, requestId);
 
-      // Notifikacija korisniku — serviser dodijeljen
+      // Notifikacija korisniku - serviser dodijeljen
       const { data: zahtjevUser } = await db
         .from('service_requests').select('user_id').eq('id', requestId).maybeSingle();
       const { data: serviserOsoba } = await db
@@ -479,7 +479,7 @@ export async function PATCH(
         metadata:   { iz: zahtjev.status, u: 'zavrseno' },
       });
 
-      // Notify korisnik — intervention complete
+      // Notify korisnik - intervention complete
       const { data: zahtjevZav } = await db
         .from('service_requests').select('user_id').eq('id', requestId).maybeSingle();
       if (zahtjevZav?.user_id) {
@@ -562,7 +562,7 @@ export async function PATCH(
         await notifZatvaranjeIntervencije(db, clan.serviser_id, requestId);
       }
 
-      // Notify korisnik — formally closed
+      // Notify korisnik - formally closed
       const { data: zahtjevZatv } = await db
         .from('service_requests').select('user_id').eq('id', requestId).maybeSingle();
       if (zahtjevZatv?.user_id) {
@@ -620,7 +620,7 @@ export async function PATCH(
         metadata:   { iz: zahtjev.status, u: 'potvrdeno', final_priority: podaci.final_priority },
       });
 
-      // Notify korisnik — request in processing
+      // Notify korisnik - request in processing
       const { data: zahtjevPotv } = await db
         .from('service_requests').select('user_id').eq('id', requestId).maybeSingle();
       if (zahtjevPotv?.user_id) {

@@ -216,7 +216,7 @@ function ZatvoriFormalnoPanel({
             style={{ backgroundColor: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.2)' }}>
             <AlertTriangle className="h-4 w-4 flex-shrink-0 mt-0.5" style={{ color: '#DC2626' }} />
             <p className="text-sm" style={{ color: '#DC2626' }}>
-              Zatvaranje nije moguće — serviser još nije evidentirao obavljeni rad.
+              Zatvaranje nije moguće - serviser još nije evidentirao obavljeni rad.
             </p>
           </div>
         )}

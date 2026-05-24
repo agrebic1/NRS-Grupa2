@@ -10,7 +10,7 @@ const BUCKET           = 'intervencije-slike';
 const MAX_SIZE_BYTES   = 10 * 1024 * 1024; // 10 MB
 const DOZVOLJENI_TIPOVI = ['image/jpeg', 'image/png', 'image/webp'];
 
-/** SEC-T-3: Magic bytes provjera — sprječava upload preimenovanih non-image fajlova. */
+/** SEC-T-3: Magic bytes provjera - sprječava upload preimenovanih non-image fajlova. */
 function provjeriMagicBytes(buffer: Buffer): 'image/jpeg' | 'image/png' | 'image/webp' | null {
   if (buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[2] === 0xFF) return 'image/jpeg';
   if (buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47) return 'image/png';
@@ -20,7 +20,7 @@ function provjeriMagicBytes(buffer: Buffer): 'image/jpeg' | 'image/png' | 'image
   return null;
 }
 
-/** GET /api/slike?zahtjev_id=X — lista slika za intervenciju */
+/** GET /api/slike?zahtjev_id=X - lista slika za intervenciju */
 export async function GET(request: NextRequest) {
   try {
     const supabase = createClient();
@@ -49,7 +49,7 @@ export async function GET(request: NextRequest) {
   }
 }
 
-/** POST /api/slike — upload slike za intervenciju (multipart/form-data) */
+/** POST /api/slike - upload slike za intervenciju (multipart/form-data) */
 export async function POST(request: NextRequest) {
   try {
     const supabase = createClient();
@@ -161,7 +161,7 @@ export async function POST(request: NextRequest) {
   }
 }
 
-/** DELETE /api/slike?id=X — brisanje slike */
+/** DELETE /api/slike?id=X - brisanje slike */
 export async function DELETE(request: NextRequest) {
   try {
     const supabase = createClient();

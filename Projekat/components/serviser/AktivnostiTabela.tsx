@@ -106,7 +106,7 @@ export function AktivnostiTabela({ aktivnosti, ucitava }: AktivnostiTabelaProps)
                       style={{ backgroundColor: 'rgba(156,163,175,0.12)', color: '#6B7280' }}>
                       {poljeLabel(a.old_value)}
                     </span>
-                  ) : '—'}
+                  ) : '-'}
                 </td>
                 <td className="px-3 py-2">
                   {a.old_value && a.new_value && (
@@ -117,7 +117,7 @@ export function AktivnostiTabela({ aktivnosti, ucitava }: AktivnostiTabelaProps)
                       style={{ backgroundColor: 'rgb(var(--first-secondary-rgb)/0.1)', color: 'var(--first-secondary)' }}>
                       {poljeLabel(a.new_value)}
                     </span>
-                  ) : '—'}
+                  ) : '-'}
                 </td>
                 <td className="px-3 py-2 whitespace-nowrap">{autor}</td>
               </tr>

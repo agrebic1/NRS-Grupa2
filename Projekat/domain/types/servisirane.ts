@@ -1,15 +1,15 @@
-// ─── Statusi zahtjeva — životni ciklus ───────────────────────────────────────
+// ─── Statusi zahtjeva - životni ciklus ───────────────────────────────────────
 
 export type StatusZahtjeva =
-  | 'pending_review' // Novi — sinonim za na_cekanju; oba znače isti početni status
-  | 'na_cekanju'    // Novi — korisnik može uređivati; kanonski naziv za oba
+  | 'pending_review' // Novi - sinonim za na_cekanju; oba znače isti početni status
+  | 'na_cekanju'    // Novi - korisnik može uređivati; kanonski naziv za oba
   | 'in_review'     // Dispečerski čarobnjak aktivan (faze: prioritet → termin → serviser → potvrda)
   | 'potvrdeno'     // Čeka dodjelu/re-dodjelu servisera (serviser_dodijeljen_id može biti null)
-  | 'dodijeljeno'   // Serviser dodijeljen — čeka prihvatanje
-  | 'u_radu'        // Serviser prihvatio — na putu ka lokaciji
-  | 'u_izvrsenju'   // Serviser na terenu — rad u toku
-  | 'zavrseno'      // Operativno završeno — čeka formalno zatvaranje dispečera
-  | 'zatvoreno'     // Formalno zatvoreno — read-only, audit finaliziran
+  | 'dodijeljeno'   // Serviser dodijeljen - čeka prihvatanje
+  | 'u_radu'        // Serviser prihvatio - na putu ka lokaciji
+  | 'u_izvrsenju'   // Serviser na terenu - rad u toku
+  | 'zavrseno'      // Operativno završeno - čeka formalno zatvaranje dispečera
+  | 'zatvoreno'     // Formalno zatvoreno - read-only, audit finaliziran
   | 'otkazano'      // Korisnik otkazao (cancel_reason + cancelled_at)
   | 'odbijeno';     // Dispečer odbio (rejection_reason obavezan)
 
@@ -19,9 +19,9 @@ export type TipUsluge        = 'serviser' | 'dispecer';
 export type StepenObrazovanja = 'SSS' | 'VŠS' | 'VSS' | 'Certifikovani majstor';
 
 export type VremenslotTip =
-  | 'jutro'       // 08:00 – 12:00  🟠 Narandžasta
-  | 'dan'         // 12:00 – 16:00  🟡 Žuta
-  | 'vece'        // 16:00 – 20:00  🔵 Plava
+  | 'jutro'       // 08:00 - 12:00  🟠 Narandžasta
+  | 'dan'         // 12:00 - 16:00  🟡 Žuta
+  | 'vece'        // 16:00 - 20:00  🔵 Plava
   | 'cijeli_dan'  // Po dogovoru    🟢 Zelena
   | 'custom';     // Prilagođeno    🟣 Ljubičasta
 
@@ -35,7 +35,7 @@ export interface TriageOdgovori {
   obuhvat:        boolean;
 }
 
-// ─── Termin slot — V5.0 range-based scheduling ───────────────────────────────
+// ─── Termin slot - V5.0 range-based scheduling ───────────────────────────────
 
 export interface TerminSlot {
   date: string;  // 'YYYY-MM-DD'
@@ -47,7 +47,7 @@ export interface TerminSlot {
 
 export interface PreferredSchedule {
   termini: TerminSlot[];
-  /** Korisnik nema preferenciju — dispečer dogovara termin. */
+  /** Korisnik nema preferenciju - dispečer dogovara termin. */
   no_preferred_time?: boolean;
   /** Oznaka brzog izbora (npr. Jutro, Cijeli dan) ili prilagođeno. */
   preferred_time_label?: string | null;
@@ -92,7 +92,7 @@ export interface ServisniZahtjev {
   cancel_reason:        string | null;
   /** Postavljeno pri otkazivanju od strane korisnika. */
   cancelled_at:         string | null;
-  /** `true` kad je serviser potvrdio dogovoreni termin — u pregledu zahtjeva prelazi iz „Novi“ u „U obradi“. */
+  /** `true` kad je serviser potvrdio dogovoreni termin - u pregledu zahtjeva prelazi iz „Novi“ u „U obradi“. */
   is_verified_assigned: boolean;
   /**
    * Dogovoreni termin u čarobnjaku (dispečer); NULL dok termin nije potvrđen u koraku „Termin i serviser“.

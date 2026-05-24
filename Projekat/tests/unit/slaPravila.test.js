@@ -5,9 +5,9 @@ const {
   formatirајPreostaloVrijeme,
 } = require('@/lib/servisirane/slaPravila');
 
-// ─── SLA_ROKOVI_SATI — konstante ──────────────────────────────────────────────
+// ─── SLA_ROKOVI_SATI - konstante ──────────────────────────────────────────────
 
-describe('SLA_ROKOVI_SATI — rokovi po prioritetu', () => {
+describe('SLA_ROKOVI_SATI - rokovi po prioritetu', () => {
   test.each([
     ['NISKO',    72],
     ['SREDNJE',  24],
@@ -22,25 +22,25 @@ describe('SLA_ROKOVI_SATI — rokovi po prioritetu', () => {
 // ─── izracunajSlaRok ──────────────────────────────────────────────────────────
 
 describe('izracunajSlaRok', () => {
-  test('HITNO — dodaje 2 sata na created_at', () => {
+  test('HITNO - dodaje 2 sata na created_at', () => {
     const baza = '2025-01-01T10:00:00.000Z';
     const rok  = izracunajSlaRok(baza, 'HITNO');
     expect(rok.toISOString()).toBe('2025-01-01T12:00:00.000Z');
   });
 
-  test('NISKO — dodaje 72 sata (3 dana)', () => {
+  test('NISKO - dodaje 72 sata (3 dana)', () => {
     const baza = '2025-01-01T00:00:00.000Z';
     const rok  = izracunajSlaRok(baza, 'NISKO');
     expect(rok.toISOString()).toBe('2025-01-04T00:00:00.000Z');
   });
 
-  test('SREDNJE — dodaje 24 sata', () => {
+  test('SREDNJE - dodaje 24 sata', () => {
     const baza = '2025-06-15T08:00:00.000Z';
     const rok  = izracunajSlaRok(baza, 'SREDNJE');
     expect(rok.toISOString()).toBe('2025-06-16T08:00:00.000Z');
   });
 
-  test('VISOKO — dodaje 8 sati', () => {
+  test('VISOKO - dodaje 8 sati', () => {
     const baza = '2025-03-10T06:00:00.000Z';
     const rok  = izracunajSlaRok(baza, 'VISOKO');
     expect(rok.toISOString()).toBe('2025-03-10T14:00:00.000Z');
@@ -54,7 +54,7 @@ describe('izracunajSlaRok', () => {
 
 // ─── getSlaStatus ─────────────────────────────────────────────────────────────
 
-describe('getSlaStatus — zatvorene intervencije', () => {
+describe('getSlaStatus - zatvorene intervencije', () => {
   test.each(['zavrseno', 'zatvoreno', 'otkazano', 'odbijeno'])(
     'vraća null za terminalni status %s',
     (status) => {
@@ -64,7 +64,7 @@ describe('getSlaStatus — zatvorene intervencije', () => {
   );
 });
 
-describe('getSlaStatus — nepostojeci ili null prioritet', () => {
+describe('getSlaStatus - nepostojeci ili null prioritet', () => {
   test('vraća null za null prioritet', () => {
     const createdAt = new Date(Date.now() - 1 * 3600_000).toISOString();
     expect(getSlaStatus(createdAt, null, 'dodijeljeno')).toBeNull();
@@ -76,7 +76,7 @@ describe('getSlaStatus — nepostojeci ili null prioritet', () => {
   });
 });
 
-describe('getSlaStatus — aktivne intervencije', () => {
+describe('getSlaStatus - aktivne intervencije', () => {
   test('vraća "prekoraceno" kada je rok prošao', () => {
     // HITNO = 2h; postavljamo created_at na 5 sati nazad → rok je 3h u prošlosti
     const createdAt = new Date(Date.now() - 5 * 3600_000).toISOString();

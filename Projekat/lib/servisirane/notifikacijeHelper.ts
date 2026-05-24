@@ -232,7 +232,7 @@ export function notifServiserNaTerenu(
     uloga_korisnika: 'Dispečer',
     tip:             'promjena_statusa',
     naslov:          'Serviser stigao na lokaciju',
-    poruka:          `${ime_servisera} je stigao na lokaciju — intervencija #${zahtjev_id} u toku.`,
+    poruka:          `${ime_servisera} je stigao na lokaciju - intervencija #${zahtjev_id} u toku.`,
     zahtjev_id,
   });
 }
@@ -314,7 +314,7 @@ export function notifKorisnikusServiserNaTerenu(
     uloga_korisnika: 'Korisnik usluge',
     tip:             'promjena_statusa',
     naslov:          'Serviser na lokaciji',
-    poruka:          `${ime_servisera} je stigao na vašu lokaciju — intervencija #${zahtjev_id} je u toku.`,
+    poruka:          `${ime_servisera} je stigao na vašu lokaciju - intervencija #${zahtjev_id} je u toku.`,
     zahtjev_id,
   });
 }

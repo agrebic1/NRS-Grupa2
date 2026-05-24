@@ -3,7 +3,7 @@ import type { KorisnickiDashboardStatus } from './statusTypes';
 /**
  * Mapira DB status (+ opcioni finalPriority) na kategoriju kartice na početnoj korisnika.
  *
- * `pending_review` ≡ `na_cekanju` — oba su inicijalni status, tretiraju se identično.
+ * `pending_review` ≡ `na_cekanju` - oba su inicijalni status, tretiraju se identično.
  */
 export function korisnickiDashboardStatus(
   status: string | null | undefined,

@@ -4,7 +4,7 @@ import type { ReactNode } from 'react';
 import { Calendar, CalendarClock, ChevronRight, Info, User } from 'lucide-react';
 import { DISPECER_PALETA_HITNOST } from '@/lib/servisirane/dispecerPaleta';
 
-/** Amber iz hitnosne palete — usklađeno s dispečerskim inboxom (srednji sloj). */
+/** Amber iz hitnosne palete - usklađeno s dispečerskim inboxom (srednji sloj). */
 const TIMELINE_IKONA_BOJA = { color: DISPECER_PALETA_HITNOST.Srednja.tekst } as const;
 const TIMELINE_IKONA_KLASA = 'h-4 w-4 shrink-0';
 const TIMELINE_DATUM_KLASA = 'm-0 text-[14px] font-bold tabular-nums leading-tight';

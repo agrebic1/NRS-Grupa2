@@ -35,7 +35,7 @@ export function EvidencijaRadaModal({ zahtjevId, onZatvori, onUspjeh }: Evidenci
 
   async function posalji() {
     if (!opisValid)     { setGreska('Opis rada mora imati najmanje 5 karaktera.'); return; }
-    if (!trajanjeNum)   { setGreska('Trajanje je obavezno. Unesite broj minuta (1–1440).'); return; }
+    if (!trajanjeNum)   { setGreska('Trajanje je obavezno. Unesite broj minuta (1-1440).'); return; }
     if (!trajanjeValid) { setGreska('Trajanje mora biti između 1 i 1440 minuta.'); return; }
 
     setJeSlanje(true);
@@ -103,7 +103,7 @@ export function EvidencijaRadaModal({ zahtjevId, onZatvori, onUspjeh }: Evidenci
             {/* ── Forma ──────────────────────────────────────────────────── */}
             <div className="flex flex-col gap-4 px-6 py-5">
 
-              {/* Opis rada — obavezno */}
+              {/* Opis rada - obavezno */}
               <div className="flex flex-col gap-1.5">
                 <div className="flex items-center gap-2">
                   <FileText className="h-4 w-4" style={{ color: 'var(--first-nonary)' }} />

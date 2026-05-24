@@ -58,7 +58,7 @@ export function preferiraniTerminZaDispecera(
   if (!prvi?.date) return { tekstCijeli: bezPreferiranogTermina, imaPreferirani: false };
 
   const datum = formatKratkiDatum(prvi.date);
-  const tekst = prvi.from && prvi.to ? `${datum}, ${prvi.from}–${prvi.to}` : datum;
+  const tekst = prvi.from && prvi.to ? `${datum}, ${prvi.from}-${prvi.to}` : datum;
   return { tekstCijeli: tekst, imaPreferirani: true };
 }
 
@@ -81,7 +81,7 @@ export function sviPreferinaniTermini(
 
 export function formatPrijavljenoDatumVrijeme(iso: string): string {
   const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return '—';
+  if (Number.isNaN(d.getTime())) return '-';
   const dd = String(d.getDate()).padStart(2, '0');
   const mm = String(d.getMonth() + 1).padStart(2, '0');
   const yyyy = String(d.getFullYear());
@@ -117,7 +117,7 @@ export function relativnoPrijavljenoZaDispecera(
   const kreirano = new Date(iso);
   const tooltipApsolutno = formatPrijavljenoDatumVrijeme(iso);
   if (Number.isNaN(kreirano.getTime())) {
-    return { label: '—', ton: 'fresh', tooltipApsolutno };
+    return { label: '-', ton: 'fresh', tooltipApsolutno };
   }
 
   const diffMs = referenca.getTime() - kreirano.getTime();

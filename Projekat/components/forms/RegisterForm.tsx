@@ -152,7 +152,7 @@ export function RegisterForm() {
       }
       setJeKreiranjeNaloga(false);
     }
-    // Nema finally — loader ostaje vidljiv dok traje redirect
+    // Nema finally - loader ostaje vidljiv dok traje redirect
   }
 
   async function ponovoPosaljiVerifikaciju() {

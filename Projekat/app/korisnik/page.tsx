@@ -96,7 +96,7 @@ export default async function KorisnikPage() {
     const od = (slot?.from ?? '').trim();
     const doStr = (slot?.to ?? '').trim();
     const dolazakVrijemeOpis =
-      od && doStr ? `${od}–${doStr}` : null;
+      od && doStr ? `${od}-${doStr}` : null;
 
     return {
       id: String(zahtjev.id),

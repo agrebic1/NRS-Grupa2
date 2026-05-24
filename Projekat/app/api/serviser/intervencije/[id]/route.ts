@@ -47,7 +47,7 @@ export async function GET(
     const zahtjevId = await resolveId(params);
     if (!zahtjevId) return NextResponse.json({ error: 'Neispravan ID.' }, { status: 400 });
 
-    // Admin klijent zaobilazi RLS — serviseri moraju čitati redove gdje su
+    // Admin klijent zaobilazi RLS - serviseri moraju čitati redove gdje su
     // dodjeljeni (serviser_dodijeljen_id), što session klijent ne može vidjeti.
     let db: any;
     try {
@@ -204,7 +204,7 @@ export async function PATCH(
 
       await db.from('intervention_activities').insert({
         zahtjev_id: zahtjevId, autor_id: user.id, tip: 'status_promjena',
-        sadrzaj: 'Serviser je na lokaciji — intervencija u toku.', metadata: { iz: trenutniStatus, u: 'u_izvrsenju' },
+        sadrzaj: 'Serviser je na lokaciji - intervencija u toku.', metadata: { iz: trenutniStatus, u: 'u_izvrsenju' },
       });
 
       // Notify korisnik + dispecer that serviser is on-site
@@ -266,7 +266,7 @@ export async function PATCH(
         zahtjev_id: zahtjevId,
         autor_id:   user.id,
         tip:        'status_promjena',
-        sadrzaj:    'Serviser završio intervenciju — čeka formalno zatvaranje dispečera.',
+        sadrzaj:    'Serviser završio intervenciju - čeka formalno zatvaranje dispečera.',
         metadata:   { iz: 'u_izvrsenju', u: 'zavrseno' },
       });
 

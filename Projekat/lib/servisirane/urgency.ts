@@ -13,20 +13,20 @@ export function efektivniKorisnickiUrgencyScore(zahtjev: {
 export function izracunajUrgency(triage: TriageOdgovori): number {
   let score = 0;
 
-  // Sigurnost — max 50
+  // Sigurnost - max 50
   if (triage.opasnost) score += 50;
 
-  // Zastoj / funkcionalnost — max 25
+  // Zastoj / funkcionalnost - max 25
   if (triage.funkcionalnost === 'potpuni_prekid') score += 25;
   else if (triage.funkcionalnost === 'otezana') score += 10;
 
-  // Rizik od sekundarne štete — max 15
+  // Rizik od sekundarne štete - max 15
   if (triage.steta) score += 15;
 
-  // Ranjivost — max 10
+  // Ranjivost - max 10
   if (triage.ranjivost) score += 10;
 
-  // Obuhvat — max 10
+  // Obuhvat - max 10
   if (triage.obuhvat) score += 10;
 
   return score; // max 110
@@ -74,7 +74,7 @@ export function oznakaInboxHitnostiCekaObradu(zahtjev: {
   return `Vaša procjena: ${tri.toLowerCase()}`;
 }
 
-/** Tri inbox grupe na kontrolnoj tabli — iz korisničke procjene (upitnik + premium), ne iz `final_priority`. */
+/** Tri inbox grupe na kontrolnoj tabli - iz korisničke procjene (upitnik + premium), ne iz `final_priority`. */
 export type DispecerskaInboxGrupaPoKorisniku = 'Hitno' | 'Srednja' | 'Niska';
 
 export function inboxGrupaIzKorisnickeProcjene(zahtjev: {

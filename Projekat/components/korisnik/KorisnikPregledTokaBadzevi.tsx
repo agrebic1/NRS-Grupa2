@@ -30,7 +30,7 @@ function nazivFazeZaKorisnika(faza: DispecerskaFazaPregleda): string {
 
 /**
  * Ista logika kao `DispecerPregledTokaBadzevi` (inbox + pod-faze prema `final_priority`, terminu, serviseru),
- * s korisničkim nazivima — usklađeno s dispečerskim pregledom zahtjeva.
+ * s korisničkim nazivima - usklađeno s dispečerskim pregledom zahtjeva.
  */
 export function KorisnikPregledTokaBadzevi({ zahtjev }: { zahtjev: ServisniZahtjev }) {
   if (!zahtjevCekaObraduUInboxuDispecera(zahtjev.status)) {
@@ -39,7 +39,7 @@ export function KorisnikPregledTokaBadzevi({ zahtjev }: { zahtjev: ServisniZahtj
 
   const jeNovi = zahtjevJeNoviUPregleduDispecera(zahtjev);
   const faza = uzmiDispecerskuFazuZaPregled(zahtjev);
-  /** U inboxu — ista hitnosna paleta kao rub kartice / dispečerski inbox (rose · amber · slate). */
+  /** U inboxu - ista hitnosna paleta kao rub kartice / dispečerski inbox (rose · amber · slate). */
   const glavnaPalHitnost =
     DISPECER_PALETA_HITNOST[inboxGrupaIzKorisnickeProcjene(zahtjev)];
   const glavnaPal = jeNovi ? glavnaPalHitnost : DISPECER_PALETA_STATUS.uObradi;

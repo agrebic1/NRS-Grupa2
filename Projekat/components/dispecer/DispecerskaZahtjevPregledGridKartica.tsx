@@ -32,14 +32,14 @@ function sljedecaAkcijaZaOperatera(zahtjev: ServisniZahtjev): string {
     if (zahtjevJeNoviUPregleduDispecera(zahtjev)) return 'Sljedeće: postavite operativni prioritet.';
     if (zahtjevCekaDogovorTerminaDispecera(zahtjev)) return 'Sljedeće: dogovorite termin s korisnikom.';
     if (zahtjevCekaDodjeluServiseraDispecera(zahtjev)) return 'Sljedeće: odaberite servisera.';
-    if (zahtjevCekaZavrsnuPotvrduCarobnjaka(zahtjev)) return 'Sljedeće: završite potvrdu u čarobnjaku.';
-    return 'Sljedeće: nastavite obradu u čarobnjaku.';
+    if (zahtjevCekaZavrsnuPotvrduCarobnjaka(zahtjev)) return 'Sljedeće: završite potvrdu u wizardu.';
+    return 'Sljedeće: nastavite obradu u wizardu.';
   }
   if (zahtjev.status === 'potvrdeno') return 'Sljedeće: dodjela serviseru ili start intervencije.';
   return 'Sljedeće: pregledajte detalje i historiju.';
 }
 
-/** Mrežna kartica za dispečera — brz operativni pregled (US-07, US-12, US-13). */
+/** Mrežna kartica za dispečera - brz operativni pregled (US-07, US-12, US-13). */
 export function DispecerskaZahtjevPregledGridKartica({ zahtjev }: { zahtjev: ZahtjevZaDispecerskuKarticu }) {
   const podnosilac = zahtjev.podnosilac;
   const { glavna, podkategorija } = labelKategorije(zahtjev);
@@ -124,7 +124,7 @@ export function DispecerskaZahtjevPregledGridKartica({ zahtjev }: { zahtjev: Zah
           </div>
         </div>
 
-        {/* Status toka + operativni vs korisnička procjena (US-12, US-13, US-07 AC12) — usklađeno s kontrolnom tablom */}
+        {/* Status toka + operativni vs korisnička procjena (US-12, US-13, US-07 AC12) - usklađeno s kontrolnom tablom */}
         <div
           className="mt-3 min-w-0 space-y-2 border-t pt-3 pointer-events-auto"
           style={{ borderColor: 'rgb(var(--first-quaternary-rgb) / 0.22)' }}
@@ -172,7 +172,7 @@ export function DispecerskaZahtjevPregledGridKartica({ zahtjev }: { zahtjev: Zah
             <div className="flex gap-2">
               <MapPin className="mt-0.5 h-4 w-4 shrink-0" style={{ color: 'var(--first-secondary)' }} aria-hidden />
               <div className="pointer-events-auto min-w-0 flex-1 text-sm font-semibold leading-snug" style={{ color: 'var(--first-octonary)' }}>
-                <p className="whitespace-pre-wrap break-words">{(zahtjev.address ?? '').trim() || '—'}</p>
+                <p className="whitespace-pre-wrap break-words">{(zahtjev.address ?? '').trim() || '-'}</p>
               </div>
             </div>
             {imaKoordinate ? (
@@ -198,7 +198,7 @@ export function DispecerskaZahtjevPregledGridKartica({ zahtjev }: { zahtjev: Zah
               </a>
             ) : (
               <p className="text-sm font-medium" style={{ color: 'var(--first-nonary)' }}>
-                —
+                -
               </p>
             )}
           </div>
@@ -206,7 +206,7 @@ export function DispecerskaZahtjevPregledGridKartica({ zahtjev }: { zahtjev: Zah
 
         <div className="min-h-0 min-w-0 flex-1 basis-0" aria-hidden />
 
-        {/* Termin, sljedeći korak, prilog (status je već u zoni toka iznad — bez duplog bedža) */}
+        {/* Termin, sljedeći korak, prilog (status je već u zoni toka iznad - bez duplog bedža) */}
         <div
           className="mt-3 w-full space-y-3 border-t pt-3"
           style={{ borderColor: 'rgb(var(--first-quaternary-rgb) / 0.25)' }}

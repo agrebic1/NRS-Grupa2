@@ -191,7 +191,7 @@ function PanelZaOtkazivanje({
         label="Razlog otkazivanja"
         id="cancel-razlog"
         options={RAZLOZI_OTKAZIVANJA}
-        placeholder="— Odaberite razlog —"
+        placeholder="- Odaberite razlog -"
         value={razlog}
         onChange={(e) => setRazlog(e.target.value)}
         error={!razlog && greska ? 'Razlog je obavezan' : undefined}
@@ -362,6 +362,15 @@ export default function ZahtjevDetaljPage() {
           className="mb-4 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm"
           aria-label="Navigacija"
         >
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className="inline-flex items-center rounded-lg p-1 transition-opacity hover:opacity-70 focus:outline-none"
+            style={{ color: 'var(--first-secondary)' }}
+            aria-label="Nazad"
+          >
+            <ArrowLeft className="h-4 w-4" />
+          </button>
           <Link
             href="/korisnik"
             className="font-medium transition-opacity hover:opacity-70"
@@ -383,7 +392,7 @@ export default function ZahtjevDetaljPage() {
           </span>
         </nav>
 
-        {/* Bijela kartica + lijevi rib (premium / hitnost) — isti vizuelni jezik kao liste */}
+        {/* Bijela kartica + lijevi rib (premium / hitnost) - isti vizuelni jezik kao liste */}
         <article
           className="flex min-w-0 flex-col overflow-hidden rounded-2xl shadow-sm"
           style={{
@@ -504,17 +513,6 @@ export default function ZahtjevDetaljPage() {
           ) : null}
         </article>
 
-        {/* Tekstualni „Povratak" link (kao na uredi/page.tsx) */}
-        <div className="mt-4">
-          <Link
-            href="/korisnik/zahtjevi"
-            className="inline-flex items-center gap-1.5 text-sm font-medium transition-opacity hover:opacity-70"
-            style={{ color: 'var(--first-nonary)' }}
-          >
-            <ArrowLeft className="h-3.5 w-3.5" />
-            Povratak na listu zahtjeva
-          </Link>
-        </div>
       </div>
     </AppShell>
   );

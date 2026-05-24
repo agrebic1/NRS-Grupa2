@@ -73,7 +73,7 @@ function TimeRange({
             style={{ borderColor: invalid ? '#DC2626' : 'rgb(var(--first-quaternary-rgb)/0.45)', backgroundColor: 'rgb(255 255 255/0.85)', color: 'var(--first-octonary)' }}
           />
         </div>
-        <span className="mb-2 flex-shrink-0 text-sm" style={{ color: 'var(--first-quinary)' }}>—</span>
+        <span className="mb-2 flex-shrink-0 text-sm" style={{ color: 'var(--first-quinary)' }}>-</span>
         <div className="flex min-w-0 flex-1 flex-col gap-1" style={{ minWidth: '90px' }}>
           <label className="text-xs font-medium" style={{ color: 'var(--first-nonary)' }}>Do</label>
           <input
@@ -158,7 +158,7 @@ function SlotCard({
           </p>
           {slot!.from && slot!.to && (
             <p className="text-[10px] tabular-nums mt-0.5" style={{ color: 'var(--first-nonary)' }}>
-              {slot!.from}–{slot!.to}
+              {slot!.from}-{slot!.to}
             </p>
           )}
         </div>
@@ -272,7 +272,7 @@ export function KorakTermin({
           {noPreferredTime && <Check className="h-3 w-3 text-white" strokeWidth={3} />}
         </div>
         <div className="flex flex-col gap-1">
-          <span>Nemam preferirani termin — kontaktirajte me radi dogovora</span>
+          <span>Nemam preferirani termin - kontaktirajte me radi dogovora</span>
           {noPreferredTime && (
             <span className="text-xs font-normal" style={{ color: 'var(--first-nonary)' }}>
               Zahtjev će biti poslan bez preferiranog termina.
@@ -315,7 +315,7 @@ export function KorakTermin({
             <div className="rounded-2xl p-4"
               style={{ backgroundColor: 'rgb(var(--first-quinary-rgb)/0.15)', border: '1px solid rgb(var(--first-quaternary-rgb)/0.3)' }}>
               <p className="mb-3 text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--first-nonary)' }}>
-                Datum — {TIP_OZNAKA[aktivniSlot]}
+                Datum - {TIP_OZNAKA[aktivniSlot]}
               </p>
               <KalendarOdabir
                 jedanDatum
@@ -349,7 +349,7 @@ export function KorakTermin({
                 <div className="mt-3 rounded-lg border px-3 py-2 text-xs"
                   style={{ borderColor: 'rgb(var(--first-quaternary-rgb)/0.35)', backgroundColor: 'rgb(var(--first-quinary-rgb)/0.12)', color: 'var(--first-nonary)' }}>
                   <p><span className="font-semibold" style={{ color: 'var(--first-octonary)' }}>Datum:</span>{' '}{formatirajDatumPrikaz(aktivniSlotData.date)}</p>
-                  <p className="mt-1"><span className="font-semibold" style={{ color: 'var(--first-octonary)' }}>Period:</span>{' '}{aktivniSlotData.from} – {aktivniSlotData.to}</p>
+                  <p className="mt-1"><span className="font-semibold" style={{ color: 'var(--first-octonary)' }}>Period:</span>{' '}{aktivniSlotData.from} - {aktivniSlotData.to}</p>
                 </div>
               )}
             </div>
@@ -377,7 +377,7 @@ export function KorakTermin({
                       {TIP_OZNAKA[i]}
                     </span>
                     <span style={{ color: 'var(--first-octonary)' }}>
-                      {formatirajDatumPrikaz(t.date)}{t.from && t.to ? `, ${t.from}–${t.to}` : ''}
+                      {formatirajDatumPrikaz(t.date)}{t.from && t.to ? `, ${t.from}-${t.to}` : ''}
                     </span>
                   </div>
                 ) : null)}

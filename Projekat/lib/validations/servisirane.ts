@@ -117,7 +117,7 @@ export const serviceRequestSchema = z
     category_sub:  z.string().min(1).optional(),
     address:       z.string().min(5).max(500),
     description:   z.string().min(20).max(2000),
-    // Usklađeno s wizardom (PHONE_REGEX): 8–20 znakova
+    // Usklađeno s wizardom (PHONE_REGEX): 8-20 znakova
     contact_phone: z
       .string()
       .min(8, 'Unesite ispravan kontakt telefon.')
@@ -129,7 +129,7 @@ export const serviceRequestSchema = z
     longitude:     z.number().min(-180).max(180).optional().nullable(),
     is_premium:    z.boolean().optional(),
     premium_terms_accepted: z.boolean().optional(),
-    /** Za premium hitnu može biti `null` / izostavljeno — trijaža se ne primjenjuje. */
+    /** Za premium hitnu može biti `null` / izostavljeno - trijaža se ne primjenjuje. */
     triage:        z.union([wizardKorak3Schema, z.null()]).optional(),
   })
   .superRefine((data, ctx) => {

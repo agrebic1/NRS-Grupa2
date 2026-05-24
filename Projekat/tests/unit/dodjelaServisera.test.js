@@ -92,7 +92,7 @@ describe('assertServiserVlasnistvo', () => {
 
 // ─── odbijZadatakSchema ───────────────────────────────────────────────────────
 
-describe('odbijZadatakSchema — validacija razloga odbijanja', () => {
+describe('odbijZadatakSchema - validacija razloga odbijanja', () => {
   test('prihvata razlog koji zadovoljava minimum', () => {
     expect(odbijZadatakSchema.safeParse({ razlog: 'Nema kapaciteta.' }).success).toBe(true);
   });
@@ -117,7 +117,7 @@ describe('odbijZadatakSchema — validacija razloga odbijanja', () => {
 
 // ─── dodijelijeSchema ─────────────────────────────────────────────────────────
 
-describe('dodijelijeSchema — validacija dodjele servisera', () => {
+describe('dodijelijeSchema - validacija dodjele servisera', () => {
   const validan = {
     action:      'dodijeli',
     serviser_id: '00000000-0000-0000-0000-000000000001',

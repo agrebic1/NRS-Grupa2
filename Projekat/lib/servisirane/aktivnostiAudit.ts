@@ -12,7 +12,7 @@ export interface ZabiljeziAktivnostParams {
   metadata?:   Record<string, unknown> | null;
 }
 
-/** Centralni insert u intervention_activities (Sprint 9 — konzistentan audit). */
+/** Centralni insert u intervention_activities (Sprint 9 - konzistentan audit). */
 export async function zabiljeziAktivnost(
   db: AnyDB,
   params: ZabiljeziAktivnostParams,

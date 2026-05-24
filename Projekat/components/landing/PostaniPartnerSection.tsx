@@ -39,7 +39,7 @@ export function PostaniPartnerSection() {
             <h2
               className="text-3xl font-bold leading-tight text-white sm:text-4xl"
             >
-              Serviseri i dispečeri — proširite posao s nama
+              Serviseri i dispečeri - proširite posao s nama
             </h2>
             <p
               className="text-base leading-relaxed"
@@ -88,7 +88,7 @@ export function PostaniPartnerSection() {
               Prijava partnerstva
             </p>
             <h3 className="mb-3 text-xl font-bold text-white">
-              Besplatna prijava — odgovor za 24h
+              Besplatna prijava - odgovor za 24h
             </h3>
             <p
               className="mb-6 text-sm leading-relaxed"

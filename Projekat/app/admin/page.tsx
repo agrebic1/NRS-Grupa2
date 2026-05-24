@@ -135,7 +135,7 @@ export default function AdminPage() {
             Pregled sistema
           </h1>
           <p className="mt-1 text-sm" style={{ color: 'var(--first-nonary)' }}>
-            Upravljanje korisnicima i podesavanjima sistema.
+            Upravljanje korisnicima i podešavanjima sistema.
           </p>
         </div>
 
@@ -146,10 +146,10 @@ export default function AdminPage() {
             size="md"
             onClick={ucitajKorisnike}
             isLoading={ucitava}
-            loadingText="Ucitavanje..."
+            loadingText="Učitavanje..."
           >
             <RefreshCw className="h-4 w-4" />
-            Osvjezi
+            Osvježi
           </Button>
           <Link href="/admin/korisnici/novi">
             <Button size="md" className="w-full sm:w-auto">
@@ -190,50 +190,6 @@ export default function AdminPage() {
 
       <div
         className="mb-8 rounded-2xl shadow-card"
-        style={{
-          backgroundColor: 'rgb(var(--first-quinary-rgb) / 0.22)',
-          border: '1px solid rgb(var(--first-quaternary-rgb) / 0.35)',
-        }}
-      >
-        <div
-          className="flex items-center justify-between px-5 py-4"
-          style={{ borderBottom: '1px solid rgb(var(--first-quaternary-rgb) / 0.3)' }}
-        >
-          <h2 className="font-semibold" style={{ color: 'var(--first-octonary)' }}>
-            Servisni zahtjevi ({zahtjevi.length})
-          </h2>
-          <Link
-            href="/dispecer"
-            className="flex items-center gap-1 text-sm font-medium transition-opacity hover:opacity-70"
-            style={{ color: 'var(--first-secondary)' }}
-          >
-            Otvori pregled <ChevronRight className="h-4 w-4" />
-          </Link>
-        </div>
-        <ul className="divide-y" style={{ borderColor: 'rgb(var(--first-quaternary-rgb) / 0.2)' }}>
-          {zahtjevi.slice(0, 5).map((z) => (
-            <li key={z.id} className="flex items-center justify-between px-5 py-3">
-              <div className="min-w-0">
-                <p className="truncate text-sm font-medium" style={{ color: 'var(--first-octonary)' }}>
-                  {z.category}
-                </p>
-                <p className="text-xs" style={{ color: 'var(--first-nonary)' }}>
-                  {formatirajDatumPrikaz(z.created_at)}
-                </p>
-              </div>
-              <StatusBadge status={z.status} />
-            </li>
-          ))}
-          {zahtjevi.length === 0 && (
-            <li className="px-5 py-4 text-sm" style={{ color: 'var(--first-nonary)' }}>
-              Nema servisnih zahtjeva.
-            </li>
-          )}
-        </ul>
-      </div>
-
-      <div
-        className="rounded-2xl shadow-card"
         style={{
           backgroundColor: 'rgb(var(--first-quinary-rgb) / 0.22)',
           border: '1px solid rgb(var(--first-quaternary-rgb) / 0.35)',
@@ -287,7 +243,7 @@ export default function AdminPage() {
               {ucitava && (
                 <tr>
                   <td colSpan={7} className="px-5 py-8 text-center" style={{ color: 'var(--first-nonary)' }}>
-                    Ucitavanje korisnika...
+                    Učitavanje korisnika...
                   </td>
                 </tr>
               )}
@@ -348,12 +304,12 @@ export default function AdminPage() {
                             </select>
                             {korisnik.premium_expires_at && korisnik.premium_status === 'active' && (
                               <span className="text-[10px]" style={{ color: 'var(--first-nonary)' }}>
-                                Istek: {formatirajDatumPrikaz(korisnik.premium_expires_at)}
+                                Vrijedi do: {formatirajDatumPrikaz(korisnik.premium_expires_at)}
                               </span>
                             )}
                           </div>
                         ) : (
-                          <span className="text-xs" style={{ color: 'var(--first-nonary)' }}>—</span>
+                          <span className="text-xs" style={{ color: 'var(--first-nonary)' }}>-</span>
                         )}
                       </td>
                       <td className="px-5 py-3.5" style={{ color: 'var(--first-nonary)' }}>
@@ -361,7 +317,7 @@ export default function AdminPage() {
                       </td>
                       <td className="px-5 py-3.5 text-right">
                         <Link
-                          href={`/admin/korisnici/${korisnik.id}`}
+                          href={`/admin/korisnici/${korisnik.id}/uredi`}
                           className="text-xs font-medium transition-opacity hover:opacity-70"
                           style={{ color: 'var(--first-secondary)' }}
                         >
@@ -378,7 +334,7 @@ export default function AdminPage() {
         <ul className="divide-y sm:hidden" style={{ borderColor: 'rgb(var(--first-quaternary-rgb) / 0.25)' }}>
           {ucitava && (
             <li className="px-5 py-6 text-center text-sm" style={{ color: 'var(--first-nonary)' }}>
-              Ucitavanje korisnika...
+              Učitavanje korisnika...
             </li>
           )}
 
@@ -440,6 +396,43 @@ export default function AdminPage() {
                 </li>
               );
             })}
+        </ul>
+      </div>
+
+      <div
+        className="rounded-2xl shadow-card"
+        style={{
+          backgroundColor: 'rgb(var(--first-quinary-rgb) / 0.22)',
+          border: '1px solid rgb(var(--first-quaternary-rgb) / 0.35)',
+        }}
+      >
+        <div
+          className="flex items-center justify-between px-5 py-4"
+          style={{ borderBottom: '1px solid rgb(var(--first-quaternary-rgb) / 0.3)' }}
+        >
+          <h2 className="font-semibold" style={{ color: 'var(--first-octonary)' }}>
+            Servisni zahtjevi ({zahtjevi.length})
+          </h2>
+        </div>
+        <ul className="divide-y" style={{ borderColor: 'rgb(var(--first-quaternary-rgb) / 0.2)' }}>
+          {zahtjevi.slice(0, 5).map((z) => (
+            <li key={z.id} className="flex items-center justify-between px-5 py-3">
+              <div className="min-w-0">
+                <p className="truncate text-sm font-medium" style={{ color: 'var(--first-octonary)' }}>
+                  {z.category}
+                </p>
+                <p className="text-xs" style={{ color: 'var(--first-nonary)' }}>
+                  {formatirajDatumPrikaz(z.created_at)}
+                </p>
+              </div>
+              <StatusBadge status={z.status} />
+            </li>
+          ))}
+          {zahtjevi.length === 0 && (
+            <li className="px-5 py-4 text-sm" style={{ color: 'var(--first-nonary)' }}>
+              Nema servisnih zahtjeva.
+            </li>
+          )}
         </ul>
       </div>
     </AppShell>

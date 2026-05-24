@@ -16,7 +16,7 @@ const BENEFITI = [
   {
     Ikona:  Wrench,
     naslov: 'Digitalni radni nalozi',
-    opis:   'Sve informacije na jednom mjestu — adresa, opis, prioritet.',
+    opis:   'Sve informacije na jednom mjestu - adresa, opis, prioritet.',
   },
   {
     Ikona:  Shield,

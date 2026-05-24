@@ -1,7 +1,7 @@
 import type { StatusZahtjeva } from '@/domain/types/servisirane';
 
 /**
- * Sažetak za korisnički dashboard — 8 stanja koja korisnik razumije.
+ * Sažetak za korisnički dashboard - 8 stanja koja korisnik razumije.
  *
  * RAZLIKA od DB statusa:
  * - `novi`       = zahtjev primljen, čeka dispečera
@@ -27,7 +27,7 @@ export type KorisnickiDashboardStatus =
   | 'odbijeno';
 
 /**
- * Završni statusi — ne ulaze u operativni pregled aktivnih.
+ * Završni statusi - ne ulaze u operativni pregled aktivnih.
  * `zavrseno`  = operativno završeno, dispečer može formalno zatvoriti
  * `zatvoreno` = formalno zatvoreno, read-only za sve uloge
  */
@@ -38,7 +38,7 @@ export const TERMINALNI_STATUSI_ZAHTJEVA = new Set<string>([
   'odbijeno',
 ]);
 
-/** Prag za urgency badge na korisničkom dashboardu — prikazuje se kao badge, ne kao status. */
+/** Prag za urgency badge na korisničkom dashboardu - prikazuje se kao badge, ne kao status. */
 export const PRAG_KORISNICKE_HITNOSTI_HITNO = 80;
 
 /** Statusi u kojima korisnik smije mijenjati ili otkazati zahtjev (service-requests PATCH). */

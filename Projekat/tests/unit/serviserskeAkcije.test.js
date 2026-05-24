@@ -6,9 +6,9 @@ const {
   evidencijaRadaSchema,
 } = require('@/lib/validations/servisirane');
 
-// ─── serviserSmijeMijenjatiStatus — rub slučajevi ─────────────────────────────
+// ─── serviserSmijeMijenjatiStatus - rub slučajevi ─────────────────────────────
 
-describe('serviserSmijeMijenjatiStatus — rub slučajevi', () => {
+describe('serviserSmijeMijenjatiStatus - rub slučajevi', () => {
   test('vraća false za nedefinirani status', () => {
     expect(serviserSmijeMijenjatiStatus(undefined, 'u_radu')).toBe(false);
     expect(serviserSmijeMijenjatiStatus(null, 'u_radu')).toBe(false);
@@ -37,7 +37,7 @@ describe('serviserSmijeMijenjatiStatus — rub slučajevi', () => {
 
 // ─── evidencijaRadaSchema ─────────────────────────────────────────────────────
 
-describe('evidencijaRadaSchema — validacija evidencije rada', () => {
+describe('evidencijaRadaSchema - validacija evidencije rada', () => {
   const validan = {
     opis_rada:       'Zamijenjen bojler u kupaonici.',
     trajanje_minuta: 60,

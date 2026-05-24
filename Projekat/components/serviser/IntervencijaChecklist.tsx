@@ -164,7 +164,7 @@ export function IntervencijaChecklist({ status }: { status: string }) {
       {/* Progress */}
       <ProgressBar oznaceno={brojOznacenih} ukupno={UKUPNO} />
 
-      {/* Brzi gumb — samo ako nije read-only */}
+      {/* Brzi gumb - samo ako nije read-only */}
       {!jeZavrseno && (
         <div className="flex justify-end">
           <button
@@ -202,7 +202,7 @@ export function IntervencijaChecklist({ status }: { status: string }) {
         >
           <CheckSquare className="h-4 w-4 flex-shrink-0" style={{ color: ZELENA }} />
           <p className="text-sm font-semibold" style={{ color: ZELENA }}>
-            Sve stavke završene — intervencija je zaključena
+            Sve stavke završene - intervencija je zaključena
           </p>
         </div>
       )}

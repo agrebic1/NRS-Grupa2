@@ -16,7 +16,7 @@ function toIso(date: Date): string {
 interface KalendarOdabirProps {
   odabraniDatumi: string[];
   onPromjena:     (datumi: string[]) => void;
-  /** Boja po datumu — svaki datum može imati različitu boju */
+  /** Boja po datumu - svaki datum može imati različitu boju */
   dateColors?:    Record<string, string>;
   /** Jedan datum (Sprint 7 preferirani termin); novi klik zamjenjuje odabir. */
   jedanDatum?:    boolean;
@@ -73,7 +73,7 @@ export function KalendarOdabir({
 
   return (
     <div className="select-none">
-      {/* Header — navigacija */}
+      {/* Header - navigacija */}
       <div className="mb-4 flex items-center justify-between">
         <button
           type="button"
