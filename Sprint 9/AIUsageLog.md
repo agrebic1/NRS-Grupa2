@@ -149,3 +149,18 @@
 | Rizici, problemi ili greške | Prvi run je otkrio 5 padajućih testova zbog promjene sheme evidencije — svi popravljeni prije zatvaranja sprinta. |
 | Ko je koristio alat | Ajla Ćesir |
 
+
+
+| Polje | Opis |
+|---|---|
+| Datum | 23.05.2026. |
+| Sprint broj | 9 |
+| Alat koji je korišten | Claude AI |
+| Svrha korištenja | Enterprise audit status logike, sigurnosti i integriteta baze podataka |
+| Kratak opis zadatka | AI alat je korišten za pregled status tranzicija, validacija, sigurnosnih rizika i konzistentnosti baze podataka kroz dispečerske i serviserske tokove aplikacije. |
+| Šta je AI generisao | Prijedloge CHECK constrainta za prioritete i score vrijednosti, trigger za normalizaciju statusa, prijedloge indeksa baze, refaktorisane status module, prijedloge sigurnosnih provjera za upload i URL pristup, te prijedloge unit testova za poslovnu logiku. |
+| Šta je tim prihvatio | Prihvaćena je centralizacija status logike, dodatna validacija podataka na nivou baze, sigurnija validacija upload-a i pregled ključnih poslovnih pravila kroz testiranje i code review. |
+| Šta je tim izmijenio | AI prijedlozi su prilagođeni postojećim modulima aplikacije i postojećem workflow-u bez većeg prepisivanja arhitekture sistema. |
+| Šta je tim odbacio | Odbačena su rješenja koja bi zahtijevala dodatnu infrastrukturu ili veće promjene van planiranog obima Sprinta 9. |
+| Rizici, problemi ili greške | Najveći rizik bio je mogući konflikt između postojeće status logike i novih validacija baze, zbog čega su izmjene dodatno provjerene kroz TypeScript provjere i ručni pregled poslovne logike. |
+| Ko je koristio alat | Amina Grebić |
