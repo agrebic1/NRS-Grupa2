@@ -11,6 +11,7 @@ import { odbijZadatakSchema, razlogOperativniSchema } from '@/lib/validations/se
 import {
   notifPrihvatanjeZadatka,
   notifOdbijanjeZadatka,
+  kreirajViseNotifikacija,
   notifVratanjaNaPonovnuDodjelu,
   notifNijeRijesen,
   notifKorisnikusServiserNaPutu,
@@ -346,10 +347,24 @@ export async function PATCH(
 
       const { data: dodjelaAktVN } = await db
         .from('intervention_activities')
-        .select('autor_id').eq('zahtjev_id', zahtjevId).eq('tip', 'dodjela')
+        .select('autor_id').eq('zahtjev_id', zahtjevId)
+        .in('tip', ['dodjela', 'promjena_izvrsioca'])
         .order('created_at', { ascending: false }).limit(1).maybeSingle();
       if (dodjelaAktVN?.autor_id) {
         await notifVratanjaNaPonovnuDodjelu(db, dodjelaAktVN.autor_id, zahtjevId, imeVN, podaci.razlog);
+      } else {
+        const { data: sviDispVN } = await db.from('uposlenici').select('id_uposlenika, uloga:uloga(naziv)');
+        const idsVN: string[] = (sviDispVN ?? [])
+          .filter((u: any) => { const n = Array.isArray(u.uloga) ? u.uloga[0]?.naziv : u.uloga?.naziv; return n === 'Dispečer'; })
+          .map((u: any) => u.id_uposlenika as string);
+        if (idsVN.length > 0) {
+          await kreirajViseNotifikacija(db, idsVN.map((id) => ({
+            korisnik_id: id, uloga_korisnika: 'Dispečer', tip: 'odbijanje_zadatka',
+            naslov: 'Serviser vratio zadatak na ponovnu dodjelu',
+            poruka: `${imeVN} je vratio intervenciju #${zahtjevId} na ponovnu dodjelu. Razlog: ${podaci.razlog}`,
+            zahtjev_id: zahtjevId,
+          })));
+        }
       }
 
       const brojCiklusa = await inkrementirajPonovniCiklus(db, zahtjevId);
@@ -389,10 +404,24 @@ export async function PATCH(
 
       const { data: dodjelaAktNR } = await db
         .from('intervention_activities')
-        .select('autor_id').eq('zahtjev_id', zahtjevId).eq('tip', 'dodjela')
+        .select('autor_id').eq('zahtjev_id', zahtjevId)
+        .in('tip', ['dodjela', 'promjena_izvrsioca'])
         .order('created_at', { ascending: false }).limit(1).maybeSingle();
       if (dodjelaAktNR?.autor_id) {
         await notifNijeRijesen(db, dodjelaAktNR.autor_id, zahtjevId, imeNR, podaci.razlog);
+      } else {
+        const { data: sviDispNR } = await db.from('uposlenici').select('id_uposlenika, uloga:uloga(naziv)');
+        const idsNR: string[] = (sviDispNR ?? [])
+          .filter((u: any) => { const n = Array.isArray(u.uloga) ? u.uloga[0]?.naziv : u.uloga?.naziv; return n === 'Dispečer'; })
+          .map((u: any) => u.id_uposlenika as string);
+        if (idsNR.length > 0) {
+          await kreirajViseNotifikacija(db, idsNR.map((id) => ({
+            korisnik_id: id, uloga_korisnika: 'Dispečer', tip: 'odbijanje_zadatka',
+            naslov: 'Intervencija označena kao nije riješena',
+            poruka: `${imeNR} je označio intervenciju #${zahtjevId} kao nije riješenu. Razlog: ${podaci.razlog}`,
+            zahtjev_id: zahtjevId,
+          })));
+        }
       }
 
       const brojCiklusaNR = await inkrementirajPonovniCiklus(db, zahtjevId);
@@ -428,17 +457,41 @@ export async function PATCH(
         .maybeSingle();
       const imeOdb = osobaOdb ? `${osobaOdb.ime} ${osobaOdb.prezime}` : 'Serviser';
 
+      // Pokušaj naći dispečera koji je dodijelio zadatak
       const { data: dodjelaAkt } = await db
         .from('intervention_activities')
         .select('autor_id')
         .eq('zahtjev_id', zahtjevId)
-        .eq('tip', 'dodjela')
+        .in('tip', ['dodjela', 'promjena_izvrsioca'])
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
 
       if (dodjelaAkt?.autor_id) {
+        // Pošalji specifičnom dispečeru koji je napravio posljednju dodjelu
         await notifOdbijanjeZadatka(db, dodjelaAkt.autor_id, zahtjevId, imeOdb, podaci.razlog);
+      } else {
+        // Fallback: nema zapisa dodjele — obavijesti sve dispečere
+        const { data: sviDisp } = await db
+          .from('uposlenici')
+          .select('id_uposlenika, uloga:uloga(naziv)');
+        const dispIds: string[] = (sviDisp ?? [])
+          .filter((u: any) => {
+            const naziv = Array.isArray(u.uloga) ? u.uloga[0]?.naziv : u.uloga?.naziv;
+            return naziv === 'Dispečer';
+          })
+          .map((u: any) => u.id_uposlenika as string);
+
+        if (dispIds.length > 0) {
+          await kreirajViseNotifikacija(db, dispIds.map((id) => ({
+            korisnik_id:     id,
+            uloga_korisnika: 'Dispečer',
+            tip:             'odbijanje_zadatka',
+            naslov:          'Serviser odbio zadatak',
+            poruka:          `${imeOdb} je odbio intervenciju #${zahtjevId}. Razlog: ${podaci.razlog}`,
+            zahtjev_id:      zahtjevId,
+          })));
+        }
       }
 
       return NextResponse.json({ success: true, novi_status: 'potvrdeno' });

@@ -240,6 +240,7 @@ async function patchServiserAkcija(zahtjevId: number, action: string, razlog: st
 
 function AkcijeServiser({
   status, zahtjevId, onRefresh, onEvidencija, imaEvidenciju, onVratiNaDodjelu, onOznaciNijeRijesen,
+  checklistSveIspunjeno, onEvidencijaBlokirana,
 }: {
   status: string;
   zahtjevId: number;
@@ -247,6 +248,8 @@ function AkcijeServiser({
   onEvidencija: () => void;
   imaEvidenciju: boolean;
   onVratiNaDodjelu: () => void;
+  checklistSveIspunjeno?: boolean;
+  onEvidencijaBlokirana?: () => void;
   onOznaciNijeRijesen: () => void;
 }) {
   const [showOdbij, setShowOdbij] = useState(false);
@@ -394,6 +397,7 @@ function AkcijeServiser({
   }
 
   if (status === 'u_izvrsenju') {
+    const checklistBlokira = checklistSveIspunjeno === false;
     return (
       <div className="rounded-2xl p-5"
         style={{ backgroundColor: 'rgb(var(--first-secondary-rgb)/0.05)', border: '1px solid rgb(var(--first-secondary-rgb)/0.2)' }}>
@@ -404,12 +408,21 @@ function AkcijeServiser({
         {greska && <p className="mb-3 text-xs font-medium" style={{ color: '#DC2626' }}>{greska}</p>}
         <button
           type="button"
-          onClick={onEvidencija}
+          onClick={() => {
+            if (checklistBlokira) { onEvidencijaBlokirana?.(); return; }
+            onEvidencija();
+          }}
           disabled={jeSlanje}
           className="flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-sm font-bold transition-all hover:opacity-90 disabled:opacity-60"
-          style={{ backgroundColor: 'var(--first-primary)', color: '#fff' }}>
+          style={{
+            backgroundColor: checklistBlokira ? 'rgba(100,116,139,0.12)' : 'var(--first-primary)',
+            color: checklistBlokira ? 'var(--first-nonary)' : '#fff',
+            border: checklistBlokira ? '1px dashed rgba(100,116,139,0.4)' : 'none',
+            cursor: checklistBlokira ? 'not-allowed' : 'pointer',
+          }}>
           <ClipboardCheck className="h-5 w-5" />
           {imaEvidenciju ? 'Dodaj još evidencije' : 'Evidentiraj rad'}
+          {checklistBlokira && <span className="ml-1 text-[11px] font-semibold opacity-70">(ispuni listu)</span>}
         </button>
         <button
           type="button"
@@ -554,7 +567,11 @@ export default function ServiserIntervencijaDetaljiPage() {
   const [pokaziVratiNaDodjelu, setPokaziVratiNaDodjelu] = useState(false);
   const [pokaziNijeRijesen,    setPokaziNijeRijesen]    = useState(false);
   const [scrollToZavrsi,      setScrollToZavrsi]      = useState(false);
-  const zavrsiRef = useRef<HTMLDivElement>(null);
+  const zavrsiRef       = useRef<HTMLDivElement>(null);
+  // Kontrolna lista
+  const [checklistOznaceni,  setChecklistOznaceni]  = useState<boolean[]>(Array(6).fill(false));
+  const [checklistHighlight, setChecklistHighlight] = useState(false);
+  const checklistRef = useRef<HTMLDivElement>(null);
 
   async function ucitaj() {
     setUcitava(true); setGreska(null);
@@ -751,6 +768,17 @@ export default function ServiserIntervencijaDetaljiPage() {
               imaEvidenciju={evidencije.length > 0}
               onVratiNaDodjelu={() => setPokaziVratiNaDodjelu(true)}
               onOznaciNijeRijesen={() => setPokaziNijeRijesen(true)}
+              checklistSveIspunjeno={
+                zahtjev.status === 'u_izvrsenju'
+                  ? checklistOznaceni.every(Boolean)
+                  : undefined
+              }
+              onEvidencijaBlokirana={() => {
+                setChecklistHighlight(true);
+                setTimeout(() => {
+                  checklistRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 50);
+              }}
             />
           )}
 
@@ -802,8 +830,18 @@ export default function ServiserIntervencijaDetaljiPage() {
 
           {/* Kontrolna lista - samo korak 3 (na terenu) */}
           {zahtjev.status === 'u_izvrsenju' && (
-            <div className="rounded-2xl p-5"
-              style={{ backgroundColor: 'rgb(255 255 255/0.85)', border: '1px solid rgb(var(--first-quaternary-rgb)/0.28)' }}>
+            <div
+              ref={checklistRef}
+              className="rounded-2xl p-5 transition-all"
+              style={{
+                backgroundColor: checklistHighlight && !checklistOznaceni.every(Boolean)
+                  ? 'rgba(220,38,38,0.02)'
+                  : 'rgb(255 255 255/0.85)',
+                border: checklistHighlight && !checklistOznaceni.every(Boolean)
+                  ? '1px solid rgba(220,38,38,0.25)'
+                  : '1px solid rgb(var(--first-quaternary-rgb)/0.28)',
+              }}
+            >
               <div className="mb-4 flex items-center gap-2">
                 <div className="flex h-7 w-7 items-center justify-center rounded-lg"
                   style={{ backgroundColor: 'rgb(var(--first-secondary-rgb)/0.1)' }}>
@@ -811,7 +849,15 @@ export default function ServiserIntervencijaDetaljiPage() {
                 </div>
                 <p className="text-[10px] font-bold uppercase tracking-wide" style={{ color: 'var(--first-nonary)' }}>Kontrolna lista</p>
               </div>
-              <IntervencijaChecklist status={zahtjev.status} />
+              <IntervencijaChecklist
+                status={zahtjev.status}
+                onPromjena={(oznaceni) => {
+                  setChecklistOznaceni(oznaceni);
+                  // Kad korisnik počne označavati, resetuj highlight
+                  if (oznaceni.some(Boolean)) setChecklistHighlight(false);
+                }}
+                highlightNepopunjena={checklistHighlight}
+              />
             </div>
           )}
 

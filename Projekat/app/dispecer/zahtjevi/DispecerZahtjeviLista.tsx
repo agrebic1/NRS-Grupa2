@@ -26,13 +26,15 @@ import { sastaviDispecerskiInboxRedoslijed } from '@/lib/servisirane/urgency';
 
 const ZAHTJEVA_PO_STRANICI = 12;
 
-/** Opcije glavnog filtera statusa zahtjeva. */
+/** Opcije glavnog filtera statusa zahtjeva — usklađeno s KPI pločicama na dashboardu. */
 const STATUS_FILTRI = [
-  { value: 'svi',       label: 'Sve',       title: 'Svi aktivni zahtjevi bez obzira na status.' },
-  { value: 'novi',      label: 'Novi',       title: 'Zahtjevi koji još čekaju procjenu dispečera (nije postavljen operativni prioritet).' },
-  { value: 'u_obradi',  label: 'U obradi',  title: 'Svi zahtjevi u obradi - od procjene do dodjele servisera.' },
-  { value: 'potvrdeni', label: 'Potvrđeni', title: 'Zahtjevi kojima je završena obrada i čekaju dodjelu servisera.' },
-  { value: 'zavrseni',  label: 'Završeni',  title: 'Uspješno završene intervencije.' },
+  { value: 'svi',       label: 'Sve',        title: 'Svi aktivni zahtjevi bez obzira na status.' },
+  { value: 'novi',      label: 'Novi',        title: 'Zahtjevi koji još čekaju procjenu dispečera (nije postavljen operativni prioritet).' },
+  { value: 'u_obradi',  label: 'U obradi',   title: 'Svi zahtjevi u obradi - od procjene do dodjele servisera.' },
+  { value: 'odbijeni',  label: 'Odbijeni',   title: 'Zahtjevi koje je serviser odbio — čekaju ponovnu dodjelu.' },
+  { value: 'potvrdeni', label: 'Potvrđeni',  title: 'Zahtjevi kojima je završena obrada u wizardu i čekaju dodjelu servisera.' },
+  { value: 'na_terenu', label: 'Na terenu',  title: 'Aktivne intervencije — serviseri dodijeljeni ili na lokaciji.' },
+  { value: 'zavrseni',  label: 'Završeni',   title: 'Uspješno završene intervencije (zadnjih 7 dana).' },
 ] as const;
 
 type StatusFilter = typeof STATUS_FILTRI[number]['value'];
@@ -52,7 +54,7 @@ const DOZVOLJENI_STATUS_FILTRI = STATUS_FILTRI.map((f) => f.value);
 const DOZVOLJENE_FAZE          = FAZA_FILTRI.map((f) => f.value);
 
 /** Statusi koji koriste inbox-redoslijed za sortiranje. */
-const INBOX_REDOSLIJED_STATUSI = new Set<StatusFilter>(['svi', 'novi', 'u_obradi']);
+const INBOX_REDOSLIJED_STATUSI = new Set<StatusFilter>(['svi', 'novi', 'u_obradi', 'odbijeni']);
 
 // ─── Logika filtriranja ───────────────────────────────────────────────────────
 
@@ -63,7 +65,15 @@ function filterPoStatusu(
   switch (statusFilter) {
     case 'novi':      return zahtjevi.filter(zahtjevJeNoviUPregleduDispecera);
     case 'u_obradi':  return zahtjevi.filter(zahtjevJeUObradiSirokoGledano);
-    case 'potvrdeni': return zahtjevi.filter(zahtjevJePotvrdenPrijeIntervencije);
+    case 'odbijeni':  return zahtjevi.filter(
+      (z) => z.status === 'potvrdeno' && !!z.serviser_odbio_razlog
+    );
+    case 'potvrdeni': return zahtjevi.filter(
+      (z) => zahtjevJePotvrdenPrijeIntervencije(z) && !z.serviser_odbio_razlog
+    );
+    case 'na_terenu': return zahtjevi.filter(
+      (z) => ['dodijeljeno', 'u_radu', 'u_izvrsenju'].includes(z.status)
+    );
     case 'zavrseni':  return zahtjevi.filter((z) => z.status === 'zavrseno');
     default:          return zahtjevi; // 'svi'
   }
@@ -119,6 +129,25 @@ function StatusFilterTraka({
       {STATUS_FILTRI.map((opcija) => {
         const br      = filterPoStatusu(zahtjevi, opcija.value).length;
         const aktiv   = opcija.value === aktivan;
+        const jeOdbij = opcija.value === 'odbijeni';
+        // Boja po tipu taba — crvena za Odbijeni, narandžasta za Na terenu, plava za ostale
+        const boja =
+          jeOdbij ? '#DC2626'
+          : opcija.value === 'na_terenu' ? 'var(--first-secondary)'
+          : 'var(--first-secondary)';
+        const bojaPoz =
+          jeOdbij ? 'rgba(220,38,38,0.12)'
+          : 'rgb(var(--first-secondary-rgb) / 0.12)';
+        const bojaBorder =
+          jeOdbij ? '1px solid rgba(220,38,38,0.35)'
+          : '1px solid rgb(var(--first-secondary-rgb) / 0.35)';
+        const bojaBadge =
+          jeOdbij ? 'rgba(220,38,38,0.15)'
+          : 'rgb(var(--first-secondary-rgb) / 0.15)';
+        // Neaktivna boja teksta — crvena za Odbijeni ako ima stavki
+        const neaktivnaBoja = jeOdbij && br > 0 ? '#DC2626' : 'var(--first-nonary)';
+        const neaktivnaBadgePoz = jeOdbij && br > 0 ? 'rgba(220,38,38,0.1)' : 'rgb(var(--first-quaternary-rgb) / 0.35)';
+
         return (
           <button
             key={opcija.value}
@@ -129,9 +158,9 @@ function StatusFilterTraka({
             onClick={() => onPromjena(opcija.value)}
             className="flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-semibold transition-colors sm:text-sm"
             style={{
-              backgroundColor: aktiv ? 'rgb(var(--first-secondary-rgb) / 0.12)' : 'transparent',
-              color: aktiv ? 'var(--first-secondary)' : 'var(--first-nonary)',
-              border: aktiv ? '1px solid rgb(var(--first-secondary-rgb) / 0.35)' : '1px solid transparent',
+              backgroundColor: aktiv ? bojaPoz : 'transparent',
+              color:           aktiv ? boja : neaktivnaBoja,
+              border:          aktiv ? bojaBorder : '1px solid transparent',
             }}
           >
             {opcija.label}
@@ -139,10 +168,8 @@ function StatusFilterTraka({
               <span
                 className="rounded-full px-1.5 py-px text-[10px] font-bold tabular-nums"
                 style={{
-                  backgroundColor: aktiv
-                    ? 'rgb(var(--first-secondary-rgb) / 0.15)'
-                    : 'rgb(var(--first-quaternary-rgb) / 0.35)',
-                  color: aktiv ? 'var(--first-secondary)' : 'var(--first-nonary)',
+                  backgroundColor: aktiv ? bojaBadge : neaktivnaBadgePoz,
+                  color:           aktiv ? boja : neaktivnaBoja,
                 }}
               >
                 {br}
@@ -285,6 +312,12 @@ export function DispecerZahtjeviLista() {
   const sortirano = useMemo(() => {
     if (INBOX_REDOSLIJED_STATUSI.has(aktivniStatus as StatusFilter)) {
       return sastaviDispecerskiInboxRedoslijed(prikazLista).uredjeni;
+    }
+    // Završeni: najnovije završene prvo
+    if (aktivniStatus === 'zavrseni') {
+      return [...prikazLista].sort(
+        (a, b) => new Date(b.updated_at ?? b.created_at).getTime() - new Date(a.updated_at ?? a.created_at).getTime()
+      );
     }
     return [...prikazLista].sort((a, b) => {
       const r = rangOperativnogPrioriteta(a.final_priority) - rangOperativnogPrioriteta(b.final_priority);

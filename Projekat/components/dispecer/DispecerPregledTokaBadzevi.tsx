@@ -35,14 +35,34 @@ function FazaBedz({ naziv, title }: { naziv: string; title?: string }) {
  * Prikazuje STATUS zahtjeva + FAZU obrade kao odvojene bedževe.
  *
  * - Inbox: "Novi" ili "U obradi" + faza (Procjena zahtjeva / Dogovor termina / Izbor servisera / Potvrda termina)
- * - Potvrdeno: DispecerStatusBadge + "Dodjela serviseru" faza
- * - Ostali aktivni statusi: samo DispecerStatusBadge
+ * - Potvrdeno + odbijeno: crveni "Serviser odbio" badge umjesto zelenog Potvrđeno
+ * - Ostali aktivni statusi: samo DispecerStatusBadge + faza
  */
 export function DispecerPregledTokaBadzevi({ zahtjev }: { zahtjev: ServisniZahtjev }) {
   const uInboxu = zahtjevCekaObraduUInboxuDispecera(zahtjev.status);
 
   // Requests outside inbox (potvrdeno, dodijeljeno, u_radu, u_izvrsenju, zavrseno, etc.)
   if (!uInboxu) {
+    // Poseban slučaj: serviser odbio — status ostaje 'potvrdeno' ali treba crveni badge
+    const jeOdbijen = zahtjev.status === 'potvrdeno' && !!zahtjev.serviser_odbio_razlog;
+    if (jeOdbijen) {
+      return (
+        <span className="flex flex-wrap items-center gap-1">
+          <span
+            className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-semibold"
+            style={{
+              color:           '#DC2626',
+              backgroundColor: 'rgba(220,38,38,0.1)',
+              border:          '1px solid rgba(220,38,38,0.28)',
+            }}
+          >
+            Serviser odbio
+          </span>
+          <FazaBedz naziv="Ponovna dodjela" />
+        </span>
+      );
+    }
+
     const fazaNaziv = fazaObradeNazivZaKarticu(zahtjev);
     return (
       <span className="flex flex-wrap items-center gap-1">

@@ -4,7 +4,7 @@ import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'rea
 import {
   ClipboardList, ChevronRight,
   RefreshCw, XCircle, Bell,
-  AlertTriangle, CheckCircle2, UserCheck, Zap, Inbox, Clock,
+  AlertTriangle, CheckCircle2, UserCheck, Zap, Inbox, Clock, Ban,
 } from 'lucide-react';
 import { getSlaStatus } from '@/lib/servisirane/slaPravila';
 import Link from 'next/link';
@@ -281,8 +281,10 @@ function DispecerPageContent() {
   const uInboxu       = zahtjevi.filter((z) => JE_PENDING(z.status));
   const noviPregledBr = uInboxu.filter((z) => zahtjevJeNoviUPregleduDispecera(z)).length;
   const uObradiPregledBr = uInboxu.filter((z) => zahtjevJeUObradiUPregleduDispecera(z)).length;
-  const potvrdenoBr   = zahtjevi.filter((z) => z.status === 'potvrdeno').length;
-  const dodijeljeniiBr = zahtjevi.filter((z) => ['dodijeljeno', 'u_radu', 'u_izvrsenju'].includes(z.status)).length;
+  // Odbijeni zahtjevi imaju status='potvrdeno' + serviser_odbio_razlog — broji ih odvojeno od potvrđenih
+  const odbijeniServiserBr = zahtjevi.filter((z) => z.status === 'potvrdeno' && !!z.serviser_odbio_razlog).length;
+  const potvrdenoBr        = zahtjevi.filter((z) => z.status === 'potvrdeno' && !z.serviser_odbio_razlog).length;
+  const dodijeljeniiBr     = zahtjevi.filter((z) => ['dodijeljeno', 'u_radu', 'u_izvrsenju'].includes(z.status)).length;
   const hitniB        = zahtjevi.filter((z) => (z.urgency_score ?? 0) >= 75 || z.is_premium).length;
   const zavrsenoDanaBr = zahtjevi.filter((z) => {
     if (z.status !== 'zavrseno') return false;
@@ -314,15 +316,16 @@ function DispecerPageContent() {
         </Button>
       </div>
 
-      <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-7">
+      <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
         {[
-          { oznaka: 'Novi zahtjevi',    v: noviPregledBr,      boja: DISPECER_PALETA_STATUS.inbox.kpi,                                          Ikona: Inbox,        href: '/dispecer/zahtjevi?filter=novi'      },
-          { oznaka: 'U obradi',         v: uObradiPregledBr,   boja: DISPECER_PALETA_STATUS.uObradi.kpi,                                        Ikona: ClipboardList, href: '/dispecer/zahtjevi?filter=u_obradi' },
-          { oznaka: 'Hitni',            v: hitniB,             boja: '#DC2626',                                                                  Ikona: Zap,           href: '/dispecer/zahtjevi'                 },
-          { oznaka: 'Potvrđeni',        v: potvrdenoBr,        boja: DISPECER_PALETA_STATUS.terminPotvrden.kpi,                                  Ikona: CheckCircle2,  href: '/dispecer/zahtjevi?filter=potvrdeni'},
-          { oznaka: 'Na terenu',        v: dodijeljeniiBr,     boja: DISPECER_PALETA_STATUS.uToku.kpi,                                           Ikona: UserCheck,     href: '/dispecer/zahtjevi'                 },
-          { oznaka: 'Završeni danas',   v: zavrsenoDanaBr,     boja: DISPECER_PALETA_STATUS.zavrseno.kpi,                                        Ikona: CheckCircle2,  href: '/dispecer/zahtjevi?filter=zavrseni' },
-          { oznaka: 'Prekoračen SLA',   v: slaPrekoracenoBr,   boja: slaPrekoracenoBr > 0 ? '#DC2626' : DISPECER_PALETA_STATUS.zavrseno.kpi,     Ikona: Clock,         href: '/dispecer/intervencije?filter=sla'  },
+          { oznaka: 'Novi zahtjevi',  v: noviPregledBr,      boja: DISPECER_PALETA_STATUS.inbox.kpi,                                        Ikona: Inbox,         href: '/dispecer/zahtjevi?filter=novi'      },
+          { oznaka: 'U obradi',       v: uObradiPregledBr,   boja: DISPECER_PALETA_STATUS.uObradi.kpi,                                      Ikona: ClipboardList, href: '/dispecer/zahtjevi?filter=u_obradi' },
+          { oznaka: 'Odbijeni',       v: odbijeniServiserBr, boja: odbijeniServiserBr > 0 ? '#DC2626' : DISPECER_PALETA_STATUS.neutral.kpi,  Ikona: Ban,           href: '/dispecer/zahtjevi?filter=odbijeni' },
+          { oznaka: 'Potvrđeni',      v: potvrdenoBr,        boja: DISPECER_PALETA_STATUS.terminPotvrden.kpi,                               Ikona: CheckCircle2,  href: '/dispecer/zahtjevi?filter=potvrdeni'},
+          { oznaka: 'Na terenu',      v: dodijeljeniiBr,     boja: DISPECER_PALETA_STATUS.uToku.kpi,                                        Ikona: UserCheck,     href: '/dispecer/zahtjevi?filter=na_terenu'},
+          { oznaka: 'Hitni',          v: hitniB,             boja: '#DC2626',                                                               Ikona: Zap,           href: '/dispecer/zahtjevi?filter=svi'      },
+          { oznaka: 'Završeni danas', v: zavrsenoDanaBr,     boja: DISPECER_PALETA_STATUS.zavrseno.kpi,                                     Ikona: CheckCircle2,  href: '/dispecer/zahtjevi?filter=zavrseni' },
+          { oznaka: 'Prekoračen SLA', v: slaPrekoracenoBr,   boja: slaPrekoracenoBr > 0 ? '#DC2626' : DISPECER_PALETA_STATUS.zavrseno.kpi,  Ikona: Clock,         href: '/dispecer/intervencije?filter=sla'  },
         ].map(({ oznaka, v, boja, Ikona, href }) => (
           <Link
             key={oznaka}

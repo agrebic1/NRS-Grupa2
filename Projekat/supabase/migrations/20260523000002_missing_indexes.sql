@@ -26,10 +26,14 @@ CREATE INDEX IF NOT EXISTS idx_intervention_activities_zahtjev_created
   ON intervention_activities (zahtjev_id, created_at ASC);
 
 -- Notifikacije: unread count po korisniku (layout query)
-CREATE INDEX IF NOT EXISTS idx_notifications_korisnik_procitano
-  ON notifications (korisnik_id, procitano)
+CREATE INDEX IF NOT EXISTS idx_notifikacije_korisnik_procitano
+  ON notifikacije (korisnik_id, procitano)
   WHERE procitano = false;
 
 -- Dispatcher alerts: po primaocu (neučitani alertovi)
-CREATE INDEX IF NOT EXISTS idx_dispatcher_alerts_recipient
-  ON dispatcher_alerts (recipient_user_id, created_at DESC);
+-- (tabela dispatcher_alerts možda ne postoji u svim env-ovima)
+DO $$ BEGIN
+  CREATE INDEX IF NOT EXISTS idx_dispatcher_alerts_recipient
+    ON dispatcher_alerts (recipient_user_id, created_at DESC);
+EXCEPTION WHEN undefined_table THEN NULL;
+END $$;

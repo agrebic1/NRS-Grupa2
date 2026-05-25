@@ -5,7 +5,7 @@ import Link from 'next/link';
 import {
   Wrench, MapPin, Calendar, Clock, AlertTriangle,
   CheckCircle2, Truck, ChevronRight, RefreshCw,
-  ClipboardList, Zap, Shield, Users,
+  ClipboardList, Zap, Shield, Users, XCircle,
 } from 'lucide-react';
 import { AppShell } from '@/components/layout/AppShell';
 import { AlertMessage } from '@/components/ui/AlertMessage';
@@ -16,9 +16,12 @@ import { prioritetBoja, statusBoja, statusOznaka } from '@/lib/servisirane/statu
 // ─── Tipovi ───────────────────────────────────────────────────────────────────
 
 interface IntervencijaZaListu extends ServisniZahtjev {
-  podnosilac:          { ime: string; prezime: string; broj_telefona: string | null } | null;
-  uloga_u_intervenciji?: 'glavni' | 'pomocni';
+  podnosilac:             { ime: string; prezime: string; broj_telefona: string | null } | null;
+  uloga_u_intervenciji?:  'glavni' | 'pomocni';
+  serviser_odbio_razlog?: string | null;
 }
+
+type FilterTab = 'sve' | 'ceka' | 'utoku' | 'zavrsene';
 
 // ─── Helperi ─────────────────────────────────────────────────────────────────
 
@@ -42,13 +45,19 @@ function jeKasni(z: IntervencijaZaListu): boolean {
   return new Date(z.termin_planirani_pocetak) < new Date();
 }
 
-function grupiraj(intervencije: IntervencijaZaListu[]) {
-  const hitne    = intervencije.filter((z) => ['dodijeljeno','u_radu','u_izvrsenju'].includes(z.status) && ((z.urgency_score ?? 0) >= 75 || z.is_premium));
+function filtrirajPoTabu(intervencije: IntervencijaZaListu[], tab: FilterTab): IntervencijaZaListu[] {
+  if (tab === 'ceka')     return intervencije.filter((z) => z.status === 'dodijeljeno');
+  if (tab === 'utoku')    return intervencije.filter((z) => ['u_radu', 'u_izvrsenju'].includes(z.status));
+  if (tab === 'zavrsene') return intervencije.filter((z) => ['zavrseno', 'zatvoreno'].includes(z.status));
+  return intervencije; // 'sve'
+}
+
+function grupirajUnutarTaba(intervencije: IntervencijaZaListu[]) {
+  // "Hitne" = zahtjevi koji trebaju odmah pažnju (visok urgency ili premium)
+  const hitne    = intervencije.filter((z) => (z.urgency_score ?? 0) >= 75 || z.is_premium);
   const hitneIds = new Set(hitne.map((z) => z.id));
-  const aktivne  = intervencije.filter((z) => ['dodijeljeno','u_radu','u_izvrsenju'].includes(z.status) && !hitneIds.has(z.id));
-  const zavrsene = intervencije.filter((z) => ['zavrseno','zatvoreno'].includes(z.status));
-  const ostale   = intervencije.filter((z) => !['dodijeljeno','u_radu','u_izvrsenju','zavrseno','zatvoreno'].includes(z.status));
-  return { hitne, aktivne, zavrsene, ostale };
+  const ostale   = intervencije.filter((z) => !hitneIds.has(z.id));
+  return { hitne, ostale };
 }
 
 // ─── KPI kartica ─────────────────────────────────────────────────────────────
@@ -75,13 +84,14 @@ function KpiKartica({ v, oznaka, boja, Ikona }: {
 // ─── Kartica intervencije ─────────────────────────────────────────────────────
 
 function IntervencijaKartica({ z }: { z: IntervencijaZaListu }) {
-  const kat     = labelKategorije(z);
-  const naslov  = kat.podkategorija ?? kat.glavna;
-  const kasni   = jeKasni(z);
-  const pboja   = prioritetBoja(z.final_priority);
-  const sboja   = statusBoja(z.status);
-  const jeAktivna = ['dodijeljeno', 'u_radu', 'u_izvrsenju'].includes(z.status);
-  const jePomocni = z.uloga_u_intervenciji === 'pomocni';
+  const kat             = labelKategorije(z);
+  const naslov          = kat.podkategorija ?? kat.glavna;
+  const kasni           = jeKasni(z);
+  const pboja           = prioritetBoja(z.final_priority);
+  const sboja           = statusBoja(z.status);
+  const jeAktivna       = ['dodijeljeno', 'u_radu', 'u_izvrsenju'].includes(z.status);
+  const jePomocni       = z.uloga_u_intervenciji === 'pomocni';
+  const prethodnoOdbijen = !!z.serviser_odbio_razlog;
 
   return (
     <Link
@@ -128,6 +138,14 @@ function IntervencijaKartica({ z }: { z: IntervencijaZaListu }) {
             <span className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold"
               style={{ backgroundColor: 'rgba(220,38,38,0.08)', color: '#DC2626', border: '1px solid rgba(220,38,38,0.2)' }}>
               <AlertTriangle className="h-3 w-3" />Kasni
+            </span>
+          )}
+          {prethodnoOdbijen && (
+            <span
+              title={`Prethodni serviser je odbio: ${z.serviser_odbio_razlog}`}
+              className="inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-[11px] font-bold"
+              style={{ backgroundColor: 'rgba(234,88,12,0.08)', color: '#EA580C', border: '1px solid rgba(234,88,12,0.22)' }}>
+              <XCircle className="h-3 w-3" />Preth. odbijeno
             </span>
           )}
         </div>
@@ -212,10 +230,18 @@ function GrupaSekcija({ naslov, ikona: IkonaProp, boja, intervencije, prazanTeks
 
 // ─── Stranica ─────────────────────────────────────────────────────────────────
 
+const FILTER_TABOVI: { id: FilterTab; oznaka: string; Ikona: React.ComponentType<{ className?: string; style?: React.CSSProperties }> }[] = [
+  { id: 'sve',      oznaka: 'Sve',               Ikona: ClipboardList },
+  { id: 'ceka',     oznaka: 'Čeka prihvatanje',  Ikona: Clock         },
+  { id: 'utoku',    oznaka: 'U toku',             Ikona: Truck         },
+  { id: 'zavrsene', oznaka: 'Završene',           Ikona: CheckCircle2  },
+];
+
 export default function ServiserIntervencijaListaPage() {
   const [sve,     setSve]     = useState<IntervencijaZaListu[]>([]);
   const [ucitava, setUcitava] = useState(true);
   const [greska,  setGreska]  = useState<string | null>(null);
+  const [tab,     setTab]     = useState<FilterTab>('sve');
 
   async function ucitaj() {
     setUcitava(true); setGreska(null);
@@ -231,12 +257,22 @@ export default function ServiserIntervencijaListaPage() {
 
   useEffect(() => { ucitaj(); }, []);
 
-  const { hitne, aktivne, zavrsene, ostale } = useMemo(() => grupiraj(sve), [sve]);
+  const prikazane = useMemo(() => filtrirajPoTabu(sve, tab), [sve, tab]);
+  const { hitne, ostale: ostaleGrupe } = useMemo(() => grupirajUnutarTaba(prikazane), [prikazane]);
 
-  const brDodijeljeno = sve.filter((z) => z.status === 'dodijeljeno').length;
-  const brNaPutu      = sve.filter((z) => z.status === 'u_radu').length;
-  const brNaTerenu    = sve.filter((z) => z.status === 'u_izvrsenju').length;
-  const brZavrseno    = sve.filter((z) => z.status === 'zavrseno').length;
+  // KPI counteri — uvijek nad cijelim skupom
+  const brDodijeljeno = useMemo(() => sve.filter((z) => z.status === 'dodijeljeno').length, [sve]);
+  const brNaPutu      = useMemo(() => sve.filter((z) => z.status === 'u_radu').length, [sve]);
+  const brNaTerenu    = useMemo(() => sve.filter((z) => z.status === 'u_izvrsenju').length, [sve]);
+  const brZavrseno    = useMemo(() => sve.filter((z) => ['zavrseno','zatvoreno'].includes(z.status)).length, [sve]);
+
+  // Broj po tabu za badge
+  const brPoTabu: Record<FilterTab, number> = useMemo(() => ({
+    sve:      sve.length,
+    ceka:     brDodijeljeno,
+    utoku:    brNaPutu + brNaTerenu,
+    zavrsene: brZavrseno,
+  }), [sve, brDodijeljeno, brNaPutu, brNaTerenu, brZavrseno]);
 
   return (
     <AppShell uloga="serviser">
@@ -247,7 +283,7 @@ export default function ServiserIntervencijaListaPage() {
             Intervencije
           </h1>
           <p className="mt-1 text-sm" style={{ color: 'var(--first-nonary)' }}>
-            Sve vaše intervencije - kao glavni i pomoćni serviser
+            Sve vaše intervencije — kao glavni i pomoćni serviser
           </p>
         </div>
         <button type="button" onClick={ucitaj} disabled={ucitava}
@@ -257,12 +293,57 @@ export default function ServiserIntervencijaListaPage() {
         </button>
       </div>
 
-      {/* KPI */}
+      {/* KPI — klikabilne kartice koje postavljaju filter */}
       <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <KpiKartica v={brDodijeljeno} oznaka="Čeka prihv." boja="var(--first-senary)"    Ikona={ClipboardList} />
-        <KpiKartica v={brNaPutu}      oznaka="Na putu"     boja="var(--first-secondary)" Ikona={Truck}         />
-        <KpiKartica v={brNaTerenu}    oznaka="Na terenu"   boja="var(--first-secondary)" Ikona={Wrench}        />
-        <KpiKartica v={brZavrseno}    oznaka="Završeno"    boja="var(--first-nonary)"    Ikona={CheckCircle2}  />
+        <button type="button" onClick={() => setTab('ceka')} className="text-left">
+          <KpiKartica v={brDodijeljeno} oznaka="Čeka prihvatanje" boja="var(--first-senary)"    Ikona={ClipboardList} />
+        </button>
+        <button type="button" onClick={() => setTab('utoku')} className="text-left">
+          <KpiKartica v={brNaPutu}      oznaka="Na putu"          boja="var(--first-secondary)" Ikona={Truck}         />
+        </button>
+        <button type="button" onClick={() => setTab('utoku')} className="text-left">
+          <KpiKartica v={brNaTerenu}    oznaka="Na terenu"        boja="var(--first-secondary)" Ikona={Wrench}        />
+        </button>
+        <button type="button" onClick={() => setTab('zavrsene')} className="text-left">
+          <KpiKartica v={brZavrseno}    oznaka="Završeno"         boja="var(--first-nonary)"    Ikona={CheckCircle2}  />
+        </button>
+      </div>
+
+      {/* Filter tabovi */}
+      <div
+        className="mb-6 flex flex-wrap gap-2 rounded-2xl p-1.5"
+        style={{
+          backgroundColor: 'rgb(var(--first-quinary-rgb)/0.15)',
+          border: '1px solid rgb(var(--first-quaternary-rgb)/0.25)',
+        }}
+      >
+        {FILTER_TABOVI.map(({ id, oznaka, Ikona }) => {
+          const aktivan = tab === id;
+          return (
+            <button
+              key={id}
+              type="button"
+              onClick={() => setTab(id)}
+              className="flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition-all"
+              style={{
+                backgroundColor: aktivan ? 'var(--first-secondary)' : 'transparent',
+                color:           aktivan ? '#fff' : 'var(--first-nonary)',
+              }}
+            >
+              <Ikona className="h-3.5 w-3.5" />
+              {oznaka}
+              <span
+                className="rounded-full px-1.5 py-0.5 text-[10px] font-bold"
+                style={{
+                  backgroundColor: aktivan ? 'rgba(255,255,255,0.25)' : 'rgb(var(--first-quaternary-rgb)/0.35)',
+                  color:           aktivan ? '#fff' : 'var(--first-nonary)',
+                }}
+              >
+                {brPoTabu[id]}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
       {greska && <div className="mb-4"><AlertMessage variant="error" message={greska} /></div>}
@@ -277,32 +358,42 @@ export default function ServiserIntervencijaListaPage() {
         </div>
       ) : (
         <div className="flex flex-col gap-8">
-          <GrupaSekcija
-            naslov="Hitne intervencije"
-            ikona={AlertTriangle}
-            boja="#DC2626"
-            intervencije={hitne}
-          />
-          <GrupaSekcija
-            naslov="Aktivne"
-            ikona={Clock}
-            boja="var(--first-secondary)"
-            intervencije={aktivne}
-            prazanTekst={hitne.length === 0 ? 'Nemate aktivnih intervencija.' : undefined}
-          />
-          {ostale.length > 0 && (
+          {/* Hitne — prikazuju se unutar svakog taba ako postoje */}
+          {hitne.length > 0 && (
             <GrupaSekcija
-              naslov="Ostalo"
-              ikona={ClipboardList}
-              boja="var(--first-nonary)"
-              intervencije={ostale}
+              naslov="Hitne"
+              ikona={AlertTriangle}
+              boja="#DC2626"
+              intervencije={hitne}
             />
           )}
+
+          {/* Ostale u odabranom tabu */}
           <GrupaSekcija
-            naslov="Završene"
-            ikona={CheckCircle2}
-            boja="var(--first-nonary)"
-            intervencije={zavrsene}
+            naslov={
+              tab === 'ceka'     ? 'Čekaju prihvatanje' :
+              tab === 'utoku'    ? 'Aktivne intervencije' :
+              tab === 'zavrsene' ? 'Završene' :
+              hitne.length > 0  ? 'Ostale' : 'Sve intervencije'
+            }
+            ikona={
+              tab === 'ceka'     ? Clock :
+              tab === 'utoku'    ? Truck :
+              tab === 'zavrsene' ? CheckCircle2 :
+              ClipboardList
+            }
+            boja={
+              tab === 'zavrsene' ? 'var(--first-nonary)' : 'var(--first-secondary)'
+            }
+            intervencije={ostaleGrupe}
+            prazanTekst={
+              prikazane.length === 0
+                ? tab === 'ceka'     ? 'Nema intervencija koje čekaju prihvatanje.'
+                : tab === 'utoku'    ? 'Nemate aktivnih intervencija u toku.'
+                : tab === 'zavrsene' ? 'Nema završenih intervencija.'
+                : 'Nema intervencija.'
+                : undefined
+            }
           />
 
           {sve.length === 0 && !ucitava && (

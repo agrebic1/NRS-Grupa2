@@ -403,6 +403,22 @@ export function notifPromjenaIzvrsioca(
   });
 }
 
+export function notifReDodjela(
+  db:              AnyDB,
+  serviser_id:     string,
+  zahtjev_id:      number,
+  razlogOdbijanja: string
+) {
+  return kreirajNotifikaciju(db, {
+    korisnik_id:     serviser_id,
+    uloga_korisnika: 'Serviser',
+    tip:             'dodjela_intervencije',
+    naslov:          'Ponovo dodijeljena intervencija',
+    poruka:          `Intervencija #${zahtjev_id} vam je ponovo dodijeljena. Napomena: prethodni serviser je odbio — razlog: ${razlogOdbijanja}`,
+    zahtjev_id,
+  });
+}
+
 export function notifVratanjaNaPonovnuDodjelu(
   db:            AnyDB,
   dispecer_id:   string,

@@ -249,6 +249,12 @@ export async function PATCH(
 
     // ── suspenduj ─────────────────────────────────────────────────────────────
     if (body.action === 'suspenduj') {
+      if (ciljId === user.id) {
+        return NextResponse.json(
+          { error: 'Ne možete suspendovati vlastiti nalog.' },
+          { status: 403 }
+        );
+      }
       const { error } = await admin.auth.admin.updateUserById(ciljId, {
         ban_duration: '876000h',
       } as any);

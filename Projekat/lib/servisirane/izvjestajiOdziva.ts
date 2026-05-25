@@ -1,5 +1,15 @@
 // Tipovi za izvještaj odziva servisera - US-42
 
+/** Jedna završena intervencija u detalju servisera. */
+export interface IntervencijaOdzivaRed {
+  zahtjev_id:       number;
+  zavrseno_at:      string;        // ISO datum završetka (updated_at)
+  final_priority:   string | null;
+  odziv_minuta:     number | null; // dodjela → prihvat
+  trajanje_minuta:  number | null; // evidencija rada
+  sla_ok:           boolean | null; // null = nema podataka o prioritetu
+}
+
 export interface ServiserOdzivaRed {
   serviser_id:           string;
   ime:                   string;
@@ -11,6 +21,8 @@ export interface ServiserOdzivaRed {
   avg_trajanje_minuta:   number | null;
   /** Postotak intervencija završenih unutar SLA roka. null ako nema podataka. */
   sla_compliance_posto:  number | null;
+  /** Detalji po intervenciji — za expand redak u tabeli. */
+  intervencije:          IntervencijaOdzivaRed[];
 }
 
 export interface IzvjestajOdzivaOdgovor {
