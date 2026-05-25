@@ -44,6 +44,7 @@ Sprint 9 nadograđuje funkcionalan tok iz Sprinta 8. Kritične zavisnosti:
 - završena dodjela i serviserski tok (Sprint 8)
 - definisani US-01–US-47 u `Sprint 2/User Stories.md`
 
+---
 
 # Sprint Backlog
 

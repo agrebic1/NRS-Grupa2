@@ -2494,6 +2494,500 @@ Povezano sa storyjima za pregled vlastitog zahtjeva (US-06), pregled otvorenih i
 
 ---
 
+US-38 — Obavezno trajanje pri evidentiranju rada
+Opis:
+Kao serviser, želim da sistem zahtijeva unos trajanja pri evidentiranju rada, kako bi evidencija bila potpuna i korisna za izvještaje o performansama.
+Poslovna vrijednost:
+Ovaj story je važan jer bez podatka o trajanju evidencija rada je nepotpuna, a dispečer i sistem ne mogu pratiti stvarno utrošeno vrijeme po intervenciji, što je osnova za izvještaje o efikasnosti i SLA analizu.
+Prioritet:
+Visok
+Pretpostavke i otvorena pitanja:
+Pretpostavka: Pretpostavlja se da serviser ima otvorenu i aktivnu intervenciju koja mu je dodijeljena.
+Otvorena pitanja: Da li se trajanje unosi u minutama ili satima? Da li sistem treba automatski predložiti trajanje na osnovu razlike između početka i završetka?
+Veze sa drugim storyjima:
+Zavisi od storyja za evidentiranje izvršenog rada (US-17) i povezan je sa storyjem za izvještaj odziva i trajanja po serviseru (US-42).
+Acceptance Criteria:
+
+AC1: Obaveznost polja trajanja
+
+GIVEN serviser je otvorio formu za evidenciju rada
+WHEN pokuša potvrditi unos bez trajanja
+THEN sistem ne sprema evidenciju i prikazuje validacijsku poruku pored polja trajanja
+
+
+AC2: Validacija vrijednosti trajanja
+
+GIVEN serviser je u formi za evidenciju rada
+WHEN unese negativnu vrijednost ili nulu
+THEN sistem ne prihvata unos i prikazuje poruku o grešci
+
+
+AC3: Uspješno spremanje trajanja
+
+GIVEN serviser je unio validno trajanje i ostale obavezne podatke
+WHEN potvrdi evidenciju rada
+THEN sistem sprema trajanje uz ostale podatke evidencije
+
+
+AC4: Vidljivost trajanja dispečeru
+
+GIVEN serviser je uspješno evidentirao rad sa trajanjem
+WHEN dispečer otvori pregled evidentiranog rada te intervencije
+THEN sistem prikazuje uneseno trajanje uz ostale podatke evidencije
+
+
+AC5: Zabrana evidencije bez trajanja
+
+GIVEN serviser pokušava evidentirati rad na intervenciji
+WHEN polje trajanja ostane prazno
+THEN sistem u potpunosti blokira slanje forme do popunjavanja polja
+
+---
+US-39 — Audit trail sa starim i novim vrijednostima u historiji aktivnosti
+Opis:
+Kao dispečer, želim u historiji aktivnosti vidjeti stare i nove vrijednosti za svaku evidentiranu promjenu, kako bih imao potpun audit trail koji pokazuje šta se promijenilo, s čega na šta i ko je to uradio.
+Poslovna vrijednost:
+Ovaj story je važan jer sama evidencija da se nešto promijenilo nije dovoljna za operativni audit. Dispečer mora znati konkretno šta je bila prethodna vrijednost i šta je nova, kako bi mogao pratiti tok odlučivanja i razriješiti eventualne nesporazume.
+Prioritet:
+Srednji
+Pretpostavke i otvorena pitanja:
+Pretpostavka: Pretpostavlja se da sistem već evidentira historiju aktivnosti (US-32) i da model intervention_activities postoji u bazi.
+Otvorena pitanja: Za koja sve polja treba evidentirati stare i nove vrijednosti? Da li se evidentiraju i promjene napomena ili samo strukturirani podaci?
+Veze sa drugim storyjima:
+Zavisi od storyja za pregled historije aktivnosti intervencije (US-32) i povezan je sa storyjima za tabelarni pregled historije aktivnosti (US-44) i promjenu izvršioca intervencije (US-28).
+Acceptance Criteria:
+
+AC1: Evidentiranje stare i nove vrijednosti
+
+GIVEN korisnik izvrši promjenu na intervenciji (npr. promjena statusa, prioriteta ili izvršioca)
+WHEN sistem evidentira aktivnost u historiji
+THEN zapis u historiji sadrži naziv polja, staru vrijednost i novu vrijednost
+
+
+AC2: Prikaz autora i vremena promjene
+
+GIVEN promjena je evidentirana u historiji aktivnosti
+WHEN dispečer pregleda historiju te intervencije
+THEN sistem prikazuje ime korisnika koji je napravio promjenu i tačan vremenski pečat
+
+
+AC3: Razumljiv prikaz promjene
+
+GIVEN historija aktivnosti sadrži zapis s promjenom
+WHEN dispečer pregleda taj zapis
+THEN prikaz je razumljiv — jasno je vidljivo šta se promijenilo, s koje vrijednosti na koju
+
+
+AC4: Nepromjenjivost audit zapisa
+
+GIVEN promjena je evidentirana u historiji aktivnosti
+WHEN bilo koji korisnik pokušava izmijeniti ili obrisati taj zapis
+THEN sistem ne dozvoljava izmjenu niti brisanje audit zapisa
+
+
+AC5: Ograničenje pristupa historiji
+
+GIVEN korisnik bez odgovarajućeg ovlaštenja pokuša pristupiti historiji aktivnosti
+WHEN sistem provjeri ulogu korisnika
+THEN pristup je odbijen i prikazuje se odgovarajuća poruka
+
+---
+US-40 — Označavanje intervencije kao nije riješena
+Opis:
+Kao serviser, želim označiti intervenciju kao nije riješena, kako bi dispečer znao da problem nije otklonjen i može organizovati ponovni izlazak ili promijeniti pristup rješavanju.
+Poslovna vrijednost:
+Ovaj story je važan jer bez mogućnosti da serviser explicitno signalizira da problem nije riješen, dispečer može pogrešno zaključiti da je intervencija završena. Ova funkcionalnost osigurava tačnost operativnog stanja i sprečava zatvaranje intervencije bez stvarnog rješenja problema.
+Prioritet:
+Srednji
+Pretpostavke i otvorena pitanja:
+Pretpostavka: Pretpostavlja se da je intervencija prethodno dodijeljena serviseru i da je serviser na terenu.
+Otvorena pitanja: Da li označavanje kao nije riješena automatski vraća intervenciju u dispečerski tok ili samo mijenja status uz notifikaciju?
+Veze sa drugim storyjima:
+Zavisi od storyja za ažuriranje statusa intervencije od strane servisera (US-14) i povezan je sa storyjima za praćenje ponovnih ciklusa (US-47) i promjenu izvršioca intervencije (US-28).
+Acceptance Criteria:
+
+AC1: Obavezan razlog označavanja
+
+GIVEN serviser odabere opciju "Označi kao nije riješena"
+WHEN pokuša potvrditi akciju
+THEN sistem zahtijeva obavezan unos razloga i ne dozvoljava završetak bez toga
+
+
+AC2: Promjena statusa intervencije
+
+GIVEN serviser je potvrdio označavanje uz razlog
+WHEN sistem obradi akciju
+THEN status intervencije se ažurira i razlog je evidentiran u historiji aktivnosti
+
+
+AC3: Inkrementiranje brojača ponovnih ciklusa
+
+GIVEN serviser je označio intervenciju kao nije riješena
+WHEN sistem obradi akciju
+THEN brojač ponovnih ciklusa za tu intervenciju se povećava za jedan (US-47)
+
+
+AC4: Vidljivost dispečeru
+
+GIVEN intervencija je označena kao nije riješena
+WHEN dispečer pregleda listu intervencija
+THEN sistem prikazuje ažuriran status i oznaku na toj intervenciji
+
+
+AC5: Evidentiranje u historiji aktivnosti
+
+GIVEN akcija je uspješno izvršena
+WHEN dispečer pregleda historiju aktivnosti intervencije
+THEN zapis u historiji sadrži razlog, autora i vremenski pečat
+
+
+AC6: Ograničenje pristupa
+
+GIVEN korisnik koji nije dodijeljen serviser te intervencije pokuša označiti je kao nije riješena
+WHEN sistem provjeri ovlaštenje
+THEN akcija nije dostupna tom korisniku
+
+---
+US-41 — SLA praćenje intervencija
+Opis:
+Kao dispečer, želim vidjeti SLA status intervencija, kako bih mogao pravovremeno reagovati na intervencije kojima prijeti prekoračenje dogovorenih rokova.
+Poslovna vrijednost:
+Ovaj story je važan jer bez vidljivog SLA statusa dispečer ne može pravovremeno prioritizovati intervencije koje su blizu ili su već prekoračile dogovorene rokove, što direktno utiče na kvalitet usluge i zadovoljstvo korisnika.
+Prioritet:
+Srednji
+Pretpostavke i otvorena pitanja:
+Pretpostavka: Pretpostavlja se da su SLA rokovi definisani po prioritetu intervencije i da sistem zna vrijeme prijave zahtjeva.
+Otvorena pitanja: Koji su konkretni SLA rokovi po prioritetu? Da li SLA sat počinje od prijave zahtjeva ili od momenta dodjele serviseru?
+Veze sa drugim storyjima:
+Povezan je sa storyjima za SLA eskalacije (US-45), određivanje prioriteta intervencije (US-12) i izvještaj odziva i trajanja po serviseru (US-42).
+Acceptance Criteria:
+
+AC1: Izračun SLA statusa
+
+GIVEN u sistemu postoje aktivne intervencije s definisanim prioritetima
+WHEN sistem izračuna SLA status za svaku intervenciju
+THEN svaka intervencija dobija SLA status: u roku, upozorenje ili prekoračeno
+
+
+AC2: Prikaz SLA badge-a
+
+GIVEN intervencija ima izračunat SLA status
+WHEN dispečer pregleda listu intervencija ili detalj pojedinačne intervencije
+THEN sistem prikazuje SLA badge koji vizuelno ukazuje na trenutni status
+
+
+AC3: KPI prikaz na dashboardu
+
+GIVEN dispečer pristupi operativnom dashboardu
+WHEN sistem učita podatke
+THEN dashboard prikazuje KPI kartice s brojem intervencija po SLA statusu
+
+
+AC4: Ažuriranje u realnom vremenu
+
+GIVEN SLA status intervencije se promijeni zbog protoka vremena
+WHEN dispečer osviježi prikaz
+THEN sistem prikazuje ažurirani SLA status koji odgovara trenutnom stanju
+
+
+AC5: Filtriranje po SLA statusu
+
+GIVEN dispečer pregleda listu intervencija
+WHEN odabere filter po SLA statusu
+THEN sistem prikazuje samo intervencije koje odgovaraju odabranom SLA statusu
+
+
+AC6: Ograničenje pristupa
+
+GIVEN korisnik bez dispečerske uloge pokuša pristupiti SLA informacijama
+WHEN sistem provjeri ulogu
+THEN SLA informacije nisu vidljive tom korisniku
+
+
+---
+US-42 — Izvještaj odziva i trajanja po serviseru
+Opis:
+Kao dispečer, želim pregledati izvještaj koji prikazuje prosječno vrijeme odziva i prosječno trajanje intervencija po serviseru, kako bih mogao pratiti efikasnost tima i donositi informirane operativne odluke.
+Poslovna vrijednost:
+Ovaj story je važan jer bez agregiranih podataka o odzivima i trajanjima dispečer ne može objektivno procijeniti radni učinak servisera niti identificirati obrasce koji ukazuju na potrebu za poboljšanjem procesa ili preraspodjelom zadataka.
+Prioritet:
+Nizak
+Pretpostavke i otvorena pitanja:
+Pretpostavka: Pretpostavlja se da sistem već evidentira trajanje rada (US-38) i vremena dodjele i prihvatanja zadataka.
+Otvorena pitanja: Koji je minimalni period za koji se može generisati izvještaj? Da li se prikazuju i serviseri bez evidentiranih intervencija u odabranom periodu?
+Veze sa drugim storyjima:
+Zavisi od storyja za obavezno trajanje pri evidentiranju rada (US-38) i povezan je sa storyjima za SLA praćenje (US-41) i pregled historije aktivnosti (US-32).
+Acceptance Criteria:
+
+AC1: Prikaz prosječnog odziva po serviseru
+
+GIVEN dispečer pristupi stranici izvještaja
+WHEN sistem učita podatke
+THEN izvještaj prikazuje prosječno vrijeme odziva (od dodjele do prihvatanja zadatka) za svakog servisera
+
+
+AC2: Prikaz prosječnog trajanja po serviseru
+
+GIVEN dispečer pregleda izvještaj
+WHEN sistem agregira podatke o evidentiranom radu
+THEN izvještaj prikazuje prosječno trajanje intervencija po serviseru
+
+
+AC3: Filtriranje po vremenskom periodu
+
+GIVEN dispečer želi vidjeti podatke za određeni period
+WHEN odabere vremenski raspon i primijeni filter
+THEN sistem prikazuje izvještaj samo za intervencije u odabranom periodu
+
+
+AC4: Konzistentnost podataka
+
+GIVEN dispečer pregleda izvještaj
+WHEN usporedi vrijednosti s evidentiranim podacima
+THEN podaci u izvještaju su konzistentni s evidentiranim trajanjima i vremenima odziva
+
+
+AC5: Ograničenje pristupa
+
+GIVEN korisnik bez odgovarajućeg ovlaštenja pokuša pristupiti izvještaju
+WHEN sistem provjeri ulogu
+THEN pristup je odbijen i prikazuje se odgovarajuća poruka
+
+
+---
+US-43 — Upload fotografije intervencije
+Opis:
+Kao serviser, želim uploadovati fotografije vezane za intervenciju, kako bi vizuelna dokumentacija bila dostupna dispečeru i ostala trajno pohranjena uz evidenciju intervencije.
+Poslovna vrijednost:
+Ovaj story je važan jer fotografska dokumentacija pruža jasan dokaz o stanju kvara prije i nakon popravke, smanjuje sporove i nedoumice između servisera, dispečera i korisnika, te povećava transparentnost i kvalitet izvještavanja.
+Prioritet:
+Nizak
+Pretpostavke i otvorena pitanja:
+Pretpostavka: Pretpostavlja se da je Supabase Storage konfigurisan i dostupan za pohranu slika.
+Otvorena pitanja: Koliki je maksimalni broj fotografija po intervenciji? Postoji li maksimalna veličina fajla?
+Veze sa drugim storyjima:
+Zavisi od storyja za evidentiranje izvršenog rada (US-17) i povezan je sa storyjem za pregled evidentiranog izvršenog rada (US-24).
+Acceptance Criteria:
+
+AC1: Uspješan upload fotografije
+
+GIVEN serviser je otvorio detalje intervencije i odabrao opciju za upload fotografije
+WHEN odabere validnu fotografiju i potvrdi upload
+THEN sistem uspješno pohranjuje fotografiju i povezuje je sa intervencijom
+
+
+AC2: Pohrana u Supabase Storage
+
+GIVEN upload je uspješan
+WHEN sistem obradi fajl
+THEN fotografija je pohranjena u Supabase Storage bucket i dostupna putem sigurnog URL-a
+
+
+AC3: Pregled galerije fotografija
+
+GIVEN intervencija ima uploadovane fotografije
+WHEN serviser ili dispečer otvori detalje intervencije
+THEN sistem prikazuje galeriju svih fotografija vezanih za tu intervenciju
+
+
+AC4: Validacija formata fajla
+
+GIVEN serviser pokušava uploadovati fajl
+WHEN sistem provjeri tip fajla
+THEN sistem prihvata samo dozvoljene formate (JPEG, PNG, WebP) i odbija sve ostale s odgovarajućom porukom
+
+
+AC5: Validacija putem magic bytes
+
+GIVEN serviser uploaduje fajl s ispravnom ekstenzijom ali pogrešnim sadržajem
+WHEN sistem provjeri binarne magic bytes fajla
+THEN sistem odbija fajl čiji sadržaj ne odgovara deklarisanom tipu
+
+
+AC6: Ograničenje pristupa
+
+GIVEN korisnik bez odgovarajućeg ovlaštenja pokuša pristupiti fotografijama
+WHEN sistem provjeri ulogu
+THEN fotografije nisu dostupne tom korisniku
+
+
+---
+US-44 — Tabelarni pregled historije aktivnosti
+Opis:
+Kao dispečer, želim pregledati historiju aktivnosti intervencije u tabelarnom obliku s kolonama polje, stara vrijednost, nova vrijednost i autor, kako bih lakše pratio konkretne promjene na intervenciji.
+Poslovna vrijednost:
+Ovaj story je važan jer timeline prikaz historije pruža dobar hronološki pregled, ali nije optimalan za pregled konkretnih promjena vrijednosti. Tabelarni prikaz s eksplicitnim kolonama za staru i novu vrijednost čini audit trail preglednim i lakšim za analizu.
+Prioritet:
+Srednji
+Pretpostavke i otvorena pitanja:
+Pretpostavka: Pretpostavlja se da historija aktivnosti već evidentira stare i nove vrijednosti (US-39).
+Otvorena pitanja: Da li tabelarni i timeline prikaz koegzistiraju kao dvije opcije ili tabelarni zamjenjuje timeline?
+Veze sa drugim storyjima:
+Zavisi od storyja za audit trail sa starim i novim vrijednostima (US-39) i pregled historije aktivnosti (US-32).
+Acceptance Criteria:
+
+AC1: Tabelarni prikaz aktivnosti
+
+GIVEN intervencija ima evidentiranu historiju aktivnosti
+WHEN dispečer odabere tabelarni prikaz historije
+THEN sistem prikazuje tabelu s kolonama: polje, stara vrijednost, nova vrijednost i autor
+
+
+AC2: Hronološki redosljed
+
+GIVEN tabela aktivnosti je učitana
+WHEN dispečer pregleda redove tabele
+THEN zapisi su sortirani hronološki od najnovijeg prema najstarijem
+
+
+AC3: Toggle između tabelarnog i timeline prikaza
+
+GIVEN dispečer pregleda historiju aktivnosti
+WHEN odabere opciju za promjenu načina prikaza
+THEN sistem mijenja prikaz između tabelarnog i timeline formata bez gubitka podataka
+
+
+AC4: Preglednost za veći broj zapisa
+
+GIVEN intervencija ima velik broj evidentiranih aktivnosti
+WHEN dispečer otvori tabelarni prikaz
+THEN tabela ostaje pregledna i čitljiva, s podrškom za skrolanje ili paginaciju
+
+---
+US-45 — SLA eskalacije
+Opis:
+Kao dispečer, želim primati eskalacijske notifikacije kada intervencija prekorači SLA rok, kako bih mogao hitno reagovati i spriječiti daljnje kašnjenje.
+Poslovna vrijednost:
+Ovaj story je važan jer SLA praćenje samo po sebi nije dovoljno ako dispečer mora ručno provjeravati statuse. Automatska eskalacija osigurava da dispečer bude odmah obaviješten o prekoračenjima, što smanjuje rizik od dugotrajnih kašnjenja i negativnog uticaja na korisničko iskustvo.
+Prioritet:
+Srednji
+Pretpostavke i otvorena pitanja:
+Pretpostavka: Pretpostavlja se da je SLA praćenje implementirano (US-41) i da sistem evidentira vremena relevantnih događaja.
+Otvorena pitanja: Koliki je cooldown period između ponovljenih eskalacija za istu intervenciju?
+Veze sa drugim storyjima:
+Zavisi od storyja za SLA praćenje (US-41) i povezan je sa storyjima za sistemske notifikacije (US-37) i historiju aktivnosti (US-32).
+Acceptance Criteria:
+
+AC1: Detekcija prekoračenja SLA
+
+GIVEN intervencija je prešla definirani SLA rok bez zatvaranja
+WHEN sistem periodično provjerava SLA statuse
+THEN sistem detektuje prekoračenje i kreira eskalaciju za tu intervenciju
+
+
+AC2: Slanje eskalacijske notifikacije
+
+GIVEN eskalacija je kreirana za prekoračeni SLA
+WHEN sistem obradi eskalaciju
+THEN dispečer prima hitnu notifikaciju koja sadrži identifikator intervencije i informaciju o prekoračenju
+
+
+AC3: Evidentiranje eskalacije u audit logu
+
+GIVEN eskalacija je poslana dispečeru
+WHEN sistem evidentira akciju
+THEN zapis o eskalaciji je pohranjen u historiji aktivnosti intervencije s vremenskim pečatom
+
+
+AC4: Cooldown period za sprečavanje duplikata
+
+GIVEN eskalacija je već poslana za određenu intervenciju
+WHEN SLA i dalje ostaje prekoračen unutar cooldown perioda
+THEN sistem ne šalje ponovnu eskalaciju dok cooldown period ne istekne
+
+---
+US-46 — Evidencija materijala i dijelova
+Opis:
+Kao serviser, želim evidentirati materijale i dijelove korištene tokom intervencije, kako bi evidencija bila potpuna i transparentna za dispečera i za naknadnu analizu troškova.
+Poslovna vrijednost:
+Ovaj story je važan jer evidencija rada bez liste utrošenih materijala i dijelova nije potpuna. Ova informacija je neophodna za transparentno fakturisanje, analizu troškova po intervenciji i upravljanje zalihama.
+Prioritet:
+Srednji
+Pretpostavke i otvorena pitanja:
+Pretpostavka: Pretpostavlja se da je forma za evidentiranje rada već implementirana (US-17).
+Otvorena pitanja: Da li postoji predefinisana lista materijala ili serviser slobodno unosi naziv? Da li se vodi evidencija zaliha?
+Veze sa drugim storyjima:
+Zavisi od storyja za evidentiranje izvršenog rada (US-17) i povezan je sa storyjem za pregled evidentiranog izvršenog rada (US-24).
+Acceptance Criteria:
+
+AC1: Dodavanje stavke materijala
+
+GIVEN serviser evidentira rad na intervenciji
+WHEN odabere opciju za dodavanje materijala i unese naziv, količinu i jedinicu mjere
+THEN sistem dodaje stavku materijala uz evidenciju rada
+
+
+AC2: Obaveznost sva tri polja
+
+GIVEN serviser dodaje stavku materijala
+WHEN jedno ili više od tri polja (naziv, količina, jedinica mjere) ostane prazno
+THEN sistem ne sprema stavku i prikazuje validacijsku poruku za nepopunjena polja
+
+
+AC3: Dodavanje više stavki
+
+GIVEN serviser evidentira rad s više korištenih materijala
+WHEN dodaje više stavki materijala
+THEN sistem prihvata i sprema sve stavke vezane za jednu evidenciju
+
+
+AC4: Vidljivost dispečeru
+
+GIVEN serviser je uspješno evidentirao rad s materijalima
+WHEN dispečer otvori pregled evidentiranog rada te intervencije
+THEN sistem prikazuje listu svih evidentiranih materijala uz ostale podatke evidencije
+
+
+AC5: Nepromjenjivost nakon zatvaranja
+
+GIVEN intervencija je zatvorena
+WHEN korisnik pokuša izmijeniti ili dodati stavke materijala
+THEN sistem ne dozvoljava izmjenu — evidencija materijala je zaključana zajedno s ostatkom evidencije
+
+---
+US-47 — Praćenje intervencije nije riješene iz prve
+Opis:
+Kao dispečer, želim vidjeti koliko puta je intervencija vraćana ili označena kao nije riješena, kako bih identificirao problematične slučajeve koji zahtijevaju posebnu pažnju ili promjenu pristupa.
+Poslovna vrijednost:
+Ovaj story je važan jer intervencija koja se ponavlja više puta ukazuje na sistemski problem — bilo u opisu kvara, odabiru servisera, dostupnosti dijelova ili složenosti problema. Praćenje ponovnih ciklusa daje dispečeru i upravljačku informaciju za bolje planiranje i alokaciju resursa.
+Prioritet:
+Srednji
+Pretpostavke i otvorena pitanja:
+Pretpostavka: Pretpostavlja se da su implementirane funkcionalnosti vraćanja zadatka (US-29) i označavanja kao nije riješena (US-40).
+Otvorena pitanja: Da li se broj ciklusa resetuje nakon uspješnog zatvaranja ili ostaje trajno vidljiv u historiji?
+Veze sa drugim storyjima:
+Zavisi od storyja za vraćanje zadatka na ponovnu dodjelu (US-29) i označavanje intervencije kao nije riješena (US-40).
+Acceptance Criteria:
+
+AC1: Automatsko brojanje ciklusa
+
+GIVEN serviser vrati zadatak (US-29) ili označi intervenciju kao nije riješena (US-40)
+WHEN sistem obradi akciju
+THEN brojač ponovnih ciklusa za tu intervenciju se automatski povećava za jedan
+
+
+AC2: Vidljivost brojača dispečeru
+
+GIVEN intervencija ima evidentirane ponovne cikluse
+WHEN dispečer pregleda listu intervencija ili detalj intervencije
+THEN sistem prikazuje broj ponovnih ciklusa kao jasno vidljivi badge
+
+
+AC3: Automatsko ažuriranje
+
+GIVEN novi ciklus je evidentiran
+WHEN dispečer osviježi prikaz
+THEN badge prikazuje ažurirani broj ciklusa
+
+
+AC4: Filtriranje po broju ciklusa
+
+GIVEN dispečer želi identificirati problematične intervencije
+WHEN primijeni filter za intervencije s više od jednog ciklusa
+THEN sistem prikazuje samo intervencije čiji broj ponovnih ciklusa prelazi odabrani prag
+
+---
+
 # Raspodjela zadataka po sprintovima i sprint ciljevi:
 
 Ovaj plan je organizovan tako da se razvoj sistema odvija **postepeno, smisleno i zavisno od blokatora**, pri čemu se u ranijim sprintovima prioritet daje **happy path-u**, a u kasnijim sprintovima se uvode **alternativni putevi** i dodatne funkcionalnosti.
