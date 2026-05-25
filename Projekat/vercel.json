@@ -6,7 +6,7 @@
     },
     {
       "path": "/api/cron/sla-eskalacija",
-      "schedule": "0 * * * *"
+      "schedule": "0 6 * * *"
     }
   ]
 }
