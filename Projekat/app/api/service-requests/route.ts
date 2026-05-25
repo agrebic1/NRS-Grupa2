@@ -9,6 +9,10 @@ import { izracunajUrgency, URGENCY_SCORE_MAKS } from '@/lib/servisirane/urgency'
 import type { TriageOdgovori } from '@/domain/types/servisirane';
 import { serializujKategoriju, validnaKombinacijaKategorije } from '@/lib/servisirane/kategorije';
 import { dodijeliKorisnickeBrojeveZahtjeva } from '@/lib/servisirane/korisnickiBrojZahtjeva';
+import {
+  notifKorisnikusZahtjevPrimljen,
+  notifUposleniciNoviZahtjev,
+} from '@/lib/servisirane/notifikacijeHelper';
 import { checkRateLimit } from '@/lib/rateLimiter';
 import { z } from 'zod';
 
@@ -309,6 +313,16 @@ export async function POST(request: Request) {
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
     if (data?.id) {
+      const kategorijaLabel =
+        (data.category as string | null) ??
+        resolvedCategory?.category ??
+        category ??
+        'Servisni zahtjev';
+
+      await notifKorisnikusZahtjevPrimljen(db, user.id, data.id);
+      await notifUposleniciNoviZahtjev(db, data.id, kategorijaLabel);
+
+      // Zadržano: realtime toast na dispečerskom dashboardu
       const { data: uposlenici } = await db
         .from('uposlenici')
         .select('id_uposlenika, uloga:uloga(naziv)');

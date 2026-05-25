@@ -9,7 +9,7 @@ import {
   FileText, History, RefreshCw, ChevronRight,
   AlertTriangle, Radio, Navigation, Shield, User, Headphones, Users,
   ClipboardList, Activity, Wrench, RotateCcw, X,
-  Image as ImageIcon, ExternalLink,
+  Image as ImageIcon, ExternalLink, Trash2,
 } from 'lucide-react';
 import { AppShell } from '@/components/layout/AppShell';
 import { Button } from '@/components/ui/Button';
@@ -26,6 +26,8 @@ import type { ServisniZahtjev, WorkEvidence, InterventionActivity } from '@/doma
 import { labelKategorije } from '@/lib/servisirane/kategorije';
 import { prioritetBoja, statusBoja, statusOznaka } from '@/lib/servisirane/statusBoja';
 import { fmtSat, fmtDatumKratki } from '@/lib/format/datumi';
+
+type SlikaIntervencije = { id: number; image_url: string };
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -559,7 +561,8 @@ export default function ServiserIntervencijaDetaljiPage() {
   const [evidencije, setEvidencije] = useState<WorkEvidence[]>([]);
   const [aktivnosti, setAktivnosti] = useState<InterventionActivity[]>([]);
   const [tim,        setTim]        = useState<Array<{ serviser_id: string; serviser?: { ime: string; prezime: string } | null }>>([]);
-  const [slike,      setSlike]      = useState<string[]>([]);
+  const [slike,      setSlike]      = useState<SlikaIntervencije[]>([]);
+  const [brisanjeSlikaId, setBrisanjeSlikaId] = useState<number | null>(null);
   const [ucitava,    setUcitava]    = useState(true);
   const [greska,     setGreska]     = useState<string | null>(null);
   const [pokaziEvid,           setPokaziEvid]           = useState(false);
@@ -572,9 +575,11 @@ export default function ServiserIntervencijaDetaljiPage() {
   const [checklistOznaceni,  setChecklistOznaceni]  = useState<boolean[]>(Array(6).fill(false));
   const [checklistHighlight, setChecklistHighlight] = useState(false);
   const checklistRef = useRef<HTMLDivElement>(null);
+  const checklistStorageKey = `serviser-checklist-${id}`;
 
-  async function ucitaj() {
-    setUcitava(true); setGreska(null);
+  async function ucitaj(opts?: { silent?: boolean }) {
+    if (!opts?.silent) setUcitava(true);
+    setGreska(null);
     try {
       const [intR, timR, slikeR] = await Promise.all([
         fetch(`/api/serviser/intervencije/${id}`, { cache: 'no-store' }),
@@ -592,15 +597,55 @@ export default function ServiserIntervencijaDetaljiPage() {
       }
       if (slikeR.ok) {
         const slikeD = await slikeR.json();
-        setSlike((slikeD.slike ?? []).map((s: { image_url: string }) => s.image_url));
+        setSlike(
+          (slikeD.slike ?? []).map((s: { id: number; image_url: string }) => ({
+            id: s.id,
+            image_url: s.image_url,
+          })),
+        );
       }
     } catch (e) {
       setGreska(e instanceof Error ? e.message : 'Greška pri učitavanju.');
     } finally { setUcitava(false); }
   }
 
+  function dodajSliku(slika: SlikaIntervencije) {
+    setSlike((prev) => (prev.some((s) => s.id === slika.id) ? prev : [...prev, slika]));
+  }
+
+  async function obrisiSliku(slikaId: number) {
+    setBrisanjeSlikaId(slikaId);
+    try {
+      const r = await fetch(`/api/slike?id=${slikaId}`, { method: 'DELETE' });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error ?? 'Greška pri brisanju slike.');
+      setSlike((prev) => prev.filter((s) => s.id !== slikaId));
+    } catch (e) {
+      setGreska(e instanceof Error ? e.message : 'Greška pri brisanju slike.');
+    } finally {
+      setBrisanjeSlikaId(null);
+    }
+  }
+
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { ucitaj(); }, [id]);
+
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem(checklistStorageKey);
+      if (!saved) return;
+      const parsed = JSON.parse(saved) as unknown;
+      if (Array.isArray(parsed) && parsed.length === 6 && parsed.every((v) => typeof v === 'boolean')) {
+        setChecklistOznaceni(parsed);
+      }
+    } catch { /* ignorisi neispravan cache */ }
+  }, [checklistStorageKey]);
+
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(checklistStorageKey, JSON.stringify(checklistOznaceni));
+    } catch { /* quota / privatni mod */ }
+  }, [checklistOznaceni, checklistStorageKey]);
 
   useEffect(() => {
     if (scrollToZavrsi && !ucitava && evidencije.length > 0 && zavrsiRef.current) {
@@ -851,9 +896,9 @@ export default function ServiserIntervencijaDetaljiPage() {
               </div>
               <IntervencijaChecklist
                 status={zahtjev.status}
+                oznaceni={checklistOznaceni}
                 onPromjena={(oznaceni) => {
                   setChecklistOznaceni(oznaceni);
-                  // Kad korisnik počne označavati, resetuj highlight
                   if (oznaceni.some(Boolean)) setChecklistHighlight(false);
                 }}
                 highlightNepopunjena={checklistHighlight}
@@ -877,22 +922,41 @@ export default function ServiserIntervencijaDetaljiPage() {
 
               {slike.length > 0 && (
                 <div className="mb-4 grid grid-cols-3 gap-2">
-                  {slike.map((url, i) => (
-                    <a
-                      key={i}
-                      href={url}
-                      target="_blank"
-                      rel="noopener noreferrer"
+                  {slike.map((slika, i) => (
+                    <div
+                      key={slika.id}
                       className="group relative aspect-square overflow-hidden rounded-xl border transition-all hover:shadow-md"
                       style={{ borderColor: 'rgb(var(--first-quaternary-rgb)/0.3)' }}
                     >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={url} alt={`Slika ${i + 1}`}
-                        className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105" />
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-all group-hover:bg-black/20">
-                        <ExternalLink className="h-4 w-4 text-white opacity-0 transition-opacity group-hover:opacity-100" />
-                      </div>
-                    </a>
+                      <a
+                        href={slika.image_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block h-full w-full"
+                      >
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={slika.image_url} alt={`Slika ${i + 1}`}
+                          className="h-full w-full object-cover transition-transform duration-200 group-hover:scale-105" />
+                        <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-all group-hover:bg-black/20">
+                          <ExternalLink className="h-4 w-4 text-white opacity-0 transition-opacity group-hover:opacity-100" />
+                        </div>
+                      </a>
+                      {zahtjev.status === 'u_izvrsenju' && (
+                        <button
+                          type="button"
+                          title="Obriši sliku"
+                          disabled={brisanjeSlikaId === slika.id}
+                          onClick={() => void obrisiSliku(slika.id)}
+                          className="absolute right-1.5 top-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-black/65 text-white opacity-0 transition-opacity hover:bg-red-600 group-hover:opacity-100 disabled:opacity-50"
+                        >
+                          {brisanjeSlikaId === slika.id ? (
+                            <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                          ) : (
+                            <Trash2 className="h-3.5 w-3.5" />
+                          )}
+                        </button>
+                      )}
+                    </div>
                   ))}
                 </div>
               )}
@@ -900,7 +964,8 @@ export default function ServiserIntervencijaDetaljiPage() {
               {zahtjev.status === 'u_izvrsenju' && (
                 <ImageUploader
                   zahtjevId={zahtjev.id}
-                  onUspjeh={() => void ucitaj()}
+                  onUspjeh={dodajSliku}
+                  mozeBrisati
                   maxFajlova={10}
                 />
               )}

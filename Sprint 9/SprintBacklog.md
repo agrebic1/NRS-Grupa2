@@ -49,24 +49,24 @@ Sprint 9 nadograđuje funkcionalan tok iz Sprinta 8. Kritične zavisnosti:
 # Sprint Backlog
 
 
-| ID    | User Story                                 | Prioritet | Procjena | Status   | Zadaci                                                    | Acceptance Criteria                                       |
-| ----- | ------------------------------------------ | --------- | -------- | -------- | --------------------------------------------------------- | --------------------------------------------------------- |
-| US-28 | Promjena izvršioca intervencije            | Srednji   | 8        | Završeno | PATCH `promijeni_izvrsioca`, modal, audit, notifikacije   | AC1–AC4                                                   |
-| US-29 | Vraćanje zadatka na ponovnu dodjelu        | Srednji   | 5        | Završeno | PATCH `vrati_na_ponovnu_dodjelu`, US-47 inkrement         | AC1–AC4                                                   |
-| US-40 | Označavanje intervencije kao nije riješena | Srednji   | 3        | Završeno | PATCH `oznaci_nije_rijesen`, US-47 inkrement              | AC1–AC6                                                   |
-| US-38 | Obavezno trajanje pri evidentiranju rada   | Visok     | 3        | Završeno | Zod + `EvidencijaRadaModal`                               | AC1–AC5                                                   |
-| US-39 | Audit trail staro/novo u historiji         | Srednji   | 5        | Završeno | `old_value`/`new_value` u handlerima + timeline           | AC1–AC5                                                   |
-| US-41 | SLA praćenje                               | Srednji   | 5        | Završeno | `slaPravila.ts`, badge, KPI                               | AC1–AC6                                                   |
-| US-42 | Izvještaj odziva servisera                 | Nizak     | 5        | Završeno | `izvjestajiOdziva.ts`, stranica odziva                    | AC1–AC5                                                   |
-| US-43 | Upload fotografije intervencije            | Nizak     | 3        | Završeno | Storage + galerija                                        | AC1–AC6                                                   |
-| US-44 | Tabelarni pregled historije aktivnosti     | Srednji   | 3        | Završeno | `AktivnostiTabela`, toggle u `HistorijaAktivnostiSekcija` | AC1–AC4: tabela hronološki, kolone polje/stara/nova/autor |
-| US-45 | SLA eskalacije                             | Srednji   | 5        | Završeno | `slaEskalacije.ts`, notifikacije dispečeru, audit         | AC1–AC4: eskalacija prekoračenog SLA, cooldown            |
-| US-46 | Evidencija materijala i dijelova           | Srednji   | 5        | Završeno | `stavke_materijala` JSONB, modal stavke                   | AC1–AC5: naziv/količina/jedinica                          |
-| US-47 | Praćenje nije riješeno iz prve             | Srednji   | 3        | Završeno | `broj_ponovnih_ciklusa`, `PonovniCiklusBadge`             | AC1–AC4: brojač i vidljivost dispečeru                    |
-| US-19 | Pregled korisničkih naloga                 | Srednji   | 3        | Završeno | `admin/korisnici` — lista korisnika sa karticama, badge statusa, filter po tipu | AC iz US-19 |
-| US-20 | Promjena korisničke uloge                  | Srednji   | 3        | Završeno | PATCH `promijeni_ulogu`, `PromijeniUloguModal`, audit log | AC iz US-20 |
-| US-21 | Deaktivacija korisničkog naloga            | Srednji   | 3        | Završeno | PATCH `suspenduj`/`aktiviraj`, `SuspenzijaModal`, ban_duration, audit log | AC iz US-21 |
-| US-36 | Uređivanje korisničkog naloga              | Srednji   | 3        | Završeno | PATCH `uredi_podatke`, `/admin/korisnici/[id]/uredi`, ime/prezime/telefon/adresa | AC iz US-36 |
-| US-37 | Sistemske notifikacije                     | Srednji   | 3        | Završeno | `NotifikacijeBell`, polling 30s, grupiranje po danu, mapping svih tipova događaja | AC1–AC6 |
+| ID    | User Story                                 | Prioritet | Procjena | Status   | Zadaci                                                                            | Acceptance Criteria                                       |
+| ----- | ------------------------------------------ | --------- | -------- | -------- | --------------------------------------------------------------------------------- | --------------------------------------------------------- |
+| US-28 | Promjena izvršioca intervencije            | Srednji   | 8        | Završeno | PATCH `promijeni_izvrsioca`, modal, audit, notifikacije                           | AC1–AC4                                                   |
+| US-29 | Vraćanje zadatka na ponovnu dodjelu        | Srednji   | 5        | Završeno | PATCH `vrati_na_ponovnu_dodjelu`, US-47 inkrement                                 | AC1–AC4                                                   |
+| US-40 | Označavanje intervencije kao nije riješena | Srednji   | 3        | Završeno | PATCH `oznaci_nije_rijesen`, US-47 inkrement                                      | AC1–AC6                                                   |
+| US-38 | Obavezno trajanje pri evidentiranju rada   | Visok     | 3        | Završeno | Zod + `EvidencijaRadaModal`                                                       | AC1–AC5                                                   |
+| US-39 | Audit trail staro/novo u historiji         | Srednji   | 5        | Završeno | `old_value`/`new_value` u handlerima + timeline                                   | AC1–AC5                                                   |
+| US-41 | SLA praćenje                               | Srednji   | 5        | Završeno | `slaPravila.ts`, badge, KPI                                                       | AC1–AC6                                                   |
+| US-42 | Izvještaj odziva servisera                 | Nizak     | 5        | Završeno | `izvjestajiOdziva.ts`, stranica odziva                                            | AC1–AC5                                                   |
+| US-43 | Upload fotografije intervencije            | Nizak     | 3        | Završeno | Storage + galerija                                                                | AC1–AC6                                                   |
+| US-44 | Tabelarni pregled historije aktivnosti     | Srednji   | 3        | Završeno | `AktivnostiTabela`, toggle u `HistorijaAktivnostiSekcija`                         | AC1–AC4: tabela hronološki, kolone polje/stara/nova/autor |
+| US-45 | SLA eskalacije                             | Srednji   | 5        | Završeno | `slaEskalacije.ts`, notifikacije dispečeru, audit                                 | AC1–AC4: eskalacija prekoračenog SLA, cooldown            |
+| US-46 | Evidencija materijala i dijelova           | Srednji   | 5        | Završeno | `stavke_materijala` JSONB, modal stavke                                           | AC1–AC5: naziv/količina/jedinica                          |
+| US-47 | Praćenje nije riješeno iz prve             | Srednji   | 3        | Završeno | `broj_ponovnih_ciklusa`, `PonovniCiklusBadge`                                     | AC1–AC4: brojač i vidljivost dispečeru                    |
+| US-19 | Pregled korisničkih naloga                 | Srednji   | 3        | Završeno | `admin/korisnici` — lista korisnika sa karticama, badge statusa, filter po tipu   | AC iz US-19                                               |
+| US-20 | Promjena korisničke uloge                  | Srednji   | 3        | Završeno | PATCH `promijeni_ulogu`, `PromijeniUloguModal`, audit log                         | AC iz US-20                                               |
+| US-21 | Deaktivacija korisničkog naloga            | Srednji   | 3        | Završeno | PATCH `suspenduj`/`aktiviraj`, `SuspenzijaModal`, ban_duration, audit log         | AC iz US-21                                               |
+| US-36 | Uređivanje korisničkog naloga              | Srednji   | 3        | Završeno | PATCH `uredi_podatke`, `/admin/korisnici/[id]/uredi`, ime/prezime/telefon/adresa  | AC iz US-36                                               |
+| US-37 | Sistemske notifikacije                     | Srednji   | 3        | Završeno | `NotifikacijeBell`, polling 30s, grupiranje po danu, mapping svih tipova događaja | AC1–AC6                                                   |
 
 

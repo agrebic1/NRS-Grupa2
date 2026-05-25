@@ -3,12 +3,19 @@
 import { useRef, useState, useCallback } from 'react';
 import { Upload, X, Image as ImageIcon, AlertTriangle, ExternalLink } from 'lucide-react';
 
+export interface SlikaUploadRezultat {
+  id:        number;
+  image_url: string;
+}
+
 interface ImageUploaderProps {
   zahtjevId:    number;
   evidencijaId?: number;
-  onUspjeh?:    (imageUrl: string) => void;
+  onUspjeh?:    (slika: SlikaUploadRezultat) => void;
   maxFajlova?:  number;
   disabled?:    boolean;
+  /** Dozvoljava brisanje uploadovanih slika s servera (serviser na terenu). */
+  mozeBrisati?: boolean;
 }
 
 interface SlikaPreview {
@@ -17,6 +24,7 @@ interface SlikaPreview {
   dataUrl: string;
   status:  'ceka' | 'upload' | 'ok' | 'greska';
   url?:    string;
+  dbId?:   number;
   greska?: string;
 }
 
@@ -35,6 +43,7 @@ export function ImageUploader({
   onUspjeh,
   maxFajlova = 10,
   disabled   = false,
+  mozeBrisati = false,
 }: ImageUploaderProps) {
   const [slike,     setSlike]     = useState<SlikaPreview[]>([]);
   const [dragging,  setDragging]  = useState(false);
@@ -82,11 +91,14 @@ export function ImageUploader({
       const r = await fetch('/api/slike', { method: 'POST', body: formData });
       const d = await r.json();
       if (!r.ok) throw new Error(d.error ?? 'Greška pri uploadu.');
-      const url = d.slika.image_url as string;
+      const dbId = Number(d.slika.id);
+      const url  = d.slika.image_url as string;
       setSlike((prev) =>
-        prev.map((s) => (s.id === slika.id ? { ...s, status: 'ok', url } : s))
+        prev.map((s) => (s.id === slika.id ? { ...s, status: 'ok', url, dbId } : s))
       );
-      onUspjeh?.(url);
+      onUspjeh?.({ id: dbId, image_url: url });
+      // Prikaz u roditeljskoj galeriji; ukloni duplikat iz lokalnog previewa
+      setSlike((prev) => prev.filter((s) => s.id !== slika.id));
     } catch (e) {
       setSlike((prev) =>
         prev.map((s) =>
@@ -98,7 +110,20 @@ export function ImageUploader({
     }
   }
 
-  function ukloni(id: string) {
+  async function ukloni(id: string) {
+    const slika = slike.find((s) => s.id === id);
+    if (!slika) return;
+
+    if (slika.status === 'ok' && slika.dbId && mozeBrisati) {
+      try {
+        const r = await fetch(`/api/slike?id=${slika.dbId}`, { method: 'DELETE' });
+        const d = await r.json();
+        if (!r.ok) throw new Error(d.error ?? 'Greška pri brisanju.');
+      } catch {
+        return;
+      }
+    }
+
     setSlike((prev) => prev.filter((s) => s.id !== id));
   }
 
@@ -189,11 +214,11 @@ export function ImageUploader({
                 </div>
               )}
 
-              {/* Ukloni */}
-              {!disabled && (
+              {/* Ukloni (lokalni preview ili upload na serveru) */}
+              {!disabled && (s.status !== 'ok' || mozeBrisati) && (
                 <button
                   type="button"
-                  onClick={(e) => { e.stopPropagation(); ukloni(s.id); }}
+                  onClick={(e) => { e.stopPropagation(); void ukloni(s.id); }}
                   className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-black/60 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-red-600"
                 >
                   <X className="h-3 w-3" />

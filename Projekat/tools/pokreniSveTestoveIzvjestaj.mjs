@@ -117,10 +117,10 @@ const sprint8AddedTests = {
 };
 
 const sprint9AddedTests = {
-  automatic: 18,
-  manual:    144,
+  automatic: 61,
+  manual:    80,
   manualId:  'SB-09-36',
-  note:      'Automatski zbir 286. Manuelno 144 TC: korisnik 24, dispecer 44, serviser 40, admin 18, E2E 18.',
+  note:      'Jest zbir 286 (225→286). E2E 23/23. Manuelno 80 TC (TC-S9-01–80) iz QA-Sprint9NRS.xlsx.',
 };
 
 const results = [];

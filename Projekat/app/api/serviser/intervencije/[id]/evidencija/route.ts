@@ -103,7 +103,7 @@ export async function POST(
       .from('intervention_activities')
       .select('autor_id')
       .eq('zahtjev_id', zahtjevId)
-      .eq('tip', 'dodjela')
+      .in('tip', ['dodjela', 'promjena_izvrsioca'])
       .order('created_at', { ascending: false })
       .limit(1)
       .maybeSingle();
