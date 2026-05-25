@@ -701,7 +701,7 @@ export default function ServiserIntervencijaDetaljiPage() {
           <ChevronRight className="h-3.5 w-3.5" />
           <span className="font-semibold" style={{ color: 'var(--first-octonary)' }}>#{id}</span>
         </div>
-        <button type="button" onClick={ucitaj}
+        <button type="button" onClick={() => void ucitaj()}
           className="flex h-8 w-8 items-center justify-center rounded-lg transition-all hover:bg-black/[0.05]">
           <RefreshCw className="h-4 w-4" style={{ color: 'var(--first-nonary)' }} />
         </button>
