@@ -62,10 +62,10 @@ Sprint 9 nadograđuje funkcionalan tok iz Sprinta 8. Kritične zavisnosti:
 | US-45 | SLA eskalacije                             | Srednji   | 5        | Završeno | `slaEskalacije.ts`, notifikacije dispečeru, audit         | AC1–AC4: eskalacija prekoračenog SLA, cooldown            |
 | US-46 | Evidencija materijala i dijelova           | Srednji   | 5        | Završeno | `stavke_materijala` JSONB, modal stavke                   | AC1–AC5: naziv/količina/jedinica                          |
 | US-47 | Praćenje nije riješeno iz prve             | Srednji   | 3        | Završeno | `broj_ponovnih_ciklusa`, `PonovniCiklusBadge`             | AC1–AC4: brojač i vidljivost dispečeru                    |
-| US-19 | Pregled korisničkih naloga                 | Srednji   | 3        | U toku   | `admin/korisnici`                                         | AC iz US-19                                               |
-| US-20 | Promjena korisničke uloge                  | Srednji   | 3        | U toku   | PATCH `promijeni_ulogu`                                   | AC iz US-20                                               |
-| US-21 | Deaktivacija korisničkog naloga            | Srednji   | 3        | U toku   | PATCH `suspenduj`                                         | AC iz US-21                                               |
-| US-36 | Uređivanje korisničkog naloga              | Srednji   | 3        | U toku   | `/profil`, admin uredi                                    | AC iz US-36                                               |
-| US-37 | Sistemske notifikacije                     | Srednji   | 3        | U toku   | `NotifikacijeBell`, mapping događaja                      | AC1–AC6                                                   |
+| US-19 | Pregled korisničkih naloga                 | Srednji   | 3        | Završeno | `admin/korisnici` — lista korisnika sa karticama, badge statusa, filter po tipu | AC iz US-19 |
+| US-20 | Promjena korisničke uloge                  | Srednji   | 3        | Završeno | PATCH `promijeni_ulogu`, `PromijeniUloguModal`, audit log | AC iz US-20 |
+| US-21 | Deaktivacija korisničkog naloga            | Srednji   | 3        | Završeno | PATCH `suspenduj`/`aktiviraj`, `SuspenzijaModal`, ban_duration, audit log | AC iz US-21 |
+| US-36 | Uređivanje korisničkog naloga              | Srednji   | 3        | Završeno | PATCH `uredi_podatke`, `/admin/korisnici/[id]/uredi`, ime/prezime/telefon/adresa | AC iz US-36 |
+| US-37 | Sistemske notifikacije                     | Srednji   | 3        | Završeno | `NotifikacijeBell`, polling 30s, grupiranje po danu, mapping svih tipova događaja | AC1–AC6 |
 
 
