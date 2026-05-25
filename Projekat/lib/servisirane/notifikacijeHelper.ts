@@ -1,9 +1,56 @@
 // ─── Helper za kreiranje in-app notifikacija ──────────────────────────────────
 //
 // Sve insert operacije u tabelu `notifikacije` idu kroz ove funkcije.
-// Koristiti admin/service-role klijent da se zaobiđu RLS politike pri insertu.
+// Koristi service-role klijent (zaobilazi RLS) — korisnička sesija ne smije
+// insertovati tuđe notifikacije.
+
+import { createAdminClient } from '@/lib/supabase/admin';
 
 type AnyDB = any;
+
+function nazivUloge(raw: unknown): string {
+  if (Array.isArray(raw)) return String((raw[0] as { naziv?: string })?.naziv ?? '');
+  return String((raw as { naziv?: string } | null)?.naziv ?? '');
+}
+
+function normalizujUlogu(naziv: string): string {
+  return naziv
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim();
+}
+
+/** Dohvata auth ID uposlenika čija uloga odgovara jednoj od traženih. */
+export async function dohvatiUposlenikIdsPoUlogama(
+  db: AnyDB,
+  uloge: string[],
+): Promise<string[]> {
+  const cilj = new Set(uloge.map(normalizujUlogu));
+  const { data, error } = await db
+    .from('uposlenici')
+    .select('id_uposlenika, uloga:uloga(naziv)');
+
+  if (error) {
+    console.error('[notifikacije] dohvat uposlenika:', error.message);
+    return [];
+  }
+
+  return (data ?? [])
+    .filter((u: { id_uposlenika: string; uloga?: unknown }) =>
+      cilj.has(normalizujUlogu(nazivUloge(u.uloga))),
+    )
+    .map((u: { id_uposlenika: string }) => u.id_uposlenika);
+}
+
+function dbZaInsert(_db?: AnyDB): AnyDB {
+  try {
+    return createAdminClient() as AnyDB;
+  } catch (e) {
+    console.error('[notifikacije] admin klijent nedostupan:', e);
+    return _db as AnyDB;
+  }
+}
 
 export interface NotifikacijaParams {
   korisnik_id:          string;
@@ -33,7 +80,11 @@ export async function kreirajNotifikaciju(
   db:     AnyDB,
   params: NotifikacijaParams
 ): Promise<void> {
-  await db.from('notifikacije').insert(toRow(params));
+  const admin = dbZaInsert(db);
+  const { error } = await admin.from('notifikacije').insert(toRow(params));
+  if (error) {
+    console.error('[notifikacije] insert:', error.message, params.tip, params.korisnik_id);
+  }
 }
 
 export async function kreirajViseNotifikacija(
@@ -41,7 +92,11 @@ export async function kreirajViseNotifikacija(
   params: NotifikacijaParams[]
 ): Promise<void> {
   if (!params.length) return;
-  await db.from('notifikacije').insert(params.map(toRow));
+  const admin = dbZaInsert(db);
+  const { error } = await admin.from('notifikacije').insert(params.map(toRow));
+  if (error) {
+    console.error('[notifikacije] bulk insert:', error.message, params.length);
+  }
 }
 
 // ─── Serviser notifikacije ────────────────────────────────────────────────────
@@ -455,29 +510,41 @@ export function notifNijeRijesen(
 
 // ─── Bulk helper: notify all dispatchers ─────────────────────────────────────
 
+/** Dispečeri + administratori — novi korisnički zahtjev (NotifikacijeBell). */
+export async function notifUposleniciNoviZahtjev(
+  db:         AnyDB,
+  zahtjev_id: number,
+  kategorija: string
+): Promise<void> {
+  const ids = await dohvatiUposlenikIdsPoUlogama(db, [
+    'Dispečer',
+    'dispečer',
+    'dispecer',
+    'Administrator',
+    'administrator',
+    'admin',
+  ]);
+
+  if (!ids.length) return;
+
+  await kreirajViseNotifikacija(
+    db,
+    ids.map((id) => ({
+      korisnik_id:     id,
+      uloga_korisnika: 'Dispečer',
+      tip:             'novi_zahtjev',
+      naslov:          'Novi servisni zahtjev',
+      poruka:          `Pristigao je novi zahtjev za "${kategorija}" (#${zahtjev_id}). Pregledajte i obradite.`,
+      zahtjev_id,
+    })),
+  );
+}
+
+/** @deprecated Koristiti notifUposleniciNoviZahtjev */
 export async function notifSviDispeceruNoviZahtjev(
   db:         AnyDB,
   zahtjev_id: number,
   kategorija: string
 ): Promise<void> {
-  const { data: dispeceri } = await db
-    .from('uposlenici')
-    .select('id_uposlenika, uloga:uloga(naziv)')
-    .filter('uloga.naziv', 'eq', 'Dispečer');
-  const ids: string[] = (dispeceri ?? [])
-    .filter((u: any) => {
-      const naziv = Array.isArray(u.uloga) ? u.uloga[0]?.naziv : u.uloga?.naziv;
-      return naziv === 'Dispečer';
-    })
-    .map((u: any) => u.id_uposlenika as string);
-
-  if (!ids.length) return;
-  await kreirajViseNotifikacija(db, ids.map((id) => ({
-    korisnik_id:     id,
-    uloga_korisnika: 'Dispečer',
-    tip:             'novi_zahtjev',
-    naslov:          'Novi servisni zahtjev',
-    poruka:          `Pristigao je novi zahtjev za "${kategorija}" (#${zahtjev_id}). Pregledajte i obradite.`,
-    zahtjev_id,
-  })));
+  return notifUposleniciNoviZahtjev(db, zahtjev_id, kategorija);
 }

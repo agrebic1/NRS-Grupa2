@@ -133,12 +133,39 @@ export function NotifikacijeBell({
   }, [otvoren]);
 
   async function označiSveKaoProcitano() {
+    if (neprocitane === 0) return;
     setUcitava(true);
     try {
-      await fetch('/api/notifikacije', { method: 'PATCH' });
+      const r = await fetch('/api/notifikacije', { method: 'PATCH' });
+      if (!r.ok) return;
       setNotifikacije((prev) => prev.map((n) => ({ ...n, procitano: true })));
       setNeprocitane(0);
     } finally { setUcitava(false); }
+  }
+
+  async function otvoriPanel() {
+    const otvori = !otvoren;
+    setOtvoren(otvori);
+    if (!otvori) return;
+
+    try {
+      const r = await fetch('/api/notifikacije?limit=30', { cache: 'no-store' });
+      if (!r.ok) return;
+      const d = await r.json();
+      const lista = (d.notifikacije ?? []) as Notifikacija[];
+      const cnt   = d.neprocitane ?? 0;
+      setNotifikacije(lista);
+      setNeprocitane(cnt);
+
+      // Pri otvaranju panela označi nepročitane (lista ostaje vidljiva, samo stil „pročitano“)
+      if (cnt > 0) {
+        const patch = await fetch('/api/notifikacije', { method: 'PATCH' });
+        if (patch.ok) {
+          setNotifikacije(lista.map((n) => ({ ...n, procitano: true })));
+          setNeprocitane(0);
+        }
+      }
+    } catch { /* silent */ }
   }
 
   async function klikNaNotifikaciju(n: Notifikacija) {
@@ -173,7 +200,7 @@ export function NotifikacijeBell({
       {/* ── Bell button ───────────────────────────────────────────────── */}
       <button
         type="button"
-        onClick={() => { setOtvoren((v) => !v); if (!otvoren) fetchNotifikacije(); }}
+        onClick={() => void otvoriPanel()}
         className="relative flex h-8 w-8 items-center justify-center rounded-lg transition-colors hover:bg-black/[0.06]"
         style={{ color: neprocitane > 0 ? akcentBoja : 'var(--first-nonary)' }}
         aria-label="Obavještenja"
@@ -259,7 +286,7 @@ export function NotifikacijeBell({
                     <div className="sticky top-0 px-4 py-1.5"
                       style={{ backgroundColor: 'var(--first-tertiary)', borderBottom: '1px solid rgb(var(--first-quaternary-rgb)/0.15)' }}>
                       <p className="text-[10px] font-bold uppercase tracking-widest"
-                        style={{ color: 'var(--first-quinary)' }}>
+                        style={{ color: 'rgb(var(--first-nonary-rgb) / 0.55)' }}>
                         {GRUPA_LABEL[g]}
                       </p>
                     </div>
@@ -268,23 +295,38 @@ export function NotifikacijeBell({
                       const cfg    = TIP_CFG[n.tip] ?? FALLBACK_CFG;
                       const Ikona  = cfg.Ikona;
                       const href   = getHref(n, uloga);
+                      const procitano = n.procitano;
+                      const bojaNaslova = procitano
+                        ? 'rgb(var(--first-nonary-rgb) / 0.72)'
+                        : 'var(--first-octonary)';
+                      const bojaTeksta = procitano
+                        ? 'rgb(var(--first-nonary-rgb) / 0.58)'
+                        : 'var(--first-nonary)';
+                      const bojaVremena = procitano
+                        ? 'rgb(var(--first-nonary-rgb) / 0.5)'
+                        : 'rgb(var(--first-nonary-rgb) / 0.65)';
                       return (
                         <button
                           key={n.id}
                           type="button"
                           onClick={() => klikNaNotifikaciju(n)}
-                          disabled={!href && n.procitano}
+                          disabled={!href && procitano}
                           className="flex w-full items-start gap-3 px-4 py-3 text-left transition-colors hover:bg-black/[0.04] disabled:cursor-default"
                           style={{
-                            backgroundColor: !n.procitano
-                              ? `color-mix(in srgb, ${cfg.boja} 5%, transparent)`
-                              : 'transparent',
+                            backgroundColor: !procitano
+                              ? `color-mix(in srgb, ${cfg.boja} 8%, var(--first-tertiary))`
+                              : 'rgb(var(--first-quaternary-rgb) / 0.06)',
                             borderBottom: '1px solid rgb(var(--first-quaternary-rgb)/0.12)',
                           }}
                         >
                           {/* Type icon */}
                           <div className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg"
-                            style={{ backgroundColor: `color-mix(in srgb, ${cfg.boja} 12%, transparent)` }}>
+                            style={{
+                              backgroundColor: procitano
+                                ? 'rgb(var(--first-quaternary-rgb) / 0.12)'
+                                : `color-mix(in srgb, ${cfg.boja} 14%, transparent)`,
+                              opacity: procitano ? 0.85 : 1,
+                            }}>
                             <Ikona className="h-3.5 w-3.5" style={{ color: cfg.boja }} />
                           </div>
 
@@ -292,20 +334,20 @@ export function NotifikacijeBell({
                           <div className="min-w-0 flex-1">
                             <div className="flex items-start justify-between gap-2">
                               <p className="text-xs font-bold leading-snug"
-                                style={{ color: n.procitano ? 'var(--first-nonary)' : 'var(--first-octonary)' }}>
+                                style={{ color: bojaNaslova }}>
                                 {n.naslov}
                               </p>
-                              {!n.procitano && (
+                              {!procitano && (
                                 <div className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full"
                                   style={{ backgroundColor: akcentBoja }} />
                               )}
                             </div>
                             <p className="mt-0.5 line-clamp-2 text-[11px] leading-relaxed"
-                              style={{ color: n.procitano ? 'var(--first-quinary)' : 'var(--first-nonary)' }}>
+                              style={{ color: bojaTeksta }}>
                               {n.poruka}
                             </p>
-                            <div className="mt-1 flex items-center gap-1" style={{ color: 'var(--first-quinary)' }}>
-                              <Clock className="h-2.5 w-2.5" />
+                            <div className="mt-1 flex items-center gap-1" style={{ color: bojaVremena }}>
+                              <Clock className="h-2.5 w-2.5 shrink-0" style={{ color: 'inherit' }} />
                               <span className="text-[10px] tabular-nums">{fmtVrijeme(n.created_at)}</span>
                             </div>
                           </div>

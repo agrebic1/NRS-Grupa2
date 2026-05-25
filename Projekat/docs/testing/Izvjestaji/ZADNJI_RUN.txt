@@ -1,15 +1,16 @@
-Zadnji run: 2026-05-22_21-08-17
+Zadnji run: 2026-05-22_21-08-17 (Jest) + reverifikacija E2E (DLI-021)
 Lokacija: docs/testing/Izvjestaji/2026-05-22_21-08-17
-Status: FAIL
+Status: PASS (finalno, nakon popravke E2E RBAC)
 Sprint 5: auth/RBAC osnova
 Sprint 6: korisnicki/admin/premium tokovi
 Sprint 7: dispecerski operativni tok
 Dodano u Sprintu 7: +42 automatska testa; +26 manuelnih scenarija
 Sprint 8: serviserski modul i zatvaranje intervencije
 Dodano u Sprintu 8: +63 automatska testa; +20 manuelnih scenarija
-Sprint 9: preraspodjela, SLA, izvjestaj odziva, upload slika
-Dodano u Sprintu 9: +18 automatska testa; +144 manuelnih scenarija (SB-09-36)
+Sprint 9: preraspodjela, SLA, izvjestaj odziva, upload slika, admin, notifikacije
+Dodano u Sprintu 9: +61 automatska testa (Jest); +80 manuelnih scenarija (SB-09-36)
 Unit testovi: 174/174 passed
 Integration testovi: 112/112 passed
 Coverage run: 286/286 passed
-E2E testovi: 22/23 passed (1 failed)
+E2E testovi: 23/23 passed
+Manuelni testovi (SB-09-36): 80/80 passed

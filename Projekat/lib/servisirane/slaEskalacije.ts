@@ -1,6 +1,6 @@
 import { getSlaStatus } from '@/lib/servisirane/slaPravila';
 import { zabiljeziAktivnost } from '@/lib/servisirane/aktivnostiAudit';
-import { kreirajViseNotifikacija } from '@/lib/servisirane/notifikacijeHelper';
+import { dohvatiUposlenikIdsPoUlogama, kreirajViseNotifikacija } from '@/lib/servisirane/notifikacijeHelper';
 
 type AnyDB = {
   from: (t: string) => {
@@ -46,16 +46,7 @@ export async function obradiSlaEskalacijuZaZahtjev(
     if (Date.now() - zadnja < COOLDOWN_MS) return false;
   }
 
-  const { data: dispeceri } = await (db as any)
-    .from('uposlenici')
-    .select('id_uposlenika, uloga:uloga(naziv)');
-
-  const ids: string[] = (dispeceri ?? [])
-    .filter((u: { uloga?: { naziv?: string } | { naziv?: string }[] }) => {
-      const z = Array.isArray(u.uloga) ? u.uloga[0] : u.uloga;
-      return z?.naziv === 'Dispečer';
-    })
-    .map((u: { id_uposlenika: string }) => u.id_uposlenika);
+  const ids = await dohvatiUposlenikIdsPoUlogama(db as any, ['Dispečer', 'dispečer', 'dispecer']);
 
   if (ids.length) {
     await kreirajViseNotifikacija(db as any, ids.map((id) => ({

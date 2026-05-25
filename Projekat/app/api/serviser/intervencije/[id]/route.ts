@@ -12,6 +12,7 @@ import {
   notifPrihvatanjeZadatka,
   notifOdbijanjeZadatka,
   kreirajViseNotifikacija,
+  dohvatiUposlenikIdsPoUlogama,
   notifVratanjaNaPonovnuDodjelu,
   notifNijeRijesen,
   notifKorisnikusServiserNaPutu,
@@ -170,7 +171,7 @@ export async function PATCH(
         .from('intervention_activities')
         .select('autor_id')
         .eq('zahtjev_id', zahtjevId)
-        .eq('tip', 'dodjela')
+        .in('tip', ['dodjela', 'promjena_izvrsioca'])
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -228,7 +229,7 @@ export async function PATCH(
         .from('intervention_activities')
         .select('autor_id')
         .eq('zahtjev_id', zahtjevId)
-        .eq('tip', 'dodjela')
+        .in('tip', ['dodjela', 'promjena_izvrsioca'])
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -472,15 +473,7 @@ export async function PATCH(
         await notifOdbijanjeZadatka(db, dodjelaAkt.autor_id, zahtjevId, imeOdb, podaci.razlog);
       } else {
         // Fallback: nema zapisa dodjele — obavijesti sve dispečere
-        const { data: sviDisp } = await db
-          .from('uposlenici')
-          .select('id_uposlenika, uloga:uloga(naziv)');
-        const dispIds: string[] = (sviDisp ?? [])
-          .filter((u: any) => {
-            const naziv = Array.isArray(u.uloga) ? u.uloga[0]?.naziv : u.uloga?.naziv;
-            return naziv === 'Dispečer';
-          })
-          .map((u: any) => u.id_uposlenika as string);
+        const dispIds = await dohvatiUposlenikIdsPoUlogama(db, ['Dispečer', 'dispečer', 'dispecer']);
 
         if (dispIds.length > 0) {
           await kreirajViseNotifikacija(db, dispIds.map((id) => ({

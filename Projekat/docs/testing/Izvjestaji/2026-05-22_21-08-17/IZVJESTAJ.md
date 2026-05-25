@@ -3,7 +3,7 @@
 - Pokrenuto: 2026-05-22T19:08:17.228Z
 - Zavrseno: 2026-05-22T19:12:00.321Z
 - Run ID: 2026-05-22_21-08-17
-- Status: FAIL
+- Status: FAIL (inicijalni E2E run; finalno PASS nakon DLI-021)
 
 ## Izvrsene provjere
 
@@ -31,15 +31,15 @@
 
 ## Dodano u Sprintu 9
 
-- Automatski testovi: +18 (Automatski zbir 286. Manuelno 144 TC: korisnik 24, dispecer 44, serviser 40, admin 18, E2E 18.)
-- Manuelni test scenariji: +144 za `SB-09-36` (TC/EXEC u `docs/testing/SB-09-36/`)
+- Automatski testovi: +61 (Jest zbir 286; E2E finalno 23/23 nakon DLI-021.)
+- Manuelni test scenariji: +80 za `SB-09-36` (TC-S9-01–80; TC/EXEC u `docs/testing/SB-09-36/`)
 
 ## Broj pokrenutih testova
 
 - Unit testovi: 174/174 passed
 - Integration testovi: 112/112 passed
 - Coverage run: 286/286 passed
-- E2E testovi: 22/23 passed (1 failed)
+- E2E testovi: 22/23 passed u ovom runu (1 failed); reverifikacija → 23/23 PASS
 
 ## Pokrivenost
 
@@ -55,4 +55,4 @@
 - `e2e.log`
 - `coverage-summary.json` (ako postoji)
 
-Napomena: ovaj folder sadrzi sve sto je testirano u ovom pokretanju.
+Napomena: ovaj folder sadrzi logove inicijalnog pokretanja. Zavrsni Sprint 9 status (automatski + manuelni): v. `Sprint 9/IzvjestajTestiranja.md` i `docs/testing/SB-09-36/`.

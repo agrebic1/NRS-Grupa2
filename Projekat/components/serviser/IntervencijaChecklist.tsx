@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { AlertTriangle, Square, CheckSquare } from 'lucide-react';
 
 // ─── Stavke checkliste ────────────────────────────────────────────────────────
@@ -111,6 +111,8 @@ function ChecklistStavka({ tekst, oznacena, readOnly, highlight, onToggle }: Sta
 
 interface IntervencijaChecklistProps {
   status:            string;
+  /** Kontrolirano stanje iz roditelja (preživljava remount / djelomični refresh). */
+  oznaceni?:         boolean[];
   /** Poziva se svaki put kad korisnik označi/odznači stavku. */
   onPromjena?:       (oznaceni: boolean[]) => void;
   /** Ako true, neoznačene stavke postaju crvene (validacija prije evidencije). */
@@ -119,38 +121,42 @@ interface IntervencijaChecklistProps {
 
 export function IntervencijaChecklist({
   status,
+  oznaceni: oznaceniProp,
   onPromjena,
   highlightNepopunjena = false,
 }: IntervencijaChecklistProps) {
   const jeZavrseno = status === 'zavrseno';
+  const kontrolirano = oznaceniProp !== undefined;
 
-  const [oznaceni, setOznaceni] = useState<boolean[]>(() =>
+  const [oznaceniLokalno, setOznaceniLokalno] = useState<boolean[]>(() =>
     Array(UKUPNO).fill(jeZavrseno),
   );
+
+  const oznaceni = kontrolirano ? oznaceniProp! : oznaceniLokalno;
 
   const prikazOznaceni: boolean[] = jeZavrseno ? Array(UKUPNO).fill(true) : oznaceni;
   const brojOznacenih = prikazOznaceni.filter(Boolean).length;
   const sveDone = brojOznacenih === UKUPNO;
 
-  // Obavijesti roditeljsku komponentu o promjenama
-  useEffect(() => {
-    if (!jeZavrseno) onPromjena?.(oznaceni);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [oznaceni, jeZavrseno]);
+  function postaviOznacene(novi: boolean[]) {
+    if (kontrolirano) {
+      onPromjena?.(novi);
+    } else {
+      setOznaceniLokalno(novi);
+      onPromjena?.(novi);
+    }
+  }
 
   function toggle(idx: number) {
     if (jeZavrseno) return;
-    setOznaceni((prev) => {
-      const sljedeci = [...prev];
-      sljedeci[idx] = !sljedeci[idx];
-      return sljedeci;
-    });
+    const sljedeci = [...oznaceni];
+    sljedeci[idx] = !sljedeci[idx];
+    postaviOznacene(sljedeci);
   }
 
   function oznacenSve() {
     if (jeZavrseno) return;
-    const noviStanje = Array(UKUPNO).fill(!sveDone);
-    setOznaceni(noviStanje);
+    postaviOznacene(Array(UKUPNO).fill(!sveDone));
   }
 
   return (

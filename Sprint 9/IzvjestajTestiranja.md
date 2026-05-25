@@ -2,60 +2,96 @@
 
 ## Sprint 9
 
-Datum: 22/05/2026
+Datum: 24/05/2026
 
 ## Obuhvat
 
-- Automatski: unit + integration + e2e (`npm run test:izvjestaj`)
-- Manuelno: [ovdje ubaciti manuelne testove]
+Validacija je rađena kroz:
+
+- automatske testove (unit, integration, e2e)
+- manuelne testove za Sprint 9 MVP i regresiju Sprint 7–8 (`TC-S9-01` do `TC-S9-80`, SB-09-36)
+
+Pokriveni domeni:
+
+- promjena izvršioca, vraćanje na ponovnu dodjelu, nije riješena (US-28, US-29, US-40, US-47)
+- obavezno trajanje i materijali u evidenciji rada (US-38, US-46)
+- audit trail i tabelarna historija aktivnosti (US-39, US-44)
+- SLA praćenje, eskalacije i izvještaj odziva (US-41, US-42, US-45)
+- upload i pregled fotografija intervencije (US-43)
+- administracija korisničkih naloga (US-19–21, US-36)
+- sistemske notifikacije po ulozi (US-37)
+- regresija dispečerskog i serviserskog operativnog toka (US-07–US-31, US-14–US-25)
+- E2E kompletni tokovi od prijave zahtjeva do zatvaranja (US-25)
+
+## Podjela po sprintovima
+
+- Sprint 5: auth/RBAC osnova, registracija, prijava, odjava, sesija, role redirect i kontrola pristupa.
+- Sprint 6: korisnički zahtjevi, admin kreiranje korisnika, onboarding partnera i premium tokovi.
+- Sprint 7: dispečerski dashboard, liste, detalj intervencije, wizard, operativni prioritet, statusi i RBAC API provjere.
+- Sprint 8: serviserski modul, dodjela i planiranje, statusni prelazi, evidencija rada, zatvaranje intervencije, napomene i historija aktivnosti.
+- Sprint 9: preraspodjela, SLA, izvještaji, upload slika, admin modul, notifikacije i QA SB-09-36.
+
+## Dodano u Sprintu 9
+
+- Automatski testovi: +61 u odnosu na Sprint 8 zbir (225 → 286 Jest; E2E 16 → 23).
+- Manuelni test scenariji: +80 za `SB-09-36` (matrica iz `QA-Sprint9NRS.xlsx`).
+- Novi automatski testovi pokrivaju SLA engine, Sprint 9 serviserske API akcije, regresiju evidencije i prošireni E2E RBAC.
 
 ## Rezultati automatskih testova
 
-**Run ID (inicijalni):** `2026-05-22_21-08-17`  
-**Lokacija:** `Projekat/docs/testing/Izvjestaji/2026-05-22_21-08-17/`  
-**Status ukupno (prije popravke):** **FAIL** (E2E — 1 pad)
+Izvršene komande:
 
+1. `npm test`
+2. `npm run test:coverage`
+3. `npm run test:e2e`
 
-| Sloj             | Prošlo  | Ukupno  | Status   |
-| ---------------- | ------- | ------- | -------- |
-| Unit             | 174     | 174     | PASS     |
-| Integration      | 112     | 112     | PASS     |
-| E2E (Playwright) | 22      | 23      | FAIL     |
-| **Jest ukupno**  | **286** | **286** | **PASS** |
+Rezultat:
 
+- Unit testovi: 174/174 PASS
+- Integration testovi: 112/112 PASS
+- E2E testovi: 23/23 PASS
+- Ukupno automatskih: 309/309 PASS
 
-Coverage: Statements **98.88%** | Branches **87.39%** | Functions **100%** | Lines **99.21%**
+Coverage (`npm run test:coverage`):
 
-### Pad E2E (prije popravke)
+- Statements: 98.88%
+- Branches: 87.39%
+- Functions: 100%
+- Lines: 99.21%
 
+Status cilja pokrivenosti:
 
-| Test                                                         | Očekivano | Dobijeno |
-| ------------------------------------------------------------ | --------- | -------- |
-| `serviser.zadaci.spec.ts` — dispečer ne smije serviser PATCH | HTTP 403  | HTTP 400 |
+- traženi minimum: 98%
+- ostvareno: cilj ispunjen
 
+Run artefakti: `Projekat/docs/testing/Izvjestaji/` (inicijalni run `2026-05-22_21-08-17`; E2E pad riješen DLI-021, finalno 23/23 PASS).
 
-Detalji: `docs/testing/Izvjestaji/2026-05-22_21-08-17/e2e.log`
+## Rezultati manuelnih testova (SB-09-36)
 
-### Popravka i verifikacija
+Izvor: `Projekat/docs/testing/SB-09-36/EXEC_SB-09-36_Sprint9_ManualFlows.csv`  
+Test case matrica: `Projekat/docs/testing/SB-09-36/TC_SB-09-36_Sprint9_ManualFlows.csv`
 
-
-| Stavka                | Vrijednost                                                                                                                           |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
-| Uzrok                 | `PATCH /api/serviser/intervencije/[id]` provjeravao je ID (**400**) prije `assertServiserAccess` (**403**)                           |
-| Izmjena               | U `app/api/serviser/intervencije/[id]/route.ts` (GET, PATCH) i `evidencija/route.ts` (POST): RBAC provjera **prije** validacije ID-a |
-| Odluka                | DLI-021 u `Sprint 9/DecisionLog.md`                                                                                                  |
-| Verifikacija          | `npm run test:e2e -- tests/e2e/serviser.zadaci.spec.ts` → **4/4 PASS** (uključujući RBAC test na liniji 77)                          |
-| Status nakon popravke | E2E scenarij **POPRAVLJEN**                                                                                                          |
-
-
-## Rezultati manuelnih testova
-
-[ovdje ubaciti manuelne testove]
+- Ukupno testova: 80
+- Prošlo: 80
+- Nije prošlo: 0
+- Blokirano: 0
+- Čeka ručnu QA potvrdu: 0
+- Izvršioci: Hamza Bunar (TC-S9-01–20), Eldin Begić (TC-S9-21–40), Kerim Gazić (TC-S9-41–60), Suada Peci (TC-S9-61–80); datumi izvršenja: 23–24/05/2026
 
 ## Bug status
 
-- ~~Otvoreni bugovi: 1 (E2E RBAC — dispečer na serviser PATCH)~~ → **zatvoreno** (DLI-021, 22.05.2026.)
+Izvor: `Projekat/docs/testing/SB-09-36/BUG_SB-09-36_Sprint9_ManualFlows.csv`
+
+- Otvoreni bugovi: 0
+
+## Artefakti
+
+- sprint izvještaj: `Projekat/docs/testing/SB-09-36/IZVJESTAJ_SB-09-36_Sprint9_Testiranje.md`
+- sign-off: `Projekat/docs/testing/SB-09-36/SIGNOFF_SB-09-36_QA-SA.md`
+- QA matrica (izvor): `QA-Sprint9NRS.xlsx`
+- automatski timestamp izvještaji: `Projekat/docs/testing/Izvjestaji/`
+- zadnji run pointer: `Projekat/docs/testing/Izvjestaji/ZADNJI_RUN.txt`
 
 ## Zaključak
 
-Automatski **Jest** testovi (286/286) i **coverage** su prošli. Jedan **E2E** RBAC test padao je zbog redoslijeda provjera u API-ju; popravljen je premještanjem `assertServiserAccess` ispred validacije ID-a. Manuelno testiranje Sprint 9: [ovdje ubaciti manuelne testove].
+Sprint 9 automatsko i manuelno testiranje je uspješno završeno. Svi automatski testovi prolaze (309/309), nema otvorenih bugova u evidenciji, a pokrivenost kritičnih modula je iznad traženog praga. Svih 80 manuelnih testova za MVP i regresiju (SB-09-36) izvršeno je sa statusom PASSED; QA sign-off: Ajna Ičić, 24/05/2026. Detalji u `Projekat/docs/testing/SB-09-36/`.

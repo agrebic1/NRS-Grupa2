@@ -22,7 +22,7 @@ Ovaj dokument je jedinstven vodič za testiranje: šta je pokriveno, kada se tes
 - **SB-05-13**: `ACCESS`, `SEC`, `SIGNOFF`
 - **SB-06-20**: `TC_SB-06-20_Sprint6_ManualFlows.csv`, `EXEC`, `BUG`, `SIGNOFF`
 - **SB-07-35**: `TC_SB-07-35_Sprint7_DispecerManualFlows.csv`, `EXEC`, `BUG`, `SIGNOFF`
-- **SB-09-36** (Sprint 9): [ovdje ubaciti manuelne testove]
+- **SB-09-36** (Sprint 9): `TC_SB-09-36_Sprint9_ManualFlows.csv`, `EXEC`, `BUG`, `SIGNOFF` (80 scenarija, `TC-S9-01`–`TC-S9-80`)
 
 ## Kada se pokreće
 
@@ -84,4 +84,6 @@ E2E_KORISNIK_PASSWORD=123456789Aa@
 - Sprint 7 izvještaj: `docs/testing/SB-07-35/IZVJESTAJ_SB-07-35_Sprint7_Testiranje.md`
 - Sprint 7 sign-off: `docs/testing/SB-07-35/SIGNOFF_SB-07-35_QA-SA.md`
 - Sprint 7 manual execution: `docs/testing/SB-07-35/EXEC_SB-07-35_Sprint7_DispecerManualFlows.csv`
-- Sprint 9 manual (SB-09-36): [ovdje ubaciti manuelne testove]
+- Sprint 9 izvještaj: `docs/testing/SB-09-36/IZVJESTAJ_SB-09-36_Sprint9_Testiranje.md`
+- Sprint 9 sign-off: `docs/testing/SB-09-36/SIGNOFF_SB-09-36_QA-SA.md`
+- Sprint 9 manual execution: `docs/testing/SB-09-36/EXEC_SB-09-36_Sprint9_ManualFlows.csv`
