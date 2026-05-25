@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { assertDispatcherAccess } from '@/lib/servisirane/dispecerPristup';
 import { SLA_ROKOVI_SATI } from '@/lib/servisirane/slaPravila';
-import type { ServiserOdzivaRed, IzvjestajOdzivaOdgovor } from '@/lib/servisirane/izvjestajiOdziva';
+import type { ServiserOdzivaRed, IntervencijaOdzivaRed, IzvjestajOdzivaOdgovor } from '@/lib/servisirane/izvjestajiOdziva';
 
 export const dynamic = 'force-dynamic';
 
@@ -105,36 +105,57 @@ export async function GET(request: Request) {
 
     // Agregacija po serviseru
     const aggMap = new Map<string, {
-      broj:      number;
-      odzvMin:   number[];
-      trajMin:   number[];
-      slaOk:     number;
+      broj:         number;
+      odzvMin:      number[];
+      trajMin:      number[];
+      slaOk:        number;
+      intervencije: IntervencijaOdzivaRed[];
     }>();
 
     for (const z of zahtjevi) {
       const sid = z.serviser_dodijeljen_id;
-      if (!aggMap.has(sid)) aggMap.set(sid, { broj: 0, odzvMin: [], trajMin: [], slaOk: 0 });
+      if (!aggMap.has(sid)) aggMap.set(sid, { broj: 0, odzvMin: [], trajMin: [], slaOk: 0, intervencije: [] });
       const agg = aggMap.get(sid)!;
 
       agg.broj++;
 
       // Trajanje iz evidencija
-      const traj = evidByZah.get(z.id);
+      const traj = evidByZah.get(z.id) ?? null;
       if (traj) agg.trajMin.push(traj);
 
       // Odziv (dodjela → prihvat)
       const akt = aktByZah.get(z.id);
+      let odzivMin: number | null = null;
       if (akt?.dodjelaAt && akt?.prihvatAt) {
         const odziv = (new Date(akt.prihvatAt).getTime() - new Date(akt.dodjelaAt).getTime()) / 60_000;
-        if (odziv >= 0) agg.odzvMin.push(odziv);
+        if (odziv >= 0) { odzivMin = Math.round(odziv); agg.odzvMin.push(odzivMin); }
       }
 
       // SLA compliance: je li intervencija završena u roku?
+      let slaOk: boolean | null = null;
       if (z.final_priority && z.final_priority in SLA_ROKOVI_SATI) {
         const slaMs = SLA_ROKOVI_SATI[z.final_priority as keyof typeof SLA_ROKOVI_SATI] * 3_600_000;
         const trajMs = new Date(z.updated_at).getTime() - new Date(z.created_at).getTime();
-        if (trajMs <= slaMs) agg.slaOk++;
+        slaOk = trajMs <= slaMs;
+        if (slaOk) agg.slaOk++;
       }
+
+      // Detalj intervencije za expand
+      agg.intervencije.push({
+        zahtjev_id:      z.id,
+        zavrseno_at:     z.updated_at,
+        final_priority:  z.final_priority ?? null,
+        odziv_minuta:    odzivMin,
+        trajanje_minuta: traj,
+        sla_ok:          slaOk,
+      });
+    }
+
+    // Sortiraj intervencije svake serviserke po datumu (najnovije prvo)
+    for (const agg of aggMap.values()) {
+      agg.intervencije.sort(
+        (a, b) => new Date(b.zavrseno_at).getTime() - new Date(a.zavrseno_at).getTime()
+      );
     }
 
     const avg = (arr: number[]) => arr.length ? Math.round(arr.reduce((s, v) => s + v, 0) / arr.length) : null;
@@ -150,6 +171,7 @@ export async function GET(request: Request) {
         avg_odziv_minuta:     avg(agg.odzvMin),
         avg_trajanje_minuta:  avg(agg.trajMin),
         sla_compliance_posto: slaPosto,
+        intervencije:         agg.intervencije,
       };
     }).sort((a, b) => b.broj_intervencija - a.broj_intervencija);
 

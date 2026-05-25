@@ -79,7 +79,7 @@ const NAVIGACIJA_PO_ULOZI: Record<UserRole, StavkaNavigacije[]> = {
   admin: [
     { href: '/admin',                  oznaka: 'Pregled',       Ikona: LayoutDashboard },
     { href: '/admin/korisnici',        oznaka: 'Korisnici',     Ikona: Users },
-    { href: '/admin/serviseri',        oznaka: 'Serviseri',     Ikona: Wrench },
+    { href: '/admin/serviseri',        oznaka: 'Uposlenici',    Ikona: Wrench },
     { href: '/admin/aplikacije',       oznaka: 'Aplikacije',    Ikona: ClipboardList },
   ],
 };

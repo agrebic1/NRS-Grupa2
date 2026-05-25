@@ -299,6 +299,7 @@ export default function UrediKorisnikaPage() {
   const [greska,     setGreska]     = useState<string | null>(null);
   const [uspjeh,     setUspjeh]     = useState<string | null>(null);
   const [jeSlanje,   setJeSlanje]   = useState(false);
+  const [prijavjenId, setPrijavjenId] = useState<string | null>(null);
 
   // Form state
   const [ime,          setIme]          = useState('');
@@ -332,6 +333,17 @@ export default function UrediKorisnikaPage() {
   }
 
   useEffect(() => { if (userId) ucitaj(); }, [userId]);
+
+  // Učitaj ID prijavljenog admina da bismo zabranili akcije na vlastitom nalogu
+  useEffect(() => {
+    fetch('/api/profil', { cache: 'no-store' })
+      .then((r) => r.json())
+      .then((d) => { if (d?.profil?.id) setPrijavjenId(d.profil.id); })
+      .catch(() => {});
+  }, []);
+
+  // True kada admin gleda vlastiti nalog
+  const jeSamSebe = prijavjenId !== null && prijavjenId === userId;
 
   async function posaljiPatch(body: Record<string, unknown>, uspjehPoruka: string) {
     setJeSlanje(true);
@@ -507,7 +519,7 @@ export default function UrediKorisnikaPage() {
               <ShieldCheck className="h-4 w-4" />
               Aktiviraj nalog
             </Button>
-          ) : (
+          ) : !jeSamSebe ? (
             <Button
               type="button" size="md" variant="ghost"
               onClick={() => setSuspenzijaMod(true)}
@@ -517,7 +529,7 @@ export default function UrediKorisnikaPage() {
               <ShieldOff className="h-4 w-4" />
               Suspenduj nalog
             </Button>
-          )}
+          ) : null}
           <Button type="button" size="md" onClick={sacuvajPodatke} isLoading={jeSlanje} loadingText="Snimanje...">
             <Save className="h-4 w-4" />
             Sačuvaj izmjene
@@ -789,6 +801,16 @@ export default function UrediKorisnikaPage() {
                     <p className="text-xs" style={{ color: 'var(--first-nonary)' }}>Ukloni suspenziju</p>
                   </div>
                 </button>
+              ) : jeSamSebe ? (
+                <div
+                  className="flex w-full items-center gap-3 rounded-xl p-3.5"
+                  style={{ backgroundColor: 'rgb(var(--first-quinary-rgb)/0.15)', border: '1px dashed rgb(var(--first-quaternary-rgb)/0.4)', opacity: 0.6 }}>
+                  <ShieldOff className="h-4 w-4 flex-shrink-0" style={{ color: 'var(--first-nonary)' }} />
+                  <div>
+                    <p className="text-sm font-semibold" style={{ color: 'var(--first-octonary)' }}>Suspenduj nalog</p>
+                    <p className="text-xs" style={{ color: 'var(--first-nonary)' }}>Ne možete suspendovati vlastiti nalog</p>
+                  </div>
+                </div>
               ) : (
                 <button type="button"
                   onClick={() => setSuspenzijaMod(true)}

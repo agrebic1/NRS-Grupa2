@@ -104,6 +104,18 @@ function izracunajDostignutiKorak(z: ZahtjevDetalj): number {
   return 0;
 }
 
+/**
+ * Za zahtjeve sa statusom `potvrdeno` i postavljenim prioritetom, dispečer treba samo dodijeliti servisera —
+ * preskočimo direktno na korak 2 (Termin i serviser).
+ * Vrijedi i kad je serviser odbio (serviser_odbio_razlog) i kad je zahtjev potvrđen bez dodjele.
+ */
+function inicijalniAktivniKorak(z: ZahtjevDetalj): number {
+  if (z.status === 'potvrdeno' && z.final_priority?.trim()) {
+    return 2;
+  }
+  return 0;
+}
+
 function todayISO(): string {
   return new Date().toISOString().slice(0, 10);
 }
@@ -593,7 +605,7 @@ function KorakPrioritet({ zahtjev, prioritet, setPrioritet, downgradeRazlog, set
 
 // ─── KORAK 3 - Termin i serviser ──────────────────────────────────────────────
 
-function KorakTerminIServiser({ zahtjev: _zahtjev, odabraniDatum, setDatum, odabraniSlot, setSlot, napomene, setNapomene, preporuke, odabraniServiser, setServiser, ucitavaServisere, pomocniServiseri, setPomocniServiseri, konfliktUpozorenje, onOverrideKonflikt }: {
+function KorakTerminIServiser({ zahtjev: _zahtjev, odabraniDatum, setDatum, odabraniSlot, setSlot, napomene, setNapomene, preporuke, odabraniServiser, setServiser, ucitavaServisere, pomocniServiseri, setPomocniServiseri, konfliktUpozorenje, onOverrideKonflikt, odbijeniServiserIds }: {
   zahtjev: ZahtjevDetalj;
   odabraniDatum: string;
   setDatum: (s: string) => void;
@@ -608,7 +620,9 @@ function KorakTerminIServiser({ zahtjev: _zahtjev, odabraniDatum, setDatum, odab
   pomocniServiseri: ServiserZaDodjelu[];
   setPomocniServiseri: (s: ServiserZaDodjelu[]) => void;
   konfliktUpozorenje: null | { zahtjev_id: number; pocetak: string; kraj: string };
-  onOverrideKonflikt: () => void;
+  onOverrideKonflikt: () => Promise<void>;
+  /** ID-evi servisera koji su prethodno odbili ovaj zahtjev — prikazuju se grayed-out i ne mogu biti odabrani. */
+  odbijeniServiserIds?: string[];
 }) {
   const serviseri = preporuke.map(p => p.serviser);
   const sekcija = {
@@ -749,41 +763,64 @@ function KorakTerminIServiser({ zahtjev: _zahtjev, odabraniDatum, setDatum, odab
               {preporuke.map(({ serviser: srv, score, razlozi, jePreporucen }) => {
                 const odabran   = odabraniServiser?.id === srv.id;
                 const jePomocni = pomocniServiseri.some(p => p.id === srv.id);
+                const jeOdbijen = (odbijeniServiserIds ?? []).includes(srv.id);
+                const onemogucen = jePomocni || jeOdbijen;
                 const scoreBoja = scoreBojaHex(score);
                 return (
                   <button key={srv.id} type="button"
-                    onClick={() => !jePomocni && setServiser(odabran ? null : srv)}
-                    disabled={jePomocni}
-                    className="relative flex flex-col gap-2 rounded-xl p-3 text-left transition-all disabled:opacity-40"
+                    onClick={() => !onemogucen && setServiser(odabran ? null : srv)}
+                    disabled={onemogucen}
+                    title={jeOdbijen ? 'Serviser je prethodno odbio ovaj zahtjev — nije dostupan za odabir.' : undefined}
+                    className="relative flex flex-col gap-2 rounded-xl p-3 text-left transition-all"
                     style={{
-                      backgroundColor: odabran ? 'rgb(var(--first-primary-rgb)/0.06)' : 'rgb(255 255 255/0.8)',
-                      border: odabran ? '2px solid var(--first-primary)' : '1px solid rgb(var(--first-quaternary-rgb)/0.35)',
+                      backgroundColor: jeOdbijen
+                        ? 'rgb(var(--first-quinary-rgb)/0.18)'
+                        : odabran ? 'rgb(var(--first-primary-rgb)/0.06)' : 'rgb(255 255 255/0.8)',
+                      border: jeOdbijen
+                        ? '1px solid rgba(220,38,38,0.18)'
+                        : odabran ? '2px solid var(--first-primary)' : '1px solid rgb(var(--first-quaternary-rgb)/0.35)',
+                      opacity: jeOdbijen ? 0.6 : 1,
+                      cursor: onemogucen ? 'not-allowed' : 'pointer',
                     }}>
-                    {/* Preporučeno badge */}
-                    {jePreporucen && (
+
+                    {/* Badge: preporučeno ili prethodno odbio */}
+                    {jeOdbijen ? (
+                      <div className="absolute -top-2.5 right-2 flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[9px] font-bold"
+                        style={{ backgroundColor: '#DC2626', color: '#fff' }}>
+                        <AlertTriangle className="h-2.5 w-2.5" />Preth. odbio
+                      </div>
+                    ) : jePreporucen ? (
                       <div className="absolute -top-2.5 right-2 flex items-center gap-0.5 rounded-full px-2 py-0.5 text-[9px] font-bold"
                         style={{ backgroundColor: 'var(--first-primary)', color: '#fff' }}>
                         <Star className="h-2.5 w-2.5" />Preporučeno
                       </div>
-                    )}
+                    ) : null}
 
                     {/* Top row: avatar + name + check */}
                     <div className="flex items-center gap-2.5">
                       <div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-xl"
                         style={{
-                          backgroundColor: odabran ? 'var(--first-primary)' : 'rgb(var(--first-quaternary-rgb)/0.28)',
+                          backgroundColor: jeOdbijen
+                            ? 'rgba(220,38,38,0.08)'
+                            : odabran ? 'var(--first-primary)' : 'rgb(var(--first-quaternary-rgb)/0.28)',
                         }}>
-                        <Wrench className="h-3.5 w-3.5" style={{ color: odabran ? '#fff' : 'var(--first-nonary)' }} />
+                        <Wrench className="h-3.5 w-3.5" style={{ color: jeOdbijen ? '#DC2626' : odabran ? '#fff' : 'var(--first-nonary)' }} />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-bold truncate" style={{ color: 'var(--first-octonary)' }}>
+                        <p className="text-sm font-bold truncate" style={{ color: jeOdbijen ? 'rgb(var(--first-nonary-rgb)/0.7)' : 'var(--first-octonary)' }}>
                           {srv.ime} {srv.prezime}
                           {srv.is_verified && (
-                            <Shield className="ml-1 inline h-3 w-3" style={{ color: 'var(--first-secondary)' }} />
+                            <Shield className="ml-1 inline h-3 w-3" style={{ color: jeOdbijen ? 'rgba(0,0,0,0.3)' : 'var(--first-secondary)' }} />
                           )}
                         </p>
+                        {/* Napomena za odbijene */}
+                        {jeOdbijen && (
+                          <p className="mt-0.5 text-[10px] font-medium leading-tight" style={{ color: '#DC2626' }}>
+                            Prethodno odbio — nije dostupan za odabir
+                          </p>
+                        )}
                       </div>
-                      {odabran && (
+                      {odabran && !jeOdbijen && (
                         <div className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full"
                           style={{ backgroundColor: 'var(--first-primary)' }}>
                           <Check className="h-3 w-3 text-white" strokeWidth={2.5} />
@@ -863,14 +900,19 @@ function KorakTerminIServiser({ zahtjev: _zahtjev, odabraniDatum, setDatum, odab
             </div>
           )}
 
-          {/* Dodaj iz liste */}
+          {/* Dodaj iz liste — odbijeni serviseri su isključeni */}
           {serviseri.filter(s =>
             s.id !== odabraniServiser?.id &&
-            !pomocniServiseri.some(p => p.id === s.id)
+            !pomocniServiseri.some(p => p.id === s.id) &&
+            !(odbijeniServiserIds ?? []).includes(s.id)
           ).length > 0 ? (
             <div className="flex flex-col gap-1.5">
               {serviseri
-                .filter(s => s.id !== odabraniServiser?.id && !pomocniServiseri.some(p => p.id === s.id))
+                .filter(s =>
+                  s.id !== odabraniServiser?.id &&
+                  !pomocniServiseri.some(p => p.id === s.id) &&
+                  !(odbijeniServiserIds ?? []).includes(s.id)
+                )
                 .map(srv => (
                   <button key={srv.id} type="button"
                     onClick={() => setPomocniServiseri([...pomocniServiseri, srv])}
@@ -1162,16 +1204,17 @@ export function DispecerZahtjevDetaljSadrzaj({
   fokusKorakTermin?: boolean;
 }) {
   const router = useRouter();
-  const [aktivniKorak,    setAktivniKorakRaw] = useState(0);
+  const [aktivniKorak,    setAktivniKorakRaw] = useState(() => inicijalniAktivniKorak(zahtjev));
   const [dostignutiKorak, setDostignutiKorak] = useState(() => izracunajDostignutiKorak(zahtjev));
   const [prioritet,       setPrioritet]       = useState<NivoOp>(() => inicijalniPrioritet(zahtjev));
   const [downgradeRazlog, setDowngradeRazlog] = useState('');
   const [odabraniDatum,   setOdabraniDatum]   = useState(todayISO);
   const [odabraniSlot,    setOdabraniSlot]    = useState<SlotDef | null>(null);
   const [napomene,        setNapomene]        = useState('');
-  const [preporuke,       setPreporuke]       = useState<PreporukaServisera[]>([]);
-  const [ucitavaServ,     setUcitavaServ]     = useState(false);
-  const [odabraniServ,    setOdabraniServ]    = useState<ServiserZaDodjelu | null>(null);
+  const [preporuke,          setPreporuke]          = useState<PreporukaServisera[]>([]);
+  const [odbijeniServiserIds,setOdbijeniServiserIds] = useState<string[]>([]);
+  const [ucitavaServ,        setUcitavaServ]        = useState(false);
+  const [odabraniServ,       setOdabraniServ]       = useState<ServiserZaDodjelu | null>(null);
   const [potvrdjeno,        setPotvrdjeno]        = useState(false);
   const [imeDispecera,      setImeDispecera]      = useState('Dispečer');
   const [jeSlanje,          setJeSlanje]          = useState(false);
@@ -1197,11 +1240,18 @@ export function DispecerZahtjevDetaljSadrzaj({
       .then(r => r.json())
       .then(d => {
         const lista: PreporukaServisera[] = Array.isArray(d.preporuke) ? d.preporuke : [];
+        const odbijeni: string[] = Array.isArray(d.odbijeniServiserIds) ? d.odbijeniServiserIds : [];
         setPreporuke(lista);
-        if (!odabraniServ && lista[0]) setOdabraniServ(lista[0].serviser);
+        setOdbijeniServiserIds(odbijeni);
+        // Auto-odaberi prvog neodbijena servisera
+        if (!odabraniServ) {
+          const prviNeodbijenPreporucen = lista.find(p => !odbijeni.includes(p.serviser.id));
+          if (prviNeodbijenPreporucen) setOdabraniServ(prviNeodbijenPreporucen.serviser);
+        }
       })
       .catch(() => {
         setPreporuke([]);
+        setOdbijeniServiserIds([]);
       })
       .finally(() => setUcitavaServ(false));
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -1366,6 +1416,28 @@ export function DispecerZahtjevDetaljSadrzaj({
 
   return (
     <div>
+      {/* Banner: serviser odbio — dispečer treba odabrati novog servisera */}
+      {zahtjev.serviser_odbio_razlog && (
+        <div
+          className="mb-5 flex items-start gap-3 rounded-2xl px-4 py-3.5"
+          style={{
+            backgroundColor: 'rgba(220,38,38,0.06)',
+            border: '1px solid rgba(220,38,38,0.22)',
+          }}
+        >
+          <AlertTriangle className="h-5 w-5 flex-shrink-0 mt-0.5" style={{ color: '#DC2626' }} />
+          <div className="min-w-0">
+            <p className="text-sm font-bold" style={{ color: '#DC2626' }}>
+              Serviser je odbio ovu intervenciju
+            </p>
+            <p className="mt-0.5 text-xs leading-relaxed" style={{ color: 'var(--first-octonary)' }}>
+              Razlog: <span className="font-semibold">{zahtjev.serviser_odbio_razlog}</span>
+              {' '}— prioritet i termin su sačuvani. Odaberite novog servisera u koraku ispod.
+            </p>
+          </div>
+        </div>
+      )}
+
       <WizardStepper
         aktivni={aktivniKorak}
         dostupnoDoInkluzivno={dostignutiKorak}
@@ -1425,7 +1497,11 @@ export function DispecerZahtjevDetaljSadrzaj({
                 pomocniServiseri={pomocniServiseri}
                 setPomocniServiseri={setPomocniServiseri}
                 konfliktUpozorenje={konfliktUpozorenje}
-                onOverrideKonflikt={() => sacuvajTerminIServiser(true)}
+                onOverrideKonflikt={async () => {
+                  const ok = await sacuvajTerminIServiser(true);
+                  if (ok) setAktivniKorak(Math.min(aktivniKorak + 1, 4));
+                }}
+                odbijeniServiserIds={odbijeniServiserIds}
               />
             )}
             {aktivniKorak === 3 && (

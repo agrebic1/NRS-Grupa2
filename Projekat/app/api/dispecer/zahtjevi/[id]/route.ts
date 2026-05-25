@@ -9,6 +9,7 @@ import { dodijelijeSchema, razlogOperativniSchema } from '@/lib/validations/serv
 import { provjeriKonfliktServiseraNaTerminu } from '@/lib/servisirane/konfliktiTermina';
 import {
   notifDodjelaIntervencije,
+  notifReDodjela,
   notifZatvaranjeIntervencije,
   notifUklanjanjeServisera,
   notifPromjenaIzvrsioca,
@@ -222,7 +223,7 @@ export async function PATCH(
 
     const { data: zahtjev } = await db
       .from('service_requests')
-      .select('status, is_premium, closed_at, serviser_dodijeljen_id, final_priority')
+      .select('status, is_premium, closed_at, serviser_dodijeljen_id, final_priority, serviser_odbio_razlog')
       .eq('id', requestId)
       .single();
 
@@ -342,11 +343,11 @@ export async function PATCH(
         );
       }
 
-      // Provjera konflikta termina (samo ako su oba termina prisutna)
+      // Provjera konflikta termina (samo ako su oba termina prisutna i override nije aktivan)
       if (
         podaci.termin_planirani_pocetak &&
         podaci.termin_planirani_kraj &&
-        !(podaci as Record<string, unknown>).override_konflikt
+        !podaci.override_konflikt
       ) {
         const konflikt = await provjeriKonfliktServiseraNaTerminu(
           db,
@@ -368,12 +369,12 @@ export async function PATCH(
       }
 
       // Evidentiramo override konflikta ako je prisutan
-      if ((podaci as Record<string, unknown>).override_konflikt) {
+      if (podaci.override_konflikt) {
         await db.from('intervention_activities').insert({
           zahtjev_id: requestId,
           autor_id:   user.id,
           tip:        'konflikt_override',
-          sadrzaj:    `Dispečer prihvatio konflikt termina. Razlog: ${(podaci as Record<string, unknown>).razlog_konflikta ?? 'nije naveden'}`,
+          sadrzaj:    `Dispečer prihvatio konflikt termina. Razlog: ${podaci.razlog_konflikta ?? 'nije naveden'}`,
           metadata:   { serviser_id: podaci.serviser_id },
         });
       }
@@ -381,6 +382,7 @@ export async function PATCH(
       const izmjena: Record<string, unknown> = {
         status:                 'dodijeljeno',
         serviser_dodijeljen_id: podaci.serviser_id,
+        serviser_odbio_razlog:  null, // resetuj pri svakoj novoj dodjeli
       };
       if (podaci.termin_planirani_pocetak !== undefined)
         izmjena.termin_planirani_pocetak = podaci.termin_planirani_pocetak;
@@ -409,8 +411,13 @@ export async function PATCH(
         metadata:   { serviser_id: podaci.serviser_id, iz: zahtjev.status, u: 'dodijeljeno' },
       });
 
-      // Notifikacija serviseru
-      await notifDodjelaIntervencije(db, podaci.serviser_id, requestId);
+      // Notifikacija serviseru — posebna poruka ako je re-dodjela (prethodni serviser je odbio)
+      const razlogOdbijanja = zahtjev.serviser_odbio_razlog as string | null;
+      if (razlogOdbijanja) {
+        await notifReDodjela(db, podaci.serviser_id, requestId, razlogOdbijanja);
+      } else {
+        await notifDodjelaIntervencije(db, podaci.serviser_id, requestId);
+      }
 
       // Notifikacija korisniku - serviser dodijeljen
       const { data: zahtjevUser } = await db

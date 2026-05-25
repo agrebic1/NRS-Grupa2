@@ -212,6 +212,7 @@ Sažeti pregled user story-a u okviru MVP-a:
 | US-45 | SLA eskalacije | Kao dispečer, želim da sistem eskalira prekoračene SLA rokove, kako bih pravovremeno reagovao na kašnjenja. | - proaktivna reakcija<br>- poštivanje SLA | Srednji |
 | US-46 | Evidencija materijala i dijelova | Kao serviser, želim evidentirati utrošeni materijal i dijelove strukturirano, kako bi evidencija bila tačna za kontrolu i izvještaje. | - tačna evidencija<br>- kontrola troškova | Srednji |
 | US-47 | Praćenje intervencije nije riješene iz prve | Kao dispečer, želim vidjeti da intervencija nije riješena iz prvog pokušaja, kako bih pratio kvalitet rješavanja. | - kvalitet usluge<br>- ponovna dodjela | Srednji |
+| US-37 | Sistemske notifikacije | Kao korisnik sistema, želim primati relevantne sistemske obavještenja, kako bih bio pravovremeno informisan o promjenama koje se odnose na moje zahtjeve, intervencije ili zaduženja. | - pravovremena komunikacija<br>- manje ručnih provjera<br>- bolja reaktivnost korisnika | Srednji |
 
 U sljedećoj tabeli je prikazana povezanost konkretnog User Story-a sa itemima iz Product Backloga:
 | User Story | Naziv user storyja                                    | Feature / PBI                                                       | Epic                                                    |
@@ -261,6 +262,7 @@ U sljedećoj tabeli je prikazana povezanost konkretnog User Story-a sa itemima i
 | US-45      | SLA eskalacije                                          | **PBI-009 – Pregled operativnog statusa na kontrolnoj tabli**       | **Operativni pregled intervencija od strane dispečera** |
 | US-46      | Evidencija materijala i dijelova                        | **PBI-017 – Evidentiranje izvršenog rada**                          | **Izvršenje intervencija od strane servisera**          |
 | US-47      | Praćenje intervencije nije riješene iz prve             | **PBI-013 – Preraspodjela i ponovna dodjela intervencije**          | **Planiranje i dodjela intervencija**                   |
+| US-37      | Primanje relevantnih sistemskih obavještenja            | **PBI-022 – Sistemske notifikacije**                                | **Komunikacija, notifikacije i historija aktivnosti**   |
 ---
 
 ## US-01 — Samostalna registracija korisnika usluge

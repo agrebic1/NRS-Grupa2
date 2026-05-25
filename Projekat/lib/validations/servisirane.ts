@@ -226,6 +226,9 @@ export const dodijelijeSchema = z.object({
   termin_planirani_kraj:    z.string().datetime({ offset: true, local: true }).optional().nullable(),
   procijenjeno_trajanje:    z.number().int().min(5).max(1440).optional().nullable(),
   dispecer_napomene:        z.string().max(1000).optional().nullable(),
+  /** Dispečer svjesno prihvata konflikt termina — preskači 409 provjeru. */
+  override_konflikt:        z.boolean().optional(),
+  razlog_konflikta:         z.string().max(500).optional(),
 });
 
 export const napomenaSchema = z.object({

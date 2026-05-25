@@ -115,7 +115,17 @@ export async function GET(
       izuzeti,
     });
 
-    return NextResponse.json({ preporuke });
+    // Nađi ID-eve servisera koji su prethodno odbili ovaj zahtjev (intervention_activities, tip='odbijanje')
+    const { data: odbijanjeAktivnosti } = await db
+      .from('intervention_activities')
+      .select('autor_id')
+      .eq('zahtjev_id', params.id)
+      .eq('tip', 'odbijanje');
+    const odbijeniServiserIds: string[] = Array.from(
+      new Set((odbijanjeAktivnosti ?? []).map((a: any) => a.autor_id as string).filter(Boolean))
+    );
+
+    return NextResponse.json({ preporuke, odbijeniServiserIds });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Greška servera.';
     return NextResponse.json({ error: message }, { status: 500 });

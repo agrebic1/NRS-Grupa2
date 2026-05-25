@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Calendar, Image as ImageLucide, MapPin, Phone } from 'lucide-react';
+import { AlertTriangle, Calendar, Image as ImageLucide, MapPin, Phone } from 'lucide-react';
 import { labelKategorije } from '@/lib/servisirane/kategorije';
 import {
   formatPrijavljenoDatumVrijeme,
@@ -26,6 +26,7 @@ import {
   zahtjevJeNoviUPregleduDispecera,
 } from '@/lib/servisirane/dispecerskeFaze';
 import { zahtjevCekaObraduUInboxuDispecera } from '@/lib/servisirane/statusZahtjeva';
+import { SlaStatusBadge } from '@/components/dispecer/SlaStatusBadge';
 
 function sljedecaAkcijaZaOperatera(zahtjev: ServisniZahtjev): string {
   if (zahtjevCekaObraduUInboxuDispecera(zahtjev.status)) {
@@ -35,7 +36,10 @@ function sljedecaAkcijaZaOperatera(zahtjev: ServisniZahtjev): string {
     if (zahtjevCekaZavrsnuPotvrduCarobnjaka(zahtjev)) return 'Sljedeće: završite potvrdu u wizardu.';
     return 'Sljedeće: nastavite obradu u wizardu.';
   }
-  if (zahtjev.status === 'potvrdeno') return 'Sljedeće: dodjela serviseru ili start intervencije.';
+  if (zahtjev.status === 'potvrdeno') {
+    if (zahtjev.serviser_odbio_razlog) return '⚠ Serviser odbio — odaberite drugog servisera.';
+    return 'Sljedeće: dodjela serviseru ili start intervencije.';
+  }
   return 'Sljedeće: pregledajte detalje i historiju.';
 }
 
@@ -67,6 +71,7 @@ export function DispecerskaZahtjevPregledGridKartica({ zahtjev }: { zahtjev: Zah
   const korisnikJePrilozioSliku = brojPrilozenihSlika > 0;
 
   const detaljHref = `/dispecer/zahtjevi/${zahtjev.id}`;
+  const jeOdbijen  = !!zahtjev.serviser_odbio_razlog;
 
   return (
     <article
@@ -85,6 +90,23 @@ export function DispecerskaZahtjevPregledGridKartica({ zahtjev }: { zahtjev: Zah
         className="absolute inset-0 z-0 rounded-2xl"
         aria-label={`Otvori zahtjev #${oznakaZaDispecerskiPrikazBroja(zahtjev)}, ${glavna}`}
       />
+
+      {/* Banner: serviser odbio — prikazuje se na vrhu kartice */}
+      {jeOdbijen && (
+        <div
+          className="relative z-10 flex items-center gap-2 px-4 py-2 text-xs font-bold"
+          style={{
+            backgroundColor: 'rgba(220,38,38,0.09)',
+            borderBottom: '1px solid rgba(220,38,38,0.18)',
+            color: '#DC2626',
+          }}
+        >
+          <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+          <span className="truncate">
+            Serviser odbio — {zahtjev.serviser_odbio_razlog}
+          </span>
+        </div>
+      )}
 
       <div className="relative z-10 flex min-h-0 min-w-0 flex-1 flex-col gap-0 p-4 text-left pointer-events-none">
         {/* Identitet + datum prijave (US-07 AC9) */}
@@ -137,6 +159,12 @@ export function DispecerskaZahtjevPregledGridKartica({ zahtjev }: { zahtjev: Zah
               <OperativniPrioritetChip vrijednost={operativniPrioritetSirovo} />
             )}
             <KorisnickaHitnostOutlinedChip score={scoreZaPrikaz} />
+            <SlaStatusBadge
+              createdAt={zahtjev.created_at}
+              prioritet={zahtjev.final_priority ?? null}
+              status={zahtjev.status}
+              prikaziVrijeme
+            />
           </div>
         </div>
 
