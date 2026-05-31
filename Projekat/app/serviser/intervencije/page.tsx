@@ -286,8 +286,8 @@ export default function ServiserIntervencijaListaPage() {
             Sve vaše intervencije — kao glavni i pomoćni serviser
           </p>
         </div>
-        <button type="button" onClick={ucitaj} disabled={ucitava}
-          className="flex h-9 w-9 items-center justify-center rounded-xl transition-all hover:bg-black/[0.05] disabled:opacity-50"
+        <button type="button" onClick={ucitaj} disabled={ucitava} aria-label="Osvježi intervencije"
+          className="flex h-9 w-9 items-center justify-center rounded-xl transition-all hover:bg-black/[0.05] focus:outline-none focus-visible:ring-2 focus-visible:ring-celestial-teal/40 disabled:opacity-50"
           style={{ border: '1px solid rgb(var(--first-quaternary-rgb)/0.35)' }}>
           <RefreshCw className={`h-4 w-4 ${ucitava ? 'animate-spin' : ''}`} style={{ color: 'var(--first-nonary)' }} />
         </button>

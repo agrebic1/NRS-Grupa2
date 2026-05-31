@@ -1,6 +1,6 @@
 'use client';
 
-import { Check, Wrench, Briefcase } from 'lucide-react';
+import { Check, Wrench, Briefcase, MapPin } from 'lucide-react';
 import type { ServiserZaDodjelu } from '@/domain/types/servisirane';
 
 interface ServiserOdabirKarticaProps {
@@ -8,6 +8,10 @@ interface ServiserOdabirKarticaProps {
   odabran:   boolean;
   onClick:   () => void;
   disabled?: boolean;
+  /** US-48: udaljenost (km) servisera od lokacije kvara. null/undefined kad nema koordinata. */
+  udaljenostKm?: number | null;
+  /** US-48: true ako je ovo najbliži serviser među onima s koordinatama. */
+  jeNajblizi?: boolean;
 }
 
 export function ServiserOdabirKartica({
@@ -15,6 +19,8 @@ export function ServiserOdabirKartica({
   odabran,
   onClick,
   disabled,
+  udaljenostKm,
+  jeNajblizi,
 }: ServiserOdabirKarticaProps) {
   const aktivnih = serviser.aktivnih_zadataka;
   const statusBoja =
@@ -81,12 +87,27 @@ export function ServiserOdabirKartica({
           </div>
         )}
 
-        {/* Broj aktivnih zadataka */}
-        <div className="mt-1.5 flex items-center gap-1 text-xs" style={{ color: 'var(--first-nonary)' }}>
-          <Briefcase className="h-3 w-3" />
-          {aktivnih === 0
-            ? 'Nema aktivnih zadataka'
-            : `${aktivnih} aktivn${aktivnih === 1 ? 'i zadatak' : aktivnih < 5 ? 'a zadatka' : 'ih zadataka'}`}
+        {/* Broj aktivnih zadataka + udaljenost (US-48) */}
+        <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs" style={{ color: 'var(--first-nonary)' }}>
+          <span className="flex items-center gap-1">
+            <Briefcase className="h-3 w-3" />
+            {aktivnih === 0
+              ? 'Nema aktivnih zadataka'
+              : `${aktivnih} aktivn${aktivnih === 1 ? 'i zadatak' : aktivnih < 5 ? 'a zadatka' : 'ih zadataka'}`}
+          </span>
+          {udaljenostKm != null && (
+            <span
+              className="flex items-center gap-1 rounded-full px-2 py-0.5 font-semibold"
+              style={
+                jeNajblizi
+                  ? { backgroundColor: 'rgb(34,197,94,0.12)', color: '#16A34A' }
+                  : { backgroundColor: 'rgb(var(--first-quaternary-rgb) / 0.3)', color: 'var(--first-nonary)' }
+              }
+            >
+              <MapPin className="h-3 w-3" />
+              {jeNajblizi ? `Najbliži · ${udaljenostKm} km` : `${udaljenostKm} km`}
+            </span>
+          )}
         </div>
       </div>
 

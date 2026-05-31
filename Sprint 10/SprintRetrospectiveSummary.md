@@ -1,1 +1,0 @@
-# Sprint Retrospective Summary

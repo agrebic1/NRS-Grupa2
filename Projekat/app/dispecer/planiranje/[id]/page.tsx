@@ -16,6 +16,7 @@ import { StatusBadge } from '@/components/servisirane/ZahtjevKartica';
 import { ServiserOdabirKartica } from '@/components/dispecer/ServiserOdabirKartica';
 import type { ServisniZahtjev, ServiserZaDodjelu } from '@/domain/types/servisirane';
 import { labelKategorije } from '@/lib/servisirane/kategorije';
+import { haversineKm } from '@/lib/servisirane/preporukaServisera';
 import { kreirajKlijenta } from '@/lib/supabase/klijent';
 
 // ─── Koraci wizard-a ──────────────────────────────────────────────────────────
@@ -462,6 +463,25 @@ export default function DispecerPlaniranjePage() {
   const kat    = labelKategorije(zahtjev);
   const naslov = kat.podkategorija ? `${kat.glavna} - ${kat.podkategorija}` : kat.glavna;
   const odabraniServiser = serviseri.find((s) => s.id === wz.serviser_id) ?? null;
+
+  // US-48: udaljenost servisera od lokacije kvara (km) + oznaka najbližeg.
+  const udaljenosti = (() => {
+    const lat = zahtjev.latitude;
+    const lng = zahtjev.longitude;
+    const map: Record<string, number> = {};
+    let najbliziId: string | null = null;
+    if (typeof lat === 'number' && typeof lng === 'number') {
+      let min = Infinity;
+      for (const s of serviseri) {
+        if (typeof s.latitude === 'number' && typeof s.longitude === 'number') {
+          const km = Math.round(haversineKm(lat, lng, s.latitude, s.longitude) * 10) / 10;
+          map[s.id] = km;
+          if (km < min) { min = km; najbliziId = s.id; }
+        }
+      }
+    }
+    return { map, najbliziId };
+  })();
   const preporucenoKljuc = preporuciPrioritet(zahtjev);
   const smanjenjePrioriteta = wz.odabraniPrioritet
     ? jeSmanjenjeOdPreporucenog(wz.odabraniPrioritet, preporucenoKljuc)
@@ -814,6 +834,8 @@ export default function DispecerPlaniranjePage() {
                         serviser={s}
                         odabran={wz.serviser_id === s.id}
                         onClick={() => azuriraj({ serviser_id: s.id })}
+                        udaljenostKm={udaljenosti.map[s.id] ?? null}
+                        jeNajblizi={udaljenosti.najbliziId === s.id}
                       />
                     ))}
                   </div>

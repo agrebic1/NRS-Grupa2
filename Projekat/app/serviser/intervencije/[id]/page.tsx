@@ -701,8 +701,8 @@ export default function ServiserIntervencijaDetaljiPage() {
           <ChevronRight className="h-3.5 w-3.5" />
           <span className="font-semibold" style={{ color: 'var(--first-octonary)' }}>#{id}</span>
         </div>
-        <button type="button" onClick={() => void ucitaj()}
-          className="flex h-8 w-8 items-center justify-center rounded-lg transition-all hover:bg-black/[0.05]">
+        <button type="button" onClick={() => void ucitaj()} aria-label="Osvježi intervenciju"
+          className="flex h-8 w-8 items-center justify-center rounded-lg transition-all hover:bg-black/[0.05] focus:outline-none focus-visible:ring-2 focus-visible:ring-celestial-teal/40">
           <RefreshCw className="h-4 w-4" style={{ color: 'var(--first-nonary)' }} />
         </button>
       </div>
@@ -945,9 +945,10 @@ export default function ServiserIntervencijaDetaljiPage() {
                         <button
                           type="button"
                           title="Obriši sliku"
+                          aria-label="Obriši sliku"
                           disabled={brisanjeSlikaId === slika.id}
                           onClick={() => void obrisiSliku(slika.id)}
-                          className="absolute right-1.5 top-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-black/65 text-white opacity-0 transition-opacity hover:bg-red-600 group-hover:opacity-100 disabled:opacity-50"
+                          className="absolute right-1.5 top-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-black/65 text-white opacity-0 transition-opacity hover:bg-red-600 focus-visible:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-white group-hover:opacity-100 disabled:opacity-50"
                         >
                           {brisanjeSlikaId === slika.id ? (
                             <div className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-white border-t-transparent" />
@@ -1079,7 +1080,7 @@ export default function ServiserIntervencijaDetaljiPage() {
                   <CheckCircle2 className="h-4 w-4" />Prihvati
                 </button>
                 <a href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(zahtjev.address ?? '')}`}
-                  target="_blank" rel="noopener noreferrer"
+                  target="_blank" rel="noopener noreferrer" aria-label="Navigiraj do lokacije"
                   className="flex items-center justify-center gap-1 rounded-xl px-4 py-3 text-sm font-semibold"
                   style={{ backgroundColor: 'rgb(var(--first-secondary-rgb)/0.1)', color: 'var(--first-secondary)', border: '1px solid rgb(var(--first-secondary-rgb)/0.2)' }}>
                   <Navigation className="h-4 w-4" />
@@ -1104,6 +1105,7 @@ export default function ServiserIntervencijaDetaljiPage() {
                 <button
                   type="button"
                   onClick={() => setPokaziEvid(true)}
+                  aria-label="Evidentiraj rad"
                   className="flex items-center justify-center gap-1 rounded-xl px-4 py-3 text-sm font-semibold"
                   style={{ backgroundColor: 'rgb(var(--first-secondary-rgb)/0.1)', color: 'var(--first-secondary)', border: '1px solid rgb(var(--first-secondary-rgb)/0.2)' }}>
                   <ClipboardCheck className="h-4 w-4" />

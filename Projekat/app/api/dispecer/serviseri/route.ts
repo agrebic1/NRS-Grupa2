@@ -41,7 +41,7 @@ export async function GET() {
       .select(`
         id_uposlenika,
         is_verified,
-        osoba!id_uposlenika(ime, prezime)
+        osoba!id_uposlenika(ime, prezime, bazna_latitude, bazna_longitude)
       `)
       .eq('id_uloge', ulogaPodaci.id_uloge);
 
@@ -89,6 +89,8 @@ export async function GET() {
         is_verified:       u.is_verified,
         aktivnih_zadataka: aktivniMap[u.id_uposlenika] ?? 0,
         specialnosti:      [] as string[],
+        latitude:          (osoba as { bazna_latitude?: number | null })?.bazna_latitude  ?? null,
+        longitude:         (osoba as { bazna_longitude?: number | null })?.bazna_longitude ?? null,
       };
     });
 

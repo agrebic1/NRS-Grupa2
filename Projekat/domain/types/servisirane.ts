@@ -194,6 +194,9 @@ export interface ServiserZaDodjelu {
   is_verified:       boolean;
   aktivnih_zadataka: number;
   specialnosti:      string[];
+  /** US-48: bazna lokacija servisera (osoba.bazna_latitude/longitude). null kad nije postavljena. */
+  latitude?:         number | null;
+  longitude?:        number | null;
 }
 
 // ─── Partner aplikacija ───────────────────────────────────────────────────────
@@ -222,6 +225,9 @@ export interface ProfilKorisnika {
   email:        string | null;
   broj_telefona: string | null;
   adresa:       string | null;
+  /** US-48: bazna lokacija servisera za geo-preporuku. */
+  bazna_latitude?:  number | null;
+  bazna_longitude?: number | null;
   uloge:        string[];
   is_verified:  boolean;
   is_premium:   boolean;

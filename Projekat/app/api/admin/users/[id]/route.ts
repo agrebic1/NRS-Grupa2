@@ -94,6 +94,7 @@ export async function GET(
     const [
       { data: profKorisnik },
       { data: profUposlenik },
+      { data: profOsoba },
     ] = await Promise.all([
       adb.from('korisnik_usluge')
         .select('id_korisnika_usluge, ime, prezime, email, broj_telefona, adresa, is_premium, premium_status, premium_expires_at')
@@ -102,6 +103,11 @@ export async function GET(
       adb.from('uposlenici')
         .select('id_uposlenika, ime, prezime, email, broj_telefona, adresa, id_uloge, uloga:uloga(naziv)')
         .eq('id_uposlenika', ciljId)
+        .maybeSingle(),
+      // US-48: bazna lokacija (živi na supertype tabeli osoba)
+      adb.from('osoba')
+        .select('bazna_latitude, bazna_longitude')
+        .eq('id_osobe', ciljId)
         .maybeSingle(),
     ]);
 
@@ -139,6 +145,8 @@ export async function GET(
       isPremium:       Boolean(profKorisnik?.is_premium),
       premium_status:  profKorisnik?.premium_status ?? null,
       premium_expires_at: profKorisnik?.premium_expires_at ?? null,
+      bazna_latitude:  profOsoba?.bazna_latitude  ?? null,
+      bazna_longitude: profOsoba?.bazna_longitude ?? null,
     };
 
     return NextResponse.json({
@@ -159,6 +167,9 @@ const urediPodatkeSchema = z.object({
   prezime:       z.string().min(1).max(100),
   broj_telefona: z.string().max(30).optional().nullable(),
   adresa:        z.string().max(255).optional().nullable(),
+  // US-48: bazna lokacija servisera (opcionalno)
+  bazna_latitude:  z.number().min(-90).max(90).optional().nullable(),
+  bazna_longitude: z.number().min(-180).max(180).optional().nullable(),
 });
 
 const suspendujSchema = z.object({
@@ -238,11 +249,25 @@ export async function PATCH(
       const { error } = await adb.from(tablica).update(patch).eq(pkKolona, ciljId);
       if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
+      // US-48: bazna lokacija živi na supertype tabeli osoba — ažuriraj odvojeno.
+      const promijenjeno = Object.keys(patch);
+      if ('bazna_latitude' in body || 'bazna_longitude' in body) {
+        const { error: osobaErr } = await adb
+          .from('osoba')
+          .update({
+            bazna_latitude:  body.bazna_latitude  ?? null,
+            bazna_longitude: body.bazna_longitude ?? null,
+          })
+          .eq('id_osobe', ciljId);
+        if (osobaErr) return NextResponse.json({ error: osobaErr.message }, { status: 500 });
+        promijenjeno.push('bazna_latitude', 'bazna_longitude');
+      }
+
       await upisiAuditLog(adb, {
         user_id:  ciljId,
         actor_id: user.id,
         akcija:   'uredi_podatke',
-        detalji:  { promijenjeno: Object.keys(patch) },
+        detalji:  { promijenjeno },
       });
       return NextResponse.json({ success: true });
     }

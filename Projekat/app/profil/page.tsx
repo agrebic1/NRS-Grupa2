@@ -5,8 +5,9 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import {
-  User, Shield, Lock, ArrowLeftRight, Check, AlertTriangle,
+  User, Shield, Lock, ArrowLeftRight, Check, AlertTriangle, MapPin,
 } from 'lucide-react';
+import { OdabirLokacije } from '@/components/shared/MapaOdabir';
 import { AppShell } from '@/components/layout/AppShell';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
@@ -221,6 +222,82 @@ function LozinkaSekcija() {
   );
 }
 
+// ─── Sekcija: Bazna lokacija servisera (US-48) ────────────────────────────────
+
+function BaznaLokacijaSekcija({
+  profil,
+  onAzuriranje,
+}: {
+  profil:       ProfilKorisnika;
+  onAzuriranje: () => void;
+}) {
+  const [lat, setLat] = useState<number | null>(profil.bazna_latitude  ?? null);
+  const [lng, setLng] = useState<number | null>(profil.bazna_longitude ?? null);
+  const [uspjelo, setUspjelo] = useState(false);
+  const [greska,  setGreska]  = useState<string | null>(null);
+  const [slanje,  setSlanje]  = useState(false);
+
+  const promijenjeno =
+    lat !== (profil.bazna_latitude ?? null) || lng !== (profil.bazna_longitude ?? null);
+
+  async function spremi() {
+    setGreska(null);
+    setUspjelo(false);
+    setSlanje(true);
+    try {
+      const odgovor = await fetch('/api/profil', {
+        method:  'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body:    JSON.stringify({ bazna_latitude: lat, bazna_longitude: lng }),
+      });
+      const r = await odgovor.json();
+      if (!odgovor.ok) throw new Error(r.error ?? 'Greška pri spremanju.');
+      setUspjelo(true);
+      onAzuriranje();
+    } catch (err) {
+      setGreska(err instanceof Error ? err.message : 'Greška pri spremanju lokacije.');
+    } finally {
+      setSlanje(false);
+    }
+  }
+
+  return (
+    <div className="flex flex-col gap-4">
+      {greska  && <AlertMessage variant="error"   message={greska} />}
+      {uspjelo && <AlertMessage variant="success" message="Bazna lokacija je spremljena." />}
+
+      <p className="text-sm" style={{ color: 'var(--first-nonary)' }}>
+        Pretražite adresu svoje bazne lokacije (ili je označite na mapi / GPS-om). Koristi se
+        da vam dispečer dodjeljuje bliže intervencije. Opcionalno — možete je i ukloniti.
+      </p>
+
+      <OdabirLokacije
+        latitude={lat}
+        longitude={lng}
+        label="Adresa bazne lokacije"
+        onChange={({ latitude, longitude }) => {
+          setLat(latitude);
+          setLng(longitude);
+          setUspjelo(false);
+        }}
+      />
+
+      <Button
+        type="button"
+        size="md"
+        className="w-fit"
+        onClick={spremi}
+        isLoading={slanje}
+        loadingText="Spremanje..."
+        disabled={!promijenjeno || slanje}
+      >
+        <Check className="h-4 w-4" />
+        Spremi lokaciju
+      </Button>
+    </div>
+  );
+}
+
 // ─── Sekcija: Uloge i pristup ─────────────────────────────────────────────────
 
 const ULOGA_CONFIG: Record<
@@ -412,6 +489,17 @@ export default function ProfilPage() {
           >
             <LicniPodaciSekcija profil={profil} onAzuriranje={ucitajProfil} />
           </SekcijaKartica>
+
+          {/* Bazna lokacija — samo za servisere (US-48) */}
+          {profil.uloge.includes('serviser') && (
+            <SekcijaKartica
+              naslov="Bazna lokacija"
+              opis="Koordinate za geo-preporuku bližih intervencija"
+              Ikona={MapPin}
+            >
+              <BaznaLokacijaSekcija profil={profil} onAzuriranje={ucitajProfil} />
+            </SekcijaKartica>
+          )}
 
           {/* Promjena lozinke */}
           <SekcijaKartica

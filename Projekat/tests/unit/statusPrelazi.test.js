@@ -2,17 +2,16 @@ const {
   validirajServiserPrelaz,
   validirajDispecerasPrelaz,
   jeTerminalniStatus,
-  jeReadOnly,
 } = require('@/lib/servisirane/statusPrelazi');
 
 describe('statusni prelazi - serviser', () => {
   test.each([
     ['dodijeljeno', 'u_radu'],
-    ['dodijeljeno', 'potvrdeno'],    // vrati_na_dodjelu
-    ['u_radu',      'u_izvrsenju'],
-    ['u_radu',      'potvrdeno'],    // vrati_na_dodjelu
+    ['dodijeljeno', 'potvrdeno'], // vrati_na_dodjelu
+    ['u_radu', 'u_izvrsenju'],
+    ['u_radu', 'potvrdeno'], // vrati_na_dodjelu
     ['u_izvrsenju', 'zavrseno'],
-    ['u_izvrsenju', 'potvrdeno'],    // nije_rijeseno
+    ['u_izvrsenju', 'potvrdeno'], // nije_rijeseno
   ])('dozvoljava serviser prelaz %s → %s', (iz, u) => {
     expect(validirajServiserPrelaz(iz, u)).toEqual({ ok: true });
   });
@@ -20,9 +19,9 @@ describe('statusni prelazi - serviser', () => {
   test.each([
     ['u_izvrsenju', 'zatvoreno'],
     ['dodijeljeno', 'u_izvrsenju'],
-    ['u_radu',      'dodijeljeno'],
-    ['u_radu',      'zavrseno'],
-    ['potvrdeno',   'u_radu'],
+    ['u_radu', 'dodijeljeno'],
+    ['u_radu', 'zavrseno'],
+    ['potvrdeno', 'u_radu'],
   ])('blokira nedozvoljeni serviser prelaz %s → %s', (iz, u) => {
     const rez = validirajServiserPrelaz(iz, u);
     expect(rez.ok).toBe(false);
@@ -56,9 +55,8 @@ describe('statusni prelazi - dispečer', () => {
   test.each([
     ['u_izvrsenju', 'zavrseno'],
     ['u_izvrsenju', 'potvrdeno'],
-    ['zavrseno',    'zatvoreno'],
     ['dodijeljeno', 'potvrdeno'],
-    ['u_radu',      'potvrdeno'],
+    ['u_radu', 'potvrdeno'],
   ])('dozvoljava dispečer prelaz %s → %s', (iz, u) => {
     expect(validirajDispecerasPrelaz(iz, u)).toEqual({ ok: true });
   });
@@ -66,10 +64,11 @@ describe('statusni prelazi - dispečer', () => {
   test.each([
     ['dodijeljeno', 'zavrseno'],
     ['dodijeljeno', 'zatvoreno'],
-    ['u_radu',      'zatvoreno'],
-    ['u_radu',      'zavrseno'],
-    ['potvrdeno',   'u_radu'],
-    ['potvrdeno',   'zatvoreno'],
+    ['u_radu', 'zatvoreno'],
+    ['u_radu', 'zavrseno'],
+    ['potvrdeno', 'u_radu'],
+    ['potvrdeno', 'zatvoreno'],
+    ['zavrseno', 'zatvoreno'], // zatvaranje ide preko closed_at, ne kroz status-prelaz
   ])('blokira nedozvoljeni dispečer prelaz %s → %s', (iz, u) => {
     const rez = validirajDispecerasPrelaz(iz, u);
     expect(rez.ok).toBe(false);
@@ -94,23 +93,14 @@ describe('jeTerminalniStatus', () => {
     },
   );
 
-  test.each(['dodijeljeno', 'u_radu', 'u_izvrsenju', 'potvrdeno', 'zavrseno', 'pending_review'])(
-    '%s nije terminalni status',
-    (status) => {
-      expect(jeTerminalniStatus(status)).toBe(false);
-    },
-  );
-});
-
-describe('jeReadOnly', () => {
-  test('zatvoreno je read-only', () => {
-    expect(jeReadOnly('zatvoreno')).toBe(true);
+  test.each([
+    'dodijeljeno',
+    'u_radu',
+    'u_izvrsenju',
+    'potvrdeno',
+    'zavrseno',
+    'pending_review',
+  ])('%s nije terminalni status', (status) => {
+    expect(jeTerminalniStatus(status)).toBe(false);
   });
-
-  test.each(['otkazano', 'odbijeno', 'u_radu', 'zavrseno', 'dodijeljeno'])(
-    '%s nije read-only',
-    (status) => {
-      expect(jeReadOnly(status)).toBe(false);
-    },
-  );
 });

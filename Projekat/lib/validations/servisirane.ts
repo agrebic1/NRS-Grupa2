@@ -168,6 +168,9 @@ export const profilUpdateSchema = z.object({
     .optional()
     .nullable(),
   adresa: z.string().max(255).optional().nullable(),
+  // US-48: bazna lokacija servisera (opcionalno; koristi se za geo-preporuku)
+  bazna_latitude:  z.number().min(-90, 'Širina mora biti između -90 i 90').max(90, 'Širina mora biti između -90 i 90').optional().nullable(),
+  bazna_longitude: z.number().min(-180, 'Dužina mora biti između -180 i 180').max(180, 'Dužina mora biti između -180 i 180').optional().nullable(),
 });
 
 /** MVP: otkazivanje premiuma (simulacija naplate). */

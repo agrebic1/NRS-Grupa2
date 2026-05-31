@@ -4,7 +4,7 @@ import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'rea
 import {
   ClipboardList, ChevronRight,
   RefreshCw, XCircle, Bell,
-  AlertTriangle, CheckCircle2, UserCheck, Zap, Inbox, Clock, Ban,
+  AlertTriangle, CheckCircle2, UserCheck, Zap, Inbox, Clock, Ban, BarChart3,
 } from 'lucide-react';
 import { getSlaStatus } from '@/lib/servisirane/slaPravila';
 import Link from 'next/link';
@@ -303,17 +303,25 @@ function DispecerPageContent() {
             Kontrolna ploča
           </h1>
         </div>
-        <Button
-          type="button"
-          variant="secondary"
-          size="md"
-          onClick={() => void ucitajZahtjeve(false)}
-          isLoading={ucitava}
-          loadingText="Osvježavanje..."
-        >
-          <RefreshCw className="h-4 w-4" />
-          Osvježi
-        </Button>
+        <div className="flex flex-wrap items-center gap-2">
+          <Link href="/dispecer/analitika">
+            <Button type="button" variant="secondary" size="md">
+              <BarChart3 className="h-4 w-4" />
+              Analitika
+            </Button>
+          </Link>
+          <Button
+            type="button"
+            variant="secondary"
+            size="md"
+            onClick={() => void ucitajZahtjeve(false)}
+            isLoading={ucitava}
+            loadingText="Osvježavanje..."
+          >
+            <RefreshCw className="h-4 w-4" />
+            Osvježi
+          </Button>
+        </div>
       </div>
 
       <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-4 lg:grid-cols-8">
@@ -625,7 +633,8 @@ function DispecerPageContent() {
           <button
             type="button"
             onClick={() => setToast(null)}
-            className="flex-shrink-0 transition-opacity hover:opacity-60"
+            aria-label="Zatvori obavijest"
+            className="flex-shrink-0 rounded-lg transition-opacity hover:opacity-60 focus:outline-none focus-visible:ring-2 focus-visible:ring-celestial-teal/40"
             style={{ color: 'var(--first-nonary)' }}
           >
             <XCircle className="h-4 w-4" />

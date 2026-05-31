@@ -21,7 +21,7 @@ export async function GET() {
 
     const { data: osoba, error: greskaOsoba } = await db
       .from('osoba')
-      .select('ime, prezime, broj_telefona, adresa, email')
+      .select('ime, prezime, broj_telefona, adresa, email, bazna_latitude, bazna_longitude')
       .eq('id_osobe', user.id)
       .maybeSingle();
 
@@ -111,6 +111,8 @@ export async function GET() {
         email:         osoba?.email ?? user.email ?? '',
         broj_telefona: osoba?.broj_telefona ?? null,
         adresa:        osoba?.adresa ?? null,
+        bazna_latitude:  osoba?.bazna_latitude  ?? null,
+        bazna_longitude: osoba?.bazna_longitude ?? null,
         uloge,
         is_verified:   isVerified,
         is_premium:    isPremium,

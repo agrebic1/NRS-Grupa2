@@ -93,8 +93,9 @@ export function EvidencijaRadaModal({ zahtjevId, onZatvori, onUspjeh }: Evidenci
               </p>
             </div>
           </div>
-          <button type="button" onClick={onZatvori}
-            className="transition-opacity hover:opacity-70" style={{ color: 'var(--first-nonary)' }}>
+          <button type="button" onClick={onZatvori} aria-label="Zatvori"
+            className="rounded-lg transition-opacity hover:opacity-70 focus:outline-none focus-visible:ring-2 focus-visible:ring-celestial-teal/40"
+            style={{ color: 'var(--first-nonary)' }}>
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -220,7 +221,7 @@ export function EvidencijaRadaModal({ zahtjevId, onZatvori, onUspjeh }: Evidenci
                     <button
                       type="button"
                       onClick={() => setStavke((arr) => arr.filter((_, j) => j !== i))}
-                      className="p-1.5"
+                      className="rounded-lg p-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-celestial-teal/40"
                       aria-label="Ukloni stavku"
                     >
                       <Trash2 className="h-4 w-4" style={{ color: '#DC2626' }} />

@@ -1,3 +1,0 @@
-# Sprint Goal
-
-# Sprint Backlog

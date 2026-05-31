@@ -47,6 +47,7 @@ Napomena: `npm run test:e2e` koristi jedan Playwright worker radi stabilnog logi
 `npm run test:izvjestaj`
 
 Ova komanda:
+
 - pokrece `npm test`
 - pokrece `npm run test:coverage`
 - pokrece `npm run test:e2e -- --workers=1` (stabilnije za CI/lokalni batch run)
@@ -69,12 +70,12 @@ E2E_KORISNIK_EMAIL=test@gmail.com
 E2E_KORISNIK_PASSWORD=123456789Aa@
 ```
 
-## Trenutni status (Sprint 9 — automatski)
+## Trenutni status (automatski — mjereno 2026-05-30)
 
-- `npm test`: 286/286 passed (174 unit + 112 integration)
-- `npm run test:e2e`: 23/23 passed (popravka DLI-021: RBAC prije validacije ID na serviserskom API)
+- `npm test`: **368/368 passed** (256 unit + 112 integration)
+- `npm run test:e2e`: **21/23 passed** — 2 poznata pada u `rbac.cross-access.spec.ts` (testovi pretpostavljaju da serviser/dispečer nalog ima i `korisnik_usluge` profil pa može otvoriti `/korisnik`; seed-ovani interni nalozi ga nemaju). Sigurnosno-kritični negativni slučajevi (serviser ne može `/dispecer`, 403 na tuđe API rute) **prolaze**.
 - `npm run test:izvjestaj`: generiše `docs/testing/Izvjestaji/<run>/IZVJESTAJ.md`
-- cilj pokrivenosti: **minimum 98%**
+- pokrivenost (`test:coverage`): trenutno ograničena na uži skup fajlova kroz `collectCoverageFrom` u `jest.config.js` — prikazani postotak nije pokrivenost cijelog projekta.
 
 ## Izvještaji i artefakti
 
