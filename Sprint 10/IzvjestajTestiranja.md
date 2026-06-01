@@ -264,3 +264,4 @@ Geo-preporuka (US-48) i analitički dashboard (US-49) pokriveni su unit i integr
 - [`ManualniTestovi.md`](ManualniTestovi.md)
 - `Projekat/tests/unit/preporukaServisera.test.ts`, `analitikaMetrike.test.ts`
 - `Projekat/tests/integration/api.dispecer.analitika.test.js`, `api.dispecer.preporuka.test.js`
+
