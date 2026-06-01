@@ -1,16 +1,16 @@
 # Decision Log
 
-## Odluka #001 - Sprint 10 kao finalni sprint za dodanu vrijednost, stabilizaciju i predaju
+## Odluka #001 - Sprint 10 kao finalni sprint za dodatnu vrijednost i stabilizaciju sistema
 
 | Polje               | Opis                                                                                                                                                                                                                                                     |
 | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | ID odluke           | DLI-001                                                                                                                                                                                                                                                  |
 | Datum               | 29.05.2026.                                                                                                                                                                                                                                              |
-| Kratak naziv odluke | Opseg finalnog sprinta                                                                                                                                                                                                                                   |
+| Kratak naziv odluke | Opseg sprinta 10                                                                                                                                                                                                                                         |
 | Opis problema       | Nakon implementacije svih kanonskih korisničkih priča US-01…US-47 bilo je potrebno odlučiti da li Sprint 10 treba koristiti za nove velike funkcionalnosti, samo za ispravke ili za balans između dodatne vrijednosti, stabilizacije i pripreme predaje. |
 | Razmatrane opcije   | 1. Dodavati što više novih funkcionalnosti <br> 2. Raditi samo tehničko čišćenje i bug fixing <br> 3. Balansirati nove funkcionalnosti, UX poliranje, stabilizaciju i dokumentaciju                                                                      |
 | Odabrana opcija     | Balansiran sprint sa tri toka: nove funkcionalnosti, UX poliranje i stabilizacija/predaja                                                                                                                                                                |
-| Razlog izbora       | Pošto je MVP već funkcionalno zatvoren, najveću vrijednost u finalnom sprintu donosi kombinacija korisnih dopuna, stabilnosti, boljeg UX-a i usklađene dokumentacije                                                                                     |
+| Razlog izbora       | Pošto je MVP već funkcionalno zatvoren, najveću vrijednost u finalnom implementacionom sprintu donosi kombinacija korisnih dopuna, stabilnosti, boljeg UX-a i usklađene dokumentacije                                                                        |
 | Posljedice odluke   | Sprint 10 uvodi nove story-je US-48, US-49 i US-50, ali istovremeno uključuje tehnički dug, testove, migracije, dokumentaciju i demo pripremu                                                                                                               |
 | Status odluke       | aktivna                                                                                                                                                                                                                                                  |
 
@@ -36,7 +36,7 @@
 
 ### Sažetak odluke
 
-**Krajnja odluka:** Sprint 10 se koristi kao finalni sprint za dodanu vrijednost, stabilizaciju, UX poliranje i pripremu predaje.
+**Krajnja odluka:** Sprint 10 se koristi kao finalni sprint za dodatnu vrijednost, stabilizaciju, UX poliranje i pripremu predaje.
 
 | Stavka         | Objašnjenje                                                                                                                 |
 | -------------- | --------------------------------------------------------------------------------------------------------------------------- |
@@ -54,7 +54,7 @@ S obzirom da je kompletan kanonski opseg US-01…US-47 već implementiran, Sprin
 
 Zbog toga je odabran balansiran pristup. U sprint su uključene dvije funkcionalnosti koje imaju jasnu vrijednost za sistem i prezentaciju: geo-preporuka servisera po blizini i analitički dashboard s grafovima. Pored toga, uključeno je UX poliranje kroz responsive prikaz, prazna/loading stanja i accessibility poboljšanja. Treći tok se odnosi na tehnički dug, dokumentaciju, migracije i demo pripremu.
 
-Ova odluka smanjuje rizik da finalni sprint postane preširok, a istovremeno osigurava da proizvod na kraju izgleda zrelije, stabilnije i profesionalnije.
+Ova odluka smanjuje rizik da finalni implementacioni sprint postane preširok, a istovremeno osigurava da proizvod na kraju izgleda zrelije, stabilnije i profesionalnije.
 
 ---
 
