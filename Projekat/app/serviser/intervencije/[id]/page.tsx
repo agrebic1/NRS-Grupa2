@@ -228,7 +228,16 @@ function TerminVizual({ zahtjev }: { zahtjev: IntervencijaDetalji }) {
   );
 }
 
-async function patchServiserAkcija(zahtjevId: number, action: string, razlog: string) {
+type ServiserAkcijaOdgovor = {
+  novi_status?: string;
+  broj_ponovnih_ciklusa?: number;
+};
+
+async function patchServiserAkcija(
+  zahtjevId: number,
+  action: string,
+  razlog: string,
+): Promise<ServiserAkcijaOdgovor> {
   const r = await fetch(`/api/serviser/intervencije/${zahtjevId}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
@@ -236,6 +245,7 @@ async function patchServiserAkcija(zahtjevId: number, action: string, razlog: st
   });
   const d = await r.json();
   if (!r.ok) throw new Error(d.error ?? 'Greška.');
+  return d as ServiserAkcijaOdgovor;
 }
 
 // ─── Akcije servisera ─────────────────────────────────────────────────────────
@@ -565,8 +575,11 @@ export default function ServiserIntervencijaDetaljiPage() {
   const [brisanjeSlikaId, setBrisanjeSlikaId] = useState<number | null>(null);
   const [ucitava,    setUcitava]    = useState(true);
   const [greska,     setGreska]     = useState<string | null>(null);
+  const [samoCitanje, setSamoCitanje] = useState(false);
+  const [nivoPristupa, setNivoPristupa] = useState<'glavni' | 'pomocni' | 'arhiva'>('glavni');
   const [pokaziEvid,           setPokaziEvid]           = useState(false);
   const [pokaziUspjeh,         setPokaziUspjeh]         = useState(false);
+  const [uspjehPoruka,         setUspjehPoruka]         = useState<string | null>(null);
   const [pokaziVratiNaDodjelu, setPokaziVratiNaDodjelu] = useState(false);
   const [pokaziNijeRijesen,    setPokaziNijeRijesen]    = useState(false);
   const [scrollToZavrsi,      setScrollToZavrsi]      = useState(false);
@@ -591,6 +604,8 @@ export default function ServiserIntervencijaDetaljiPage() {
       setZahtjev(intD.zahtjev);
       setEvidencije(intD.evidencije ?? []);
       setAktivnosti(intD.aktivnosti ?? []);
+      setSamoCitanje(Boolean(intD.pristup?.samo_citanje));
+      setNivoPristupa(intD.pristup?.nivo ?? 'glavni');
       if (timR.ok) {
         const timD = await timR.json();
         setTim(timD.tim ?? []);
@@ -686,6 +701,7 @@ export default function ServiserIntervencijaDetaljiPage() {
   const pboja  = prioritetBoja(zahtjev.final_priority);
   const kasni  = jeKasni(zahtjev);
   const jeAktivna = ['dodijeljeno', 'u_radu', 'u_izvrsenju'].includes(zahtjev.status);
+  const mozeMijenjati = jeAktivna && !samoCitanje;
 
   const sboja = statusBoja(zahtjev.status);
 
@@ -708,6 +724,21 @@ export default function ServiserIntervencijaDetaljiPage() {
       </div>
 
       {/* ─── Success banner ─────────────────────────────────────────────────── */}
+      {samoCitanje && (
+        <div className="mb-4">
+          <AlertMessage
+            variant="info"
+            message={
+              nivoPristupa === 'pomocni'
+                ? 'Pregledate intervenciju kao pomoćni član tima — izmjene nisu dozvoljene.'
+                : nivoPristupa === 'arhiva'
+                  ? 'Pregled arhive — intervencija je završena; prikazani su podaci s vašeg rada.'
+                  : 'Samo pregled — intervencija više nije dodijeljena vama.'
+            }
+          />
+        </div>
+      )}
+
       {pokaziUspjeh && (
         <div className="mb-4 flex items-center gap-3 rounded-2xl px-5 py-3.5"
           style={{ backgroundColor: 'rgba(34,197,94,0.08)', border: '1px solid rgba(34,197,94,0.25)' }}>
@@ -715,7 +746,7 @@ export default function ServiserIntervencijaDetaljiPage() {
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
           </svg>
           <p className="text-sm font-semibold" style={{ color: '#16A34A' }}>
-            Evidencija rada je uspješno sačuvana.
+            {uspjehPoruka ?? 'Evidencija rada je uspješno sačuvana.'}
           </p>
         </div>
       )}
@@ -804,7 +835,7 @@ export default function ServiserIntervencijaDetaljiPage() {
         <div className="min-w-0 flex-1 flex flex-col gap-4">
 
           {/* Akcije */}
-          {jeAktivna && (
+          {mozeMijenjati && (
             <AkcijeServiser
               status={zahtjev.status}
               zahtjevId={zahtjev.id}
@@ -870,7 +901,7 @@ export default function ServiserIntervencijaDetaljiPage() {
             apiEndpoint={`/api/serviser/intervencije/${zahtjev.id}`}
             mojaUloga="serviser"
             onDodana={ucitaj}
-            disabled={!jeAktivna}
+            disabled={!mozeMijenjati}
           />
 
           {/* Kontrolna lista - samo korak 3 (na terenu) */}
@@ -1056,7 +1087,7 @@ export default function ServiserIntervencijaDetaljiPage() {
       </div>
 
       {/* ─── Mobile sticky bar ──────────────────────────────────────────────── */}
-      {jeAktivna && (
+      {mozeMijenjati && (
         <div className="fixed bottom-0 left-0 right-0 z-40 lg:hidden"
           style={{
             backgroundColor: 'rgb(255 255 255/0.97)',
@@ -1142,7 +1173,7 @@ export default function ServiserIntervencijaDetaljiPage() {
           </div>
         </div>
       )}
-      {jeAktivna && <div className="h-20 lg:hidden" />}
+      {mozeMijenjati && <div className="h-20 lg:hidden" />}
 
       {/* Modal za evidenciju */}
       {pokaziEvid && (
@@ -1167,8 +1198,27 @@ export default function ServiserIntervencijaDetaljiPage() {
           potvrdiTekst="Vrati na dodjelu"
           onZatvori={() => setPokaziVratiNaDodjelu(false)}
           onPotvrdi={async (razlog) => {
-            await patchServiserAkcija(zahtjev.id, 'vrati_na_ponovnu_dodjelu', razlog);
-            ucitaj();
+            const odg = await patchServiserAkcija(zahtjev.id, 'vrati_na_ponovnu_dodjelu', razlog);
+            setPokaziVratiNaDodjelu(false);
+            setZahtjev((z) =>
+              z
+                ? {
+                    ...z,
+                    status: odg.novi_status ?? 'potvrdeno',
+                    serviser_dodijeljen_id: null,
+                    broj_ponovnih_ciklusa: odg.broj_ponovnih_ciklusa ?? z.broj_ponovnih_ciklusa,
+                  }
+                : z,
+            );
+            setSamoCitanje(true);
+            setNivoPristupa('arhiva');
+            setUspjehPoruku(
+              odg.broj_ponovnih_ciklusa
+                ? `Zadatak vraćen dispečeru. Ponovni ciklus: ${odg.broj_ponovnih_ciklusa}.`
+                : 'Zadatak vraćen dispečeru na ponovnu dodjelu.',
+            );
+            setPokaziUspjeh(true);
+            void ucitaj({ silent: true });
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
         />
@@ -1185,8 +1235,27 @@ export default function ServiserIntervencijaDetaljiPage() {
           variantPotvrdi="danger"
           onZatvori={() => setPokaziNijeRijesen(false)}
           onPotvrdi={async (razlog) => {
-            await patchServiserAkcija(zahtjev.id, 'oznaci_nije_rijesen', razlog);
-            ucitaj();
+            const odg = await patchServiserAkcija(zahtjev.id, 'oznaci_nije_rijesen', razlog);
+            setPokaziNijeRijesen(false);
+            setZahtjev((z) =>
+              z
+                ? {
+                    ...z,
+                    status: odg.novi_status ?? 'potvrdeno',
+                    serviser_dodijeljen_id: null,
+                    broj_ponovnih_ciklusa: odg.broj_ponovnih_ciklusa ?? z.broj_ponovnih_ciklusa,
+                  }
+                : z,
+            );
+            setSamoCitanje(true);
+            setNivoPristupa('arhiva');
+            setUspjehPoruku(
+              odg.broj_ponovnih_ciklusa
+                ? `Označeno kao nije riješeno. Ponovni ciklus: ${odg.broj_ponovnih_ciklusa}.`
+                : 'Intervencija označena kao nije riješena.',
+            );
+            setPokaziUspjeh(true);
+            void ucitaj({ silent: true });
             window.scrollTo({ top: 0, behavior: 'smooth' });
           }}
         />

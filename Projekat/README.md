@@ -33,9 +33,12 @@ npm run dev          # http://localhost:3000
 ```env
 NEXT_PUBLIC_SUPABASE_URL=...
 NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+NEXT_PUBLIC_SITE_URL=http://localhost:3000   # baza za email linkove (registracija / resend)
 SUPABASE_SERVICE_ROLE_KEY=...          # server-side (API rute, cron)
 CRON_SECRET=...                        # zaštita cron ruta u produkciji
 ```
+
+U Supabase dashboardu (Authentication → URL Configuration) dodajte istu vrijednost kao **Site URL** i u **Redirect URLs** putanju `{SITE_URL}/auth/callback` (npr. `https://nrs-grupa2.vercel.app/auth/callback`). Bez toga ponovno slanje linka za potvrdu emaila može pasti.
 
 Za e2e testove potrebni su i kredencijali test-naloga (vidi `docs/testing/README.md`).
 

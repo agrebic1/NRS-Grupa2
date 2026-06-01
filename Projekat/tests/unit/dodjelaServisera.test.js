@@ -1,6 +1,7 @@
 const {
   serviserSmijeMijenjatiStatus,
   assertServiserVlasnistvo,
+  provjeriServiserPristupDetalju,
 } = require('@/lib/servisirane/serviserPristup');
 
 const {
@@ -17,6 +18,45 @@ function supabaseZaVlasnistvo(data) {
       eq:     jest.fn().mockReturnThis(),
       maybeSingle: jest.fn().mockResolvedValue({ data, error: null }),
     })),
+  };
+}
+
+function supabaseZaPristup({
+  zahtjev,
+  timClan = false,
+  evidencijaBroj = 0,
+  aktivnostiBroj = 0,
+}) {
+  return {
+    from: jest.fn((table) => {
+      const chain = {
+        select: jest.fn().mockReturnThis(),
+        eq: jest.fn().mockReturnThis(),
+        maybeSingle: jest.fn(),
+      };
+      if (table === 'service_requests') {
+        chain.maybeSingle.mockResolvedValue({ data: zahtjev, error: null });
+        return chain;
+      }
+      if (table === 'tim_intervencije') {
+        chain.maybeSingle.mockResolvedValue({
+          data: timClan ? { serviser_id: 's1' } : null,
+          error: null,
+        });
+        return chain;
+      }
+      if (table === 'work_evidence' || table === 'intervention_activities') {
+        const count = table === 'work_evidence' ? evidencijaBroj : aktivnostiBroj;
+        return {
+          select: jest.fn(() => ({
+            eq: jest.fn().mockReturnValue({
+              eq: jest.fn().mockResolvedValue({ count, error: null }),
+            }),
+          })),
+        };
+      }
+      return chain;
+    }),
   };
 }
 
@@ -78,6 +118,22 @@ describe('assertServiserVlasnistvo', () => {
     expect(rez.ok).toBe(false);
   });
 
+  test('vraća ok:false za pomoćnog člana tima (PATCH)', async () => {
+    const db = supabaseZaPristup({
+      zahtjev: {
+        serviser_dodijeljen_id: 'drugi',
+        status: 'u_radu',
+        is_premium: false,
+      },
+      timClan: true,
+    });
+    const rez = await assertServiserVlasnistvo(db, 1, 's1');
+    expect(rez.ok).toBe(false);
+    if (!rez.ok) {
+      expect(rez.greska).toContain('glavni serviser');
+    }
+  });
+
   test('tretira is_premium null kao false', async () => {
     const db = supabaseZaVlasnistvo({
       serviser_dodijeljen_id: 's1',
@@ -87,6 +143,90 @@ describe('assertServiserVlasnistvo', () => {
     const rez = await assertServiserVlasnistvo(db, 1, 's1');
     expect(rez.ok).toBe(true);
     if (rez.ok) expect(rez.is_premium).toBe(false);
+  });
+});
+
+// ─── provjeriServiserPristupDetalju ───────────────────────────────────────────
+
+describe('provjeriServiserPristupDetalju', () => {
+  test('glavni serviser — puna prava', async () => {
+    const db = supabaseZaPristup({
+      zahtjev: {
+        serviser_dodijeljen_id: 's1',
+        status: 'dodijeljeno',
+        is_premium: true,
+      },
+    });
+    const rez = await provjeriServiserPristupDetalju(db, 1, 's1');
+    expect(rez.ok).toBe(true);
+    if (rez.ok) {
+      expect(rez.nivo).toBe('glavni');
+      expect(rez.samo_citanje).toBe(false);
+      expect(rez.is_premium).toBe(true);
+    }
+  });
+
+  test('pomoćni član tima — samo čitanje', async () => {
+    const db = supabaseZaPristup({
+      zahtjev: {
+        serviser_dodijeljen_id: 'drugi',
+        status: 'zavrseno',
+        is_premium: false,
+      },
+      timClan: true,
+    });
+    const rez = await provjeriServiserPristupDetalju(db, 1, 's1');
+    expect(rez.ok).toBe(true);
+    if (rez.ok) {
+      expect(rez.nivo).toBe('pomocni');
+      expect(rez.samo_citanje).toBe(true);
+    }
+  });
+
+  test('arhiva — završeno s evidencijom radnika', async () => {
+    const db = supabaseZaPristup({
+      zahtjev: {
+        serviser_dodijeljen_id: null,
+        status: 'zavrseno',
+        is_premium: false,
+      },
+      evidencijaBroj: 2,
+    });
+    const rez = await provjeriServiserPristupDetalju(db, 1, 's1');
+    expect(rez.ok).toBe(true);
+    if (rez.ok) {
+      expect(rez.nivo).toBe('arhiva');
+      expect(rez.samo_citanje).toBe(true);
+    }
+  });
+
+  test('potvrdeno nakon sudjelovanja — pregled arhive', async () => {
+    const db = supabaseZaPristup({
+      zahtjev: {
+        serviser_dodijeljen_id: null,
+        status: 'potvrdeno',
+        is_premium: false,
+      },
+      aktivnostiBroj: 2,
+    });
+    const rez = await provjeriServiserPristupDetalju(db, 1, 's1');
+    expect(rez.ok).toBe(true);
+    if (rez.ok) {
+      expect(rez.nivo).toBe('arhiva');
+      expect(rez.samo_citanje).toBe(true);
+    }
+  });
+
+  test('završeno bez dodjele i bez evidencije — odbijen pristup', async () => {
+    const db = supabaseZaPristup({
+      zahtjev: {
+        serviser_dodijeljen_id: null,
+        status: 'zavrseno',
+        is_premium: false,
+      },
+    });
+    const rez = await provjeriServiserPristupDetalju(db, 1, 's1');
+    expect(rez.ok).toBe(false);
   });
 });
 

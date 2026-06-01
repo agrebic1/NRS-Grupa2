@@ -1,5 +1,26 @@
 import { z } from 'zod';
 
+// ─── Kontakt telefon ──────────────────────────────────────────────────────────
+// Dozvoljeni su samo cifre i znakovi za formatiranje (+, razmak, -, zagrade).
+// Ključna provjera je broj STVARNIH cifara: separator-znakovi se ne smiju
+// računati kao dužina broja, inače unosi poput "---------" ili "12 34 56 78"
+// (premalo cifara) prolaze validaciju.
+export const KONTAKT_TELEFON_REGEX = /^[+]?[0-9\s\-()]{9,25}$/;
+const MIN_CIFARA_TELEFONA = 9;
+const MAKS_CIFARA_TELEFONA = 15;
+
+export function jeValidanKontaktTelefon(vrijednost: string): boolean {
+  const tel = vrijednost.trim();
+  if (!KONTAKT_TELEFON_REGEX.test(tel)) return false;
+  const brojCifara = (tel.match(/\d/g) ?? []).length;
+  return brojCifara >= MIN_CIFARA_TELEFONA && brojCifara <= MAKS_CIFARA_TELEFONA;
+}
+
+export const kontaktTelefonSchema = z
+  .string()
+  .min(1, 'Unesite kontakt telefon.')
+  .refine(jeValidanKontaktTelefon, 'Unesite ispravan kontakt telefon.');
+
 export const partnerApplicationSchema = z.object({
   first_name:      z.string().min(2, 'Ime mora imati najmanje 2 karaktera').max(100),
   last_name:       z.string().min(2, 'Prezime mora imati najmanje 2 karaktera').max(100),
@@ -94,10 +115,7 @@ export const wizardKorak2Schema = z.object({
     .string()
     .min(20, 'Opis zahtjeva mora sadržavati dovoljno informacija za obradu.')
     .max(2000, 'Opis ne smije biti duži od 2000 karaktera'),
-  contactPhone: z
-    .string()
-    .min(1, 'Unesite kontakt telefon.')
-    .regex(/^[+]?[0-9\s\-()]{9,20}$/, 'Unesite ispravan kontakt telefon.'),
+  contactPhone: kontaktTelefonSchema,
 });
 
 export const wizardKorak3Schema = z.object({
@@ -117,12 +135,8 @@ export const serviceRequestSchema = z
     category_sub:  z.string().min(1).optional(),
     address:       z.string().min(5).max(500),
     description:   z.string().min(20).max(2000),
-    // Usklađeno s wizardom (PHONE_REGEX): 8-20 znakova
-    contact_phone: z
-      .string()
-      .min(9, 'Unesite ispravan kontakt telefon.')
-      .max(20, 'Kontakt telefon je predugačak.')
-      .regex(/^[+]?[0-9\s\-()]{9,20}$/, 'Unesite ispravan kontakt telefon.'),
+    // Usklađeno s wizardom: traži se 9-15 stvarnih cifara (vidi kontaktTelefonSchema).
+    contact_phone: kontaktTelefonSchema,
     photo_url:     z.string().url().optional().nullable(),
     /** Opcionalno: GPS / mapa (AC15) */
     latitude:      z.number().min(-90).max(90).optional().nullable(),
@@ -152,7 +166,7 @@ export const updateRequestSchema = z
   .object({
     description:        z.string().min(10, 'Opis mora imati najmanje 10 karaktera').max(2000).optional(),
     address:            z.string().min(5, 'Unesite ispravnu adresu').max(500).optional(),
-    contact_phone:      z.string().min(1, 'Unesite kontakt telefon.').regex(/^[+]?[0-9\s\-()]{9,20}$/, 'Unesite ispravan kontakt telefon.').optional(),
+    contact_phone:      kontaktTelefonSchema.optional(),
     preferred_schedule: preferredScheduleSchema.optional(),
   })
   .refine((d) => Object.keys(d).length > 0, {

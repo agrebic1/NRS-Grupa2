@@ -10,6 +10,7 @@ import {
   isLoginBlocked,
   recordFailedLoginAttempt,
 } from '@/lib/security/loginRateLimiter';
+import { getAuthEmailRedirectUrl } from '@/lib/auth/emailRedirect';
 
 function normalizujEmail(email: string) {
   return email
@@ -41,6 +42,28 @@ function mapirajAuthGresku(greska: { message: string; status?: number; code?: st
   }
 
   return greska.message;
+}
+
+function mapirajResendGresku(greska: { message: string; status?: number }) {
+  const poruka = greska.message?.toLowerCase() ?? '';
+
+  if (greska.status === 429 || poruka.includes('too many') || poruka.includes('rate limit')) {
+    return 'Previše zahtjeva za novi link. Sačekajte nekoliko minuta i pokušajte ponovo.';
+  }
+
+  if (poruka.includes('redirect') || poruka.includes('redirect_to')) {
+    return 'Potvrda emaila trenutno nije dostupna zbog konfiguracije preusmjeravanja. Kontaktirajte podršku.';
+  }
+
+  if (
+    poruka.includes('already confirmed') ||
+    poruka.includes('already verified') ||
+    poruka.includes('email confirmed')
+  ) {
+    return 'Email je već potvrđen. Prijavite se na nalog.';
+  }
+
+  return 'Slanje verifikacijskog emaila nije uspjelo. Pokušajte ponovo.';
 }
 
 // Prijava 
@@ -76,16 +99,21 @@ export async function posaljiPonovoVerifikacijskiEmail(emailAdresa: string) {
     throw new Error('Unesite ispravnu email adresu.');
   }
 
+  const emailRedirectTo = getAuthEmailRedirectUrl();
+  if (!emailRedirectTo) {
+    throw new Error('Potvrda emaila nije konfigurisana (NEXT_PUBLIC_SITE_URL).');
+  }
+
   const { error } = await supabase.auth.resend({
     type: 'signup',
     email,
     options: {
-      emailRedirectTo: `${typeof window !== 'undefined' ? window.location.origin : ''}/auth/login`,
+      emailRedirectTo,
     },
   });
 
   if (error) {
-    throw new Error('Slanje verifikacijskog emaila nije uspjelo. Pokušajte ponovo.');
+    throw new Error(mapirajResendGresku(error));
   }
 }
 
@@ -118,12 +146,15 @@ export async function registrujKorisnika(podaci: {
     throw new Error('Unesite ispravnu email adresu.');
   }
 
+  const emailRedirectTo = getAuthEmailRedirectUrl();
+
   const { data: authPodaci, error: greskaAuth } = await supabase.auth.signUp({
     email,
     password: podaci.lozinka,
     options: {
       // DB trigger reads these from raw_user_meta_data and inserts into osoba + odgovarajuci subtype
       data: { ime: podaci.ime, prezime: podaci.prezime, uloga: 'Klijent' },
+      ...(emailRedirectTo ? { emailRedirectTo } : {}),
     },
   });
 
@@ -214,33 +245,35 @@ export async function getUlogeKorisnika(idKorisnika: string): Promise<UserRole[]
     // Ako server ruta nije dostupna, nastavi sa direktnom provjerom ispod.
   }
 
-  // Provjera korisnik_usluge tabele
+  // Provjera korisnik_usluge i uposlenici tabela (isto kao /api/auth/uloge).
   const { data: korisnikUsluge } = await supabase
     .from('korisnik_usluge')
     .select('id_korisnika_usluge')
     .eq('id_korisnika_usluge', idKorisnika)
     .maybeSingle();
 
-  if (korisnikUsluge) pronadjeneUloge.push('korisnik');
-
-  // Provjera uposlenici tabele + join sa ulogom
   const { data: uposlenik } = await supabase
     .from('uposlenici')
     .select('id_uloge')
     .eq('id_uposlenika', idKorisnika)
     .maybeSingle();
 
+  // Zaposleni uvijek imaju i opciju korištenja sistema kao korisnik usluge,
+  // pa stranica za odabir uloge može ponuditi oba izbora.
+  if (korisnikUsluge || uposlenik) {
+    pronadjeneUloge.push('korisnik');
+  }
+
   if (uposlenik?.id_uloge) {
     const { data: ulogaPodaci } = await supabase
       .from('uloga')
       .select('naziv')
       .eq('id_uloge', uposlenik.id_uloge)
-      .single();
+      .maybeSingle();
 
     const uloga = mapirajNazivUloge(ulogaPodaci?.naziv);
-    const INTERNE_ULOGE: UserRole[] = ['serviser', 'dispecer', 'admin'];
 
-    if (uloga && INTERNE_ULOGE.includes(uloga)) {
+    if (uloga && !pronadjeneUloge.includes(uloga)) {
       pronadjeneUloge.push(uloga);
     }
   }

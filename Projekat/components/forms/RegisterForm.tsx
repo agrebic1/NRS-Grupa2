@@ -164,8 +164,12 @@ export function RegisterForm() {
       await posaljiPonovoVerifikacijskiEmail(emailCekaPotvrdu);
       setPorukaNakonPonovnogSlanja('Poslali smo novi link za potvrdu naloga.');
       setPreostaleSekundePonovo(SEKUNDE_DO_PONOVNOG_SLANJA);
-    } catch {
-      setGreskaPonovnogSlanja('Nije moguće poslati novi link. Pokušajte ponovo.');
+    } catch (greska) {
+      setGreskaPonovnogSlanja(
+        greska instanceof Error
+          ? greska.message
+          : 'Nije moguće poslati novi link. Pokušajte ponovo.'
+      );
     } finally {
       setJeSlanjePonovo(false);
     }

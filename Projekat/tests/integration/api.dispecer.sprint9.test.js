@@ -192,6 +192,7 @@ describe('/api/dispecer/zahtjevi/[id] - Sprint 9 (US-28)', () => {
     mockAssertDispatcherAccess.mockResolvedValue(true);
 
     const onUpdate = jest.fn();
+    const onActivityInsert = jest.fn().mockResolvedValue({ data: null, error: null });
     let srCalls = 0;
 
     mockFrom.mockImplementation((table) => {
@@ -218,15 +219,19 @@ describe('/api/dispecer/zahtjevi/[id] - Sprint 9 (US-28)', () => {
       if (table === 'osoba') {
         return {
           select: jest.fn().mockReturnThis(),
-          eq: jest.fn().mockReturnThis(),
-          maybeSingle: jest.fn().mockResolvedValue({
-            data: { ime: 'Novi', prezime: 'Serviser' },
-            error: null,
-          }),
+          eq: jest.fn().mockImplementation((_col, id) => ({
+            maybeSingle: jest.fn().mockResolvedValue({
+              data:
+                id === SERVISER_A
+                  ? { ime: 'Stari', prezime: 'Serviser' }
+                  : { ime: 'Novi', prezime: 'Serviser' },
+              error: null,
+            }),
+          })),
         };
       }
       if (table === 'intervention_activities') {
-        return { insert: jest.fn().mockResolvedValue({ data: null, error: null }) };
+        return { insert: onActivityInsert };
       }
       return flexChain();
     });
@@ -245,5 +250,19 @@ describe('/api/dispecer/zahtjevi/[id] - Sprint 9 (US-28)', () => {
     expect(body.success).toBe(true);
     expect(body.novi_serviser_id).toBe(SERVISER_B);
     expect(onUpdate).toHaveBeenCalledWith({ serviser_dodijeljen_id: SERVISER_B });
+    expect(onActivityInsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        tip: 'promjena_izvrsioca',
+        old_value: 'Stari Serviser',
+        new_value: 'Novi Serviser',
+        razlog: VALID_RAZLOG,
+        metadata: expect.objectContaining({
+          iz_servisera_id: SERVISER_A,
+          na_servisera_id: SERVISER_B,
+          iz_servisera_ime: 'Stari Serviser',
+          na_servisera_ime: 'Novi Serviser',
+        }),
+      }),
+    );
   });
 });

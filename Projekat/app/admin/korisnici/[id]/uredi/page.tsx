@@ -567,7 +567,11 @@ export default function UrediKorisnikaPage() {
       });
       const d = await r.json();
       if (!r.ok) throw new Error(d.error ?? 'Greška.');
-      setUspjeh(uspjehPoruka);
+      if (d.korisnik?.ime) setIme(d.korisnik.ime);
+      if (d.korisnik?.prezime) setPrezime(d.korisnik.prezime);
+      setUspjeh(
+        d.upozorenje ? `${uspjehPoruka} (${d.upozorenje})` : uspjehPoruka,
+      );
       await ucitaj();
       setTimeout(() => setUspjeh(null), 4000);
     } catch (e) {
@@ -578,18 +582,35 @@ export default function UrediKorisnikaPage() {
   }
 
   function sacuvajPodatke() {
+    const imeT = ime.trim();
+    const prezimeT = prezime.trim();
+    if (!imeT) {
+      setGreska('Ime je obavezno.');
+      return;
+    }
+    if (!prezimeT) {
+      setGreska('Prezime je obavezno.');
+      return;
+    }
+    if (telefon.trim().length > 30) {
+      setGreska('Broj telefona je predugačak (maks. 30 znakova).');
+      return;
+    }
+
     const body: Record<string, unknown> = {
       action: 'uredi_podatke',
-      ime: ime.trim(),
-      prezime: prezime.trim(),
+      ime: imeT,
+      prezime: prezimeT,
       broj_telefona: telefon.trim() || null,
       adresa: adresa.trim() || null,
     };
 
-    // US-48: bazna lokacija — šalje se samo za servisere (koordinate dolaze iz OdabirLokacije)
-    if (korisnik?.uloga === 'Serviser') {
-      body.bazna_latitude = baznaLat;
-      body.bazna_longitude = baznaLng;
+    const jeServiser = (korisnik?.uloga ?? '').toLowerCase().includes('serviser');
+    if (jeServiser) {
+      const latOk = typeof baznaLat === 'number' && Number.isFinite(baznaLat);
+      const lngOk = typeof baznaLng === 'number' && Number.isFinite(baznaLng);
+      body.bazna_latitude = latOk ? baznaLat : null;
+      body.bazna_longitude = lngOk ? baznaLng : null;
     }
 
     posaljiPatch(body, 'Podaci uspješno sačuvani.');
@@ -984,7 +1005,7 @@ export default function UrediKorisnikaPage() {
             </div>
 
             {/* Bazna lokacija — samo za servisere (US-48) */}
-            {korisnik.uloga === 'Serviser' && (
+            {(korisnik.uloga ?? '').toLowerCase().includes('serviser') && (
               <div
                 className="mt-5 border-t pt-5"
                 style={{ borderColor: 'rgb(var(--first-quaternary-rgb)/0.25)' }}

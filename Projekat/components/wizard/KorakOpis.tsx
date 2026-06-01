@@ -4,14 +4,14 @@ import { useEffect, useMemo, useState } from 'react';
 import { Upload, X, AlertCircle, FileText, Phone } from 'lucide-react';
 import { Textarea } from '@/components/ui/Textarea';
 import { OkvirGalerije } from '@/components/servisirane/PrilogGalerija';
+import { jeValidanKontaktTelefon } from '@/lib/validations/servisirane';
 
-const PHONE_REGEX = /^[+]?[0-9\s\-()]{9,20}$/;
 const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
 const DOZVOLJENI_FORMATI = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 
 function validirajTelefon(tel: string): string | null {
   if (!tel.trim()) return 'Unesite kontakt telefon.';
-  if (!PHONE_REGEX.test(tel.trim())) return 'Unesite ispravan kontakt telefon.';
+  if (!jeValidanKontaktTelefon(tel)) return 'Unesite ispravan kontakt telefon.';
   return null;
 }
 

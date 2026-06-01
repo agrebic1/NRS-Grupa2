@@ -6,6 +6,7 @@ import type { UserRole } from './domain/types';
 const JAVNE_RUTE = [
   '/',
   '/auth/login',
+  '/auth/callback',
   '/auth/registracija',
   '/auth/odabir-uloge',
   '/odabir-uloge',

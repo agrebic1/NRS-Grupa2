@@ -12,6 +12,7 @@ import { AlertMessage } from '@/components/ui/AlertMessage';
 import type { ServisniZahtjev } from '@/domain/types/servisirane';
 import { labelKategorije } from '@/lib/servisirane/kategorije';
 import { prioritetBoja, statusBoja, statusOznaka } from '@/lib/servisirane/statusBoja';
+import { PonovniCiklusBadge } from '@/components/servisirane/PonovniCiklusBadge';
 
 // ─── Tipovi ───────────────────────────────────────────────────────────────────
 
@@ -147,6 +148,9 @@ function IntervencijaKartica({ z }: { z: IntervencijaZaListu }) {
               style={{ backgroundColor: 'rgba(234,88,12,0.08)', color: '#EA580C', border: '1px solid rgba(234,88,12,0.22)' }}>
               <XCircle className="h-3 w-3" />Preth. odbijeno
             </span>
+          )}
+          {(z.broj_ponovnih_ciklusa ?? 0) > 0 && (
+            <PonovniCiklusBadge broj={z.broj_ponovnih_ciklusa!} />
           )}
         </div>
 

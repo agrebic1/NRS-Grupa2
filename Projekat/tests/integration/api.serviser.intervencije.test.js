@@ -2,6 +2,7 @@ const mockGetUser = jest.fn();
 const mockFrom = jest.fn();
 const mockAssertServiserAccess = jest.fn();
 const mockAssertVlasnistvo = jest.fn();
+const mockProvjeriPristup = jest.fn();
 
 jest.mock('@/lib/supabase/server', () => ({
   createClient: () => ({
@@ -16,6 +17,7 @@ jest.mock('@/lib/servisirane/serviserPristup', () => {
     ...actual,
     assertServiserAccess: (...a) => mockAssertServiserAccess(...a),
     assertServiserVlasnistvo: (...a) => mockAssertVlasnistvo(...a),
+    provjeriServiserPristupDetalju: (...a) => mockProvjeriPristup(...a),
   };
 });
 
@@ -103,6 +105,7 @@ describe('GET /api/serviser/intervencije/[id]', () => {
     mockFrom.mockReset();
     mockAssertServiserAccess.mockReset();
     mockAssertVlasnistvo.mockReset();
+    mockProvjeriPristup.mockReset();
   });
 
   test('vraća 401 bez sesije', async () => {
@@ -134,12 +137,12 @@ describe('GET /api/serviser/intervencije/[id]', () => {
     expect(res.status).toBe(403);
   });
 
-  test('vraća 403 ako serviser nije vlasnik', async () => {
+  test('vraća 403 ako serviser nema pristup detalju', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 's1' } } });
     mockAssertServiserAccess.mockResolvedValue(true);
-    mockAssertVlasnistvo.mockResolvedValue({
+    mockProvjeriPristup.mockResolvedValue({
       ok: false,
-      greska: 'Nemate pristup.',
+      greska: 'Nemate pristup ovom zadatku.',
     });
     const res = await GET(
       new Request('http://localhost/api/serviser/intervencije/1'),
@@ -151,10 +154,12 @@ describe('GET /api/serviser/intervencije/[id]', () => {
   test('vraća 200 s detaljem intervencije', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 's1' } } });
     mockAssertServiserAccess.mockResolvedValue(true);
-    mockAssertVlasnistvo.mockResolvedValue({
+    mockProvjeriPristup.mockResolvedValue({
       ok: true,
       status: 'dodijeljeno',
       is_premium: false,
+      nivo: 'glavni',
+      samo_citanje: false,
     });
 
     mockFrom.mockImplementation((table) => {
@@ -178,6 +183,41 @@ describe('GET /api/serviser/intervencije/[id]', () => {
     const body = await res.json();
     expect(res.status).toBe(200);
     expect(body.zahtjev.id).toBe(1);
+    expect(body.pristup).toEqual({ nivo: 'glavni', samo_citanje: false });
+  });
+
+  test('vraća 200 s samo_citanje za pomoćnog člana tima', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 's1' } } });
+    mockAssertServiserAccess.mockResolvedValue(true);
+    mockProvjeriPristup.mockResolvedValue({
+      ok: true,
+      status: 'zavrseno',
+      is_premium: false,
+      nivo: 'pomocni',
+      samo_citanje: true,
+    });
+
+    mockFrom.mockImplementation((table) => {
+      if (table === 'service_requests') {
+        return {
+          select: jest.fn().mockReturnThis(),
+          eq: jest.fn().mockReturnThis(),
+          single: jest.fn().mockResolvedValue({
+            data: { id: 1, user_id: 'u1', status: 'zavrseno' },
+            error: null,
+          }),
+        };
+      }
+      return flexChain();
+    });
+
+    const res = await GET(
+      new Request('http://localhost/api/serviser/intervencije/1'),
+      PARAMS,
+    );
+    const body = await res.json();
+    expect(res.status).toBe(200);
+    expect(body.pristup).toEqual({ nivo: 'pomocni', samo_citanje: true });
   });
 });
 

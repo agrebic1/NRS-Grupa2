@@ -5,6 +5,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import {
   assertServiserAccess,
   assertServiserVlasnistvo,
+  provjeriServiserPristupDetalju,
   serviserSmijeMijenjatiStatus,
 } from '@/lib/servisirane/serviserPristup';
 import { odbijZadatakSchema, razlogOperativniSchema } from '@/lib/validations/servisirane';
@@ -58,7 +59,7 @@ export async function GET(
       db = supabase as any;
     }
 
-    const provjera = await assertServiserVlasnistvo(db, zahtjevId, user.id);
+    const provjera = await provjeriServiserPristupDetalju(db, zahtjevId, user.id);
     if (!provjera.ok) return NextResponse.json({ error: provjera.greska }, { status: 403 });
 
     const { data: zahtjev, error } = await db
@@ -87,6 +88,10 @@ export async function GET(
       zahtjev:    { ...zahtjev, podnosilac: osoba ?? null },
       evidencije: evidencije ?? [],
       aktivnosti: mapAktivnostiResponse(aktivnosti),
+      pristup: {
+        nivo: provjera.nivo,
+        samo_citanje: provjera.samo_citanje,
+      },
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Greška servera.';
@@ -149,8 +154,14 @@ export async function PATCH(
       if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
       await db.from('intervention_activities').insert({
-        zahtjev_id: zahtjevId, autor_id: user.id, tip: 'status_promjena',
-        sadrzaj: 'Serviser prihvatio zadatak.', metadata: { iz: trenutniStatus, u: 'u_radu' },
+        zahtjev_id: zahtjevId,
+        autor_id: user.id,
+        tip: 'status_promjena',
+        sadrzaj: 'Serviser prihvatio zadatak.',
+        old_value: trenutniStatus,
+        new_value: 'u_radu',
+        actor_role: 'serviser',
+        metadata: { iz: trenutniStatus, u: 'u_radu' },
       });
 
       // Notifikacija dispečeru
@@ -205,8 +216,14 @@ export async function PATCH(
       if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
       await db.from('intervention_activities').insert({
-        zahtjev_id: zahtjevId, autor_id: user.id, tip: 'status_promjena',
-        sadrzaj: 'Serviser je na lokaciji - intervencija u toku.', metadata: { iz: trenutniStatus, u: 'u_izvrsenju' },
+        zahtjev_id: zahtjevId,
+        autor_id: user.id,
+        tip: 'status_promjena',
+        sadrzaj: 'Serviser je na lokaciji — intervencija u toku.',
+        old_value: trenutniStatus,
+        new_value: 'u_izvrsenju',
+        actor_role: 'serviser',
+        metadata: { iz: trenutniStatus, u: 'u_izvrsenju' },
       });
 
       // Notify korisnik + dispecer that serviser is on-site
@@ -268,8 +285,11 @@ export async function PATCH(
         zahtjev_id: zahtjevId,
         autor_id:   user.id,
         tip:        'status_promjena',
-        sadrzaj:    'Serviser završio intervenciju - čeka formalno zatvaranje dispečera.',
-        metadata:   { iz: 'u_izvrsenju', u: 'zavrseno' },
+        sadrzaj:    'Serviser završio intervenciju — čeka formalno zatvaranje dispečera.',
+        old_value:  trenutniStatus,
+        new_value:  'zavrseno',
+        actor_role: 'serviser',
+        metadata:   { iz: trenutniStatus, u: 'zavrseno' },
       });
 
       // Notifikacija dispečeru
@@ -368,7 +388,13 @@ export async function PATCH(
         }
       }
 
-      const brojCiklusa = await inkrementirajPonovniCiklus(db, zahtjevId);
+      let brojCiklusa: number;
+      try {
+        brojCiklusa = await inkrementirajPonovniCiklus(db, zahtjevId);
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : 'Brojač ponovnih ciklusa nije ažuriran.';
+        return NextResponse.json({ error: msg }, { status: 500 });
+      }
       return NextResponse.json({ success: true, novi_status: 'potvrdeno', broj_ponovnih_ciklusa: brojCiklusa });
     }
 
@@ -425,7 +451,13 @@ export async function PATCH(
         }
       }
 
-      const brojCiklusaNR = await inkrementirajPonovniCiklus(db, zahtjevId);
+      let brojCiklusaNR: number;
+      try {
+        brojCiklusaNR = await inkrementirajPonovniCiklus(db, zahtjevId);
+      } catch (e) {
+        const msg = e instanceof Error ? e.message : 'Brojač ponovnih ciklusa nije ažuriran.';
+        return NextResponse.json({ error: msg }, { status: 500 });
+      }
       return NextResponse.json({
         success: true,
         novi_status: 'potvrdeno',
@@ -446,8 +478,15 @@ export async function PATCH(
       if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
       await db.from('intervention_activities').insert({
-        zahtjev_id: zahtjevId, autor_id: user.id, tip: 'odbijanje',
-        sadrzaj: `Serviser odbio zadatak: ${podaci.razlog}`, metadata: { iz: 'dodijeljeno', u: 'potvrdeno' },
+        zahtjev_id: zahtjevId,
+        autor_id: user.id,
+        tip: 'odbijanje',
+        sadrzaj: `Serviser odbio zadatak: ${podaci.razlog}`,
+        old_value: trenutniStatus,
+        new_value: 'potvrdeno',
+        actor_role: 'serviser',
+        razlog: podaci.razlog,
+        metadata: { iz: trenutniStatus, u: 'potvrdeno' },
       });
 
       // Notifikacija dispečeru

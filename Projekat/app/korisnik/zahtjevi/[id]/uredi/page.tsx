@@ -15,8 +15,7 @@ import { KorakTermin } from '@/components/wizard/KorakTermin';
 import type { ServisniZahtjev, TerminSlot } from '@/domain/types/servisirane';
 import { brojZahtjevaZaPrikaz } from '@/lib/servisirane/korisnickiBrojZahtjeva';
 import { korisnikSmijeMijenjatiIliOtkazatiZahtjev } from '@/lib/servisirane/statusZahtjeva';
-
-const PHONE_REGEX = /^[0-9+\-\/ ]*$/;
+import { jeValidanKontaktTelefon } from '@/lib/validations/servisirane';
 
 // ─── Forma za izmjenu ─────────────────────────────────────────────────────────
 
@@ -34,8 +33,8 @@ function validiraj(s: EditState): string | null {
   if (s.address.trim().length > 500) return 'Adresa ne smije biti duža od 500 karaktera.';
   if (s.description.trim().length < 10)   return 'Opis mora imati najmanje 10 karaktera.';
   if (s.description.trim().length > 2000) return 'Opis ne smije biti duži od 2000 karaktera.';
-  if (s.contactPhone && !PHONE_REGEX.test(s.contactPhone))
-    return 'Dozvoljeni su samo brojevi i znakovi +, -, /.';
+  if (s.contactPhone.trim() && !jeValidanKontaktTelefon(s.contactPhone))
+    return 'Unesite ispravan kontakt telefon.';
   const pt = porukaValidacijePreferiranogTermina(s);
   if (pt) return pt;
   return null;

@@ -48,14 +48,33 @@ async function upisiAuditLog(
     detalji?: Record<string, unknown>;
     razlog?: string | null;
   }
-) {
-  await db.from('admin_user_audit_log').insert({
+): Promise<string | null> {
+  const { error } = await db.from('admin_user_audit_log').insert({
     user_id:   payload.user_id,
     actor_id:  payload.actor_id,
     akcija:    payload.akcija,
     detalji:   payload.detalji ?? {},
     razlog:    payload.razlog ?? null,
   });
+  return error?.message ?? null;
+}
+
+function porukaValidacije(err: z.ZodError): string {
+  const issue = err.issues[0];
+  const polje = issue?.path?.[0];
+  if (polje === 'ime') return 'Ime je obavezno (najmanje 1 karakter).';
+  if (polje === 'prezime') return 'Prezime je obavezno (najmanje 1 karakter).';
+  if (polje === 'broj_telefona') return 'Broj telefona je predugačak (maks. 30 znakova).';
+  if (polje === 'bazna_latitude' || polje === 'bazna_longitude') {
+    return 'Bazna lokacija nije ispravna — odaberite adresu na karti ili ostavite prazno.';
+  }
+  return issue?.message ?? 'Neispravni podaci.';
+}
+
+function normalizujKoordinatu(v: unknown): number | null {
+  if (v === null || v === undefined || v === '') return null;
+  if (typeof v !== 'number' || Number.isNaN(v)) return null;
+  return v;
 }
 
 // ─── GET /api/admin/users/[id] ────────────────────────────────────────────────
@@ -218,10 +237,18 @@ export async function PATCH(
     const adb = admin as any;
 
     const raw = await req.json();
-    const parsed = patchSchema.safeParse(raw);
+    const rawObj =
+      raw && typeof raw === 'object' && !Array.isArray(raw)
+        ? { ...(raw as Record<string, unknown>) }
+        : raw;
+    if (rawObj && typeof rawObj === 'object' && !Array.isArray(rawObj)) {
+      const o = rawObj as Record<string, unknown>;
+      if ('bazna_latitude' in o) o.bazna_latitude = normalizujKoordinatu(o.bazna_latitude);
+      if ('bazna_longitude' in o) o.bazna_longitude = normalizujKoordinatu(o.bazna_longitude);
+    }
+    const parsed = patchSchema.safeParse(rawObj);
     if (!parsed.success) {
-      const msg = parsed.error.issues[0]?.message ?? 'Neispravni podaci.';
-      return NextResponse.json({ error: msg }, { status: 400 });
+      return NextResponse.json({ error: porukaValidacije(parsed.error) }, { status: 400 });
     }
 
     const body = parsed.data;
@@ -236,29 +263,89 @@ export async function PATCH(
 
     // ── uredi_podatke ─────────────────────────────────────────────────────────
     if (body.action === 'uredi_podatke') {
-      // All personal data (ime, prezime, telefon, adresa, lokacija) lives on osoba supertype.
+      const { data: authCilj, error: authCiljErr } = await admin.auth.admin.getUserById(ciljId);
+      if (authCiljErr || !authCilj.user) {
+        return NextResponse.json({ error: 'Korisnik nije pronađen u autentifikaciji.' }, { status: 404 });
+      }
+
       const osobaPatch: Record<string, unknown> = {
-        ime:           body.ime,
-        prezime:       body.prezime,
+        id_osobe:      ciljId,
+        email:         authCilj.user.email ?? '',
+        ime:           body.ime.trim(),
+        prezime:       body.prezime.trim(),
         broj_telefona: body.broj_telefona ?? null,
         adresa:        body.adresa ?? null,
       };
 
       if ('bazna_latitude' in body || 'bazna_longitude' in body) {
-        osobaPatch.bazna_latitude  = body.bazna_latitude  ?? null;
+        osobaPatch.bazna_latitude  = body.bazna_latitude ?? null;
         osobaPatch.bazna_longitude = body.bazna_longitude ?? null;
       }
 
-      const { error } = await adb.from('osoba').update(osobaPatch).eq('id_osobe', ciljId);
-      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      let { data: sacuvano, error: osobaErr } = await adb
+        .from('osoba')
+        .upsert(osobaPatch, { onConflict: 'id_osobe' })
+        .select('id_osobe, ime, prezime')
+        .single();
 
-      await upisiAuditLog(adb, {
+      if (
+        osobaErr &&
+        (osobaErr.message.includes('bazna_latitude') ||
+          osobaErr.message.includes('bazna_longitude'))
+      ) {
+        const { bazna_latitude: _lat, bazna_longitude: _lng, ...bezGeo } = osobaPatch;
+        void _lat;
+        void _lng;
+        const retry = await adb
+          .from('osoba')
+          .upsert(bezGeo, { onConflict: 'id_osobe' })
+          .select('id_osobe, ime, prezime')
+          .single();
+        sacuvano = retry.data;
+        osobaErr = retry.error;
+      }
+
+      if (osobaErr) {
+        return NextResponse.json({ error: osobaErr.message }, { status: 500 });
+      }
+      if (!sacuvano?.id_osobe) {
+        return NextResponse.json(
+          { error: 'Profil korisnika nije sačuvan. Provjerite da korisnik postoji u bazi.' },
+          { status: 500 },
+        );
+      }
+
+      const meta = authCilj.user.user_metadata ?? {};
+      const { error: metaErr } = await admin.auth.admin.updateUserById(ciljId, {
+        user_metadata: {
+          ...meta,
+          ime: body.ime.trim(),
+          prezime: body.prezime.trim(),
+        },
+      });
+      if (metaErr) {
+        return NextResponse.json(
+          { error: `Podaci u profilu su sačuvani, ali Auth metapodaci nisu ažurirani: ${metaErr.message}` },
+          { status: 500 },
+        );
+      }
+
+      const auditGreska = await upisiAuditLog(adb, {
         user_id:  ciljId,
         actor_id: user.id,
         akcija:   'uredi_podatke',
-        detalji:  { promijenjeno: Object.keys(osobaPatch) },
+        detalji:  {
+          promijenjeno: Object.keys(osobaPatch).filter((k) => k !== 'id_osobe'),
+          ime: body.ime,
+          prezime: body.prezime,
+        },
       });
-      return NextResponse.json({ success: true });
+
+      return NextResponse.json({
+        success: true,
+        korisnik: { ime: sacuvano.ime, prezime: sacuvano.prezime },
+        ...(auditGreska ? { upozorenje: `Audit zapis nije upisan: ${auditGreska}` } : {}),
+      });
     }
 
     // ── suspenduj ─────────────────────────────────────────────────────────────

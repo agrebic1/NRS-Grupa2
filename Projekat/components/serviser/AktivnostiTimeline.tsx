@@ -6,6 +6,10 @@ import {
   Headphones, Wrench, User, RotateCcw, ArrowRight,
 } from 'lucide-react';
 import type { InterventionActivity, TipAktivnosti } from '@/domain/types/servisirane';
+import {
+  prikazOpisaAktivnosti,
+  prikazStareNoveVrijednostiAktivnosti,
+} from '@/lib/servisirane/aktivnostiPrikaz';
 import type { LucideIcon } from 'lucide-react';
 
 // ─── Role ikonice ─────────────────────────────────────────────────────────────
@@ -45,8 +49,9 @@ const TIP_CONFIG: Record<TipAktivnosti, {
   konflikt_override:    { Ikona: AlertTriangle,  boja: '#D97706',                rgb: '217,119,6' },
   nije_rijeseno:        { Ikona: AlertTriangle,  boja: '#DC2626',                rgb: '220,38,38' },
   promjena_izvrsioca:   { Ikona: ArrowRightLeft, boja: '#7C3AED',                rgb: '124,58,237' },
+  promjena_prioriteta:  { Ikona: AlertTriangle,  boja: '#C2410C',                rgb: '194,65,12' },
   vracanje_na_dodjelu:  { Ikona: RotateCcw,      boja: '#D97706',                rgb: '217,119,6' },
-  sla_eskalacija:        { Ikona: AlertTriangle,  boja: '#DC2626',                rgb: '220,38,38' },
+  sla_eskalacija:       { Ikona: AlertTriangle,  boja: '#DC2626',                rgb: '220,38,38' },
 };
 
 // ─── Status label ─────────────────────────────────────────────────────────────
@@ -102,7 +107,11 @@ export function AktivnostiTimeline({ aktivnosti, ucitava }: AktivnostiTimelinePr
     );
   }
 
-  if (aktivnosti.length === 0) {
+  const sortirane = [...aktivnosti].sort(
+    (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+  );
+
+  if (sortirane.length === 0) {
     return (
       <div className="flex flex-col items-center gap-2 py-8 text-center">
         <Clock className="h-8 w-8" style={{ color: 'var(--first-quinary)' }} />
@@ -115,13 +124,15 @@ export function AktivnostiTimeline({ aktivnosti, ucitava }: AktivnostiTimelinePr
 
   return (
     <div className="flex flex-col gap-0">
-      {aktivnosti.map((a, idx) => {
+      {sortirane.map((a, idx) => {
         const cfg       = TIP_CONFIG[a.tip] ?? TIP_CONFIG.sistem;
         const Ikona     = cfg.Ikona;
-        const jeLast    = idx === aktivnosti.length - 1;
+        const jeLast    = idx === sortirane.length - 1;
         const imePrezime = a.autor ? `${a.autor.ime} ${a.autor.prezime}`.trim() : '';
         const autorIme  = ulogaNaziv(a.autor?.uloga, imePrezime);
         const AutorIkona = ulogaIkona(a.autor?.uloga);
+        const { stara, nova } = prikazStareNoveVrijednostiAktivnosti(a);
+        const opis = prikazOpisaAktivnosti(a);
 
         return (
           <div key={a.id} className="flex gap-3">
@@ -151,24 +162,24 @@ export function AktivnostiTimeline({ aktivnosti, ucitava }: AktivnostiTimelinePr
                   className="text-sm font-medium leading-snug"
                   style={{ color: 'var(--first-octonary)' }}
                 >
-                  {a.sadrzaj}
+                  {opis}
                 </p>
               </div>
-              {(a.old_value || a.new_value) && (
-                <div className="mt-1.5 flex items-center gap-1.5">
-                  {a.old_value && (
+              {(stara || nova) && (
+                <div className="mt-1.5 flex flex-wrap items-center gap-1.5">
+                  {stara && (
                     <span className="rounded-md px-2 py-0.5 text-[11px] font-semibold"
                       style={{ backgroundColor: 'rgba(156,163,175,0.12)', color: '#6B7280', border: '1px solid rgba(156,163,175,0.3)' }}>
-                      {statusLabel(a.old_value)}
+                      {stara}
                     </span>
                   )}
-                  {a.old_value && a.new_value && (
+                  {stara && nova && (
                     <ArrowRight className="h-3 w-3 flex-shrink-0" style={{ color: 'var(--first-nonary)' }} />
                   )}
-                  {a.new_value && (
+                  {nova && (
                     <span className="rounded-md px-2 py-0.5 text-[11px] font-semibold"
                       style={{ backgroundColor: `rgba(${cfg.rgb},0.1)`, color: cfg.boja, border: `1px solid rgba(${cfg.rgb},0.25)` }}>
-                      {statusLabel(a.new_value)}
+                      {nova}
                     </span>
                   )}
                 </div>

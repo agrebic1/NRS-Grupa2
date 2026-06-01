@@ -164,7 +164,8 @@ export type TipAktivnosti =
   | 'nije_rijeseno'
   | 'promjena_izvrsioca'
   | 'vracanje_na_dodjelu'
-  | 'sla_eskalacija';
+  | 'sla_eskalacija'
+  | 'promjena_prioriteta';
 
 export interface InterventionActivity {
   id:         number;

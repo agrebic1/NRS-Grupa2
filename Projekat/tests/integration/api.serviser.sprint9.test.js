@@ -190,6 +190,7 @@ describe('PATCH vrati_na_ponovnu_dodjelu (US-29)', () => {
     const body = await res.json();
     expect(res.status).toBe(200);
     expect(body.novi_status).toBe('potvrdeno');
+    expect(body.broj_ponovnih_ciklusa).toBe(1);
   });
 
   test('vraća 200 i novi_status=potvrdeno iz statusa u_radu', async () => {

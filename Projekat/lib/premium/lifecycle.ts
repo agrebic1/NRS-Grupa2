@@ -39,8 +39,14 @@ export async function safeInsertPremiumEvent(
   }
 ): Promise<{ ok: true } | { ok: false; message: string }> {
   const { error } = await supabase.from('premium_events').insert(row);
-  if (error?.message?.includes('premium_events')) return { ok: true };
-  if (error) return { ok: false, message: error.message };
+  if (error) {
+    const msg = error.message ?? '';
+    const tabelaNePostoji =
+      (msg.includes('does not exist') || msg.includes('Could not find the table')) &&
+      msg.includes('premium_events');
+    if (tabelaNePostoji) return { ok: true };
+    return { ok: false, message: error.message };
+  }
   return { ok: true };
 }
 
