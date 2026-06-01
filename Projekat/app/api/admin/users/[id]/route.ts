@@ -90,23 +90,23 @@ export async function GET(
     }
     const authUser = authData.user;
 
-    // Profile: try korisnik_usluge first, then uposlenici
+    // Profile: korisnik_usluge/uposlenici for role data; osoba supertype for personal data
     const [
       { data: profKorisnik },
       { data: profUposlenik },
       { data: profOsoba },
     ] = await Promise.all([
       adb.from('korisnik_usluge')
-        .select('id_korisnika_usluge, ime, prezime, email, broj_telefona, adresa, is_premium, premium_status, premium_expires_at')
+        .select('id_korisnika_usluge, is_premium, premium_status, premium_expires_at')
         .eq('id_korisnika_usluge', ciljId)
         .maybeSingle(),
       adb.from('uposlenici')
-        .select('id_uposlenika, ime, prezime, email, broj_telefona, adresa, id_uloge, uloga:uloga(naziv)')
+        .select('id_uposlenika, id_uloge, uloga:uloga(naziv)')
         .eq('id_uposlenika', ciljId)
         .maybeSingle(),
-      // US-48: bazna lokacija (živi na supertype tabeli osoba)
+      // All personal data (ime, prezime, telefon, adresa, lokacija) lives on osoba supertype
       adb.from('osoba')
-        .select('bazna_latitude, bazna_longitude')
+        .select('ime, prezime, email, broj_telefona, adresa, bazna_latitude, bazna_longitude')
         .eq('id_osobe', ciljId)
         .maybeSingle(),
     ]);
@@ -123,15 +123,14 @@ export async function GET(
       .limit(20);
 
     const tip: 'korisnik' | 'uposlenik' = profKorisnik ? 'korisnik' : 'uposlenik';
-    const profil = profKorisnik ?? profUposlenik;
 
     const korisnik = {
       id:              ciljId,
-      ime:             profil?.ime   ?? authUser.user_metadata?.ime   ?? '',
-      prezime:         profil?.prezime ?? authUser.user_metadata?.prezime ?? '',
-      email:           profil?.email ?? authUser.email ?? '',
-      broj_telefona:   profil?.broj_telefona ?? null,
-      adresa:          profil?.adresa ?? null,
+      ime:             profOsoba?.ime     ?? authUser.user_metadata?.ime     ?? '',
+      prezime:         profOsoba?.prezime ?? authUser.user_metadata?.prezime ?? '',
+      email:           profOsoba?.email   ?? authUser.email ?? '',
+      broj_telefona:   profOsoba?.broj_telefona ?? null,
+      adresa:          profOsoba?.adresa ?? null,
       tip,
       uloga:           tip === 'korisnik'
         ? 'Korisnik usluge'
@@ -237,37 +236,27 @@ export async function PATCH(
 
     // ── uredi_podatke ─────────────────────────────────────────────────────────
     if (body.action === 'uredi_podatke') {
-      const patch = {
+      // All personal data (ime, prezime, telefon, adresa, lokacija) lives on osoba supertype.
+      const osobaPatch: Record<string, unknown> = {
         ime:           body.ime,
         prezime:       body.prezime,
         broj_telefona: body.broj_telefona ?? null,
         adresa:        body.adresa ?? null,
       };
-      const tablica = tip === 'korisnik' ? 'korisnik_usluge' : 'uposlenici';
-      const pkKolona = tip === 'korisnik' ? 'id_korisnika_usluge' : 'id_uposlenika';
 
-      const { error } = await adb.from(tablica).update(patch).eq(pkKolona, ciljId);
-      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-
-      // US-48: bazna lokacija živi na supertype tabeli osoba — ažuriraj odvojeno.
-      const promijenjeno = Object.keys(patch);
       if ('bazna_latitude' in body || 'bazna_longitude' in body) {
-        const { error: osobaErr } = await adb
-          .from('osoba')
-          .update({
-            bazna_latitude:  body.bazna_latitude  ?? null,
-            bazna_longitude: body.bazna_longitude ?? null,
-          })
-          .eq('id_osobe', ciljId);
-        if (osobaErr) return NextResponse.json({ error: osobaErr.message }, { status: 500 });
-        promijenjeno.push('bazna_latitude', 'bazna_longitude');
+        osobaPatch.bazna_latitude  = body.bazna_latitude  ?? null;
+        osobaPatch.bazna_longitude = body.bazna_longitude ?? null;
       }
+
+      const { error } = await adb.from('osoba').update(osobaPatch).eq('id_osobe', ciljId);
+      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
       await upisiAuditLog(adb, {
         user_id:  ciljId,
         actor_id: user.id,
         akcija:   'uredi_podatke',
-        detalji:  { promijenjeno },
+        detalji:  { promijenjeno: Object.keys(osobaPatch) },
       });
       return NextResponse.json({ success: true });
     }

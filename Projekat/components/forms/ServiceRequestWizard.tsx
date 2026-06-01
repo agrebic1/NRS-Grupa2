@@ -34,7 +34,7 @@ import { kreirajKlijenta } from '@/lib/supabase/klijent';
 
 // ─── Konstante ────────────────────────────────────────────────────────────────
 
-const PHONE_REGEX = /^[+]?[0-9\s\-()]{8,20}$/;
+const PHONE_REGEX = /^[+]?[0-9\s\-()]{9,20}$/;
 const SERVICE_REQUEST_PHOTOS_BUCKET = 'service-request-photos';
 
 // ─── Wizard state ─────────────────────────────────────────────────────────────
@@ -845,7 +845,7 @@ export function ServiceRequestWizard({
             type="button"
             size="md"
             onClick={sljedeciKorak}
-            disabled={blokiran && korak !== 4}
+            disabled={blokiran}
             title={naslovDaljeDugmeta(korak, state)}
             className="min-h-[44px] max-h-[48px] rounded-[12px] px-6"
           >

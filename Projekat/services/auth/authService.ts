@@ -79,6 +79,9 @@ export async function posaljiPonovoVerifikacijskiEmail(emailAdresa: string) {
   const { error } = await supabase.auth.resend({
     type: 'signup',
     email,
+    options: {
+      emailRedirectTo: `${typeof window !== 'undefined' ? window.location.origin : ''}/auth/login`,
+    },
   });
 
   if (error) {

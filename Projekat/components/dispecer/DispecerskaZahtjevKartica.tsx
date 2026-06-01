@@ -19,6 +19,7 @@ import { DISPECER_HITNOST_KORISNIK_CHIP_TITLE } from '@/lib/servisirane/dispecer
 import { ZahtjevExpandSadrzaj } from '@/components/dispecer/ZahtjevExpandSadrzaj';
 import { DispecerPregledTokaBadzevi } from '@/components/dispecer/DispecerPregledTokaBadzevi';
 import { DispecerPremiumKruna, KorisnickaHitnostOutlinedChip } from '@/components/servisirane/zahtjevBadgeovi';
+import { PonovniCiklusBadge } from '@/components/servisirane/PonovniCiklusBadge';
 import { efektivniKorisnickiUrgencyScore, inboxGrupaIzKorisnickeProcjene } from '@/lib/servisirane/urgency';
 import { oznakaZaDispecerskiPrikazBroja } from '@/lib/servisirane/korisnickiBrojZahtjeva';
 
@@ -103,6 +104,9 @@ export function DispecerskaZahtjevKartica({
                 #{oznakaZaDispecerskiPrikazBroja(zahtjev)}
               </span>
               {zahtjev.is_premium ? <DispecerPremiumKruna className="translate-y-px" /> : null}
+              {(zahtjev.broj_ponovnih_ciklusa ?? 0) > 0 && (
+                <PonovniCiklusBadge broj={zahtjev.broj_ponovnih_ciklusa!} />
+              )}
             </span>
             <div className="min-w-0 max-w-full">
               <DispecerPregledTokaBadzevi zahtjev={zahtjev} />

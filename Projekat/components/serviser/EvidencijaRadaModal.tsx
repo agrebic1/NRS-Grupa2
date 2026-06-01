@@ -38,6 +38,13 @@ export function EvidencijaRadaModal({ zahtjevId, onZatvori, onUspjeh }: Evidenci
     if (!trajanjeNum)   { setGreska('Trajanje je obavezno. Unesite broj minuta (1-1440).'); return; }
     if (!trajanjeValid) { setGreska('Trajanje mora biti između 1 i 1440 minuta.'); return; }
 
+    for (let i = 0; i < stavke.length; i++) {
+      const s = stavke[i];
+      if (!s.naziv.trim()) { setGreska(`Stavka ${i + 1}: naziv je obavezan.`); return; }
+      if (!s.kolicina || s.kolicina <= 0) { setGreska(`Stavka ${i + 1}: količina mora biti pozitivna.`); return; }
+      if (!s.jedinica.trim()) { setGreska(`Stavka ${i + 1}: jedinica je obavezna.`); return; }
+    }
+
     setJeSlanje(true);
     setGreska(null);
 
@@ -49,7 +56,7 @@ export function EvidencijaRadaModal({ zahtjevId, onZatvori, onUspjeh }: Evidenci
           opis_rada:       opisRada.trim(),
           trajanje_minuta: trajanjeNum,
           materijal:           materijal.trim() || null,
-          stavke_materijala:   stavke.filter((s) => s.naziv.trim() && s.kolicina > 0),
+          stavke_materijala:   stavke,
           napomene:            napomene.trim() || null,
         }),
       });

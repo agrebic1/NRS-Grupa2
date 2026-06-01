@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { Crown, Mail, RefreshCw, User, Users, Pencil } from 'lucide-react';
+import { Crown, Mail, RefreshCw, Search, User, Users, Pencil } from 'lucide-react';
 import { type StatusKorisnika, BADGE_STATUSA } from '@/lib/admin/statusKorisnika';
 import { AppShell } from '@/components/layout/AppShell';
 import { Button } from '@/components/ui/Button';
@@ -28,6 +28,7 @@ export default function AdminKorisniciPage() {
   const [korisnici, setKorisnici] = useState<KorisnikSistema[]>([]);
   const [greska, setGreska] = useState<string | null>(null);
   const [ucitava, setUcitava] = useState(true);
+  const [pretraga, setPretraga] = useState('');
 
   async function ucitajKorisnike() {
     setUcitava(true);
@@ -53,6 +54,16 @@ export default function AdminKorisniciPage() {
     [korisnici]
   );
 
+  const filtrirani = useMemo(() => {
+    const termin = pretraga.trim().toLowerCase();
+    if (!termin) return korisniciUsluge;
+    return korisniciUsluge.filter(
+      (k) =>
+        k.imeIPrezime.toLowerCase().includes(termin) ||
+        k.email.toLowerCase().includes(termin),
+    );
+  }, [korisniciUsluge, pretraga]);
+
   return (
     <AppShell uloga="admin" imeKorisnika="Administrator">
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -75,6 +86,26 @@ export default function AdminKorisniciPage() {
           <RefreshCw className="h-4 w-4" />
           Osvježi
         </Button>
+      </div>
+
+      <div className="mb-6">
+        <div
+          className="flex items-center gap-2 rounded-xl border px-4 py-2.5"
+          style={{
+            borderColor: 'rgb(var(--first-quaternary-rgb) / 0.45)',
+            backgroundColor: 'rgb(255 255 255 / 0.85)',
+          }}
+        >
+          <Search className="h-4 w-4 flex-shrink-0" style={{ color: 'var(--first-nonary)' }} />
+          <input
+            type="search"
+            placeholder="Pretraži po imenu ili emailu..."
+            value={pretraga}
+            onChange={(e) => setPretraga(e.target.value)}
+            className="flex-1 bg-transparent text-sm focus:outline-none"
+            style={{ color: 'var(--first-octonary)' }}
+          />
+        </div>
       </div>
 
       <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-3">
@@ -134,7 +165,7 @@ export default function AdminKorisniciPage() {
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
         {!ucitava &&
-          korisniciUsluge.map((korisnik) => {
+          filtrirani.map((korisnik) => {
             const badge = BADGE_STATUSA[korisnik.status];
             return (
               <article
@@ -216,9 +247,9 @@ export default function AdminKorisniciPage() {
           Učitavanje korisnika...
         </p>
       )}
-      {!ucitava && korisniciUsluge.length === 0 && !greska && (
+      {!ucitava && filtrirani.length === 0 && !greska && (
         <p className="py-8 text-center text-sm" style={{ color: 'var(--first-nonary)' }}>
-          Nema korisnika za prikaz.
+          {pretraga.trim() ? 'Nema korisnika koji odgovaraju pretrazi.' : 'Nema korisnika za prikaz.'}
         </p>
       )}
     </AppShell>

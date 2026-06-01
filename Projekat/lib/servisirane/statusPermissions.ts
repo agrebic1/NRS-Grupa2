@@ -7,7 +7,7 @@ import {
 
 export function zahtjevCekaObraduUInboxuDispecera(status: string): boolean {
   const s = status.toLowerCase();
-  return s === 'pending_review' || s === 'na_cekanju' || s === 'in_review';
+  return s === 'pending_review' || s === 'na_cekanju' || s === 'in_review' || s === 'potvrdeno';
 }
 
 /** Još nije otvoren dispečerski čarobnjak (prije koraka Prioritet / Termin…). */

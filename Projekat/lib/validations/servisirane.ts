@@ -97,7 +97,7 @@ export const wizardKorak2Schema = z.object({
   contactPhone: z
     .string()
     .min(1, 'Unesite kontakt telefon.')
-    .regex(/^[+]?[0-9\s\-()]{8,20}$/, 'Unesite ispravan kontakt telefon.'),
+    .regex(/^[+]?[0-9\s\-()]{9,20}$/, 'Unesite ispravan kontakt telefon.'),
 });
 
 export const wizardKorak3Schema = z.object({
@@ -120,9 +120,9 @@ export const serviceRequestSchema = z
     // Usklađeno s wizardom (PHONE_REGEX): 8-20 znakova
     contact_phone: z
       .string()
-      .min(8, 'Unesite ispravan kontakt telefon.')
+      .min(9, 'Unesite ispravan kontakt telefon.')
       .max(20, 'Kontakt telefon je predugačak.')
-      .regex(/^[+]?[0-9\s\-()]{8,20}$/, 'Unesite ispravan kontakt telefon.'),
+      .regex(/^[+]?[0-9\s\-()]{9,20}$/, 'Unesite ispravan kontakt telefon.'),
     photo_url:     z.string().url().optional().nullable(),
     /** Opcionalno: GPS / mapa (AC15) */
     latitude:      z.number().min(-90).max(90).optional().nullable(),
@@ -152,7 +152,7 @@ export const updateRequestSchema = z
   .object({
     description:        z.string().min(10, 'Opis mora imati najmanje 10 karaktera').max(2000).optional(),
     address:            z.string().min(5, 'Unesite ispravnu adresu').max(500).optional(),
-    contact_phone:      z.string().min(1, 'Unesite kontakt telefon.').regex(/^[+]?[0-9\s\-()]{8,20}$/, 'Unesite ispravan kontakt telefon.').optional(),
+    contact_phone:      z.string().min(1, 'Unesite kontakt telefon.').regex(/^[+]?[0-9\s\-()]{9,20}$/, 'Unesite ispravan kontakt telefon.').optional(),
     preferred_schedule: preferredScheduleSchema.optional(),
   })
   .refine((d) => Object.keys(d).length > 0, {

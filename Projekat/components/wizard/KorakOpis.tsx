@@ -5,7 +5,7 @@ import { Upload, X, AlertCircle, FileText, Phone } from 'lucide-react';
 import { Textarea } from '@/components/ui/Textarea';
 import { OkvirGalerije } from '@/components/servisirane/PrilogGalerija';
 
-const PHONE_REGEX = /^[+]?[0-9\s\-()]{8,20}$/;
+const PHONE_REGEX = /^[+]?[0-9\s\-()]{9,20}$/;
 const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
 const DOZVOLJENI_FORMATI = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
 
