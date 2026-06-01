@@ -38,28 +38,25 @@ export async function GET() {
     const db = supabase as any;
     const uloge: UserRole[] = [];
 
-    const { data: korisnikUsluge, error: greskaKorisnikaUsluge } = await db
-      .from('korisnik_usluge')
-      .select('id_korisnika_usluge')
-      .eq('id_korisnika_usluge', user.id)
-      .maybeSingle();
+    const [
+      { data: korisnikUsluge, error: greskaKorisnikaUsluge },
+      { data: uposlenik,      error: greskaUposlenika },
+    ] = await Promise.all([
+      db.from('korisnik_usluge').select('id_korisnika_usluge').eq('id_korisnika_usluge', user.id).maybeSingle(),
+      db.from('uposlenici').select('id_uloge').eq('id_uposlenika', user.id).maybeSingle(),
+    ]);
 
     if (greskaKorisnikaUsluge) {
       return NextResponse.json({ error: greskaKorisnikaUsluge.message }, { status: 500 });
     }
-
-    if (korisnikUsluge) {
-      uloge.push('korisnik');
-    }
-
-    const { data: uposlenik, error: greskaUposlenika } = await db
-      .from('uposlenici')
-      .select('id_uloge')
-      .eq('id_uposlenika', user.id)
-      .maybeSingle();
-
     if (greskaUposlenika) {
       return NextResponse.json({ error: greskaUposlenika.message }, { status: 500 });
+    }
+
+    // Zaposleni uvijek imaju opciju korištenja sistema kao korisnik usluge.
+    // korisnik_usluge zapis se kreira u POST /api/admin/users i trigger-om pri prvom zahtjevu.
+    if (korisnikUsluge || uposlenik) {
+      uloge.push('korisnik');
     }
 
     if (uposlenik?.id_uloge) {

@@ -389,6 +389,15 @@ export async function POST(request: Request) {
     }
 
     createdUserId = createResult.data.user.id;
+
+    // Osiguraj da zaposleni ima korisnik_usluge zapis kako bi mogao koristiti
+    // sistem i u ulozi korisnika (odabir-uloge prikazuje oba izbora).
+    // handle_new_user trigger kreira uposlenici zapis; korisnik_usluge mora biti eksplicitno dodat.
+    await (supabase as any).from('korisnik_usluge').upsert(
+      { id_korisnika_usluge: createdUserId },
+      { onConflict: 'id_korisnika_usluge', ignoreDuplicates: true }
+    );
+
     const emailHtml = kreirajEmailInternogNaloga({
       ime: podaci.first_name,
       prezime: podaci.last_name,
