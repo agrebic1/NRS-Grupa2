@@ -23,6 +23,7 @@ async function prijaviSe(page: Page, creds: RoleCreds) {
   await expect(page).not.toHaveURL(/\/auth\/login/);
 }
 
+/** Sprint 10 · S10-T1: cross-access između uloga (stranice + API). */
 test.describe('RBAC cross-access', () => {
   const serviser = ucitajKredencijale('serviser');
   const dispecer = ucitajKredencijale('dispecer');

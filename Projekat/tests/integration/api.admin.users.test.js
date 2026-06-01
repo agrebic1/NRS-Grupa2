@@ -46,6 +46,12 @@ function insertOnly(result) {
   };
 }
 
+function upsertOnly(result = { data: null, error: null }) {
+  return {
+    upsert: jest.fn().mockResolvedValue(result),
+  };
+}
+
 describe('/api/admin/users route', () => {
   beforeEach(() => {
     mockFrom.mockReset();
@@ -464,6 +470,7 @@ describe('/api/admin/users POST route', () => {
         };
       }
       if (table === 'admin_user_create_audit') return insertOnly({ data: null, error: null });
+      if (table === 'korisnik_usluge') return upsertOnly();
       return selectOnly({ data: [], error: null });
     });
   }

@@ -102,4 +102,20 @@ describe('evidencijaRadaSchema - validacija evidencije rada', () => {
   test('odbija nepostojeći opis (obavezno polje)', () => {
     expect(evidencijaRadaSchema.safeParse({}).success).toBe(false);
   });
+
+  test('odbija stavku materijala s praznim nazivom (US-46 / T3-11)', () => {
+    const payload = {
+      ...validan,
+      stavke_materijala: [{ naziv: '', kolicina: 1, jedinica: 'kom' }],
+    };
+    expect(evidencijaRadaSchema.safeParse(payload).success).toBe(false);
+  });
+
+  test('odbija stavku materijala s nultom količinom', () => {
+    const payload = {
+      ...validan,
+      stavke_materijala: [{ naziv: 'Cijev', kolicina: 0, jedinica: 'kom' }],
+    };
+    expect(evidencijaRadaSchema.safeParse(payload).success).toBe(false);
+  });
 });

@@ -120,7 +120,8 @@ describe('zahtjevCekaObraduUInboxuDispecera', () => {
   it('pending_review → čeka', () => expect(zahtjevCekaObraduUInboxuDispecera('pending_review')).toBe(true));
   it('na_cekanju → čeka', () => expect(zahtjevCekaObraduUInboxuDispecera('na_cekanju')).toBe(true));
   it('in_review → čeka (dispečer u wizard-u)', () => expect(zahtjevCekaObraduUInboxuDispecera('in_review')).toBe(true));
-  it('potvrdeno → ne čeka', () => expect(zahtjevCekaObraduUInboxuDispecera('potvrdeno')).toBe(false));
+  it('potvrdeno → čeka (ponovna dodjela / dodjela serviseru)', () =>
+    expect(zahtjevCekaObraduUInboxuDispecera('potvrdeno')).toBe(true));
   it('zavrseno → ne čeka', () => expect(zahtjevCekaObraduUInboxuDispecera('zavrseno')).toBe(false));
 });
 

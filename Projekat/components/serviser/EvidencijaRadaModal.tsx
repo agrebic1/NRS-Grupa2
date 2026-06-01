@@ -32,6 +32,11 @@ export function EvidencijaRadaModal({ zahtjevId, onZatvori, onUspjeh }: Evidenci
   const opisValid     = opisRada.trim().length >= MIN_OPIS;
   const trajanjeNum   = trajanje ? parseInt(trajanje, 10) : null;
   const trajanjeValid = trajanjeNum !== null && trajanjeNum > 0 && trajanjeNum <= 1440;
+  const stavkeValid =
+    stavke.length === 0 ||
+    stavke.every(
+      (s) => s.naziv.trim().length > 0 && s.jedinica.trim().length > 0 && s.kolicina > 0,
+    );
 
   async function posalji() {
     if (!opisValid)     { setGreska('Opis rada mora imati najmanje 5 karaktera.'); return; }
@@ -268,7 +273,7 @@ export function EvidencijaRadaModal({ zahtjevId, onZatvori, onUspjeh }: Evidenci
                 type="button" size="md"
                 onClick={posalji}
                 isLoading={jeSlanje} loadingText="Snimanje..."
-                disabled={!opisValid || !trajanjeValid}
+                disabled={!opisValid || !trajanjeValid || !stavkeValid}
               >
                 <ClipboardCheck className="h-4 w-4" />
                 Evidentiraj rad
