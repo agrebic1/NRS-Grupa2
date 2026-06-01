@@ -2,7 +2,6 @@ import {
   validirajServiserPrelaz,
   validirajDispecerasPrelaz,
   jeTerminalniStatus,
-  jeReadOnly,
   jeZavrsenoIliZatvoreno,
 } from '@/lib/servisirane/statusPrelazi';
 
@@ -66,10 +65,6 @@ describe('validirajDispecerasPrelaz', () => {
     expect(validirajDispecerasPrelaz('u_izvrsenju', 'zavrseno').ok).toBe(true);
   });
 
-  it('zavrseno → zatvoreno: dozvoljen', () => {
-    expect(validirajDispecerasPrelaz('zavrseno', 'zatvoreno').ok).toBe(true);
-  });
-
   it('dodijeljeno → potvrdeno (rollback): dozvoljen', () => {
     expect(validirajDispecerasPrelaz('dodijeljeno', 'potvrdeno').ok).toBe(true);
   });
@@ -79,6 +74,10 @@ describe('validirajDispecerasPrelaz', () => {
   });
 
   // ── Zabranjeni prelazi ────────────────────────────────────────────────────────
+  it('zavrseno → zatvoreno: zabranjen (zatvaranje ide preko closed_at, ne statusa)', () => {
+    expect(validirajDispecerasPrelaz('zavrseno', 'zatvoreno').ok).toBe(false);
+  });
+
   it('zatvoreno → zavrseno: zabranjen (zaključan)', () => {
     const r = validirajDispecerasPrelaz('zatvoreno', 'zavrseno');
     expect(r.ok).toBe(false);
@@ -106,25 +105,13 @@ describe('jeTerminalniStatus', () => {
   });
 
   it('aktivni statusi nisu terminalni', () => {
-    ['pending_review', 'in_review', 'potvrdeno', 'dodijeljeno', 'u_radu'].forEach(
-      (s) => expect(jeTerminalniStatus(s)).toBe(false)
-    );
-  });
-});
-
-describe('jeReadOnly', () => {
-  it('samo zatvoreno je read-only', () => {
-    expect(jeReadOnly('zatvoreno')).toBe(true);
-  });
-
-  it('zavrseno nije read-only (dispečer može zatvoriti)', () => {
-    expect(jeReadOnly('zavrseno')).toBe(false);
-  });
-
-  it('ostali statusi nisu read-only', () => {
-    ['otkazano', 'odbijeno', 'u_radu', 'potvrdeno'].forEach(
-      (s) => expect(jeReadOnly(s)).toBe(false)
-    );
+    [
+      'pending_review',
+      'in_review',
+      'potvrdeno',
+      'dodijeljeno',
+      'u_radu',
+    ].forEach((s) => expect(jeTerminalniStatus(s)).toBe(false));
   });
 });
 
@@ -135,8 +122,8 @@ describe('jeZavrsenoIliZatvoreno', () => {
   });
 
   it('drugi statusi vraćaju false', () => {
-    ['otkazano', 'odbijeno', 'u_radu', 'potvrdeno', 'in_review'].forEach(
-      (s) => expect(jeZavrsenoIliZatvoreno(s)).toBe(false)
+    ['otkazano', 'odbijeno', 'u_radu', 'potvrdeno', 'in_review'].forEach((s) =>
+      expect(jeZavrsenoIliZatvoreno(s)).toBe(false),
     );
   });
 });

@@ -23,6 +23,7 @@ function serviceRequestsQuery(result, terminalOrderCall = 2) {
   const query = {
     select: jest.fn().mockReturnThis(),
     not: jest.fn().mockReturnThis(),
+    or: jest.fn().mockReturnThis(),
     in: jest.fn().mockReturnThis(),
     order: jest.fn(() => {
       if (query.order.mock.calls.length >= terminalOrderCall) {
@@ -52,7 +53,9 @@ describe('/api/dispecer/zahtjevi route', () => {
   test('returns 401 without session', async () => {
     mockSessionGetUser.mockResolvedValue({ data: { user: null } });
 
-    const response = await GET(new Request('http://localhost/api/dispecer/zahtjevi'));
+    const response = await GET(
+      new Request('http://localhost/api/dispecer/zahtjevi'),
+    );
 
     expect(response.status).toBe(401);
     expect(mockAssertDispatcherAccess).not.toHaveBeenCalled();
@@ -62,7 +65,9 @@ describe('/api/dispecer/zahtjevi route', () => {
     mockSessionGetUser.mockResolvedValue({ data: { user: { id: 'u1' } } });
     mockAssertDispatcherAccess.mockResolvedValue(false);
 
-    const response = await GET(new Request('http://localhost/api/dispecer/zahtjevi'));
+    const response = await GET(
+      new Request('http://localhost/api/dispecer/zahtjevi'),
+    );
 
     expect(response.status).toBe(403);
   });
@@ -73,8 +78,20 @@ describe('/api/dispecer/zahtjevi route', () => {
     mockAssertDispatcherAccess.mockResolvedValue(true);
 
     const zahtjevi = [
-      { id: 1, user_id: 'u1', status: 'pending_review', is_premium: true, created_at: '2026-05-10' },
-      { id: 2, user_id: 'u2', status: 'in_review', is_premium: false, created_at: '2026-05-10' },
+      {
+        id: 1,
+        user_id: 'u1',
+        status: 'pending_review',
+        is_premium: true,
+        created_at: '2026-05-10',
+      },
+      {
+        id: 2,
+        user_id: 'u2',
+        status: 'in_review',
+        is_premium: false,
+        created_at: '2026-05-10',
+      },
     ];
     const serviceQuery = serviceRequestsQuery({ data: zahtjevi, error: null });
 
@@ -97,7 +114,12 @@ describe('/api/dispecer/zahtjevi route', () => {
       if (table === 'osoba') {
         return osobaQuery({
           data: [
-            { id_osobe: 'u1', ime: 'A', prezime: 'B', broj_telefona: '061111111' },
+            {
+              id_osobe: 'u1',
+              ime: 'A',
+              prezime: 'B',
+              broj_telefona: '061111111',
+            },
             { id_osobe: 'u2', ime: 'C', prezime: 'D', broj_telefona: null },
           ],
           error: null,
@@ -106,11 +128,19 @@ describe('/api/dispecer/zahtjevi route', () => {
       return serviceRequestsQuery({ data: [], error: null });
     });
 
-    const response = await GET(new Request('http://localhost/api/dispecer/zahtjevi'));
+    const response = await GET(
+      new Request('http://localhost/api/dispecer/zahtjevi'),
+    );
     const body = await response.json();
 
     expect(response.status).toBe(200);
-    expect(serviceQuery.not).toHaveBeenCalledWith('status', 'in', '("zavrseno","zatvoreno","otkazano","odbijeno")');
+    expect(serviceQuery.not).toHaveBeenCalledWith(
+      'status',
+      'in',
+      '("zatvoreno","otkazano","odbijeno")',
+    );
+    // `zavrseno` se ne isključuje u .not() - nedavno završeni se prikazuju preko .or() (7-dnevni prozor).
+    expect(serviceQuery.or).toHaveBeenCalled();
     expect(body.zahtjevi).toHaveLength(2);
     expect(body.zahtjevi[0].podnosilac).toEqual({
       ime: 'A',
@@ -135,11 +165,16 @@ describe('/api/dispecer/zahtjevi route', () => {
     });
 
     const response = await GET(
-      new Request('http://localhost/api/dispecer/zahtjevi?status=pending_review,in_review'),
+      new Request(
+        'http://localhost/api/dispecer/zahtjevi?status=pending_review,in_review',
+      ),
     );
 
     expect(response.status).toBe(200);
-    expect(serviceQuery.in).toHaveBeenCalledWith('status', ['pending_review', 'in_review']);
+    expect(serviceQuery.in).toHaveBeenCalledWith('status', [
+      'pending_review',
+      'in_review',
+    ]);
   });
 
   test('falls back when is_premium ordering column is missing', async () => {
@@ -152,7 +187,10 @@ describe('/api/dispecer/zahtjevi route', () => {
       error: { message: "'is_premium' column does not exist" },
     });
     const fallbackQuery = serviceRequestsQuery(
-      { data: [{ id: 1, user_id: 'u1', created_at: '2026-05-01T00:00:00Z' }], error: null },
+      {
+        data: [{ id: 1, user_id: 'u1', created_at: '2026-05-01T00:00:00Z' }],
+        error: null,
+      },
       1,
     );
 
@@ -164,7 +202,9 @@ describe('/api/dispecer/zahtjevi route', () => {
         return {
           select: jest.fn().mockReturnThis(),
           in: jest.fn().mockResolvedValue({
-            data: [{ id: 1, user_id: 'u1', created_at: '2026-05-01T00:00:00Z' }],
+            data: [
+              { id: 1, user_id: 'u1', created_at: '2026-05-01T00:00:00Z' },
+            ],
             error: null,
           }),
         };
@@ -173,7 +213,9 @@ describe('/api/dispecer/zahtjevi route', () => {
       return serviceRequestsQuery({ data: [], error: null });
     });
 
-    const response = await GET(new Request('http://localhost/api/dispecer/zahtjevi'));
+    const response = await GET(
+      new Request('http://localhost/api/dispecer/zahtjevi'),
+    );
     const body = await response.json();
 
     expect(response.status).toBe(200);

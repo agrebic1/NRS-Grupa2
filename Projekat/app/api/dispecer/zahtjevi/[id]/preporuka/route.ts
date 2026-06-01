@@ -6,6 +6,33 @@ import { izracunajPreporuke } from '@/lib/servisirane/preporukaServisera';
 
 export const dynamic = 'force-dynamic';
 
+/**
+ * US-48 fallback: kad zahtjev nema GPS koordinate, jednom geokodiramo njegovu
+ * adresu (OpenStreetMap/Nominatim) da bi geo-preporuka radila i bez GPS-a.
+ * Best-effort: kratak timeout, tihi povratak na null pri grešci.
+ */
+async function geokodirajAdresu(adresa: string): Promise<{ lat: number; lon: number } | null> {
+  try {
+    const ctrl = new AbortController();
+    const t = setTimeout(() => ctrl.abort(), 3500);
+    const r = await fetch(
+      `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(adresa)}&format=json&limit=1&countrycodes=ba,hr,rs,si`,
+      { headers: { 'User-Agent': 'NRS-Servisirane/1.0', Accept: 'application/json' }, signal: ctrl.signal },
+    );
+    clearTimeout(t);
+    if (!r.ok) return null;
+    const d = await r.json();
+    if (Array.isArray(d) && d[0]?.lat && d[0]?.lon) {
+      const lat = parseFloat(d[0].lat);
+      const lon = parseFloat(d[0].lon);
+      if (Number.isFinite(lat) && Number.isFinite(lon)) return { lat, lon };
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 export async function GET(
   req:    NextRequest,
   { params }: { params: { id: string } }
@@ -30,12 +57,20 @@ export async function GET(
       dbEmp = db;
     }
 
-    // Fetch category info from zahtjev
+    // Fetch category + location info from zahtjev (latitude/longitude za geo-preporuku, US-48)
     const { data: zahtjev } = await db
       .from('service_requests')
-      .select('category_main, category_sub')
+      .select('category_main, category_sub, latitude, longitude, address')
       .eq('id', params.id)
       .single();
+
+    // US-48: koordinate zahtjeva — iz GPS-a ako postoje, inače geokodiraj adresu (fallback).
+    let zahtjevLat: number | null = typeof zahtjev?.latitude  === 'number' ? zahtjev.latitude  : null;
+    let zahtjevLng: number | null = typeof zahtjev?.longitude === 'number' ? zahtjev.longitude : null;
+    if ((zahtjevLat == null || zahtjevLng == null) && zahtjev?.address) {
+      const geo = await geokodirajAdresu(zahtjev.address);
+      if (geo) { zahtjevLat = geo.lat; zahtjevLng = geo.lon; }
+    }
 
     // Parse excluded IDs: ?izuzeti=uuid1,uuid2
     const url = new URL(req.url);
@@ -58,7 +93,7 @@ export async function GET(
       .select(`
         id_uposlenika,
         is_verified,
-        osoba!id_uposlenika(ime, prezime)
+        osoba!id_uposlenika(ime, prezime, bazna_latitude, bazna_longitude)
       `)
       .eq('id_uloge', ulogaPodaci.id_uloge);
 
@@ -107,12 +142,16 @@ export async function GET(
         is_verified:       Boolean(u.is_verified),
         aktivnih_zadataka: aktivniMap[u.id_uposlenika] ?? 0,
         specialnosti:      [] as string[],
+        latitude:          (osoba as any)?.bazna_latitude  ?? null,
+        longitude:         (osoba as any)?.bazna_longitude ?? null,
       };
     });
 
     const preporuke = izracunajPreporuke(serviseri, {
       kategorija: zahtjev?.category_main ?? null,
       izuzeti,
+      zahtjevLat,
+      zahtjevLng,
     });
 
     // Nađi ID-eve servisera koji su prethodno odbili ovaj zahtjev (intervention_activities, tip='odbijanje')

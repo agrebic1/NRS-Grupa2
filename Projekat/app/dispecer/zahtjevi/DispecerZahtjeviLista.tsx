@@ -35,6 +35,11 @@ const STATUS_FILTRI = [
   { value: 'potvrdeni', label: 'Potvrđeni',  title: 'Zahtjevi kojima je završena obrada u wizardu i čekaju dodjelu servisera.' },
   { value: 'na_terenu', label: 'Na terenu',  title: 'Aktivne intervencije — serviseri dodijeljeni ili na lokaciji.' },
   { value: 'zavrseni',  label: 'Završeni',   title: 'Uspješno završene intervencije (zadnjih 7 dana).' },
+  {
+    value: 'ponovni_ciklus',
+    label: 'Ponovni ciklusi',
+    title: 'Intervencije vraćene na obradu ili označene kao nije riješene (više od jednog ciklusa).',
+  },
 ] as const;
 
 type StatusFilter = typeof STATUS_FILTRI[number]['value'];
@@ -75,6 +80,8 @@ function filterPoStatusu(
       (z) => ['dodijeljeno', 'u_radu', 'u_izvrsenju'].includes(z.status)
     );
     case 'zavrseni':  return zahtjevi.filter((z) => z.status === 'zavrseno');
+    case 'ponovni_ciklus':
+      return zahtjevi.filter((z) => (z.broj_ponovnih_ciklusa ?? 0) > 1);
     default:          return zahtjevi; // 'svi'
   }
 }

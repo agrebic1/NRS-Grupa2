@@ -6,6 +6,7 @@ import type { UserRole } from './domain/types';
 const JAVNE_RUTE = [
   '/',
   '/auth/login',
+  '/auth/callback',
   '/auth/registracija',
   '/auth/odabir-uloge',
   '/odabir-uloge',
@@ -126,9 +127,10 @@ export async function middleware(zahtjev: NextRequest) {
         jeDispecer = uposlenikUloga === 'dispecer';
       }
 
-      // Korisnicka zona treba biti dostupna svim nalozima koji imaju korisnik_usluge profil,
-      // cak i kada isti nalog ima i internu (uposlenik) ulogu.
-      jeKorisnik = !greskaKorisnikaUsluge && !!korisnikUsluge;
+      // Korisnicka zona: korisnik_usluge profil ili zaposleni nalog (usklađeno s GET /api/auth/uloge).
+      const imaKorisnikUslugu = !greskaKorisnikaUsluge && !!korisnikUsluge;
+      const imaUposlenikZapis = !greskaUposlenika && !!uposlenik;
+      jeKorisnik = imaKorisnikUslugu || imaUposlenikZapis;
     }
   } catch (error) {
     console.error('Middleware auth provjera nije uspjela:', error);

@@ -21,6 +21,7 @@ import {
 } from '@/lib/servisirane/notifikacijeHelper';
 import { z } from 'zod';
 import { mapAktivnostiResponse, ucitajAktivnostiSaAutorom } from '@/lib/servisirane/aktivnostiQuery';
+import { labelOperativnogPrioriteta } from '@/lib/servisirane/aktivnostiPrikaz';
 
 export const dynamic = 'force-dynamic';
 
@@ -255,32 +256,47 @@ export async function PATCH(
         return NextResponse.json({ error: 'Novi serviser nije pronađen.' }, { status: 404 });
       }
 
+      const noviServiserIme = `${noviServiser.ime} ${noviServiser.prezime}`.trim();
+
+      let stariServiserIme: string | null = null;
+      if (stariServIserId) {
+        const { data: stariOsoba } = await db
+          .from('osoba')
+          .select('ime, prezime')
+          .eq('id_osobe', stariServIserId)
+          .maybeSingle();
+        if (stariOsoba) {
+          stariServiserIme = `${stariOsoba.ime} ${stariOsoba.prezime}`.trim();
+        }
+      }
+      const stariServiserPrikaz = stariServiserIme ?? 'Nije bio dodijeljen';
+
       const { error: updErr } = await db
         .from('service_requests')
         .update({ serviser_dodijeljen_id: podaci.novi_serviser_id })
         .eq('id', requestId);
       if (updErr) return NextResponse.json({ error: updErr.message }, { status: 500 });
 
-      // Audit zapis sa old/new vrijednostima
+      // Audit: old/new = imena servisera (US-39 / US-28), ID-evi u metadata
       await db.from('intervention_activities').insert({
         zahtjev_id: requestId,
         autor_id:   user.id,
         tip:        'promjena_izvrsioca',
-        sadrzaj:    `Dispečer promijenio izvršioca. Razlog: ${podaci.razlog}`,
-        old_value:  stariServIserId,
-        new_value:  podaci.novi_serviser_id,
+        sadrzaj:    `Promjena izvršioca: ${stariServiserPrikaz} → ${noviServiserIme}. Razlog: ${podaci.razlog}`,
+        old_value:  stariServiserPrikaz,
+        new_value:  noviServiserIme,
         actor_role: 'dispecer',
         razlog:     podaci.razlog,
-        metadata:   { iz_servisera: stariServIserId, na_servisera: podaci.novi_serviser_id },
+        metadata:   {
+          iz_servisera_id: stariServIserId,
+          na_servisera_id: podaci.novi_serviser_id,
+          iz_servisera_ime: stariServiserIme,
+          na_servisera_ime: noviServiserIme,
+        },
       });
 
       // Notifikacija novom serviseru
-      let imeStarogServs = 'prethodnog servisera';
-      if (stariServIserId) {
-        const { data: stariOsoba } = await db
-          .from('osoba').select('ime, prezime').eq('id_osobe', stariServIserId).maybeSingle();
-        if (stariOsoba) imeStarogServs = `${stariOsoba.ime} ${stariOsoba.prezime}`;
-      }
+      const imeStarogServs = stariServiserIme ?? 'prethodnog servisera';
       await notifPromjenaIzvrsioca(db, podaci.novi_serviser_id, requestId, imeStarogServs);
 
       // Notifikacija starom serviseru (uklanjanje)
@@ -330,6 +346,47 @@ export async function PATCH(
       const { error } = await db.from('service_requests').update(izmjena).eq('id', requestId);
 
       if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+      const stariPrioritet = (zahtjev.final_priority as string | null) ?? null;
+      const stariLabel = labelOperativnogPrioriteta(stariPrioritet);
+      const noviLabel = labelOperativnogPrioriteta(podaci.final_priority);
+      const premiumRazlog =
+        zahtjev.is_premium === true &&
+        premiumZahtijevaObrazlozenjeSmanjenjaPrioriteta(podaci.final_priority)
+          ? podaci.premium_downgrade_reason?.trim() ?? null
+          : null;
+
+      await db.from('intervention_activities').insert({
+        zahtjev_id: requestId,
+        autor_id:   user.id,
+        tip:        'promjena_prioriteta',
+        sadrzaj:    `Operativni prioritet: ${stariLabel} → ${noviLabel}`,
+        old_value:  stariLabel,
+        new_value:  noviLabel,
+        actor_role: 'dispecer',
+        razlog:     premiumRazlog,
+        metadata:   {
+          stari_prioritet: stariPrioritet,
+          novi_prioritet: podaci.final_priority,
+          stari_prioritet_label: stariLabel,
+          novi_prioritet_label: noviLabel,
+          ...(premiumRazlog ? { premium_downgrade_reason: premiumRazlog } : {}),
+        },
+      });
+
+      if (izmjena.status) {
+        await db.from('intervention_activities').insert({
+          zahtjev_id: requestId,
+          autor_id:   user.id,
+          tip:        'status_promjena',
+          sadrzaj:    'Zahtjev prebačen u obradu nakon postavljanja prioriteta.',
+          old_value:  zahtjev.status,
+          new_value:  'in_review',
+          actor_role: 'dispecer',
+          metadata:   { iz: zahtjev.status, u: 'in_review', final_priority: podaci.final_priority },
+        });
+      }
+
       return NextResponse.json({ success: true });
     }
 
@@ -400,15 +457,29 @@ export async function PATCH(
 
       if (updErr) return NextResponse.json({ error: updErr.message }, { status: 500 });
 
+      const { data: serviserOsoba } = await db
+        .from('osoba')
+        .select('ime, prezime')
+        .eq('id_osobe', podaci.serviser_id)
+        .maybeSingle();
+      const imeServisera = serviserOsoba
+        ? `${serviserOsoba.ime} ${serviserOsoba.prezime}`.trim()
+        : 'Serviser';
+
       await db.from('intervention_activities').insert({
         zahtjev_id: requestId,
         autor_id:   user.id,
         tip:        'dodjela',
-        sadrzaj:    'Dispečer dodijelio intervenciju serviseru.',
+        sadrzaj:    `Dodjela serviseru: ${imeServisera}`,
         old_value:  zahtjev.status,
-        new_value:  'dodijeljeno',
+        new_value:  imeServisera,
         actor_role: 'dispecer',
-        metadata:   { serviser_id: podaci.serviser_id, iz: zahtjev.status, u: 'dodijeljeno' },
+        metadata:   {
+          serviser_id: podaci.serviser_id,
+          serviser_ime: imeServisera,
+          iz: zahtjev.status,
+          u: 'dodijeljeno',
+        },
       });
 
       // Notifikacija serviseru — posebna poruka ako je re-dodjela (prethodni serviser je odbio)
@@ -422,9 +493,6 @@ export async function PATCH(
       // Notifikacija korisniku - serviser dodijeljen
       const { data: zahtjevUser } = await db
         .from('service_requests').select('user_id').eq('id', requestId).maybeSingle();
-      const { data: serviserOsoba } = await db
-        .from('osoba').select('ime, prezime').eq('id_osobe', podaci.serviser_id).maybeSingle();
-      const imeServisera = serviserOsoba ? `${serviserOsoba.ime} ${serviserOsoba.prezime}` : 'Serviser';
       const terminTekst  = podaci.termin_planirani_pocetak
         ? new Date(podaci.termin_planirani_pocetak as string).toLocaleString('bs-BA', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })
         : undefined;
@@ -616,16 +684,43 @@ export async function PATCH(
 
       if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
+      const noviPrioritetLabel = labelOperativnogPrioriteta(podaci.final_priority);
+      const stariPrioritet = (zahtjev.final_priority as string | null) ?? null;
+
       await db.from('intervention_activities').insert({
         zahtjev_id: requestId,
         autor_id:   user.id,
         tip:        'status_promjena',
-        sadrzaj:    `Dispečer potvrdio zahtjev. Prioritet: ${podaci.final_priority}`,
+        sadrzaj:    `Dispečer potvrdio zahtjev (prioritet: ${noviPrioritetLabel})`,
         old_value:  zahtjev.status,
         new_value:  'potvrdeno',
         actor_role: 'dispecer',
-        metadata:   { iz: zahtjev.status, u: 'potvrdeno', final_priority: podaci.final_priority },
+        metadata:   {
+          iz: zahtjev.status,
+          u: 'potvrdeno',
+          final_priority: podaci.final_priority,
+          final_priority_label: noviPrioritetLabel,
+        },
       });
+
+      if (!stariPrioritet || stariPrioritet !== podaci.final_priority) {
+        await db.from('intervention_activities').insert({
+          zahtjev_id: requestId,
+          autor_id:   user.id,
+          tip:        'promjena_prioriteta',
+          sadrzaj:    `Operativni prioritet pri potvrdi: ${labelOperativnogPrioriteta(stariPrioritet)} → ${noviPrioritetLabel}`,
+          old_value:  labelOperativnogPrioriteta(stariPrioritet),
+          new_value:  noviPrioritetLabel,
+          actor_role: 'dispecer',
+          metadata:   {
+            stari_prioritet: stariPrioritet,
+            novi_prioritet: podaci.final_priority,
+            stari_prioritet_label: labelOperativnogPrioriteta(stariPrioritet),
+            novi_prioritet_label: noviPrioritetLabel,
+            izvor: 'potvrda_zahtjeva',
+          },
+        });
+      }
 
       // Notify korisnik - request in processing
       const { data: zahtjevPotv } = await db

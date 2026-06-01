@@ -12,6 +12,9 @@ module.exports = {
   transform: {
     '^.+\\.(js|jsx|ts|tsx)$': ['babel-jest', { presets: ['next/babel'] }],
   },
+  // NAPOMENA: coverage se namjerno mjeri samo na ovom užem skupu fajlova,
+  // pa prikazani postotak NIJE pokrivenost cijelog projekta. Pragovi ispod
+  // vrijede za ovaj skup. Proširenje liste zahtijeva i ponovno kalibrisanje pragova.
   collectCoverageFrom: [
     'lib/validations/authValidation.ts',
     'services/auth/authService.ts',

@@ -12,6 +12,7 @@ import { AlertMessage } from '@/components/ui/AlertMessage';
 import type { ServisniZahtjev } from '@/domain/types/servisirane';
 import { labelKategorije } from '@/lib/servisirane/kategorije';
 import { prioritetBoja, statusBoja, statusOznaka } from '@/lib/servisirane/statusBoja';
+import { PonovniCiklusBadge } from '@/components/servisirane/PonovniCiklusBadge';
 
 // ─── Tipovi ───────────────────────────────────────────────────────────────────
 
@@ -147,6 +148,9 @@ function IntervencijaKartica({ z }: { z: IntervencijaZaListu }) {
               style={{ backgroundColor: 'rgba(234,88,12,0.08)', color: '#EA580C', border: '1px solid rgba(234,88,12,0.22)' }}>
               <XCircle className="h-3 w-3" />Preth. odbijeno
             </span>
+          )}
+          {(z.broj_ponovnih_ciklusa ?? 0) > 0 && (
+            <PonovniCiklusBadge broj={z.broj_ponovnih_ciklusa!} />
           )}
         </div>
 
@@ -286,8 +290,8 @@ export default function ServiserIntervencijaListaPage() {
             Sve vaše intervencije — kao glavni i pomoćni serviser
           </p>
         </div>
-        <button type="button" onClick={ucitaj} disabled={ucitava}
-          className="flex h-9 w-9 items-center justify-center rounded-xl transition-all hover:bg-black/[0.05] disabled:opacity-50"
+        <button type="button" onClick={ucitaj} disabled={ucitava} aria-label="Osvježi intervencije"
+          className="flex h-9 w-9 items-center justify-center rounded-xl transition-all hover:bg-black/[0.05] focus:outline-none focus-visible:ring-2 focus-visible:ring-celestial-teal/40 disabled:opacity-50"
           style={{ border: '1px solid rgb(var(--first-quaternary-rgb)/0.35)' }}>
           <RefreshCw className={`h-4 w-4 ${ucitava ? 'animate-spin' : ''}`} style={{ color: 'var(--first-nonary)' }} />
         </button>

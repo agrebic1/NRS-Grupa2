@@ -97,15 +97,27 @@ describe('middleware auth and role checks', () => {
     expect(response.url).toBe('http://localhost:3000/');
   });
 
-  test('redirects korisnik route when korisnik_usluge row missing', async () => {
+  test('redirects korisnik route when nema ni korisnik_usluge ni uposlenik', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'u1' } } });
     setTableResponse('korisnik_usluge', { data: null, error: null });
+    setTableResponse('uposlenici', { data: null, error: null });
 
     const response = await middleware(req('/korisnik/dashboard'));
 
     expect(mockFrom).toHaveBeenCalledWith('korisnik_usluge');
     expect(response.type).toBe('redirect');
     expect(response.url).toBe('http://localhost:3000/');
+  });
+
+  test('allows korisnik route for uposlenik without korisnik_usluge row', async () => {
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'u1' } } });
+    setTableResponse('korisnik_usluge', { data: null, error: null });
+    setTableResponse('uposlenici', { data: { id_uloge: 2 }, error: null });
+    setTableResponse('uloga', { data: { naziv: 'serviser' }, error: null });
+
+    const response = await middleware(req('/korisnik/dashboard'));
+
+    expect(response.type).toBe('next');
   });
 
   test.each([

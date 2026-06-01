@@ -2,8 +2,15 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
-import { Crown, Mail, RefreshCw, User, Users, Pencil } from 'lucide-react';
+import { Crown, Mail, RefreshCw, Search, User, Users, Pencil, UserSearch } from 'lucide-react';
 import { type StatusKorisnika, BADGE_STATUSA } from '@/lib/admin/statusKorisnika';
+import {
+  filtrirajKorisnikeListu,
+  porukaPraznogStanjaKorisnika,
+  type StatusFilterKorisnika,
+  type UlogaFilterKorisnika,
+} from '@/lib/admin/korisniciFilter';
+import { AdminKorisniciPretragaFilter } from '@/components/admin/AdminKorisniciPretragaFilter';
 import { AppShell } from '@/components/layout/AppShell';
 import { Button } from '@/components/ui/Button';
 import { formatirajDatumPrikaz } from '@/lib/format/datumi';
@@ -23,11 +30,13 @@ interface KorisnikSistema {
   premium_expires_at?: string | null;
 }
 
-
 export default function AdminKorisniciPage() {
   const [korisnici, setKorisnici] = useState<KorisnikSistema[]>([]);
   const [greska, setGreska] = useState<string | null>(null);
   const [ucitava, setUcitava] = useState(true);
+  const [pretraga, setPretraga] = useState('');
+  const [statusFilter, setStatusFilter] = useState<StatusFilterKorisnika>('svi');
+  const [ulogaFilter, setUlogaFilter] = useState<UlogaFilterKorisnika>('svi');
 
   async function ucitajKorisnike() {
     setUcitava(true);
@@ -48,20 +57,32 @@ export default function AdminKorisniciPage() {
     ucitajKorisnike();
   }, []);
 
-  const korisniciUsluge = useMemo(
-    () => korisnici.filter((korisnik) => korisnik.tip === 'korisnik'),
-    [korisnici]
+  const filtrirani = useMemo(
+    () =>
+      filtrirajKorisnikeListu(korisnici, {
+        pretraga,
+        status: statusFilter,
+        uloga: ulogaFilter,
+      }),
+    [korisnici, pretraga, statusFilter, ulogaFilter],
   );
+
+  const porukaPrazno = porukaPraznogStanjaKorisnika({
+    pretraga,
+    status: statusFilter,
+    uloga: ulogaFilter,
+    ukupno: korisnici.length,
+  });
 
   return (
     <AppShell uloga="admin" imeKorisnika="Administrator">
-      <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--first-octonary)' }}>
             Korisnici
           </h1>
           <p className="mt-1 text-sm" style={{ color: 'var(--first-nonary)' }}>
-            Pregled korisnika usluge kroz kartice sa osnovnim podacima i statusom.
+            Pregled svih korisničkih naloga — pretraga, filteri i upravljanje profilima.
           </p>
         </div>
         <Button
@@ -77,19 +98,35 @@ export default function AdminKorisniciPage() {
         </Button>
       </div>
 
-      <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-3">
+      <AdminKorisniciPretragaFilter
+        pretraga={pretraga}
+        onPretragaChange={setPretraga}
+        statusFilter={statusFilter}
+        onStatusFilterChange={setStatusFilter}
+        ulogaFilter={ulogaFilter}
+        onUlogaFilterChange={setUlogaFilter}
+        brojRezultata={ucitava ? undefined : filtrirani.length}
+      />
+
+      <div className="mb-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
         {[
-          { oznaka: 'Ukupno korisnika', vrijednost: korisniciUsluge.length, boja: 'var(--first-primary)', Ikona: Users },
+          { oznaka: 'Ukupno naloga', vrijednost: korisnici.length, boja: 'var(--first-primary)', Ikona: Users },
           {
-            oznaka: 'Aktivni korisnici',
-            vrijednost: korisniciUsluge.filter((korisnik) => korisnik.status === 'aktivan').length,
+            oznaka: 'Aktivni',
+            vrijednost: korisnici.filter((k) => k.status === 'aktivan').length,
             boja: 'var(--first-secondary)',
             Ikona: User,
           },
           {
-            oznaka: 'Premium aktivan',
-            vrijednost: korisniciUsluge.filter((korisnik) => korisnik.premium_status === 'active').length,
+            oznaka: 'Korisnici usluge',
+            vrijednost: korisnici.filter((k) => k.tip === 'korisnik').length,
             boja: 'var(--first-septenary)',
+            Ikona: UserSearch,
+          },
+          {
+            oznaka: 'Premium aktivan',
+            vrijednost: korisnici.filter((k) => k.premium_status === 'active').length,
+            boja: 'var(--first-senary)',
             Ikona: Crown,
           },
         ].map(({ oznaka, vrijednost, boja, Ikona }) => (
@@ -132,9 +169,31 @@ export default function AdminKorisniciPage() {
         </div>
       )}
 
+      {ucitava && (
+        <p className="py-8 text-center text-sm" style={{ color: 'var(--first-nonary)' }}>
+          Učitavanje korisnika...
+        </p>
+      )}
+
+      {!ucitava && filtrirani.length === 0 && !greska && (
+        <div
+          className="mb-6 flex flex-col items-center gap-3 rounded-2xl px-6 py-12 text-center"
+          style={{
+            backgroundColor: 'rgb(var(--first-quinary-rgb) / 0.15)',
+            border: '1px dashed rgb(var(--first-quaternary-rgb) / 0.4)',
+          }}
+          role="status"
+        >
+          <Search className="h-10 w-10 opacity-40" style={{ color: 'var(--first-nonary)' }} aria-hidden />
+          <p className="max-w-md text-sm font-medium" style={{ color: 'var(--first-octonary)' }}>
+            {porukaPrazno}
+          </p>
+        </div>
+      )}
+
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
         {!ucitava &&
-          korisniciUsluge.map((korisnik) => {
+          filtrirani.map((korisnik) => {
             const badge = BADGE_STATUSA[korisnik.status];
             return (
               <article
@@ -151,7 +210,7 @@ export default function AdminKorisniciPage() {
                       {korisnik.imeIPrezime}
                     </h2>
                     <p className="mt-1 flex items-center gap-1.5 truncate text-sm" style={{ color: 'var(--first-nonary)' }}>
-                      <Mail className="h-4 w-4" />
+                      <Mail className="h-4 w-4 shrink-0" />
                       {korisnik.email}
                     </p>
                   </div>
@@ -170,26 +229,30 @@ export default function AdminKorisniciPage() {
                       {korisnik.uloga}
                     </dd>
                   </div>
-                  <div className="flex justify-between gap-3">
-                    <dt style={{ color: 'var(--first-nonary)' }}>Premium</dt>
-                    <dd className="text-right font-medium" style={{ color: 'var(--first-octonary)' }}>
-                      {korisnik.premium_status ?? (korisnik.isPremium ? 'active' : 'inactive')}
-                    </dd>
-                  </div>
+                  {korisnik.tip === 'korisnik' && (
+                    <>
+                      <div className="flex justify-between gap-3">
+                        <dt style={{ color: 'var(--first-nonary)' }}>Premium</dt>
+                        <dd className="text-right font-medium" style={{ color: 'var(--first-octonary)' }}>
+                          {korisnik.premium_status ?? (korisnik.isPremium ? 'active' : 'inactive')}
+                        </dd>
+                      </div>
+                      {korisnik.premium_status === 'active' && korisnik.premium_expires_at && (
+                        <div className="flex justify-between gap-3">
+                          <dt style={{ color: 'var(--first-nonary)' }}>Premium ističe</dt>
+                          <dd className="text-right font-medium" style={{ color: 'var(--first-octonary)' }}>
+                            {formatirajDatumPrikaz(korisnik.premium_expires_at)}
+                          </dd>
+                        </div>
+                      )}
+                    </>
+                  )}
                   <div className="flex justify-between gap-3">
                     <dt style={{ color: 'var(--first-nonary)' }}>Registrovan</dt>
                     <dd className="text-right font-medium" style={{ color: 'var(--first-octonary)' }}>
                       {korisnik.datumRegistracije}
                     </dd>
                   </div>
-                  {korisnik.premium_status === 'active' && korisnik.premium_expires_at && (
-                    <div className="flex justify-between gap-3">
-                      <dt style={{ color: 'var(--first-nonary)' }}>Premium istice</dt>
-                      <dd className="text-right font-medium" style={{ color: 'var(--first-octonary)' }}>
-                        {formatirajDatumPrikaz(korisnik.premium_expires_at)}
-                      </dd>
-                    </div>
-                  )}
                 </dl>
 
                 <div className="mt-4 border-t pt-3" style={{ borderColor: 'rgb(var(--first-quaternary-rgb)/0.25)' }}>
@@ -210,17 +273,6 @@ export default function AdminKorisniciPage() {
             );
           })}
       </div>
-
-      {ucitava && (
-        <p className="py-8 text-center text-sm" style={{ color: 'var(--first-nonary)' }}>
-          Učitavanje korisnika...
-        </p>
-      )}
-      {!ucitava && korisniciUsluge.length === 0 && !greska && (
-        <p className="py-8 text-center text-sm" style={{ color: 'var(--first-nonary)' }}>
-          Nema korisnika za prikaz.
-        </p>
-      )}
     </AppShell>
   );
 }

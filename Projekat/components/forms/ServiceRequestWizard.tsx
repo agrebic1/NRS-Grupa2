@@ -25,7 +25,7 @@ import { KorakTermin }      from '@/components/wizard/KorakTermin';
 import type { TerminSlot }  from '@/domain/types/servisirane';
 import { KorakOpis }        from '@/components/wizard/KorakOpis';
 import { KorakTrijaza, type TriageFormState, INITIAL_TRIAGE } from '@/components/wizard/KorakTrijaza';
-import { wizardKorak2Schema, wizardKorak3Schema } from '@/lib/validations/servisirane';
+import { jeValidanKontaktTelefon, wizardKorak2Schema, wizardKorak3Schema } from '@/lib/validations/servisirane';
 import type { TriageOdgovori } from '@/domain/types/servisirane';
 import { formatirajDatumPrikaz, formatirajDatumVrijemeZaPrikaz } from '@/lib/format/datumi';
 import { izracunajUrgency, oznakaHitnostiZaKorisnika } from '@/lib/servisirane/urgency';
@@ -34,7 +34,6 @@ import { kreirajKlijenta } from '@/lib/supabase/klijent';
 
 // ─── Konstante ────────────────────────────────────────────────────────────────
 
-const PHONE_REGEX = /^[+]?[0-9\s\-()]{8,20}$/;
 const SERVICE_REQUEST_PHOTOS_BUCKET = 'service-request-photos';
 
 // ─── Wizard state ─────────────────────────────────────────────────────────────
@@ -133,7 +132,7 @@ export function isStepThreeValid(s: WizardState): boolean {
 }
 
 export function isStepFourValid(s: Pick<WizardState, 'description' | 'contactPhone'>): boolean {
-  return s.description.trim().length >= 20 && PHONE_REGEX.test(s.contactPhone.trim());
+  return s.description.trim().length >= 20 && jeValidanKontaktTelefon(s.contactPhone);
 }
 
 export function izracunajGreskuPreferiranogVremena(
@@ -242,7 +241,7 @@ function validirajKorak(k: number, s: WizardState): string | null {
     });
     if (!r.success) return r.error.errors[0].message;
     if (!s.contactPhone.trim()) return 'Unesite kontakt telefon.';
-    if (!PHONE_REGEX.test(s.contactPhone.trim())) return 'Unesite ispravan kontakt telefon.';
+    if (!jeValidanKontaktTelefon(s.contactPhone)) return 'Unesite ispravan kontakt telefon.';
     return null;
   }
   if (k === 5) {
@@ -845,7 +844,7 @@ export function ServiceRequestWizard({
             type="button"
             size="md"
             onClick={sljedeciKorak}
-            disabled={blokiran && korak !== 4}
+            disabled={blokiran}
             title={naslovDaljeDugmeta(korak, state)}
             className="min-h-[44px] max-h-[48px] rounded-[12px] px-6"
           >

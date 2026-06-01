@@ -86,14 +86,23 @@ describe('auth service role logic and auth flows', () => {
   });
 
   test('resend verification validates email', async () => {
+    process.env.NEXT_PUBLIC_SITE_URL = 'https://example.com';
+
     await expect(posaljiPonovoVerifikacijskiEmail('los-email')).rejects.toThrow(
       'Unesite ispravnu email adresu.'
     );
     mockResend.mockResolvedValue({ error: null });
     await expect(posaljiPonovoVerifikacijskiEmail(' User@Example.Com ')).resolves.toBeUndefined();
-    mockResend.mockResolvedValue({ error: { message: 'fail' } });
+    expect(mockResend).toHaveBeenCalledWith({
+      type: 'signup',
+      email: 'user@example.com',
+      options: {
+        emailRedirectTo: 'https://example.com/auth/callback',
+      },
+    });
+    mockResend.mockResolvedValue({ error: { message: 'redirect_to is not allowed' } });
     await expect(posaljiPonovoVerifikacijskiEmail('user@example.com')).rejects.toThrow(
-      'Slanje verifikacijskog emaila nije uspjelo'
+      'Potvrda emaila trenutno nije dostupna'
     );
   });
 
@@ -293,6 +302,8 @@ describe('auth service role logic and auth flows', () => {
     global.fetch.mockResolvedValueOnce({ ok: true, json: async () => ({ uloge: ['admin', 'serviser'] }) });
     await expect(odrediRedirectNakonPrijave('u1')).resolves.toBe('/odabir-uloge');
 
+    // Server ruta nedostupna → fallback. Nepoznata interna uloga se preskače,
+    // ali uposlenik i dalje dobije ulogu 'korisnik'.
     global.fetch.mockResolvedValueOnce({ ok: false, json: async () => ({}) });
     mockFrom.mockImplementation((table) => {
       if (table === 'korisnik_usluge') return builder({ data: null });
@@ -300,8 +311,10 @@ describe('auth service role logic and auth flows', () => {
       if (table === 'uloga') return builder({ data: { naziv: 'X-unknown' } });
       return builder({ data: null });
     });
-    await expect(getUlogeKorisnika('u2')).resolves.toEqual([]);
+    await expect(getUlogeKorisnika('u2')).resolves.toEqual(['korisnik']);
 
+    // Zaposleni (bez zasebnog korisnik_usluge zapisa) uvijek dobije i ulogu
+    // 'korisnik' uz svoju internu ulogu, isto kao server ruta /api/auth/uloge.
     global.fetch.mockRejectedValue(new Error('offline'));
     mockFrom.mockImplementation((table) => {
       if (table === 'korisnik_usluge') return builder({ data: null });
@@ -309,7 +322,7 @@ describe('auth service role logic and auth flows', () => {
       if (table === 'uloga') return builder({ data: { naziv: 'Serviser' } });
       return builder({ data: null });
     });
-    await expect(getUlogeKorisnika('u3')).resolves.toEqual(['serviser']);
+    await expect(getUlogeKorisnika('u3')).resolves.toEqual(['korisnik', 'serviser']);
 
     global.fetch.mockRejectedValue(new Error('offline'));
     mockFrom.mockImplementation((table) => {
@@ -318,8 +331,9 @@ describe('auth service role logic and auth flows', () => {
       if (table === 'uloga') return builder({ data: { naziv: 'Admin' } });
       return builder({ data: null });
     });
-    await expect(getUlogeKorisnika('u4')).resolves.toEqual(['admin']);
+    await expect(getUlogeKorisnika('u4')).resolves.toEqual(['korisnik', 'admin']);
 
+    // Uposlenik čija uloga već mapira na 'korisnik' ne smije dati duplikat.
     global.fetch.mockRejectedValue(new Error('offline'));
     mockFrom.mockImplementation((table) => {
       if (table === 'korisnik_usluge') return builder({ data: null });
@@ -327,7 +341,7 @@ describe('auth service role logic and auth flows', () => {
       if (table === 'uloga') return builder({ data: { naziv: 'Korisnik usluge' } });
       return builder({ data: null });
     });
-    await expect(getUlogeKorisnika('u5')).resolves.toEqual([]);
+    await expect(getUlogeKorisnika('u5')).resolves.toEqual(['korisnik']);
   });
 
   test('session helpers work', async () => {

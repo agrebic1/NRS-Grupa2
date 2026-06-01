@@ -32,11 +32,23 @@ export function EvidencijaRadaModal({ zahtjevId, onZatvori, onUspjeh }: Evidenci
   const opisValid     = opisRada.trim().length >= MIN_OPIS;
   const trajanjeNum   = trajanje ? parseInt(trajanje, 10) : null;
   const trajanjeValid = trajanjeNum !== null && trajanjeNum > 0 && trajanjeNum <= 1440;
+  const stavkeValid =
+    stavke.length === 0 ||
+    stavke.every(
+      (s) => s.naziv.trim().length > 0 && s.jedinica.trim().length > 0 && s.kolicina > 0,
+    );
 
   async function posalji() {
     if (!opisValid)     { setGreska('Opis rada mora imati najmanje 5 karaktera.'); return; }
     if (!trajanjeNum)   { setGreska('Trajanje je obavezno. Unesite broj minuta (1-1440).'); return; }
     if (!trajanjeValid) { setGreska('Trajanje mora biti između 1 i 1440 minuta.'); return; }
+
+    for (let i = 0; i < stavke.length; i++) {
+      const s = stavke[i];
+      if (!s.naziv.trim()) { setGreska(`Stavka ${i + 1}: naziv je obavezan.`); return; }
+      if (!s.kolicina || s.kolicina <= 0) { setGreska(`Stavka ${i + 1}: količina mora biti pozitivna.`); return; }
+      if (!s.jedinica.trim()) { setGreska(`Stavka ${i + 1}: jedinica je obavezna.`); return; }
+    }
 
     setJeSlanje(true);
     setGreska(null);
@@ -49,7 +61,7 @@ export function EvidencijaRadaModal({ zahtjevId, onZatvori, onUspjeh }: Evidenci
           opis_rada:       opisRada.trim(),
           trajanje_minuta: trajanjeNum,
           materijal:           materijal.trim() || null,
-          stavke_materijala:   stavke.filter((s) => s.naziv.trim() && s.kolicina > 0),
+          stavke_materijala:   stavke,
           napomene:            napomene.trim() || null,
         }),
       });
@@ -93,8 +105,9 @@ export function EvidencijaRadaModal({ zahtjevId, onZatvori, onUspjeh }: Evidenci
               </p>
             </div>
           </div>
-          <button type="button" onClick={onZatvori}
-            className="transition-opacity hover:opacity-70" style={{ color: 'var(--first-nonary)' }}>
+          <button type="button" onClick={onZatvori} aria-label="Zatvori"
+            className="rounded-lg transition-opacity hover:opacity-70 focus:outline-none focus-visible:ring-2 focus-visible:ring-celestial-teal/40"
+            style={{ color: 'var(--first-nonary)' }}>
             <X className="h-5 w-5" />
           </button>
         </div>
@@ -220,7 +233,7 @@ export function EvidencijaRadaModal({ zahtjevId, onZatvori, onUspjeh }: Evidenci
                     <button
                       type="button"
                       onClick={() => setStavke((arr) => arr.filter((_, j) => j !== i))}
-                      className="p-1.5"
+                      className="rounded-lg p-1.5 focus:outline-none focus-visible:ring-2 focus-visible:ring-celestial-teal/40"
                       aria-label="Ukloni stavku"
                     >
                       <Trash2 className="h-4 w-4" style={{ color: '#DC2626' }} />
@@ -260,7 +273,7 @@ export function EvidencijaRadaModal({ zahtjevId, onZatvori, onUspjeh }: Evidenci
                 type="button" size="md"
                 onClick={posalji}
                 isLoading={jeSlanje} loadingText="Snimanje..."
-                disabled={!opisValid || !trajanjeValid}
+                disabled={!opisValid || !trajanjeValid || !stavkeValid}
               >
                 <ClipboardCheck className="h-4 w-4" />
                 Evidentiraj rad

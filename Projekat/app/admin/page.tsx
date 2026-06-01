@@ -17,6 +17,13 @@ import { StatusBadge } from '@/components/servisirane/ZahtjevKartica';
 import type { ServisniZahtjev } from '@/domain/types/servisirane';
 import { formatirajDatumPrikaz } from '@/lib/format/datumi';
 import { BADGE_STATUSA, type StatusKorisnika } from '@/lib/admin/statusKorisnika';
+import {
+  filtrirajKorisnikeListu,
+  porukaPraznogStanjaKorisnika,
+  type StatusFilterKorisnika,
+  type UlogaFilterKorisnika,
+} from '@/lib/admin/korisniciFilter';
+import { AdminKorisniciPretragaFilter } from '@/components/admin/AdminKorisniciPretragaFilter';
 
 type PremiumLifecycleStatus = 'inactive' | 'pending_payment' | 'active' | 'expired' | 'cancelled';
 
@@ -44,6 +51,9 @@ export default function AdminPage() {
   const [greska, setGreska] = useState<string | null>(null);
   const [ucitava, setUcitava] = useState(true);
   const [premiumLoadingId, setPremiumLoadingId] = useState<string | null>(null);
+  const [pretraga, setPretraga] = useState('');
+  const [statusFilter, setStatusFilter] = useState<StatusFilterKorisnika>('svi');
+  const [ulogaFilter, setUlogaFilter] = useState<UlogaFilterKorisnika>('svi');
 
   async function ucitajKorisnike() {
     setUcitava(true);
@@ -101,6 +111,23 @@ export default function AdminPage() {
       setPremiumLoadingId(null);
     }
   }
+
+  const filtriraniKorisnici = useMemo(
+    () =>
+      filtrirajKorisnikeListu(korisnici, {
+        pretraga,
+        status: statusFilter,
+        uloga: ulogaFilter,
+      }),
+    [korisnici, pretraga, statusFilter, ulogaFilter],
+  );
+
+  const porukaPraznoKorisnici = porukaPraznogStanjaKorisnika({
+    pretraga,
+    status: statusFilter,
+    uloga: ulogaFilter,
+    ukupno: korisnici.length,
+  });
 
   const kpiKartice = useMemo(
     () => [
@@ -224,6 +251,18 @@ export default function AdminPage() {
           </div>
         )}
 
+        <div className="px-5 pb-4 pt-2">
+          <AdminKorisniciPretragaFilter
+            pretraga={pretraga}
+            onPretragaChange={setPretraga}
+            statusFilter={statusFilter}
+            onStatusFilterChange={setStatusFilter}
+            ulogaFilter={ulogaFilter}
+            onUlogaFilterChange={setUlogaFilter}
+            brojRezultata={ucitava ? undefined : filtriraniKorisnici.length}
+          />
+        </div>
+
         <div className="hidden overflow-x-auto sm:block">
           <table className="w-full text-sm">
             <thead>
@@ -248,16 +287,16 @@ export default function AdminPage() {
                 </tr>
               )}
 
-              {!ucitava && korisnici.length === 0 && !greska && (
+              {!ucitava && filtriraniKorisnici.length === 0 && !greska && (
                 <tr>
                   <td colSpan={7} className="px-5 py-8 text-center" style={{ color: 'var(--first-nonary)' }}>
-                    Nema korisnika za prikaz.
+                    {porukaPraznoKorisnici}
                   </td>
                 </tr>
               )}
 
               {!ucitava &&
-                korisnici.map((korisnik) => {
+                filtriraniKorisnici.map((korisnik) => {
                   const badge = BADGE_STATUSA[korisnik.status];
 
                   return (
@@ -338,14 +377,14 @@ export default function AdminPage() {
             </li>
           )}
 
-          {!ucitava && korisnici.length === 0 && !greska && (
+          {!ucitava && filtriraniKorisnici.length === 0 && !greska && (
             <li className="px-5 py-6 text-center text-sm" style={{ color: 'var(--first-nonary)' }}>
-              Nema korisnika za prikaz.
+              {porukaPraznoKorisnici}
             </li>
           )}
 
           {!ucitava &&
-            korisnici.map((korisnik) => {
+            filtriraniKorisnici.map((korisnik) => {
               const badge = BADGE_STATUSA[korisnik.status];
 
               return (

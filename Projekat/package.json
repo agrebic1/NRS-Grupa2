@@ -14,8 +14,7 @@
     "test:e2e": "playwright test --workers=1",
     "test:coverage": "jest --config jest.config.js --coverage --runInBand",
     "test:krajnje": "npm run test:coverage && node tools/krajnjeTestiranjeReport.mjs",
-    "test:izvjestaj": "node tools/pokreniSveTestoveIzvjestaj.mjs",
-    "seed:demo-zahtjevi": "node scripts/seed-demo-zahtjevi.mjs"
+    "test:izvjestaj": "node tools/pokreniSveTestoveIzvjestaj.mjs"
   },
   "dependencies": {
     "@babel/runtime": "^7.29.2",

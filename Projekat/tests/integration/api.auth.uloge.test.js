@@ -58,7 +58,7 @@ describe('/api/auth/uloge route', () => {
     });
     const serviserResp = await GET();
     const serviserBody = await serviserResp.json();
-    expect(serviserBody.uloge).toEqual(['serviser']);
+    expect(serviserBody.uloge).toEqual(['korisnik', 'serviser']);
 
     mockFrom.mockImplementation((table) => {
       if (table === 'korisnik_usluge') return qb({ data: null, error: null });
@@ -68,7 +68,7 @@ describe('/api/auth/uloge route', () => {
     });
     const adminResp = await GET();
     const adminBody = await adminResp.json();
-    expect(adminBody.uloge).toEqual(['admin']);
+    expect(adminBody.uloge).toEqual(['korisnik', 'admin']);
 
     mockFrom.mockImplementation((table) => {
       if (table === 'korisnik_usluge') return qb({ data: null, error: null });
@@ -81,7 +81,7 @@ describe('/api/auth/uloge route', () => {
     expect(korisnikBody.uloge).toEqual(['korisnik']);
   });
 
-  test('ignores unknown role names', async () => {
+  test('ignores unknown role names but keeps korisnik for zaposleni', async () => {
     mockSessionGetUser.mockResolvedValue({ data: { user: { id: 'u1' } }, error: null });
     mockFrom.mockImplementation((table) => {
       if (table === 'korisnik_usluge') return qb({ data: null, error: null });
@@ -91,7 +91,7 @@ describe('/api/auth/uloge route', () => {
     });
     const response = await GET();
     const body = await response.json();
-    expect(body.uloge).toEqual([]);
+    expect(body.uloge).toEqual(['korisnik']);
   });
 
   test('returns 500 when db lookup fails', async () => {

@@ -23,6 +23,7 @@ Ovaj dokument je jedinstven vodič za testiranje: šta je pokriveno, kada se tes
 - **SB-06-20**: `TC_SB-06-20_Sprint6_ManualFlows.csv`, `EXEC`, `BUG`, `SIGNOFF`
 - **SB-07-35**: `TC_SB-07-35_Sprint7_DispecerManualFlows.csv`, `EXEC`, `BUG`, `SIGNOFF`
 - **SB-09-36** (Sprint 9): `TC_SB-09-36_Sprint9_ManualFlows.csv`, `EXEC`, `BUG`, `SIGNOFF` (80 scenarija, `TC-S9-01`–`TC-S9-80`)
+- **SB-10-107** (Sprint 10): `TC_SB-10-107_Sprint10_ManualFlows.csv`, `EXEC`, `BUG`, `SIGNOFF` (107 scenarija, `TC-S10-001`–`TC-S10-107`; mapiranje T1–T4 u `IZVJESTAJ_SB-10-107_Sprint10_Testiranje.md`)
 
 ## Kada se pokreće
 
@@ -47,6 +48,7 @@ Napomena: `npm run test:e2e` koristi jedan Playwright worker radi stabilnog logi
 `npm run test:izvjestaj`
 
 Ova komanda:
+
 - pokrece `npm test`
 - pokrece `npm run test:coverage`
 - pokrece `npm run test:e2e -- --workers=1` (stabilnije za CI/lokalni batch run)
@@ -69,12 +71,12 @@ E2E_KORISNIK_EMAIL=test@gmail.com
 E2E_KORISNIK_PASSWORD=123456789Aa@
 ```
 
-## Trenutni status (Sprint 9 — automatski)
+## Trenutni status (automatski · mjereno 2026-06-01, Sprint 10)
 
-- `npm test`: 286/286 passed (174 unit + 112 integration)
-- `npm run test:e2e`: 23/23 passed (popravka DLI-021: RBAC prije validacije ID na serviserskom API)
+- `npm test`: **445/445 passed** (321 unit + 124 integration)
+- `npm run test:e2e`: **23/23 passed** (uključujući `rbac.cross-access.spec.ts` · S10-T1; middleware usklađen s multi-uloga pristupom)
 - `npm run test:izvjestaj`: generiše `docs/testing/Izvjestaji/<run>/IZVJESTAJ.md`
-- cilj pokrivenosti: **minimum 98%**
+- pokrivenost (`test:coverage`): trenutno ograničena na uži skup fajlova kroz `collectCoverageFrom` u `jest.config.js` — prikazani postotak nije pokrivenost cijelog projekta.
 
 ## Izvještaji i artefakti
 
@@ -87,3 +89,6 @@ E2E_KORISNIK_PASSWORD=123456789Aa@
 - Sprint 9 izvještaj: `docs/testing/SB-09-36/IZVJESTAJ_SB-09-36_Sprint9_Testiranje.md`
 - Sprint 9 sign-off: `docs/testing/SB-09-36/SIGNOFF_SB-09-36_QA-SA.md`
 - Sprint 9 manual execution: `docs/testing/SB-09-36/EXEC_SB-09-36_Sprint9_ManualFlows.csv`
+- Sprint 10 izvještaj: `docs/testing/SB-10-107/IZVJESTAJ_SB-10-107_Sprint10_Testiranje.md`
+- Sprint 10 sign-off: `docs/testing/SB-10-107/SIGNOFF_SB-10-107_QA-SA.md`
+- Sprint 10 manual execution: `docs/testing/SB-10-107/EXEC_SB-10-107_Sprint10_ManualFlows.csv`

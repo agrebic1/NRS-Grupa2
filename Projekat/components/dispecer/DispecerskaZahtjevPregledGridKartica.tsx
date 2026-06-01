@@ -27,6 +27,7 @@ import {
 } from '@/lib/servisirane/dispecerskeFaze';
 import { zahtjevCekaObraduUInboxuDispecera } from '@/lib/servisirane/statusZahtjeva';
 import { SlaStatusBadge } from '@/components/dispecer/SlaStatusBadge';
+import { PonovniCiklusBadge } from '@/components/servisirane/PonovniCiklusBadge';
 
 function sljedecaAkcijaZaOperatera(zahtjev: ServisniZahtjev): string {
   if (zahtjevCekaObraduUInboxuDispecera(zahtjev.status)) {
@@ -123,6 +124,9 @@ export function DispecerskaZahtjevPregledGridKartica({ zahtjev }: { zahtjev: Zah
               #{oznakaZaDispecerskiPrikazBroja(zahtjev)}
             </span>
             {zahtjev.is_premium ? <DispecerPremiumKruna className="translate-y-px shrink-0" /> : null}
+            {(zahtjev.broj_ponovnih_ciklusa ?? 0) > 0 && (
+              <PonovniCiklusBadge broj={zahtjev.broj_ponovnih_ciklusa!} />
+            )}
           </span>
           <div className="shrink-0 text-right">
             <p className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: 'rgb(var(--first-nonary-rgb) / 0.78)' }}>
