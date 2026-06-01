@@ -22,7 +22,12 @@ import { EvidencijaRadaModal } from '@/components/serviser/EvidencijaRadaModal';
 import { RazlogOperativniModal } from '@/components/servisirane/RazlogOperativniModal';
 import { PonovniCiklusBadge } from '@/components/servisirane/PonovniCiklusBadge';
 import { IntervencijaChecklist } from '@/components/serviser/IntervencijaChecklist';
-import type { ServisniZahtjev, WorkEvidence, InterventionActivity } from '@/domain/types/servisirane';
+import type {
+  ServisniZahtjev,
+  WorkEvidence,
+  InterventionActivity,
+  StatusZahtjeva,
+} from '@/domain/types/servisirane';
 import { labelKategorije } from '@/lib/servisirane/kategorije';
 import { prioritetBoja, statusBoja, statusOznaka } from '@/lib/servisirane/statusBoja';
 import { fmtSat, fmtDatumKratki } from '@/lib/format/datumi';
@@ -229,7 +234,7 @@ function TerminVizual({ zahtjev }: { zahtjev: IntervencijaDetalji }) {
 }
 
 type ServiserAkcijaOdgovor = {
-  novi_status?: string;
+  novi_status?: StatusZahtjeva;
   broj_ponovnih_ciklusa?: number;
 };
 
@@ -1212,7 +1217,7 @@ export default function ServiserIntervencijaDetaljiPage() {
             );
             setSamoCitanje(true);
             setNivoPristupa('arhiva');
-            setUspjehPoruku(
+            setUspjehPoruka(
               odg.broj_ponovnih_ciklusa
                 ? `Zadatak vraćen dispečeru. Ponovni ciklus: ${odg.broj_ponovnih_ciklusa}.`
                 : 'Zadatak vraćen dispečeru na ponovnu dodjelu.',
@@ -1249,7 +1254,7 @@ export default function ServiserIntervencijaDetaljiPage() {
             );
             setSamoCitanje(true);
             setNivoPristupa('arhiva');
-            setUspjehPoruku(
+            setUspjehPoruka(
               odg.broj_ponovnih_ciklusa
                 ? `Označeno kao nije riješeno. Ponovni ciklus: ${odg.broj_ponovnih_ciklusa}.`
                 : 'Intervencija označena kao nije riješena.',

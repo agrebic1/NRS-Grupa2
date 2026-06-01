@@ -30,14 +30,14 @@ export function korisnikOdgovaraUlozi(
 }
 
 /** US-19: pretraga po imenu/emailu/ulozi + filter statusa i uloge. */
-export function filtrirajKorisnikeListu(
-  korisnici: KorisnikZaFilter[],
+export function filtrirajKorisnikeListu<T extends KorisnikZaFilter>(
+  korisnici: T[],
   opts: {
     pretraga: string;
     status: StatusFilterKorisnika;
     uloga: UlogaFilterKorisnika;
   },
-): KorisnikZaFilter[] {
+): T[] {
   let lista = korisnici;
 
   if (opts.status !== 'svi') {
