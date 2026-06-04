@@ -2953,6 +2953,222 @@ Povezano sa svim korisničkim modulima sistema, posebno pregledom intervencija (
   * **THEN** koristi vizuelne indikatore, grupisanje i hijerarhijski prikaz sadržaja radi lakšeg korištenja
 
 ---
+
+## US-51 — Bazna lokacija servisera i prikaz rute do intervencije
+
+Opis:
+Kao serviser, želim unijeti svoju baznu/polaznu lokaciju i vidjeti prikaz rute do intervencije na mapi, kako bih mogao lakše planirati dolazak na lokaciju i organizovati svoj rad na terenu.
+
+Poslovna vrijednost:
+Ovaj story omogućava bolju organizaciju rada na terenu, efikasnije planiranje dolaska na lokaciju intervencije i kvalitetnije upravljanje vremenom servisera.
+
+Prioritet:
+Srednji
+
+Pretpostavke i otvorena pitanja:
+
+Pretpostavka: Sistem raspolaže lokacijom intervencije i podržava prikaz geografskih podataka na mapi.
+
+Otvoreno pitanje: Da li se ruta prikazuje samo informativno ili će sistem koristiti podatke o udaljenosti i vremenu putovanja za dodatne preporuke i planiranje?
+
+Veze sa drugim storyjima:
+Povezano sa geo-preporukom servisera (US-48), planiranjem intervencije (US-11), pregledom detalja zadatka na terenu (US-16) i pregledom dodijeljenih intervencija (US-15).
+
+Acceptance Criteria:
+
+* AC1: Unos bazne lokacije
+  
+  * GIVEN serviser pristupi svom profilu ili postavkama
+  * WHEN unese ili izmijeni baznu lokaciju
+  * THEN sistem sprema odabranu lokaciju
+
+* AC2: Prikaz lokacije intervencije na mapi
+  
+  * GIVEN intervencija ima evidentiranu lokaciju
+  * WHEN serviser otvori detalje intervencije
+  * THEN sistem prikazuje lokaciju intervencije na mapi
+
+* AC3: Prikaz rute
+  
+  * GIVEN bazna lokacija i lokacija intervencije postoje
+  * WHEN serviser pregleda detalje intervencije
+  * THEN sistem prikazuje rutu između dvije lokacije
+
+* AC4: Nedostupni lokacijski podaci
+  
+  * GIVEN nedostaje bazna lokacija ili lokacija intervencije
+  * WHEN sistem pokuša prikazati rutu
+  * THEN prikazuje odgovarajuću poruku i ne pokušava generisati rutu
+
+* AC5: Otvaranje vanjske navigacije
+  
+  * GIVEN ruta je prikazana
+  * WHEN serviser odabere opciju navigacije
+  * THEN sistem omogućava otvaranje rute u vanjskoj navigacionoj aplikaciji
+
+---
+
+## US-52 — Ocjena korisnika nakon zatvorene intervencije
+
+Opis:
+Kao korisnik usluge, želim dati ocjenu i komentar nakon zatvorene intervencije, kako bih mogao pružiti povratnu informaciju o kvalitetu usluge i radu servisnog tima.
+
+Poslovna vrijednost:
+Ovaj story omogućava prikupljanje povratnih informacija korisnika i pruža osnovu za praćenje kvaliteta usluge i kontinuirano unapređenje rada servisnog tima.
+
+Prioritet:
+Srednji
+
+Pretpostavke i otvorena pitanja:
+
+Pretpostavka: Intervencija mora biti završena prije nego što korisnik može ostaviti ocjenu.
+
+Otvoreno pitanje: Da li korisnik može naknadno izmijeniti već unesenu ocjenu?
+
+Veze sa drugim storyjima:
+Povezano sa zatvaranjem intervencije (US-30), pregledom historije intervencija korisnika (US-54) i analitičkim dashboardom (US-49).
+
+Acceptance Criteria:
+
+* AC1: Ocjenjivanje zatvorene intervencije
+  
+  * GIVEN intervencija ima status zatvorena
+  * WHEN korisnik otvori detalje intervencije
+  * THEN sistem omogućava unos ocjene i komentara
+
+* AC2: Ograničenje na jednu ocjenu
+  
+  * GIVEN korisnik je već ocijenio intervenciju
+  * WHEN ponovo pristupi obrascu za ocjenjivanje
+  * THEN sistem prikazuje postojeću ocjenu
+
+* AC3: Validacija ocjene
+  
+  * GIVEN korisnik unosi ocjenu
+  * WHEN potvrdi unos
+  * THEN sistem prihvata samo dozvoljene vrijednosti ocjene
+
+* AC4: Spremanje komentara
+  
+  * GIVEN korisnik unese komentar
+  * WHEN potvrdi ocjenjivanje
+  * THEN sistem sprema komentar uz ocjenu
+
+* AC5: Vidljivost rezultata
+  
+  * GIVEN intervencija je ocijenjena
+  * WHEN ovlašteni korisnici pregledaju podatke
+  * THEN sistem prikazuje ocjenu i komentar
+
+---
+
+## US-53 — Automatski podsjetnik za intervencije koje dugo čekaju
+
+Opis:
+Kao dispečer, želim da sistem automatski istakne intervencije koje predugo čekaju bez obrade ili dodjele, kako ne bih propustio zahtjeve koji su ostali neobrađeni ili zapeli u workflow-u.
+
+Poslovna vrijednost:
+Ovaj story smanjuje rizik od zaboravljenih ili zanemarenih zahtjeva i pomaže u održavanju efikasnog operativnog toka rada.
+
+Prioritet:
+Srednji
+
+Pretpostavke i otvorena pitanja:
+
+Pretpostavka: Sistem prati vrijeme provedeno u svakom statusu intervencije.
+
+Otvoreno pitanje: Da li prag za podsjetnik treba biti jedinstven ili zavisiti od prioriteta intervencije?
+
+Veze sa drugim storyjima:
+Povezano sa pregledom otvorenih intervencija (US-07), pregledom statusa intervencija (US-13), SLA praćenjem (US-41) i SLA eskalacijama (US-45).
+
+Acceptance Criteria:
+
+* AC1: Detekcija dugog čekanja
+  
+  * GIVEN intervencija se nalazi u statusu čekanja
+  * WHEN prekorači definisani prag vremena
+  * THEN sistem označava intervenciju kao zahtijeva pažnju
+
+* AC2: Vizuelno isticanje
+  
+  * GIVEN intervencija zahtijeva pažnju
+  * WHEN dispečer pregleda listu intervencija
+  * THEN sistem je vizuelno ističe
+
+* AC3: Prikaz razloga upozorenja
+  
+  * GIVEN intervencija je označena
+  * WHEN dispečer pregleda detalje
+  * THEN sistem prikazuje razlog i trajanje čekanja
+
+* AC4: Uklanjanje upozorenja
+  
+  * GIVEN intervencija više ne ispunjava uslove za upozorenje
+  * WHEN status ili dodjela budu promijenjeni
+  * THEN sistem uklanja oznaku upozorenja
+
+* AC5: Prikaz na dashboardu
+  
+  * GIVEN postoje intervencije koje čekaju predugo
+  * WHEN dispečer otvori dashboard
+  * THEN sistem prikazuje broj takvih intervencija
+
+---
+
+## US-54 — Pregled historije intervencija po korisniku usluge
+
+Opis:
+Kao korisnik usluge, želim vidjeti sve svoje prošle intervencije na jednom mjestu sa osnovnim detaljima (datum, tip kvara, status, ocjena), kako bih mogao pratiti historiju servisa svoje imovine.
+
+Poslovna vrijednost:
+Ovaj story omogućava korisnicima bolji uvid u prethodne zahtjeve, povećava transparentnost sistema i olakšava praćenje ranijih intervencija.
+
+Prioritet:
+Nizak
+
+Pretpostavke i otvorena pitanja:
+
+Pretpostavka: Sistem čuva historijske podatke o završenim intervencijama korisnika.
+
+Otvoreno pitanje: Da li je potrebno omogućiti pretragu i filtriranje historijskih intervencija?
+
+Veze sa drugim storyjima:
+Povezano sa pregledom vlastitog zahtjeva (US-06), zatvaranjem intervencije (US-30) i ocjenjivanjem intervencije (US-52).
+
+Acceptance Criteria:
+
+* AC1: Prikaz historije intervencija
+  
+  * GIVEN korisnik ima prethodne intervencije
+  * WHEN otvori pregled historije
+  * THEN sistem prikazuje njegove intervencije
+
+* AC2: Prikaz osnovnih podataka
+  
+  * GIVEN historija intervencija je učitana
+  * WHEN korisnik pregleda listu
+  * THEN prikazuju se datum, tip kvara, status i ocjena intervencije
+
+* AC3: Pregled detalja intervencije
+  
+  * GIVEN korisnik odabere intervenciju iz historije
+  * WHEN otvori detalje
+  * THEN sistem prikazuje detalje intervencije
+
+* AC4: Ograničenje pristupa
+  
+  * GIVEN korisnik pregleda historiju
+  * WHEN sistem učita podatke
+  * THEN prikazuju se samo njegove intervencije
+
+* AC5: Prikaz ocjene intervencije
+  
+  * GIVEN intervencija je ocijenjena
+  * WHEN korisnik pregleda historiju
+  * THEN sistem prikazuje evidentiranu ocjenu uz intervenciju
+
+---
  
 # Raspodjela zadataka i user story-ja po sprintovima:
 
