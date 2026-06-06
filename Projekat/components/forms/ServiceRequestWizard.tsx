@@ -79,7 +79,7 @@ const INITIAL: WizardState = {
   isLocating:               false,
   locationError:            null,
   hasSelectedMapLocation:   false,
-  isMapVisible:             false,
+  isMapVisible:             true,
   locationSuccessMessage:   null,
   termini:             [],
   noPreferredTime:     false,
@@ -104,9 +104,9 @@ export function isStepOneValid(s: WizardState): boolean {
   return validnaKombinacijaKategorije(s.selectedCategory, s.selectedSubcategory);
 }
 
-/** Korak 2: adresa je obavezna (≥5 znakova). Mapa/GPS su dodatno preciziranje. */
+/** Korak 2: adresa (≥5 znakova) i GPS koordinate su obavezne. */
 export function isStepTwoValid(s: WizardState): boolean {
-  return s.address.trim().length >= 5;
+  return s.address.trim().length >= 5 && s.latitude !== null && s.longitude !== null;
 }
 
 export function danasIsoLokalno(): string {
@@ -222,10 +222,12 @@ function validirajKorak(k: number, s: WizardState): string | null {
       if (s.address.trim().length > 500) return 'Adresa ne smije biti duža od 500 karaktera.';
       return null;
     }
-    if (s.address.trim().length > 0 && s.address.trim().length < 5) {
-      return 'Adresa mora sadržavati dovoljno informacija za pronalazak lokacije.';
+    if (s.address.trim().length === 0) return 'Unesite adresu intervencije prije nastavka.';
+    if (s.address.trim().length < 5) return 'Adresa mora sadržavati dovoljno informacija za pronalazak lokacije.';
+    if (s.latitude === null || s.longitude === null) {
+      return 'Označite tačnu lokaciju na mapi, koristite GPS ili odaberite adresu iz padajuće liste.';
     }
-    return 'Unesite adresu intervencije prije nastavka.';
+    return 'Unesite adresu i označite lokaciju prije nastavka.';
   }
   if (k === 3) {
     return porukaValidacijePreferiranogTermina(s);

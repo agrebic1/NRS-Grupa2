@@ -11,6 +11,7 @@ import { OtkaziModal } from '@/components/servisirane/OtkaziModal';
 import { ServiceRequestWizard } from '@/components/forms/ServiceRequestWizard';
 import { AlertMessage } from '@/components/ui/AlertMessage';
 import type { ServisniZahtjev } from '@/domain/types/servisirane';
+import { jeZahtjevAktivan } from '@/lib/servisirane/statusZahtjeva';
 
 // ─── Prazno stanje ────────────────────────────────────────────────────────────
 
@@ -96,7 +97,7 @@ function ListaDashboard({ zahtjevi, onUredi, onOtkazi }: ListaDashboardProps) {
           style={{ borderBottom: '1px solid rgb(var(--first-quaternary-rgb) / 0.3)' }}
         >
           <h2 className="font-semibold" style={{ color: 'var(--first-octonary)' }}>
-            Svi zahtjevi ({zahtjevi.length})
+            Aktivni zahtjevi ({zahtjevi.length})
           </h2>
         </div>
 
@@ -134,7 +135,8 @@ export default function KorisnikZahtjeviPage() {
       const r = await fetch('/api/service-requests', { cache: 'no-store' });
       const d = await r.json();
       if (!r.ok) throw new Error(d.error ?? 'Greška pri učitavanju.');
-      setZahtjevi(d.zahtjevi ?? []);
+      const aktivni = (d.zahtjevi ?? []).filter((z: ServisniZahtjev) => jeZahtjevAktivan(z.status));
+      setZahtjevi(aktivni);
     } catch (err) {
       setGreska(err instanceof Error ? err.message : 'Greška pri učitavanju zahtjeva.');
     } finally {
@@ -166,13 +168,11 @@ export default function KorisnikZahtjeviPage() {
   }
 
   function handleOtkaziUspjeh() {
+    const otkazaniId = otkaziTarget?.id;
     setOtkaziTarget(null);
-    // Lokalno ažuriraj status bez re-fetcha
-    setZahtjevi((prev) =>
-      prev.map((z) =>
-        z.id === otkaziTarget?.id ? { ...z, status: 'otkazano' as const } : z
-      )
-    );
+    if (otkazaniId != null) {
+      setZahtjevi((prev) => prev.filter((z) => z.id !== otkazaniId));
+    }
   }
 
   // ─── Loading ─────────────────────────────────────────────────────────────

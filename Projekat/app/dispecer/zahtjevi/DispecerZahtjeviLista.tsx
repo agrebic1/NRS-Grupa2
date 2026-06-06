@@ -34,7 +34,7 @@ const STATUS_FILTRI = [
   { value: 'odbijeni',  label: 'Odbijeni',   title: 'Zahtjevi koje je serviser odbio — čekaju ponovnu dodjelu.' },
   { value: 'potvrdeni', label: 'Potvrđeni',  title: 'Zahtjevi kojima je završena obrada u wizardu i čekaju dodjelu servisera.' },
   { value: 'na_terenu', label: 'Na terenu',  title: 'Aktivne intervencije — serviseri dodijeljeni ili na lokaciji.' },
-  { value: 'zavrseni',  label: 'Završeni',   title: 'Uspješno završene intervencije (zadnjih 7 dana).' },
+  { value: 'zavrseni',  label: 'Završeni',   title: 'Sve završene i formalno zatvorene intervencije.' },
   {
     value: 'ponovni_ciklus',
     label: 'Ponovni ciklusi',
@@ -79,10 +79,15 @@ function filterPoStatusu(
     case 'na_terenu': return zahtjevi.filter(
       (z) => ['dodijeljeno', 'u_radu', 'u_izvrsenju'].includes(z.status)
     );
-    case 'zavrseni':  return zahtjevi.filter((z) => z.status === 'zavrseno');
+    case 'zavrseni':  return zahtjevi.filter(
+      (z) => z.status === 'zavrseno' || z.status === 'zatvoreno'
+    );
     case 'ponovni_ciklus':
       return zahtjevi.filter((z) => (z.broj_ponovnih_ciklusa ?? 0) > 1);
-    default:          return zahtjevi; // 'svi'
+    default: // 'svi' — isključuje završene da ne preplavi aktivni prikaz
+      return zahtjevi.filter(
+        (z) => z.status !== 'zavrseno' && z.status !== 'zatvoreno'
+      );
   }
 }
 

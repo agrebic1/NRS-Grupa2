@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { MapPin, Navigation, X } from 'lucide-react';
+import { MapPin, Navigation, X, CheckCircle2, AlertCircle } from 'lucide-react';
 import { AlertMessage } from '@/components/ui/AlertMessage';
 import {
   AddressAutocomplete,
@@ -205,7 +205,8 @@ export function KorakLokacija({
           Lokacija intervencije
         </h2>
         <p className="text-sm leading-snug" style={{ color: 'var(--first-nonary)' }}>
-          Unesite adresu intervencije. Po želji dodatno precizirajte lokaciju putem GPS-a ili mape.
+          Unesite adresu i označite tačnu lokaciju na mapi. Koordinate su obavezne kako bi
+          serviser mogao dobiti navigaciju do mjesta intervencije.
         </p>
       </div>
 
@@ -220,7 +221,7 @@ export function KorakLokacija({
         placeholder="Unesite adresu intervencije…"
       />
 
-      <div className="relative z-30 grid grid-cols-1 gap-3 sm:grid-cols-2">
+      <div className="relative z-30 flex gap-3">
         <button
           type="button"
           onClick={locirajMe}
@@ -229,17 +230,6 @@ export function KorakLokacija({
         >
           <Navigation className="h-4 w-4 shrink-0 text-[var(--first-secondary)]" aria-hidden />
           {gpsDisabledPoruka}
-        </button>
-        <button
-          type="button"
-          onClick={() => onUpdate({ isMapVisible: !isMapVisible })}
-          className={STIL_DUGME_MAPA}
-        >
-          <MapPin
-            className="h-4 w-4 shrink-0 text-[rgb(var(--first-senary-rgb))]"
-            aria-hidden
-          />
-          {isMapVisible ? 'Sakrij mapu' : 'Preciziraj lokaciju na mapi'}
         </button>
       </div>
 
@@ -250,39 +240,53 @@ export function KorakLokacija({
         <AlertMessage variant="success" message={locationSuccessMessage} />
       )}
 
+      {/* Status lokacije — vizuelni indikator obaveznosti */}
+      <div
+        className="flex items-center gap-2.5 rounded-xl px-3.5 py-2.5"
+        style={
+          pin
+            ? { backgroundColor: 'rgba(34,197,94,0.07)', border: '1px solid rgba(34,197,94,0.3)' }
+            : { backgroundColor: 'rgba(217,119,6,0.06)', border: '1px solid rgba(217,119,6,0.25)' }
+        }
+      >
+        {pin ? (
+          <CheckCircle2 className="h-4 w-4 flex-shrink-0" style={{ color: '#16A34A' }} />
+        ) : (
+          <AlertCircle className="h-4 w-4 flex-shrink-0" style={{ color: '#B45309' }} />
+        )}
+        <p className="text-xs font-semibold" style={{ color: pin ? '#15803D' : '#92400E' }}>
+          {pin
+            ? `Lokacija označena (${pin.lat.toFixed(5)}, ${pin.lon.toFixed(5)})`
+            : 'Lokacija nije označena — odaberite adresu iz liste, koristite GPS ili kliknite na mapu *'}
+        </p>
+        {pin && (
+          <button
+            type="button"
+            onClick={ukloniPin}
+            className="ml-auto inline-flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-lg transition-colors hover:bg-red-50"
+            style={{ color: '#DC2626' }}
+            aria-label="Ukloni označenu lokaciju"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        )}
+      </div>
+
       {isMapVisible && (
         <div
           className="flex flex-col gap-3 rounded-xl border p-4"
           style={{
-            borderColor: 'var(--border-info)',
-            backgroundColor: 'rgb(var(--first-septenary-rgb) / 0.08)',
+            borderColor: pin ? 'rgba(34,197,94,0.3)' : 'var(--border-info)',
+            backgroundColor: pin ? 'rgba(34,197,94,0.04)' : 'rgb(var(--first-septenary-rgb) / 0.08)',
           }}
         >
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-3">
-            <div className="min-w-0 space-y-1">
-              <h3 className="text-sm font-semibold" style={{ color: 'var(--first-octonary)' }}>
-                Mapa (opcionalno)
-              </h3>
-              <p className="text-xs leading-relaxed sm:text-sm" style={{ color: 'var(--first-nonary)' }}>
-                Kliknite na mapu ako želite preciznije označiti lokaciju.
-              </p>
-            </div>
-            {pin && (
-              <button
-                type="button"
-                onClick={ukloniPin}
-                className="inline-flex h-9 shrink-0 items-center justify-center gap-1.5 self-start rounded-[10px] border px-3 text-xs font-medium
-                  transition-colors hover:bg-red-50"
-                style={{
-                  borderColor:     'rgba(220,38,38,0.35)',
-                  color:           '#DC2626',
-                  backgroundColor: '#fff',
-                }}
-              >
-                <X className="h-3.5 w-3.5" />
-                Ukloni pin
-              </button>
-            )}
+          <div className="min-w-0 space-y-0.5">
+            <h3 className="text-sm font-semibold" style={{ color: 'var(--first-octonary)' }}>
+              Mapa — označite tačnu lokaciju *
+            </h3>
+            <p className="text-xs leading-relaxed" style={{ color: 'var(--first-nonary)' }}>
+              Kliknite na mapu da postavite pin. Koordinate su obavezne za prikaz rute serviseru.
+            </p>
           </div>
 
           <TileMap
@@ -296,10 +300,6 @@ export function KorakLokacija({
             idleCenterHint={null}
             pinnedCenterHint={null}
           />
-
-          <p className="text-xs leading-relaxed" style={{ color: '#64748b' }}>
-            Adresa iz polja iznad ostaje obavezna. Koordinate sa mape služe samo kao dodatna pomoć.
-          </p>
         </div>
       )}
     </div>

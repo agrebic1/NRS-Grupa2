@@ -154,12 +154,51 @@ export async function PATCH(request: Request) {
     }
 
     const db = supabase as any;
+
+    // US-51: Ako se mijenja bazna lokacija, dohvati staru vrijednost za audit log
+    const mijenjaLokaciju =
+      rezultat.data.bazna_latitude !== undefined ||
+      rezultat.data.bazna_longitude !== undefined;
+
+    let staraLat: number | null = null;
+    let staraLng: number | null = null;
+
+    if (mijenjaLokaciju) {
+      const { data: stara } = await db
+        .from('osoba')
+        .select('bazna_latitude, bazna_longitude')
+        .eq('id_osobe', user.id)
+        .maybeSingle();
+      staraLat = stara?.bazna_latitude ?? null;
+      staraLng = stara?.bazna_longitude ?? null;
+    }
+
     const { error } = await db
       .from('osoba')
       .update(rezultat.data)
       .eq('id_osobe', user.id);
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+    // Audit log za promjenu bazne lokacije (US-51) — fire-and-forget, ne blokira odgovor
+    if (mijenjaLokaciju) {
+      const novaLat = rezultat.data.bazna_latitude ?? null;
+      const novaLng = rezultat.data.bazna_longitude ?? null;
+      const lokacijaPromijenjena =
+        staraLat !== novaLat || staraLng !== novaLng;
+
+      if (lokacijaPromijenjena) {
+        db.from('profil_log').insert({
+          user_id:   user.id,
+          tip:       'bazna_lokacija',
+          staro_lat: staraLat,
+          staro_lng: staraLng,
+          novo_lat:  novaLat,
+          novo_lng:  novaLng,
+        }).then(() => {}).catch(() => {}); // ne blokira odgovor
+      }
+    }
+
     return NextResponse.json({ success: true });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Greška servera.';

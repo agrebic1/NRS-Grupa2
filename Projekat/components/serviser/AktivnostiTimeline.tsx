@@ -3,7 +3,7 @@
 import {
   ArrowRightLeft, MessageSquare, UserCheck, ClipboardCheck,
   UserX, Cog, Clock, Image as ImageIcon, Users, UserMinus, Lock, AlertTriangle,
-  Headphones, Wrench, User, RotateCcw, ArrowRight,
+  Headphones, Wrench, User, RotateCcw, ArrowRight, Star,
 } from 'lucide-react';
 import type { InterventionActivity, TipAktivnosti } from '@/domain/types/servisirane';
 import {
@@ -52,6 +52,7 @@ const TIP_CONFIG: Record<TipAktivnosti, {
   promjena_prioriteta:  { Ikona: AlertTriangle,  boja: '#C2410C',                rgb: '194,65,12' },
   vracanje_na_dodjelu:  { Ikona: RotateCcw,      boja: '#D97706',                rgb: '217,119,6' },
   sla_eskalacija:       { Ikona: AlertTriangle,  boja: '#DC2626',                rgb: '220,38,38' },
+  ocjena:               { Ikona: Star,           boja: '#D97706',                rgb: '217,119,6' },
 };
 
 // ─── Status label ─────────────────────────────────────────────────────────────

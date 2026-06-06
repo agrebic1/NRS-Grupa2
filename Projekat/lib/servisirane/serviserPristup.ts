@@ -12,6 +12,7 @@ type ServiceRequestBasic = {
 }
 
 const TERMINALNI_STATUSI_ARHIVA = new Set(['zavrseno', 'zatvoreno']);
+const TERMINALNI_STATUSI = new Set(['zavrseno', 'zatvoreno', 'otkazano', 'odbijeno']);
 
 function getUlogaNaziv(uloga: unknown): string {
   if (!uloga) return '';
@@ -113,13 +114,14 @@ export async function provjeriServiserPristupDetalju(
   const status = data.status;
 
   if (data.serviser_dodijeljen_id === serviserId) {
+    const jeTerminalni = TERMINALNI_STATUSI.has(status);
     return {
       ok: true,
       status,
       is_premium: isPremium,
-      nivo: 'glavni',
-      samo_citanje: false,
-    };
+      nivo: jeTerminalni ? 'arhiva' : 'glavni',
+      samo_citanje: jeTerminalni,
+    } as ServiserPristupDetalj;
   }
 
   if (await serviserJeUTimu(supabase, zahtjevId, serviserId)) {

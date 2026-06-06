@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { AlertTriangle, Calendar, Image as ImageLucide, MapPin, Phone } from 'lucide-react';
+import { AlertTriangle, Calendar, Image as ImageLucide, MapPin, Phone, Star } from 'lucide-react';
 import { labelKategorije } from '@/lib/servisirane/kategorije';
 import {
   formatPrijavljenoDatumVrijeme,
@@ -73,6 +73,7 @@ export function DispecerskaZahtjevPregledGridKartica({ zahtjev }: { zahtjev: Zah
 
   const detaljHref = `/dispecer/zahtjevi/${zahtjev.id}`;
   const jeOdbijen  = !!zahtjev.serviser_odbio_razlog;
+  const ocjena     = zahtjev.intervencija_ocjene?.[0] ?? null;
 
   return (
     <article
@@ -274,6 +275,36 @@ export function DispecerskaZahtjevPregledGridKartica({ zahtjev }: { zahtjev: Zah
           <p className="text-xs font-medium leading-relaxed" style={{ color: 'rgb(var(--first-nonary-rgb) / 0.9)' }}>
             {sljedecaAkcijaZaOperatera(zahtjev)}
           </p>
+
+          {zahtjev.status === 'zatvoreno' && (
+            <div
+              className="flex items-center gap-2 rounded-xl px-3 py-2"
+              style={{ backgroundColor: 'rgba(234,179,8,0.06)', border: '1px solid rgba(234,179,8,0.2)' }}
+            >
+              <Star className="h-3.5 w-3.5 shrink-0" style={{ color: '#CA8A04' }} aria-hidden />
+              {ocjena ? (
+                <>
+                  <span className="inline-flex gap-0.5">
+                    {[1,2,3,4,5].map((n) => (
+                      <Star key={n} className="h-3 w-3" strokeWidth={1.5}
+                        fill={n <= ocjena.ocjena ? '#FBBF24' : 'transparent'}
+                        style={{ color: n <= ocjena.ocjena ? '#FBBF24' : 'rgba(234,179,8,0.3)' }} />
+                    ))}
+                  </span>
+                  <span className="text-xs font-bold tabular-nums" style={{ color: '#92400E' }}>
+                    {ocjena.ocjena}/5
+                  </span>
+                  {ocjena.komentar && (
+                    <span className="truncate text-xs italic" style={{ color: '#A16207' }}>
+                      &ldquo;{ocjena.komentar}&rdquo;
+                    </span>
+                  )}
+                </>
+              ) : (
+                <span className="text-xs" style={{ color: '#A16207' }}>Bez ocjene</span>
+              )}
+            </div>
+          )}
 
           <div
             className="flex items-center gap-2 border-t pt-3"

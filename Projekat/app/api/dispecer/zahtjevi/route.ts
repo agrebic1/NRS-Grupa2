@@ -26,20 +26,14 @@ export async function GET(request: Request) {
     const db = supabase as any;
     const statusFiltar = parsirajStatuseIzUpita(request);
 
-    // Zavrsene stavke starije od 7 dana se ne prikazuju (previše historije),
-    // ali nedavne se uključuju da bi filter "Završeni" i KPI "Završeni danas" radili.
-    const sedamDanaAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
-
-    let upit = db.from('service_requests').select('*');
+    let upit = db.from('service_requests').select('*, intervencija_ocjene(ocjena, komentar)');
 
     if (statusFiltar) {
       upit = upit.in('status', statusFiltar);
     } else {
-      // Isključi terminalne statuse (zatvoreno/otkazano/odbijeno);
-      // zavrseno uključi samo zadnjih 7 dana.
-      upit = upit
-        .not('status', 'in', '("zatvoreno","otkazano","odbijeno")')
-        .or(`status.neq.zavrseno,updated_at.gte.${sedamDanaAgo}`);
+      // Isključi otkazano/odbijeno iz redovnog prikaza.
+      // zatvoreno i zavrseno su uključeni — vidljivi samo u "Završeni" tabu.
+      upit = upit.not('status', 'in', '("otkazano","odbijeno")');
     }
 
     let { data, error } = await upit
@@ -47,13 +41,11 @@ export async function GET(request: Request) {
       .order('created_at', { ascending: true });
 
     if (error?.message?.includes("'is_premium' column")) {
-      let fb = db.from('service_requests').select('*');
+      let fb = db.from('service_requests').select('*, intervencija_ocjene(ocjena, komentar)');
       if (statusFiltar) {
         fb = fb.in('status', statusFiltar);
       } else {
-        fb = fb
-          .not('status', 'in', '("zatvoreno","otkazano","odbijeno")')
-          .or(`status.neq.zavrseno,updated_at.gte.${sedamDanaAgo}`);
+        fb = fb.not('status', 'in', '("otkazano","odbijeno")');
       }
       const fallback = await fb.order('created_at', { ascending: true });
       data = fallback.data;

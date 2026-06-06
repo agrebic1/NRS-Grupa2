@@ -20,6 +20,7 @@ import { ZahtjevExpandSadrzaj } from '@/components/dispecer/ZahtjevExpandSadrzaj
 import { DispecerPregledTokaBadzevi } from '@/components/dispecer/DispecerPregledTokaBadzevi';
 import { DispecerPremiumKruna, KorisnickaHitnostOutlinedChip } from '@/components/servisirane/zahtjevBadgeovi';
 import { PonovniCiklusBadge } from '@/components/servisirane/PonovniCiklusBadge';
+import { DugoChekanjeBadge } from '@/components/servisirane/DugoChekanjeBadge';
 import { efektivniKorisnickiUrgencyScore, inboxGrupaIzKorisnickeProcjene } from '@/lib/servisirane/urgency';
 import { oznakaZaDispecerskiPrikazBroja } from '@/lib/servisirane/korisnickiBrojZahtjeva';
 
@@ -30,6 +31,7 @@ export { DispecerStatusBadge } from '@/components/servisirane/zahtjevBadgeovi';
 
 export type ZahtjevZaDispecerskuKarticu = ServisniZahtjev & {
   podnosilac: { ime: string; prezime: string; broj_telefona: string | null } | null;
+  intervencija_ocjene?: { ocjena: number; komentar: string | null }[] | null;
 };
 
 export interface DispecerskaZahtjevKarticaProps {
@@ -107,6 +109,11 @@ export function DispecerskaZahtjevKartica({
               {(zahtjev.broj_ponovnih_ciklusa ?? 0) > 0 && (
                 <PonovniCiklusBadge broj={zahtjev.broj_ponovnih_ciklusa!} />
               )}
+              <DugoChekanjeBadge
+                status={zahtjev.status}
+                createdAt={zahtjev.created_at}
+                kompaktan
+              />
             </span>
             <div className="min-w-0 max-w-full">
               <DispecerPregledTokaBadzevi zahtjev={zahtjev} />

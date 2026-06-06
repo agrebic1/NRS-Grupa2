@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { ArrowLeft, Pencil, X, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Pencil, X, AlertTriangle, Star } from 'lucide-react';
 import Link from 'next/link';
 import { AppShell } from '@/components/layout/AppShell';
 import { Button } from '@/components/ui/Button';
@@ -15,6 +15,7 @@ import {
   KorisnikZahtjevDetaljPanel,
   KorisnikZahtjevDonjaNapomena,
 } from '@/components/korisnik/KorisnikZahtjevDetaljPregled';
+import { OcjenaIntervencije } from '@/components/korisnik/OcjenaIntervencije';
 import { korisnikDonjiStatusObjasnjenje } from '@/lib/servisirane/korisnickiDetaljTekstovi';
 import type { ServisniZahtjev } from '@/domain/types/servisirane';
 import { brojZahtjevaZaPrikaz } from '@/lib/servisirane/korisnickiBrojZahtjeva';
@@ -512,6 +513,35 @@ export default function ZahtjevDetaljPage() {
             </div>
           ) : null}
         </article>
+
+        {/* US-52: Ocjena intervencije — samo za zatvorene */}
+        {zahtjev.status === 'zatvoreno' && (
+          <div
+            className="mt-4 overflow-hidden rounded-2xl"
+            style={{
+              backgroundColor: 'rgb(255 255 255 / 0.72)',
+              border: '1px solid rgb(var(--first-quaternary-rgb) / 0.35)',
+            }}
+          >
+            <div
+              className="border-b px-5 py-4 sm:px-7"
+              style={{ borderColor: 'rgb(var(--first-quaternary-rgb) / 0.22)' }}
+            >
+              <div className="flex items-center gap-2">
+                <Star className="h-4 w-4" style={{ color: 'var(--first-senary)' }} />
+                <h2 className="text-sm font-bold" style={{ color: 'var(--first-octonary)' }}>
+                  Vaša ocjena
+                </h2>
+              </div>
+              <p className="mt-0.5 text-xs" style={{ color: 'var(--first-nonary)' }}>
+                Ocijenite rad servisnog tima i kvalitet usluge
+              </p>
+            </div>
+            <div className="px-5 py-5 sm:px-7">
+              <OcjenaIntervencije zahtjevId={zahtjev.id} />
+            </div>
+          </div>
+        )}
 
       </div>
     </AppShell>

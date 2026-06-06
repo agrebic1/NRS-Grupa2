@@ -6,8 +6,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import {
   User, Shield, Lock, ArrowLeftRight, Check, AlertTriangle, MapPin,
+  Navigation, Home,
 } from 'lucide-react';
 import { OdabirLokacije } from '@/components/shared/MapaOdabir';
+import { MiniMapa } from '@/components/shared/MiniMapa';
 import { AppShell } from '@/components/layout/AppShell';
 import { Input } from '@/components/ui/Input';
 import { Button } from '@/components/ui/Button';
@@ -236,8 +238,10 @@ function BaznaLokacijaSekcija({
   const [uspjelo, setUspjelo] = useState(false);
   const [greska,  setGreska]  = useState<string | null>(null);
   const [slanje,  setSlanje]  = useState(false);
+  const [izmjena, setIzmjena] = useState(false);
 
-  const promijenjeno =
+  const imaLokaciju   = profil.bazna_latitude != null && profil.bazna_longitude != null;
+  const promijenjeno  =
     lat !== (profil.bazna_latitude ?? null) || lng !== (profil.bazna_longitude ?? null);
 
   async function spremi() {
@@ -253,6 +257,7 @@ function BaznaLokacijaSekcija({
       const r = await odgovor.json();
       if (!odgovor.ok) throw new Error(r.error ?? 'Greška pri spremanju.');
       setUspjelo(true);
+      setIzmjena(false);
       onAzuriranje();
     } catch (err) {
       setGreska(err instanceof Error ? err.message : 'Greška pri spremanju lokacije.');
@@ -264,36 +269,118 @@ function BaznaLokacijaSekcija({
   return (
     <div className="flex flex-col gap-4">
       {greska  && <AlertMessage variant="error"   message={greska} />}
-      {uspjelo && <AlertMessage variant="success" message="Bazna lokacija je spremljena." />}
+      {uspjelo && <AlertMessage variant="success" message="Bazna lokacija je uspješno ažurirana. Promjena je zabilježena u audit logu." />}
 
-      <p className="text-sm" style={{ color: 'var(--first-nonary)' }}>
-        Pretražite adresu svoje bazne lokacije (ili je označite na mapi / GPS-om). Koristi se
-        da vam dispečer dodjeljuje bliže intervencije. Opcionalno — možete je i ukloniti.
-      </p>
-
-      <OdabirLokacije
-        latitude={lat}
-        longitude={lng}
-        label="Adresa bazne lokacije"
-        onChange={({ latitude, longitude }) => {
-          setLat(latitude);
-          setLng(longitude);
-          setUspjelo(false);
-        }}
-      />
-
-      <Button
-        type="button"
-        size="md"
-        className="w-fit"
-        onClick={spremi}
-        isLoading={slanje}
-        loadingText="Spremanje..."
-        disabled={!promijenjeno || slanje}
+      {/* Info baner */}
+      <div
+        className="flex items-start gap-3 rounded-xl p-3"
+        style={{ backgroundColor: 'rgb(var(--first-secondary-rgb)/0.06)', border: '1px solid rgb(var(--first-secondary-rgb)/0.2)' }}
       >
-        <Check className="h-4 w-4" />
-        Spremi lokaciju
-      </Button>
+        <Navigation className="mt-0.5 h-4 w-4 flex-shrink-0" style={{ color: 'var(--first-secondary)' }} />
+        <div>
+          <p className="text-xs font-semibold" style={{ color: 'var(--first-octonary)' }}>
+            Koristi se za navigaciju i geo-preporuku
+          </p>
+          <p className="mt-0.5 text-xs leading-relaxed" style={{ color: 'var(--first-nonary)' }}>
+            Dispečer dodjeljuje servisere koji su geografski najbliži. Kada je lokacija postavljena,
+            na detalju intervencije vidjet ćete mapu s rutom i procjenu trajanja puta.
+          </p>
+        </div>
+      </div>
+
+      {/* Preview trenutne lokacije na mapi */}
+      {imaLokaciju && !izmjena && (
+        <div>
+          <div className="mb-2 flex items-center justify-between">
+            <div className="flex items-center gap-1.5">
+              <Home className="h-3.5 w-3.5" style={{ color: '#D97706' }} />
+              <p className="text-xs font-semibold" style={{ color: 'var(--first-octonary)' }}>
+                Trenutna bazna lokacija
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIzmjena(true)}
+              className="rounded-lg px-2.5 py-1 text-xs font-semibold transition-all hover:opacity-80"
+              style={{ backgroundColor: 'rgb(var(--first-secondary-rgb)/0.1)', color: 'var(--first-secondary)' }}
+            >
+              Izmijeni
+            </button>
+          </div>
+          <MiniMapa
+            adresa=""
+            lat={profil.bazna_latitude}
+            lng={profil.bazna_longitude}
+            visina={200}
+            prikaziFooter={false}
+            kartica
+          />
+          <p className="mt-1.5 text-xs" style={{ color: 'var(--first-nonary)' }}>
+            {profil.bazna_latitude?.toFixed(5)}, {profil.bazna_longitude?.toFixed(5)}
+          </p>
+        </div>
+      )}
+
+      {/* Odabir/izmjena lokacije */}
+      {(!imaLokaciju || izmjena) && (
+        <>
+          <OdabirLokacije
+            latitude={lat}
+            longitude={lng}
+            label={imaLokaciju ? 'Nova bazna lokacija' : 'Adresa bazne lokacije'}
+            onChange={({ latitude, longitude }) => {
+              setLat(latitude);
+              setLng(longitude);
+              setUspjelo(false);
+            }}
+          />
+
+          <div className="flex items-center gap-2">
+            <Button
+              type="button"
+              size="md"
+              onClick={spremi}
+              isLoading={slanje}
+              loadingText="Spremanje..."
+              disabled={!promijenjeno || slanje}
+            >
+              <Check className="h-4 w-4" />
+              Spremi lokaciju
+            </Button>
+            {izmjena && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="md"
+                onClick={() => {
+                  setLat(profil.bazna_latitude ?? null);
+                  setLng(profil.bazna_longitude ?? null);
+                  setIzmjena(false);
+                  setGreska(null);
+                }}
+              >
+                Otkaži
+              </Button>
+            )}
+          </div>
+
+          {(lat != null || lng != null) && promijenjeno && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="w-fit text-red-600 hover:text-red-700"
+              onClick={() => {
+                setLat(null);
+                setLng(null);
+              }}
+            >
+              <MapPin className="h-3.5 w-3.5" />
+              Ukloni baznu lokaciju
+            </Button>
+          )}
+        </>
+      )}
     </div>
   );
 }

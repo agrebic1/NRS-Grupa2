@@ -72,6 +72,8 @@ export async function GET() {
       .from('service_requests')
       .select('*')
       .eq('user_id', user.id)
+      // Samo aktivni zahtjevi — završeni/otkazani/odbijeni su u /historija.
+      .not('status', 'in', '("zavrseno","zatvoreno","otkazano","odbijeno")')
       .order('created_at', { ascending: false });
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 });

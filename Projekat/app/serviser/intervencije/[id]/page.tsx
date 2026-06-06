@@ -10,11 +10,12 @@ import {
   AlertTriangle, Radio, Navigation, Shield, User, Headphones, Users,
   ClipboardList, Activity, Wrench, RotateCcw, X,
   Image as ImageIcon, ExternalLink, Trash2,
+  Ban, XCircle, Lock,
 } from 'lucide-react';
 import { AppShell } from '@/components/layout/AppShell';
 import { Button } from '@/components/ui/Button';
 import { AlertMessage } from '@/components/ui/AlertMessage';
-import { MiniMapa } from '@/components/shared/MiniMapa';
+import { RutaKartica } from '@/components/serviser/RutaKartica';
 import { NapomeneThread } from '@/components/shared/NapomeneThread';
 import { ImageUploader } from '@/components/shared/ImageUploader';
 import { HistorijaAktivnostiSekcija } from '@/components/serviser/HistorijaAktivnostiSekcija';
@@ -456,16 +457,100 @@ function AkcijeServiser({
   return null;
 }
 
+// ─── Kartica završene intervencije ────────────────────────────────────────────
+
+function KarticaZavrseneIntervencije({
+  status,
+  zahtjev,
+}: {
+  status: string;
+  zahtjev: IntervencijaDetalji;
+}) {
+  if (status === 'zavrseno') {
+    return (
+      <div className="rounded-2xl p-5"
+        style={{ backgroundColor: 'rgba(34,197,94,0.05)', border: '1px solid rgba(34,197,94,0.25)' }}>
+        <div className="mb-3 flex items-center gap-2">
+          <CheckCircle2 className="h-5 w-5 flex-shrink-0" style={{ color: '#16A34A' }} />
+          <p className="text-sm font-bold" style={{ color: '#16A34A' }}>Rad završen — čeka zatvaranje dispečera</p>
+        </div>
+        <p className="text-sm leading-relaxed" style={{ color: 'var(--first-nonary)' }}>
+          Intervencija je evidentirana i označena kao završena. Dispečer će pregledati evidenciju rada i formalno zatvoriti nalog.
+        </p>
+      </div>
+    );
+  }
+
+  if (status === 'zatvoreno') {
+    return (
+      <div className="rounded-2xl p-5"
+        style={{ backgroundColor: 'rgb(var(--first-quinary-rgb)/0.3)', border: '1px solid rgb(var(--first-quaternary-rgb)/0.35)' }}>
+        <div className="mb-3 flex items-center gap-2">
+          <Lock className="h-4 w-4 flex-shrink-0" style={{ color: 'var(--first-secondary)' }} />
+          <p className="text-sm font-bold" style={{ color: 'var(--first-secondary)' }}>Intervencija formalno zatvorena</p>
+        </div>
+        {(zahtjev as any).closed_at && (
+          <p className="mb-1.5 text-xs" style={{ color: 'var(--first-nonary)' }}>
+            Zatvorena: {new Date((zahtjev as any).closed_at).toLocaleDateString('bs-BA', { day: 'numeric', month: 'long', year: 'numeric' })}
+          </p>
+        )}
+        {(zahtjev as any).closure_note && (
+          <p className="mt-2 rounded-xl border-l-4 py-2 pl-3 pr-4 text-sm leading-relaxed"
+            style={{ borderLeftColor: 'var(--first-secondary)', backgroundColor: 'rgb(255 255 255/0.6)', color: 'var(--first-octonary)' }}>
+            {(zahtjev as any).closure_note}
+          </p>
+        )}
+      </div>
+    );
+  }
+
+  if (status === 'otkazano') {
+    return (
+      <div className="rounded-2xl p-5"
+        style={{ backgroundColor: 'rgba(100,116,139,0.05)', border: '1px solid rgba(100,116,139,0.25)' }}>
+        <div className="mb-3 flex items-center gap-2">
+          <Ban className="h-4 w-4 flex-shrink-0" style={{ color: '#64748B' }} />
+          <p className="text-sm font-bold" style={{ color: '#64748B' }}>Zahtjev otkazan</p>
+        </div>
+        {(zahtjev as any).cancel_reason ? (
+          <p className="text-sm leading-relaxed" style={{ color: 'var(--first-nonary)' }}>
+            Razlog: {(zahtjev as any).cancel_reason}
+          </p>
+        ) : (
+          <p className="text-sm" style={{ color: 'var(--first-nonary)' }}>Korisnik je otkazao zahtjev.</p>
+        )}
+      </div>
+    );
+  }
+
+  if (status === 'odbijeno') {
+    return (
+      <div className="rounded-2xl p-5"
+        style={{ backgroundColor: 'rgba(220,38,38,0.04)', border: '1px solid rgba(220,38,38,0.2)' }}>
+        <div className="mb-3 flex items-center gap-2">
+          <XCircle className="h-4 w-4 flex-shrink-0" style={{ color: '#DC2626' }} />
+          <p className="text-sm font-bold" style={{ color: '#DC2626' }}>Zahtjev odbijen</p>
+        </div>
+        <p className="text-sm leading-relaxed" style={{ color: 'var(--first-nonary)' }}>
+          Dispečer je odbio ovaj zahtjev.
+          {(zahtjev as any).dispecer_napomene && ` Napomena: ${(zahtjev as any).dispecer_napomene}`}
+        </p>
+      </div>
+    );
+  }
+
+  return null;
+}
+
 // ─── Sidebar ──────────────────────────────────────────────────────────────────
 
-function SidebarPanel({ zahtjev, tim }: {
+function SidebarPanel({ zahtjev, tim, baznaLat, baznaLng }: {
   zahtjev: IntervencijaDetalji;
   tim: Array<{ serviser_id: string; serviser?: { ime: string; prezime: string } | null }>;
+  baznaLat: number | null;
+  baznaLng: number | null;
 }) {
-  const mapsUrl  = zahtjev.latitude && zahtjev.longitude
-    ? `https://www.google.com/maps/search/?api=1&query=${zahtjev.latitude},${zahtjev.longitude}`
-    : `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(zahtjev.address ?? '')}`;
-  const tel      = zahtjev.podnosilac?.broj_telefona ?? zahtjev.contact_phone;
+  const tel = zahtjev.podnosilac?.broj_telefona ?? zahtjev.contact_phone;
 
   const kartica = {
     backgroundColor: 'rgb(255 255 255/0.85)',
@@ -474,14 +559,14 @@ function SidebarPanel({ zahtjev, tim }: {
 
   return (
     <div className="flex flex-col gap-4 lg:w-80 xl:w-88 flex-shrink-0 lg:sticky lg:top-4">
-      {/* Mapa */}
-      <MiniMapa
-        adresa={zahtjev.address ?? ''}
-        lat={zahtjev.latitude}
-        lng={zahtjev.longitude}
-        visina={180}
-        prikaziFooter
-        kartica
+
+      {/* US-51: Ruta od bazne lokacije servisera do intervencije */}
+      <RutaKartica
+        baznaLat={baznaLat}
+        baznaLng={baznaLng}
+        intervencijaLat={zahtjev.latitude}
+        intervencijaLng={zahtjev.longitude}
+        adresaIntervencije={zahtjev.address}
       />
 
       {/* Termin */}
@@ -545,24 +630,17 @@ function SidebarPanel({ zahtjev, tim }: {
         </div>
       )}
 
-      {/* Brze akcije */}
-      <div className="rounded-2xl p-4" style={kartica}>
-        <p className="mb-3 text-[10px] font-bold uppercase tracking-wide" style={{ color: 'var(--first-nonary)' }}>Brze akcije</p>
-        <div className="flex flex-col gap-2">
-          <a href={mapsUrl} target="_blank" rel="noopener noreferrer"
+      {/* Brze akcije — poziv korisniku */}
+      {tel && (
+        <div className="rounded-2xl p-4" style={kartica}>
+          <p className="mb-3 text-[10px] font-bold uppercase tracking-wide" style={{ color: 'var(--first-nonary)' }}>Brze akcije</p>
+          <a href={`tel:${tel}`}
             className="flex w-full items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all hover:opacity-80"
-            style={{ backgroundColor: 'var(--first-primary)', color: '#fff' }}>
-            <Navigation className="h-4 w-4" />Navigiraj do lokacije
+            style={{ backgroundColor: 'rgb(var(--first-secondary-rgb)/0.08)', color: 'var(--first-secondary)', border: '1px solid rgb(var(--first-secondary-rgb)/0.2)' }}>
+            <Phone className="h-4 w-4" />Pozovi korisnika
           </a>
-          {tel && (
-            <a href={`tel:${tel}`}
-              className="flex w-full items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition-all hover:opacity-80"
-              style={{ backgroundColor: 'rgb(var(--first-secondary-rgb)/0.08)', color: 'var(--first-secondary)', border: '1px solid rgb(var(--first-secondary-rgb)/0.2)' }}>
-              <Phone className="h-4 w-4" />Pozovi korisnika
-            </a>
-          )}
         </div>
-      </div>
+      )}
     </div>
   );
 }
@@ -581,6 +659,9 @@ export default function ServiserIntervencijaDetaljiPage() {
   const [ucitava,    setUcitava]    = useState(true);
   const [greska,     setGreska]     = useState<string | null>(null);
   const [samoCitanje, setSamoCitanje] = useState(false);
+  // US-51: bazna lokacija servisera za rutu
+  const [baznaLat,   setBaznaLat]   = useState<number | null>(null);
+  const [baznaLng,   setBaznaLng]   = useState<number | null>(null);
   const [nivoPristupa, setNivoPristupa] = useState<'glavni' | 'pomocni' | 'arhiva'>('glavni');
   const [pokaziEvid,           setPokaziEvid]           = useState(false);
   const [pokaziUspjeh,         setPokaziUspjeh]         = useState(false);
@@ -599,10 +680,11 @@ export default function ServiserIntervencijaDetaljiPage() {
     if (!opts?.silent) setUcitava(true);
     setGreska(null);
     try {
-      const [intR, timR, slikeR] = await Promise.all([
+      const [intR, timR, slikeR, profilR] = await Promise.all([
         fetch(`/api/serviser/intervencije/${id}`, { cache: 'no-store' }),
         fetch(`/api/dispecer/zahtjevi/${id}/tim`, { cache: 'no-store' }),
         fetch(`/api/slike?zahtjev_id=${id}`, { cache: 'no-store' }),
+        fetch('/api/profil', { cache: 'no-store' }),
       ]);
       const intD = await intR.json();
       if (!intR.ok) throw new Error(intD.error ?? 'Zahtjev nije pronađen.');
@@ -623,6 +705,12 @@ export default function ServiserIntervencijaDetaljiPage() {
             image_url: s.image_url,
           })),
         );
+      }
+      // US-51: dohvati baznu lokaciju servisera
+      if (profilR.ok) {
+        const profilD = await profilR.json();
+        setBaznaLat(profilD.profil?.bazna_latitude ?? null);
+        setBaznaLng(profilD.profil?.bazna_longitude ?? null);
       }
     } catch (e) {
       setGreska(e instanceof Error ? e.message : 'Greška pri učitavanju.');
@@ -706,6 +794,7 @@ export default function ServiserIntervencijaDetaljiPage() {
   const pboja  = prioritetBoja(zahtjev.final_priority);
   const kasni  = jeKasni(zahtjev);
   const jeAktivna = ['dodijeljeno', 'u_radu', 'u_izvrsenju'].includes(zahtjev.status);
+  const jeTerminalni = ['zavrseno', 'zatvoreno', 'otkazano', 'odbijeno'].includes(zahtjev.status);
   const mozeMijenjati = jeAktivna && !samoCitanje;
 
   const sboja = statusBoja(zahtjev.status);
@@ -839,8 +928,8 @@ export default function ServiserIntervencijaDetaljiPage() {
         {/* ── Lijevi stupac (glavni sadržaj) ──────────────────────────────── */}
         <div className="min-w-0 flex-1 flex flex-col gap-4">
 
-          {/* Akcije */}
-          {mozeMijenjati && (
+          {/* Akcije (aktivna intervencija) ili stanje završene */}
+          {mozeMijenjati ? (
             <AkcijeServiser
               status={zahtjev.status}
               zahtjevId={zahtjev.id}
@@ -861,7 +950,9 @@ export default function ServiserIntervencijaDetaljiPage() {
                 }, 50);
               }}
             />
-          )}
+          ) : jeTerminalni ? (
+            <KarticaZavrseneIntervencije status={zahtjev.status} zahtjev={zahtjev} />
+          ) : null}
 
           {/* Opis problema */}
           <div className="rounded-2xl p-5"
@@ -1088,7 +1179,7 @@ export default function ServiserIntervencijaDetaljiPage() {
         </div>
 
         {/* ── Desni sidebar ────────────────────────────────────────────────── */}
-        <SidebarPanel zahtjev={zahtjev} tim={tim} />
+        <SidebarPanel zahtjev={zahtjev} tim={tim} baznaLat={baznaLat} baznaLng={baznaLng} />
       </div>
 
       {/* ─── Mobile sticky bar ──────────────────────────────────────────────── */}

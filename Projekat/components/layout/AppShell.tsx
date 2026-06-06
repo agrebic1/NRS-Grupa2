@@ -7,7 +7,7 @@ import {
   Home, ShieldCheck, Wrench, Headphones,
   LayoutDashboard, ClipboardList, PlusCircle,
   Users, LogOut, Menu, X, ChevronRight,
-  UserCircle, ArrowLeftRight, ChevronDown, BarChart2,
+  UserCircle, ArrowLeftRight, ChevronDown, BarChart2, History,
 } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import type { ReactNode } from 'react';
@@ -63,6 +63,7 @@ const NAVIGACIJA_PO_ULOZI: Record<UserRole, StavkaNavigacije[]> = {
   korisnik: [
     { href: '/korisnik',               oznaka: 'Pregled',       Ikona: LayoutDashboard },
     { href: '/korisnik/zahtjevi',      oznaka: 'Moji zahtjevi', Ikona: ClipboardList },
+    { href: '/korisnik/historija',     oznaka: 'Historija',      Ikona: History },
     { href: '/korisnik/premium',       oznaka: 'Premium usluga', Ikona: ShieldCheck },
     { href: '/korisnik/zahtjevi/novi', oznaka: 'Kreiraj zahtjev',  Ikona: PlusCircle },
   ],

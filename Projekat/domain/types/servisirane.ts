@@ -165,7 +165,8 @@ export type TipAktivnosti =
   | 'promjena_izvrsioca'
   | 'vracanje_na_dodjelu'
   | 'sla_eskalacija'
-  | 'promjena_prioriteta';
+  | 'promjena_prioriteta'
+  | 'ocjena';
 
 export interface InterventionActivity {
   id:         number;
@@ -315,4 +316,25 @@ export interface KonfliktTermina {
   zahtjev_id:     number;
   pocetak:        string;
   kraj:           string;
+}
+
+// ─── Sprint 11: Ocjena intervencije (US-52) ───────────────────────────────────
+
+export interface IntervencijaOcjena {
+  id:          number;
+  zahtjev_id:  number;
+  korisnik_id: string;
+  ocjena:      1 | 2 | 3 | 4 | 5;
+  komentar:    string | null;
+  created_at:  string;
+}
+
+// ─── Sprint 11: Dugo čekanje (US-53) ────────────────────────────────────────
+
+export type DugoChekanjeTip = 'nema_obrade' | 'nema_dodjele' | 'ceka_prihvatanje';
+
+export interface DugoChekanje {
+  tip:          DugoChekanjeTip;
+  trajanje_ms:  number;
+  prag_ms:      number;
 }

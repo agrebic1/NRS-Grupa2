@@ -85,8 +85,9 @@ const DISPECER_STATUS_BADGE: Record<string, StatusCfg> = {
   zavrseno: statusBadgeCfg(PS.zavrseno, 'Završeno', 'Zahtjev je uspješno zatvoren.', CheckCircle2),
   cancelled: statusBadgeCfg(PS.neutral, 'Otkazano', 'Zahtjev je otkazan.', Ban),
   otkazano: statusBadgeCfg(PS.neutral, 'Otkazano', 'Zahtjev je otkazan.', Ban),
-  closed: statusBadgeCfg(PS.zatvoreno, 'Zatvoreno', 'Zahtjev je zatvoren.', CheckCircle2),
-  odbijeno: statusBadgeCfg(PS.odbijeno, 'Odbijeno', 'Dispečer je odbio zahtjev.', XCircle),
+  closed:    statusBadgeCfg(PS.zatvoreno, 'Zatvoreno', 'Zahtjev je formalno zatvoren.', CheckCircle2),
+  zatvoreno: statusBadgeCfg(PS.zatvoreno, 'Zatvoreno', 'Zahtjev je formalno zatvoren.', CheckCircle2),
+  odbijeno:  statusBadgeCfg(PS.odbijeno,  'Odbijeno',  'Dispečer je odbio zahtjev.',    XCircle),
 };
 
 const FALLBACK_DISPECER_STATUS: StatusCfg = {

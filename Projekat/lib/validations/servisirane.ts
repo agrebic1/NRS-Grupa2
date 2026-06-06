@@ -138,9 +138,9 @@ export const serviceRequestSchema = z
     // Usklađeno s wizardom: traži se 9-15 stvarnih cifara (vidi kontaktTelefonSchema).
     contact_phone: kontaktTelefonSchema,
     photo_url:     z.string().url().optional().nullable(),
-    /** Opcionalno: GPS / mapa (AC15) */
-    latitude:      z.number().min(-90).max(90).optional().nullable(),
-    longitude:     z.number().min(-180).max(180).optional().nullable(),
+    /** Obavezno: GPS / mapa — koordinate su potrebne za prikaz rute servisera (US-51). */
+    latitude:      z.number({ required_error: 'Označite lokaciju na mapi ili koristite GPS.' }).min(-90).max(90),
+    longitude:     z.number({ required_error: 'Označite lokaciju na mapi ili koristite GPS.' }).min(-180).max(180),
     is_premium:    z.boolean().optional(),
     premium_terms_accepted: z.boolean().optional(),
     /** Za premium hitnu može biti `null` / izostavljeno - trijaža se ne primjenjuje. */
@@ -252,4 +252,11 @@ export const napomenaSchema = z.object({
   sadrzaj: z.string()
     .min(2,   'Napomena mora imati najmanje 2 karaktera')
     .max(2000, 'Napomena ne smije biti duža od 2000 karaktera'),
+});
+
+// ─── Sprint 11: Ocjena intervencije (US-52) ───────────────────────────────────
+
+export const ocjenaSchema = z.object({
+  ocjena:   z.number().int().min(1, 'Ocjena mora biti između 1 i 5').max(5, 'Ocjena mora biti između 1 i 5'),
+  komentar: z.string().max(1000, 'Komentar ne smije biti duži od 1000 karaktera').optional().nullable(),
 });
