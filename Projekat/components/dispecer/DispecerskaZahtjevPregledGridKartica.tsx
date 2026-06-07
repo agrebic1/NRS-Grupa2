@@ -25,23 +25,17 @@ import {
   zahtjevCekaZavrsnuPotvrduCarobnjaka,
   zahtjevJeNoviUPregleduDispecera,
 } from '@/lib/servisirane/dispecerskeFaze';
-import { zahtjevCekaObraduUInboxuDispecera } from '@/lib/servisirane/statusZahtjeva';
 import { SlaStatusBadge } from '@/components/dispecer/SlaStatusBadge';
 import { PonovniCiklusBadge } from '@/components/servisirane/PonovniCiklusBadge';
 
 function sljedecaAkcijaZaOperatera(zahtjev: ServisniZahtjev): string {
-  if (zahtjevCekaObraduUInboxuDispecera(zahtjev.status)) {
-    if (zahtjevJeNoviUPregleduDispecera(zahtjev)) return 'Sljedeće: postavite operativni prioritet.';
-    if (zahtjevCekaDogovorTerminaDispecera(zahtjev)) return 'Sljedeće: dogovorite termin s korisnikom.';
-    if (zahtjevCekaDodjeluServiseraDispecera(zahtjev)) return 'Sljedeće: odaberite servisera.';
-    if (zahtjevCekaZavrsnuPotvrduCarobnjaka(zahtjev)) return 'Sljedeće: završite potvrdu u wizardu.';
-    return 'Sljedeće: nastavite obradu u wizardu.';
-  }
-  if (zahtjev.status === 'potvrdeno') {
-    if (zahtjev.serviser_odbio_razlog) return '⚠ Serviser odbio — odaberite drugog servisera.';
-    return 'Sljedeće: dodjela serviseru ili start intervencije.';
-  }
-  return 'Sljedeće: pregledajte detalje i historiju.';
+  if (zahtjev.serviser_odbio_razlog) return '⚠ Serviser odbio — odaberite drugog servisera.';
+  if (zahtjev.status === 'potvrdeno') return 'Sljedeće: dodijelite servisera i potvrdite dodjelu.';
+  if (zahtjevJeNoviUPregleduDispecera(zahtjev)) return 'Sljedeće: postavite operativni prioritet.';
+  if (zahtjevCekaDogovorTerminaDispecera(zahtjev)) return 'Sljedeće: dogovorite termin s korisnikom.';
+  if (zahtjevCekaDodjeluServiseraDispecera(zahtjev)) return 'Sljedeće: odaberite servisera.';
+  if (zahtjevCekaZavrsnuPotvrduCarobnjaka(zahtjev)) return 'Sljedeće: završite potvrdu u wizardu.';
+  return 'Sljedeće: nastavite obradu u wizardu.';
 }
 
 /** Mrežna kartica za dispečera - brz operativni pregled (US-07, US-12, US-13). */

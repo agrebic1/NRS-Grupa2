@@ -595,6 +595,7 @@ export async function PATCH(
       const { error: updErr } = await db
         .from('service_requests')
         .update({
+          status:       'zatvoreno',
           closed_at:    new Date().toISOString(),
           closed_by:    user.id,
           closure_note: podaci.closure_note?.trim() || null,

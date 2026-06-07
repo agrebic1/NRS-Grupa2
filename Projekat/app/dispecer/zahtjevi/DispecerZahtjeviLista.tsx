@@ -13,44 +13,43 @@ import { kreirajKlijenta } from '@/lib/supabase/klijent';
 import { rangOperativnogPrioriteta } from '@/lib/servisirane/operativniPrioritet';
 import {
   normalizujDispecerFilterIzParametra,
-  zahtjevJeNoviUPregleduDispecera,
-  zahtjevJeUObradiSirokoGledano,
-  zahtjevJePotvrdenPrijeIntervencije,
   zahtjevUFaziDodjeleServiseraPregled,
   zahtjevUFaziDogovoraTerminaPregled,
   zahtjevUFaziKorakaPotvrdePregled,
 } from '@/lib/servisirane/dispecerskeFaze';
+import {
+  operativnaFazaZahtjeva,
+  jeZahtjevIntakeFaza,
+} from '@/lib/servisirane/operativnaFaza';
 import { sastaviDispecerskiInboxRedoslijed } from '@/lib/servisirane/urgency';
 
 // ─── Konfiguracija filtera ────────────────────────────────────────────────────
 
 const ZAHTJEVA_PO_STRANICI = 12;
 
-/** Opcije glavnog filtera statusa zahtjeva — usklađeno s KPI pločicama na dashboardu. */
+/**
+ * Opcije glavnog filtera — samo intake faze (MECE, bez preklapanja s Intervencijama).
+ * Izvršenje (dodijeljeno/u_radu/u_izvrsenju/zavrseno) prikazuje se isključivo na /dispecer/intervencije.
+ */
 const STATUS_FILTRI = [
-  { value: 'svi',       label: 'Sve',        title: 'Svi aktivni zahtjevi bez obzira na status.' },
-  { value: 'novi',      label: 'Novi',        title: 'Zahtjevi koji još čekaju procjenu dispečera (nije postavljen operativni prioritet).' },
-  { value: 'u_obradi',  label: 'U obradi',   title: 'Svi zahtjevi u obradi - od procjene do dodjele servisera.' },
-  { value: 'odbijeni',  label: 'Odbijeni',   title: 'Zahtjevi koje je serviser odbio — čekaju ponovnu dodjelu.' },
-  { value: 'potvrdeni', label: 'Potvrđeni',  title: 'Zahtjevi kojima je završena obrada u wizardu i čekaju dodjelu servisera.' },
-  { value: 'na_terenu', label: 'Na terenu',  title: 'Aktivne intervencije — serviseri dodijeljeni ili na lokaciji.' },
-  { value: 'zavrseni',  label: 'Završeni',   title: 'Sve završene i formalno zatvorene intervencije.' },
-  {
-    value: 'ponovni_ciklus',
-    label: 'Ponovni ciklusi',
-    title: 'Intervencije vraćene na obradu ili označene kao nije riješene (više od jednog ciklusa).',
-  },
+  { value: 'svi',          label: 'Sve',          title: 'Svi zahtjevi u obradi — od prijave do dodjele servisera.' },
+  { value: 'novi',         label: 'Novi',          title: 'Zahtjevi koji čekaju dispečersku procjenu (nije postavljen operativni prioritet).' },
+  { value: 'u_obradi',     label: 'U obradi',      title: 'Zahtjevi s postavljenim prioritetom — u toku dogovora termina, izbora servisera ili potvrde.' },
+  { value: 'ceka_dodjelu', label: 'Čeka dodjelu',  title: 'Wizard završen — čeka se dodjela servisera ili prihvat.' },
+  { value: 'odbijeni',     label: 'Odbijeni',      title: 'Serviser je odbio zahtjev — čeka ponovnu dodjelu.' },
 ] as const;
 
 type StatusFilter = typeof STATUS_FILTRI[number]['value'];
 
-/** Opcije filtera faze obrade - prikazuju se samo kada je odabran status "U obradi". */
+/**
+ * Pod-faze obrade — prikazuju se samo za tab "U obradi".
+ * "Procjena zahtjeva" (faza bez prioriteta) je sada zasebni tab "Novi".
+ */
 const FAZA_FILTRI = [
-  { value: 'sve_faze',         label: 'Sve faze',         title: 'Prikaz svih zahtjeva u obradi bez obzira na fazu.' },
-  { value: 'procjena_zahtjeva', label: 'Procjena zahtjeva', title: 'Faza 1 - Dispečer još nije postavio operativni prioritet.' },
-  { value: 'dogovor_termina',  label: 'Dogovor termina',   title: 'Faza 2 - Prioritet je postavljen; treba dogovoriti termin s korisnikom.' },
-  { value: 'izbor_servisera',  label: 'Izbor servisera',   title: 'Faza 3 - Termin je unesen; treba odabrati servisera.' },
-  { value: 'potvrda_termina',  label: 'Potvrda termina',   title: 'Faza 4 - Serviser je odabran; čeka se završna potvrda u wizardu.' },
+  { value: 'sve_faze',        label: 'Sve faze',        title: 'Prikaz svih zahtjeva u obradi bez obzira na pod-fazu.' },
+  { value: 'dogovor_termina', label: 'Dogovor termina', title: 'Prioritet je postavljen; treba dogovoriti termin s korisnikom.' },
+  { value: 'izbor_servisera', label: 'Izbor servisera', title: 'Termin je unesen; treba odabrati servisera.' },
+  { value: 'potvrda_termina', label: 'Potvrda termina', title: 'Serviser je odabran; čeka se završna potvrda u wizardu.' },
 ] as const;
 
 type FazaFilter = typeof FAZA_FILTRI[number]['value'];
@@ -58,36 +57,30 @@ type FazaFilter = typeof FAZA_FILTRI[number]['value'];
 const DOZVOLJENI_STATUS_FILTRI = STATUS_FILTRI.map((f) => f.value);
 const DOZVOLJENE_FAZE          = FAZA_FILTRI.map((f) => f.value);
 
-/** Statusi koji koriste inbox-redoslijed za sortiranje. */
+/** Filteri koji koriste urgency-based inbox-redoslijed za sortiranje. */
 const INBOX_REDOSLIJED_STATUSI = new Set<StatusFilter>(['svi', 'novi', 'u_obradi', 'odbijeni']);
 
 // ─── Logika filtriranja ───────────────────────────────────────────────────────
 
+/**
+ * Filter po operativnoj fazi (MECE — bez preklapanja između tabova).
+ * Sve faze su na intake strani; izvršenje je isključivo na /dispecer/intervencije.
+ */
 function filterPoStatusu(
   zahtjevi: ZahtjevZaDispecerskuKarticu[],
   statusFilter: string,
 ): ZahtjevZaDispecerskuKarticu[] {
   switch (statusFilter) {
-    case 'novi':      return zahtjevi.filter(zahtjevJeNoviUPregleduDispecera);
-    case 'u_obradi':  return zahtjevi.filter(zahtjevJeUObradiSirokoGledano);
-    case 'odbijeni':  return zahtjevi.filter(
-      (z) => z.status === 'potvrdeno' && !!z.serviser_odbio_razlog
-    );
-    case 'potvrdeni': return zahtjevi.filter(
-      (z) => zahtjevJePotvrdenPrijeIntervencije(z) && !z.serviser_odbio_razlog
-    );
-    case 'na_terenu': return zahtjevi.filter(
-      (z) => ['dodijeljeno', 'u_radu', 'u_izvrsenju'].includes(z.status)
-    );
-    case 'zavrseni':  return zahtjevi.filter(
-      (z) => z.status === 'zavrseno' || z.status === 'zatvoreno'
-    );
-    case 'ponovni_ciklus':
-      return zahtjevi.filter((z) => (z.broj_ponovnih_ciklusa ?? 0) > 1);
-    default: // 'svi' — isključuje završene da ne preplavi aktivni prikaz
-      return zahtjevi.filter(
-        (z) => z.status !== 'zavrseno' && z.status !== 'zatvoreno'
-      );
+    case 'novi':
+      return zahtjevi.filter((z) => operativnaFazaZahtjeva(z) === 'novi');
+    case 'u_obradi':
+      return zahtjevi.filter((z) => operativnaFazaZahtjeva(z) === 'u_obradi');
+    case 'ceka_dodjelu':
+      return zahtjevi.filter((z) => operativnaFazaZahtjeva(z) === 'ceka_dodjelu');
+    case 'odbijeni':
+      return zahtjevi.filter((z) => operativnaFazaZahtjeva(z) === 'odbijen_serviser');
+    default: // 'svi' — sve intake faze, bez izvršenja
+      return zahtjevi.filter((z) => jeZahtjevIntakeFaza(operativnaFazaZahtjeva(z)));
   }
 }
 
@@ -96,11 +89,10 @@ function filterPoFazi(
   fazaFilter: string,
 ): ZahtjevZaDispecerskuKarticu[] {
   switch (fazaFilter) {
-    case 'procjena_zahtjeva': return zahtjevi.filter(zahtjevJeNoviUPregleduDispecera);
-    case 'dogovor_termina':   return zahtjevi.filter(zahtjevUFaziDogovoraTerminaPregled);
-    case 'izbor_servisera':   return zahtjevi.filter(zahtjevUFaziDodjeleServiseraPregled);
-    case 'potvrda_termina':   return zahtjevi.filter(zahtjevUFaziKorakaPotvrdePregled);
-    default:                  return zahtjevi; // 'sve_faze'
+    case 'dogovor_termina': return zahtjevi.filter(zahtjevUFaziDogovoraTerminaPregled);
+    case 'izbor_servisera': return zahtjevi.filter(zahtjevUFaziDodjeleServiseraPregled);
+    case 'potvrda_termina': return zahtjevi.filter(zahtjevUFaziKorakaPotvrdePregled);
+    default:                return zahtjevi; // 'sve_faze'
   }
 }
 
@@ -141,24 +133,33 @@ function StatusFilterTraka({
       {STATUS_FILTRI.map((opcija) => {
         const br      = filterPoStatusu(zahtjevi, opcija.value).length;
         const aktiv   = opcija.value === aktivan;
-        const jeOdbij = opcija.value === 'odbijeni';
-        // Boja po tipu taba — crvena za Odbijeni, narandžasta za Na terenu, plava za ostale
+        const jeOdbij     = opcija.value === 'odbijeni';
+        const jeCekaDodjelu = opcija.value === 'ceka_dodjelu';
+        // Crvena za Odbijeni, zelena za Čeka dodjelu, plava za ostale
         const boja =
-          jeOdbij ? '#DC2626'
-          : opcija.value === 'na_terenu' ? 'var(--first-secondary)'
+          jeOdbij     ? '#DC2626'
+          : jeCekaDodjelu ? '#16A34A'
           : 'var(--first-secondary)';
         const bojaPoz =
-          jeOdbij ? 'rgba(220,38,38,0.12)'
+          jeOdbij     ? 'rgba(220,38,38,0.12)'
+          : jeCekaDodjelu ? 'rgba(22,163,74,0.1)'
           : 'rgb(var(--first-secondary-rgb) / 0.12)';
         const bojaBorder =
-          jeOdbij ? '1px solid rgba(220,38,38,0.35)'
+          jeOdbij     ? '1px solid rgba(220,38,38,0.35)'
+          : jeCekaDodjelu ? '1px solid rgba(22,163,74,0.3)'
           : '1px solid rgb(var(--first-secondary-rgb) / 0.35)';
         const bojaBadge =
-          jeOdbij ? 'rgba(220,38,38,0.15)'
+          jeOdbij     ? 'rgba(220,38,38,0.15)'
+          : jeCekaDodjelu ? 'rgba(22,163,74,0.12)'
           : 'rgb(var(--first-secondary-rgb) / 0.15)';
-        // Neaktivna boja teksta — crvena za Odbijeni ako ima stavki
-        const neaktivnaBoja = jeOdbij && br > 0 ? '#DC2626' : 'var(--first-nonary)';
-        const neaktivnaBadgePoz = jeOdbij && br > 0 ? 'rgba(220,38,38,0.1)' : 'rgb(var(--first-quaternary-rgb) / 0.35)';
+        const neaktivnaBoja =
+          jeOdbij && br > 0       ? '#DC2626'
+          : jeCekaDodjelu && br > 0 ? '#16A34A'
+          : 'var(--first-nonary)';
+        const neaktivnaBadgePoz =
+          jeOdbij && br > 0       ? 'rgba(220,38,38,0.1)'
+          : jeCekaDodjelu && br > 0 ? 'rgba(22,163,74,0.1)'
+          : 'rgb(var(--first-quaternary-rgb) / 0.35)';
 
         return (
           <button
@@ -325,12 +326,7 @@ export function DispecerZahtjeviLista() {
     if (INBOX_REDOSLIJED_STATUSI.has(aktivniStatus as StatusFilter)) {
       return sastaviDispecerskiInboxRedoslijed(prikazLista).uredjeni;
     }
-    // Završeni: najnovije završene prvo
-    if (aktivniStatus === 'zavrseni') {
-      return [...prikazLista].sort(
-        (a, b) => new Date(b.updated_at ?? b.created_at).getTime() - new Date(a.updated_at ?? a.created_at).getTime()
-      );
-    }
+    // ceka_dodjelu: po operativnom prioritetu pa po starosti
     return [...prikazLista].sort((a, b) => {
       const r = rangOperativnogPrioriteta(a.final_priority) - rangOperativnogPrioriteta(b.final_priority);
       if (r !== 0) return r;
@@ -451,7 +447,7 @@ export function DispecerZahtjeviLista() {
                 Pregled zahtjeva
               </h1>
               <p className="mt-1 text-sm" style={{ color: 'var(--first-nonary)' }}>
-                Status i faza obrade svakog zahtjeva prikazani su odvojeno.
+                Prijem, obrada i planiranje — od prijave do dodjele servisera.
               </p>
             </div>
             <Button

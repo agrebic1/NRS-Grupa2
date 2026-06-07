@@ -6,6 +6,9 @@ import {
   opterecenjePoServiseru,
   ponovniCiklusiMetrika,
   trendZavrsenih,
+  raspodjelaPoOcjeni,
+  trendOcjena,
+  ocjeneMetrika,
   sastaviMetrike,
 } from '@/lib/servisirane/analitikaMetrike';
 import type { AnalitikaZahtjevRed } from '@/lib/servisirane/analitikaMetrike';
@@ -122,6 +125,51 @@ describe('trendZavrsenih', () => {
   });
 });
 
+describe('raspodjelaPoOcjeni', () => {
+  test('uvijek vraća redove 1–5, čak i s nulom', () => {
+    const r = raspodjelaPoOcjeni([{ ocjena: 5 }, { ocjena: 5 }, { ocjena: 3 }]);
+    expect(r).toEqual([
+      { ocjena: 1, broj: 0 },
+      { ocjena: 2, broj: 0 },
+      { ocjena: 3, broj: 1 },
+      { ocjena: 4, broj: 0 },
+      { ocjena: 5, broj: 2 },
+    ]);
+  });
+});
+
+describe('trendOcjena', () => {
+  test('grupiše ocjene po danu', () => {
+    const r = trendOcjena([
+      { created_at: '2026-06-01T10:00:00Z' },
+      { created_at: '2026-06-02T08:00:00Z' },
+      { created_at: '2026-06-02T14:00:00Z' },
+    ]);
+    expect(r).toEqual([
+      { datum: '2026-06-01', broj: 1 },
+      { datum: '2026-06-02', broj: 2 },
+    ]);
+  });
+});
+
+describe('ocjeneMetrika', () => {
+  test('računa prosjek, stopu odgovora i raspodjelu', () => {
+    const r = ocjeneMetrika(4, [
+      { ocjena: 5, created_at: '2026-06-01T10:00:00Z' },
+      { ocjena: 3, created_at: '2026-06-02T08:00:00Z' },
+    ]);
+    expect(r.ukupno_zatvorenih).toBe(4);
+    expect(r.ukupno_ocijenjeno).toBe(2);
+    expect(r.stopa_odgovora_posto).toBe(50);
+    expect(r.prosjecna_ocjena).toBe(4);
+    expect(r.raspodjela.find((x) => x.ocjena === 5)?.broj).toBe(1);
+  });
+
+  test('null stopa kad nema zatvorenih', () => {
+    expect(ocjeneMetrika(0, []).stopa_odgovora_posto).toBeNull();
+  });
+});
+
 describe('sastaviMetrike', () => {
   test('spaja sve metrike u jedan objekt', () => {
     const svi = [
@@ -132,12 +180,14 @@ describe('sastaviMetrike', () => {
       zahtjev({ id: 3, status: 'zavrseno', serviser_dodijeljen_id: 's1', final_priority: 'SREDNJE', created_at: '2026-05-01T00:00:00Z', updated_at: '2026-05-01T03:00:00Z' }),
     ];
     const m = sastaviMetrike({
-      period:           { od: '2026-05-01', do: '2026-05-31' },
-      sviZahtjevi:      svi,
-      zavrseniZahtjevi: zavrseni,
-      trajanjaMinuta:   [60, 120],
-      odziviMinuta:     [10, 20],
-      imenaServisera:   { s1: 'Ana A' },
+      period:            { od: '2026-05-01', do: '2026-05-31' },
+      sviZahtjevi:       svi,
+      zavrseniZahtjevi:  zavrseni,
+      trajanjaMinuta:    [60, 120],
+      odziviMinuta:      [10, 20],
+      imenaServisera:    { s1: 'Ana A' },
+      zatvoreniZahtjevi: 3,
+      ocjene:            [{ ocjena: 4, created_at: '2026-05-10T12:00:00Z' }],
     });
     expect(m.ukupno_zahtjeva).toBe(2);
     expect(m.ukupno_zavrsenih).toBe(1);
@@ -146,5 +196,7 @@ describe('sastaviMetrike', () => {
     expect(m.sla.na_vrijeme).toBe(1);
     expect(m.ponovni_ciklusi.ukupno_ciklusa).toBe(1);
     expect(m.opterecenje_servisera[0].serviser_id).toBe('s1');
+    expect(m.ocjene.ukupno_zatvorenih).toBe(3);
+    expect(m.ocjene.prosjecna_ocjena).toBe(4);
   });
 });

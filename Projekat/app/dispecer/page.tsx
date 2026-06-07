@@ -4,10 +4,16 @@ import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from 'rea
 import {
   ClipboardList, ChevronRight,
   RefreshCw, XCircle, Bell,
-  AlertTriangle, CheckCircle2, UserCheck, Zap, Inbox, Clock, Ban, BarChart3,
+  AlertTriangle, CheckCircle2, UserCheck, Inbox, Clock, Ban, BarChart3,
+  Truck, MapPin,
 } from 'lucide-react';
-import { getSlaStatus } from '@/lib/servisirane/slaPravila';
-import { getDugoChekanje } from '@/lib/servisirane/dugoChekanje';
+import {
+  operativnaFazaZahtjeva,
+  jeZahtjevIntakeFaza,
+  jeSlaPrekoracen,
+  jeDugoCeka,
+  jeKasni,
+} from '@/lib/servisirane/operativnaFaza';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { AppShell } from '@/components/layout/AppShell';
@@ -279,22 +285,27 @@ function DispecerPageContent() {
     };
   }, []);
 
-  const uInboxu       = zahtjevi.filter((z) => JE_PENDING(z.status));
-  const noviPregledBr = uInboxu.filter((z) => zahtjevJeNoviUPregleduDispecera(z)).length;
-  const uObradiPregledBr = uInboxu.filter((z) => zahtjevJeUObradiUPregleduDispecera(z)).length;
-  // Odbijeni zahtjevi imaju status='potvrdeno' + serviser_odbio_razlog — broji ih odvojeno od potvrđenih
-  const odbijeniServiserBr = zahtjevi.filter((z) => z.status === 'potvrdeno' && !!z.serviser_odbio_razlog).length;
-  const potvrdenoBr        = zahtjevi.filter((z) => z.status === 'potvrdeno' && !z.serviser_odbio_razlog).length;
-  const dodijeljeniiBr     = zahtjevi.filter((z) => ['dodijeljeno', 'u_radu', 'u_izvrsenju'].includes(z.status)).length;
-  const hitniB        = zahtjevi.filter((z) => (z.urgency_score ?? 0) >= 75 || z.is_premium).length;
+  // ─── KPI brojači (MECE — isti uslov kao odredišni filter) ─────────────────
+  const noviPregledBr    = zahtjevi.filter((z) => operativnaFazaZahtjeva(z) === 'novi').length;
+  const uObradiPregledBr = zahtjevi.filter((z) => operativnaFazaZahtjeva(z) === 'u_obradi').length;
+  const cekaDodjelu      = zahtjevi.filter((z) => operativnaFazaZahtjeva(z) === 'ceka_dodjelu').length;
+  const odbijeniServiserBr = zahtjevi.filter((z) => operativnaFazaZahtjeva(z) === 'odbijen_serviser').length;
+
+  const brDodijeljeno    = zahtjevi.filter((z) => z.status === 'dodijeljeno').length;
+  const brNaPutu         = zahtjevi.filter((z) => z.status === 'u_radu').length;
+  const brNaTerenu       = zahtjevi.filter((z) => z.status === 'u_izvrsenju').length;
+  const brCekaZatvaranje = zahtjevi.filter((z) => z.status === 'zavrseno').length;
+
+  const slaPrekoracenoBr = zahtjevi.filter(jeSlaPrekoracen).length;
+  const dugoChekajuBr    = zahtjevi.filter((z) => jeZahtjevIntakeFaza(operativnaFazaZahtjeva(z)) && jeDugoCeka(z)).length;
+  const brKasni          = zahtjevi.filter(jeKasni).length;
+
   const zavrsenoDanaBr = zahtjevi.filter((z) => {
     if (z.status !== 'zavrseno') return false;
     const d = new Date(z.updated_at ?? z.created_at);
     const n = new Date();
     return d.getFullYear() === n.getFullYear() && d.getMonth() === n.getMonth() && d.getDate() === n.getDate();
   }).length;
-  const slaPrekoracenoBr  = zahtjevi.filter((z) => getSlaStatus(z.created_at, z.final_priority, z.status) === 'prekoraceno').length;
-  const dugoChekajuBr    = zahtjevi.filter((z) => getDugoChekanje(z.status, z.created_at) !== null).length;
 
   return (
     <>
@@ -326,39 +337,133 @@ function DispecerPageContent() {
         </div>
       </div>
 
-      <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-9">
-        {[
-          { oznaka: 'Novi zahtjevi',   v: noviPregledBr,      boja: DISPECER_PALETA_STATUS.inbox.kpi,                                        Ikona: Inbox,         href: '/dispecer/zahtjevi?filter=novi'      },
-          { oznaka: 'U obradi',        v: uObradiPregledBr,   boja: DISPECER_PALETA_STATUS.uObradi.kpi,                                      Ikona: ClipboardList, href: '/dispecer/zahtjevi?filter=u_obradi' },
-          { oznaka: 'Odbijeni',        v: odbijeniServiserBr, boja: odbijeniServiserBr > 0 ? '#DC2626' : DISPECER_PALETA_STATUS.neutral.kpi,  Ikona: Ban,           href: '/dispecer/zahtjevi?filter=odbijeni' },
-          { oznaka: 'Potvrđeni',       v: potvrdenoBr,        boja: DISPECER_PALETA_STATUS.terminPotvrden.kpi,                               Ikona: CheckCircle2,  href: '/dispecer/zahtjevi?filter=potvrdeni'},
-          { oznaka: 'Na terenu',       v: dodijeljeniiBr,     boja: DISPECER_PALETA_STATUS.uToku.kpi,                                        Ikona: UserCheck,     href: '/dispecer/zahtjevi?filter=na_terenu'},
-          { oznaka: 'Hitni',           v: hitniB,             boja: '#DC2626',                                                               Ikona: Zap,           href: '/dispecer/zahtjevi?filter=svi'      },
-          { oznaka: 'Završeni danas',  v: zavrsenoDanaBr,     boja: DISPECER_PALETA_STATUS.zavrseno.kpi,                                     Ikona: CheckCircle2,  href: '/dispecer/zahtjevi?filter=zavrseni' },
-          { oznaka: 'Prekoračen SLA',  v: slaPrekoracenoBr,   boja: slaPrekoracenoBr > 0 ? '#DC2626' : DISPECER_PALETA_STATUS.zavrseno.kpi,  Ikona: Clock,         href: '/dispecer/intervencije?filter=sla'  },
-          { oznaka: 'Dugo čekaju',     v: dugoChekajuBr,      boja: dugoChekajuBr > 0 ? '#B45309' : DISPECER_PALETA_STATUS.neutral.kpi,     Ikona: AlertTriangle, href: '/dispecer/zahtjevi?filter=svi'      },
-        ].map(({ oznaka, v, boja, Ikona, href }) => (
-          <Link
-            key={oznaka}
-            href={href}
-            className="flex items-center gap-3 rounded-2xl p-4 shadow-card transition-all hover:shadow-md hover:opacity-90"
-            style={{
-              backgroundColor: 'rgb(var(--first-quinary-rgb) / 0.22)',
-              border: '1px solid rgb(var(--first-quaternary-rgb) / 0.35)',
-            }}
-          >
-            <div
-              className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl"
-              style={{ backgroundColor: `color-mix(in srgb, ${boja} 12%, transparent)` }}
-            >
-              <Ikona className="h-4 w-4" style={{ color: boja }} />
+      {/* ── Grupirani hijerarhijski dashboard ────────────────────────────── */}
+      <div className="mb-8 space-y-6">
+
+        {/* 1. AKCIJA POTREBNA */}
+        <div>
+          <div className="mb-3 flex items-center gap-3">
+            <p className="shrink-0 text-xs font-bold uppercase tracking-widest" style={{ color: DISPECER_PALETA_STATUS.inbox.kpi }}>
+              Akcija potrebna
+            </p>
+            <div className="h-px flex-1" style={{ backgroundColor: 'rgb(var(--first-quaternary-rgb) / 0.3)' }} aria-hidden />
+            <Link href="/dispecer/zahtjevi" className="flex shrink-0 items-center gap-1 text-xs font-medium transition-opacity hover:opacity-70" style={{ color: DISPECER_PALETA_STATUS.inbox.kpi }}>
+              Svi zahtjevi <ChevronRight className="h-3 w-3" />
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {[
+              { oznaka: 'Novi',         v: noviPregledBr,      boja: DISPECER_PALETA_STATUS.inbox.kpi,                                             Ikona: Inbox,        href: '/dispecer/zahtjevi?filter=novi' },
+              { oznaka: 'U obradi',     v: uObradiPregledBr,   boja: DISPECER_PALETA_STATUS.uObradi.kpi,                                           Ikona: ClipboardList, href: '/dispecer/zahtjevi?filter=u_obradi' },
+              { oznaka: 'Čeka dodjelu', v: cekaDodjelu,        boja: DISPECER_PALETA_STATUS.terminPotvrden.kpi,                                    Ikona: CheckCircle2, href: '/dispecer/zahtjevi?filter=ceka_dodjelu' },
+              { oznaka: 'Odbijeni',     v: odbijeniServiserBr, boja: odbijeniServiserBr > 0 ? '#DC2626' : DISPECER_PALETA_STATUS.neutral.kpi,       Ikona: Ban,          href: '/dispecer/zahtjevi?filter=odbijeni' },
+            ].map(({ oznaka, v, boja, Ikona, href }) => (
+              <Link key={oznaka} href={href}
+                className="flex items-center gap-3 rounded-2xl p-4 shadow-card transition-all hover:shadow-md hover:opacity-90"
+                style={{ backgroundColor: 'rgb(var(--first-quinary-rgb) / 0.22)', border: '1px solid rgb(var(--first-quaternary-rgb) / 0.35)' }}>
+                <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl"
+                  style={{ backgroundColor: `color-mix(in srgb, ${boja} 12%, transparent)` }}>
+                  <Ikona className="h-4 w-4" style={{ color: boja }} />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-2xl font-extrabold leading-none tabular-nums" style={{ color: boja }}>{v}</p>
+                  <p className="mt-0.5 text-[11px] font-medium leading-tight" style={{ color: 'var(--first-nonary)' }}>{oznaka}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* 2. IZVRŠENJE UŽIVO */}
+        <div>
+          <div className="mb-3 flex items-center gap-3">
+            <p className="shrink-0 text-xs font-bold uppercase tracking-widest" style={{ color: DISPECER_PALETA_STATUS.uToku.kpi }}>
+              Izvršenje · uživo
+            </p>
+            <div className="h-px flex-1" style={{ backgroundColor: 'rgb(var(--first-quaternary-rgb) / 0.3)' }} aria-hidden />
+            <Link href="/dispecer/intervencije" className="flex shrink-0 items-center gap-1 text-xs font-medium transition-opacity hover:opacity-70" style={{ color: DISPECER_PALETA_STATUS.uToku.kpi }}>
+              Intervencije <ChevronRight className="h-3 w-3" />
+            </Link>
+          </div>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            {[
+              { oznaka: 'Dodijeljeno',     v: brDodijeljeno,     boja: DISPECER_PALETA_STATUS.dodijeljeno.kpi, Ikona: UserCheck,    href: '/dispecer/intervencije?filter=dodijeljeno' },
+              { oznaka: 'Na putu',         v: brNaPutu,          boja: DISPECER_PALETA_STATUS.uToku.kpi,       Ikona: Truck,        href: '/dispecer/intervencije?filter=u_radu' },
+              { oznaka: 'Na terenu',       v: brNaTerenu,        boja: DISPECER_PALETA_STATUS.uToku.kpi,       Ikona: MapPin,       href: '/dispecer/intervencije?filter=u_izvrsenju' },
+              { oznaka: 'Čeka zatvaranje', v: brCekaZatvaranje,  boja: DISPECER_PALETA_STATUS.zavrseno.kpi,   Ikona: CheckCircle2, href: '/dispecer/intervencije?filter=zavrseni' },
+            ].map(({ oznaka, v, boja, Ikona, href }) => (
+              <Link key={oznaka} href={href}
+                className="flex items-center gap-3 rounded-2xl p-4 shadow-card transition-all hover:shadow-md hover:opacity-90"
+                style={{ backgroundColor: 'rgb(var(--first-quinary-rgb) / 0.22)', border: '1px solid rgb(var(--first-quaternary-rgb) / 0.35)' }}>
+                <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl"
+                  style={{ backgroundColor: `color-mix(in srgb, ${boja} 12%, transparent)` }}>
+                  <Ikona className="h-4 w-4" style={{ color: boja }} />
+                </div>
+                <div className="min-w-0">
+                  <p className="text-2xl font-extrabold leading-none tabular-nums" style={{ color: boja }}>{v}</p>
+                  <p className="mt-0.5 text-[11px] font-medium leading-tight" style={{ color: 'var(--first-nonary)' }}>{oznaka}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* 3. UPOZORENJA — prikazuje se samo ako ima >0 */}
+        {(slaPrekoracenoBr > 0 || dugoChekajuBr > 0 || brKasni > 0) && (
+          <div>
+            <div className="mb-3 flex items-center gap-3">
+              <p className="shrink-0 text-xs font-bold uppercase tracking-widest" style={{ color: '#DC2626' }}>
+                Upozorenja
+              </p>
+              <div className="h-px flex-1" style={{ backgroundColor: 'rgba(220,38,38,0.25)' }} aria-hidden />
             </div>
-            <div className="min-w-0">
-              <p className="text-2xl font-extrabold leading-none tabular-nums" style={{ color: boja }}>{v}</p>
-              <p className="mt-0.5 text-[11px] font-medium leading-tight" style={{ color: 'var(--first-nonary)' }}>{oznaka}</p>
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+              {([
+                slaPrekoracenoBr > 0 ? { oznaka: 'Prekoračen SLA', v: slaPrekoracenoBr, boja: '#DC2626', Ikona: Clock,         href: '/dispecer/intervencije?filter=sla' } : null,
+                dugoChekajuBr > 0    ? { oznaka: 'Dugo čekaju',    v: dugoChekajuBr,    boja: '#B45309', Ikona: AlertTriangle, href: '/dispecer/zahtjevi' }                : null,
+                brKasni > 0          ? { oznaka: 'Kašnjenja',       v: brKasni,          boja: '#DC2626', Ikona: Clock,         href: '/dispecer/intervencije?filter=kasni' } : null,
+              ] as const).filter((x): x is NonNullable<typeof x> => x !== null).map(({ oznaka, v, boja, Ikona, href }) => (
+                <Link key={oznaka} href={href}
+                  className="flex items-center gap-3 rounded-2xl p-4 shadow-card transition-all hover:shadow-md"
+                  style={{ backgroundColor: 'rgba(220,38,38,0.04)', border: '1px solid rgba(220,38,38,0.18)' }}>
+                  <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl"
+                    style={{ backgroundColor: `color-mix(in srgb, ${boja} 14%, transparent)` }}>
+                    <Ikona className="h-4 w-4" style={{ color: boja }} />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="text-2xl font-extrabold leading-none tabular-nums" style={{ color: boja }}>{v}</p>
+                    <p className="mt-0.5 text-[11px] font-medium leading-tight" style={{ color: 'var(--first-nonary)' }}>{oznaka}</p>
+                  </div>
+                </Link>
+              ))}
             </div>
-          </Link>
-        ))}
+          </div>
+        )}
+
+        {/* 4. UČINAK DANAS */}
+        <div>
+          <div className="mb-3 flex items-center gap-3">
+            <p className="shrink-0 text-xs font-bold uppercase tracking-widest" style={{ color: DISPECER_PALETA_STATUS.neutral.kpi }}>
+              Učinak danas
+            </p>
+            <div className="h-px flex-1" style={{ backgroundColor: 'rgb(var(--first-quaternary-rgb) / 0.3)' }} aria-hidden />
+          </div>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+            <Link href="/dispecer/intervencije?filter=zavrseni_danas"
+              className="flex items-center gap-3 rounded-2xl p-4 shadow-card transition-all hover:shadow-md hover:opacity-90"
+              style={{ backgroundColor: 'rgb(var(--first-quinary-rgb) / 0.22)', border: '1px solid rgb(var(--first-quaternary-rgb) / 0.35)' }}>
+              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl"
+                style={{ backgroundColor: `color-mix(in srgb, ${DISPECER_PALETA_STATUS.zavrseno.kpi} 12%, transparent)` }}>
+                <CheckCircle2 className="h-4 w-4" style={{ color: DISPECER_PALETA_STATUS.zavrseno.kpi }} />
+              </div>
+              <div className="min-w-0">
+                <p className="text-2xl font-extrabold leading-none tabular-nums" style={{ color: DISPECER_PALETA_STATUS.zavrseno.kpi }}>{zavrsenoDanaBr}</p>
+                <p className="mt-0.5 text-[11px] font-medium leading-tight" style={{ color: 'var(--first-nonary)' }}>Završeni danas</p>
+              </div>
+            </Link>
+          </div>
+        </div>
+
       </div>
 
       {greska && <div className="mb-6"><AlertMessage variant="error" message={greska} /></div>}

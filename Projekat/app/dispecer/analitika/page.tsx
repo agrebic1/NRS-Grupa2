@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
   ArrowLeft, RefreshCw, BarChart3, CheckCircle2, Clock,
-  TrendingUp, AlertTriangle, Users, RotateCcw, Inbox, PieChart,
+  TrendingUp, AlertTriangle, Users, RotateCcw, Inbox, PieChart, Star,
 } from 'lucide-react';
 import { AppShell } from '@/components/layout/AppShell';
 import { Button } from '@/components/ui/Button';
@@ -248,6 +248,85 @@ export default function AnalitikaPage() {
             </GrafKartica>
           </div>
 
+          {/* Korisničke ocjene */}
+          <div
+            className="rounded-2xl p-5"
+            style={{
+              backgroundColor: 'rgb(var(--first-quinary-rgb) / 0.18)',
+              border: '1px solid rgb(var(--first-quaternary-rgb) / 0.32)',
+            }}
+          >
+            <div className="mb-4 flex items-center gap-2">
+              <Star className="h-4 w-4" style={{ color: '#CA8A04' }} />
+              <h2 className="font-semibold" style={{ color: 'var(--first-octonary)' }}>
+                Korisničke ocjene
+              </h2>
+            </div>
+
+            <div className="mb-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
+              <KpiKartica
+                oznaka="Prosječna ocjena"
+                vrijednost={podaci.ocjene.prosjecna_ocjena != null ? `${podaci.ocjene.prosjecna_ocjena}/5` : '-'}
+                boja="#CA8A04"
+                Ikona={Star}
+              />
+              <KpiKartica
+                oznaka="Ocijenjeno"
+                vrijednost={String(podaci.ocjene.ukupno_ocijenjeno)}
+                boja="#92400E"
+                Ikona={CheckCircle2}
+              />
+              <KpiKartica
+                oznaka="Zatvoreno"
+                vrijednost={String(podaci.ocjene.ukupno_zatvorenih)}
+                boja="var(--first-secondary)"
+                Ikona={Inbox}
+              />
+              <KpiKartica
+                oznaka="Stopa odgovora"
+                vrijednost={
+                  podaci.ocjene.stopa_odgovora_posto != null
+                    ? `${podaci.ocjene.stopa_odgovora_posto}%`
+                    : '-'
+                }
+                boja="#166534"
+                Ikona={TrendingUp}
+              />
+            </div>
+
+            <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+              <GrafKartica naslov="Raspodjela ocjena (1–5)" Ikona={BarChart3}>
+                <BarChart
+                  praznoTekst="Nema ocjena u odabranom periodu."
+                  podaci={podaci.ocjene.raspodjela.map((r) => ({
+                    labela:     `${r.ocjena} ★`,
+                    vrijednost: r.broj,
+                    boja:       r.ocjena >= 4 ? '#16A34A' : r.ocjena === 3 ? '#D97706' : '#DC2626',
+                  }))}
+                />
+              </GrafKartica>
+
+              <GrafKartica naslov="Trend ocjena po danu" Ikona={TrendingUp}>
+                <LineChart
+                  tacke={podaci.ocjene.trend_ocijenjenih.map((t) => ({
+                    labela:     fmtKratkiDatum(t.datum),
+                    vrijednost: t.broj,
+                  }))}
+                />
+                <p className="mt-3 text-[11px]" style={{ color: 'var(--first-nonary)' }}>
+                  Broj ocjena ostavljenih po danu. Detalji po intervenciji:{' '}
+                  <Link
+                    href="/dispecer/intervencije?filter=zatvoreni"
+                    className="font-semibold underline-offset-2 hover:underline"
+                    style={{ color: 'var(--first-secondary)' }}
+                  >
+                    Završeni
+                  </Link>.
+                </p>
+              </GrafKartica>
+            </div>
+          </div>
+
           {/* Grafovi - red 2 */}
           <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
             <GrafKartica naslov="Opterećenje po serviseru" Ikona={Users}>
@@ -302,7 +381,7 @@ export default function AnalitikaPage() {
           </div>
 
           <p className="text-xs" style={{ color: 'var(--first-nonary)' }}>
-            Period: {podaci.period.od} — {podaci.period.do}. Definicija završenih i SLA-a usklađena s izvještajem odziva (US-42).
+            Period: {podaci.period.od} — {podaci.period.do}.
           </p>
         </div>
       )}

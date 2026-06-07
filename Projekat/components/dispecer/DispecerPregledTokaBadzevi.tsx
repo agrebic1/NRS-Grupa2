@@ -34,27 +34,22 @@ function FazaBedz({ naziv, title }: { naziv: string; title?: string }) {
 /**
  * Prikazuje STATUS zahtjeva + FAZU obrade kao odvojene bedževe.
  *
- * - Inbox: "Novi" ili "U obradi" + faza (Procjena zahtjeva / Dogovor termina / Izbor servisera / Potvrda termina)
- * - Potvrdeno + odbijeno: crveni "Serviser odbio" badge umjesto zelenog Potvrđeno
- * - Ostali aktivni statusi: samo DispecerStatusBadge + faza
+ * - Inbox (novi/u_obradi): "Novi" ili "U obradi" + pod-faza
+ * - potvrdeno + serviser_odbio_razlog: crveni "Serviser odbio" + "Ponovna dodjela"
+ * - potvrdeno (čeka dodjelu): zeleni "Čeka dodjelu"
+ * - Izvršenje (dodijeljeno/u_radu/u_izvrsenju): DispecerStatusBadge + faza
  */
 export function DispecerPregledTokaBadzevi({ zahtjev }: { zahtjev: ServisniZahtjev }) {
   const uInboxu = zahtjevCekaObraduUInboxuDispecera(zahtjev.status);
 
-  // Requests outside inbox (potvrdeno, dodijeljeno, u_radu, u_izvrsenju, zavrseno, etc.)
-  if (!uInboxu) {
-    // Poseban slučaj: serviser odbio — status ostaje 'potvrdeno' ali treba crveni badge
-    const jeOdbijen = zahtjev.status === 'potvrdeno' && !!zahtjev.serviser_odbio_razlog;
-    if (jeOdbijen) {
+  // potvrdeno je tehnički "u inboxu" (dozvolama), ali vizualno je zasebna faza
+  if (zahtjev.status === 'potvrdeno') {
+    if (zahtjev.serviser_odbio_razlog) {
       return (
         <span className="flex flex-wrap items-center gap-1">
           <span
             className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-semibold"
-            style={{
-              color:           '#DC2626',
-              backgroundColor: 'rgba(220,38,38,0.1)',
-              border:          '1px solid rgba(220,38,38,0.28)',
-            }}
+            style={{ color: '#DC2626', backgroundColor: 'rgba(220,38,38,0.1)', border: '1px solid rgba(220,38,38,0.28)' }}
           >
             Serviser odbio
           </span>
@@ -62,7 +57,20 @@ export function DispecerPregledTokaBadzevi({ zahtjev }: { zahtjev: ServisniZahtj
         </span>
       );
     }
+    return (
+      <span className="flex flex-wrap items-center gap-1">
+        <span
+          className="inline-flex rounded-md px-2 py-0.5 text-[11px] font-semibold"
+          style={stilBedza(DISPECER_PALETA_STATUS.terminPotvrden)}
+        >
+          Čeka dodjelu
+        </span>
+      </span>
+    );
+  }
 
+  // Statusi van inboxu (dodijeljeno, u_radu, u_izvrsenju, zavrseno, ...)
+  if (!uInboxu) {
     const fazaNaziv = fazaObradeNazivZaKarticu(zahtjev);
     return (
       <span className="flex flex-wrap items-center gap-1">
@@ -72,6 +80,7 @@ export function DispecerPregledTokaBadzevi({ zahtjev }: { zahtjev: ServisniZahtj
     );
   }
 
+  // Inbox: Novi ili U obradi (pending_review / na_cekanju / in_review)
   const jeNovi    = zahtjevJeNoviUPregleduDispecera(zahtjev);
   const glavnaPal = jeNovi ? DISPECER_PALETA_STATUS.inbox : DISPECER_PALETA_STATUS.uObradi;
   const fazaNaziv = fazaObradeNazivZaKarticu(zahtjev);

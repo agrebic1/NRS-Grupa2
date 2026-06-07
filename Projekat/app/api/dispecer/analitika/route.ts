@@ -125,13 +125,36 @@ export async function GET(request: Request) {
       }
     }
 
+    // ── Formalno zatvorene intervencije u periodu (po closed_at) ───────────────
+    const { data: zatvoreni, error: zatErr } = await db
+      .from('service_requests')
+      .select('id')
+      .eq('status', 'zatvoreno')
+      .gte('closed_at', odISO)
+      .lte('closed_at', doISO);
+    if (zatErr) return NextResponse.json({ error: zatErr.message }, { status: 500 });
+
+    const zatvoreniBroj = (zatvoreni ?? []).length;
+
+    // ── Korisničke ocjene ostavljene u periodu ───────────────────────────────────
+    const { data: ocjeneRedovi, error: ocjErr } = await db
+      .from('intervencija_ocjene')
+      .select('ocjena, created_at')
+      .gte('created_at', odISO)
+      .lte('created_at', doISO);
+    if (ocjErr) return NextResponse.json({ error: ocjErr.message }, { status: 500 });
+
+    const ocjene = (ocjeneRedovi ?? []) as { ocjena: number; created_at: string }[];
+
     const metrike = sastaviMetrike({
       period,
-      sviZahtjevi:      (sviZahtjevi ?? []) as AnalitikaZahtjevRed[],
-      zavrseniZahtjevi: zavrseniRedovi,
+      sviZahtjevi:       (sviZahtjevi ?? []) as AnalitikaZahtjevRed[],
+      zavrseniZahtjevi:  zavrseniRedovi,
       trajanjaMinuta,
       odziviMinuta,
       imenaServisera,
+      zatvoreniZahtjevi: zatvoreniBroj,
+      ocjene,
     });
 
     return NextResponse.json(metrike);

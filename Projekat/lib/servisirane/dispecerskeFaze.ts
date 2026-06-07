@@ -176,7 +176,7 @@ export function zahtjevJeUObradiSirokoGledano(zahtjev: ServisniZahtjev): boolean
  */
 export function fazaObradeNazivZaKarticu(zahtjev: ServisniZahtjev): string | null {
   const s = zahtjev.status;
-  if (s === 'potvrdeno')   return 'Dodjela serviseru';
+  if (s === 'potvrdeno')   return 'Čeka dodjelu';
   if (s === 'dodijeljeno') return 'Servis dodijeljen';
   if (s === 'u_radu')      return 'Servis u toku';
   if (s === 'u_izvrsenju') return 'Servis na terenu';
@@ -186,29 +186,35 @@ export function fazaObradeNazivZaKarticu(zahtjev: ServisniZahtjev): string | nul
 
 /**
  * Synonymi za `?filter=` - stari i skraćeni ključevi preusmjeravaju na kanonske nazive.
- * Kanon (novi): svi, novi, u_obradi, potvrdeni, zavrseni, otkazani.
- * Stari kanon (za backward compat): zakazivanje_termina, dodjela_servisera, korak_potvrde, potvrdeno.
+ * Kanon (novi): svi, novi, u_obradi, ceka_dodjelu, odbijeni.
+ * Izvršenje (dodijeljeno/u_radu/u_izvrsenju/zavrseno) je isključivo na /dispecer/intervencije.
  */
 const SYNONIMI_DISPECER_FILTRA: Record<string, string> = {
   red_obrade:           'svi',
   inbox:                'svi',
   bez_prioriteta:       'novi',
   carobnjak:            'svi',
-  u_toku:               'na_terenu',
   ceka_prioritet:       'novi',
   // Stari alias → stari kanon (hop1); stari kanon → novi kanon (hop2)
   ceka_termin:          'zakazivanje_termina',
   ceka_servisera:       'dodjela_servisera',
   ceka_zavrsnu_potvrdu: 'korak_potvrde',
   konacna_potvrda:      'korak_potvrde',
-  intervencija:         'na_terenu',
-  teren:                'na_terenu',
-  dodijeljeno:          'na_terenu',
   // Stari kanon → novi kanon
   zakazivanje_termina:  'u_obradi',
   dodjela_servisera:    'u_obradi',
   korak_potvrde:        'u_obradi',
-  potvrdeno:            'potvrdeni',
+  // Stari nazivi za potvrdeni/potvrdeno → novi kanon ceka_dodjelu
+  potvrdeni:            'ceka_dodjelu',
+  potvrdeno:            'ceka_dodjelu',
+  // Stari izvršenje tabovi → svi (ne postoji na zahtjevi stranici; trebaju ići na /intervencije)
+  na_terenu:            'svi',
+  u_toku:               'svi',
+  intervencija:         'svi',
+  teren:                'svi',
+  dodijeljeno:          'svi',
+  zavrseni:             'svi',
+  ponovni_ciklus:       'svi',
 };
 
 export function normalizujDispecerFilterIzParametra(raw: string | null | undefined, dozvoljene: string[]): string {

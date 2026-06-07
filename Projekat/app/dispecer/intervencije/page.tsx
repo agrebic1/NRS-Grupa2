@@ -6,8 +6,10 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import {
   AlertTriangle, CheckCircle2, Clock, MapPin, User,
   RefreshCw, Calendar, Zap, Truck, ChevronRight, ArrowLeft,
-  AlertCircle,
+  AlertCircle, Star,
 } from 'lucide-react';
+import type { ZahtjevZaDispecerskuKarticu } from '@/components/dispecer/DispecerskaZahtjevKartica';
+import { DispecerskaZahtjevPregledGridKartica } from '@/components/dispecer/DispecerskaZahtjevPregledGridKartica';
 import { AppShell } from '@/components/layout/AppShell';
 import { Button } from '@/components/ui/Button';
 import { AlertMessage } from '@/components/ui/AlertMessage';
@@ -16,7 +18,7 @@ import { labelKategorije } from '@/lib/servisirane/kategorije';
 import { IntervencijaWorkflowProgress } from '@/components/dispecer/IntervencijaWorkflowProgress';
 import { prioritetBoja, statusBoja, statusOznaka } from '@/lib/servisirane/statusBoja';
 import { SlaStatusBadge } from '@/components/dispecer/SlaStatusBadge';
-import { getSlaStatus } from '@/lib/servisirane/slaPravila';
+import { jeHitan, jeKasni, jeSlaPrekoracen } from '@/lib/servisirane/operativnaFaza';
 
 // ─── Tipovi ───────────────────────────────────────────────────────────────────
 
@@ -25,31 +27,39 @@ interface IntervencijaRed extends ServisniZahtjev {
   serviser?:  { id: string; ime: string; prezime: string } | null;
 }
 
-type KpiFilter = 'sve' | 'hitno' | 'u_izvrsenju' | 'u_radu' | 'dodijeljeno' | 'kasni' | 'zavrseno' | 'sla';
+type KpiFilter =
+  | 'sve'
+  | 'hitno'
+  | 'u_izvrsenju'
+  | 'u_radu'
+  | 'dodijeljeno'
+  | 'kasni'
+  | 'zavrseno'
+  | 'zatvoreno'
+  | 'sla'
+  | 'zavrseni_danas';
 
 // ─── Helperi ──────────────────────────────────────────────────────────────────
 
-function jeHitna(z: IntervencijaRed): boolean {
-  return (z.urgency_score ?? 0) >= 75 || Boolean(z.is_premium);
+function jeZavrsenoaDanas(z: IntervencijaRed): boolean {
+  if (z.status !== 'zavrseno') return false;
+  const d = new Date(z.updated_at ?? z.created_at);
+  const n = new Date();
+  return d.getFullYear() === n.getFullYear() && d.getMonth() === n.getMonth() && d.getDate() === n.getDate();
 }
-
-function jeKasni(z: IntervencijaRed): boolean {
-  if (!z.termin_planirani_pocetak) return false;
-  if (['zavrseno', 'otkazano', 'odbijeno'].includes(z.status)) return false;
-  return new Date(z.termin_planirani_pocetak) < new Date();
-}
-
 
 function filtrirajPoKpi(intervencije: IntervencijaRed[], filter: KpiFilter): IntervencijaRed[] {
   switch (filter) {
-    case 'hitno':       return intervencije.filter(jeHitna);
-    case 'u_izvrsenju': return intervencije.filter((z) => z.status === 'u_izvrsenju');
-    case 'u_radu':      return intervencije.filter((z) => z.status === 'u_radu');
-    case 'dodijeljeno': return intervencije.filter((z) => z.status === 'dodijeljeno');
-    case 'kasni':       return intervencije.filter(jeKasni);
-    case 'zavrseno':    return intervencije.filter((z) => z.status === 'zavrseno' && !(z as any).closed_at);
-    case 'sla':         return intervencije.filter((z) => getSlaStatus(z.created_at, z.final_priority, z.status) === 'prekoraceno');
-    default:            return intervencije;
+    case 'hitno':          return intervencije.filter(jeHitan);
+    case 'u_izvrsenju':    return intervencije.filter((z) => z.status === 'u_izvrsenju');
+    case 'u_radu':         return intervencije.filter((z) => z.status === 'u_radu');
+    case 'dodijeljeno':    return intervencije.filter((z) => z.status === 'dodijeljeno');
+    case 'kasni':          return intervencije.filter(jeKasni);
+    case 'zavrseno':       return intervencije.filter((z) => z.status === 'zavrseno');
+    case 'zavrseni_danas': return intervencije.filter(jeZavrsenoaDanas);
+    case 'sla':            return intervencije.filter(jeSlaPrekoracen);
+    default:               // 'sve aktivne' — bez završenih
+      return intervencije.filter((z) => z.status !== 'zavrseno');
   }
 }
 
@@ -102,7 +112,7 @@ function KpiKartica({
 function IntervencijaKartica({ z }: { z: IntervencijaRed }) {
   const kat    = labelKategorije(z);
   const naslov = kat.podkategorija ? `${kat.podkategorija}` : kat.glavna;
-  const hitna  = jeHitna(z);
+  const hitna  = jeHitan(z);
   const kasni  = jeKasni(z);
   const pboja  = prioritetBoja(z.final_priority);
   const sboja  = statusBoja(z.status);
@@ -236,23 +246,27 @@ function IntervencijaKartica({ z }: { z: IntervencijaRed }) {
 }
 
 const URL_FILTER_MAP: Record<string, KpiFilter> = {
-  sla:         'sla',
-  hitno:       'hitno',
-  zavrseni:    'zavrseno',
-  u_radu:      'u_radu',
-  u_izvrsenju: 'u_izvrsenju',
-  dodijeljeno: 'dodijeljeno',
-  kasni:       'kasni',
+  sla:            'sla',
+  hitno:          'hitno',
+  zavrseni:       'zavrseno',
+  zatvoreni:      'zatvoreno',
+  zavrseni_danas: 'zavrseni_danas',
+  u_radu:         'u_radu',
+  u_izvrsenju:    'u_izvrsenju',
+  dodijeljeno:    'dodijeljeno',
+  kasni:          'kasni',
 };
 
 const KPI_URL_PARAM: Partial<Record<KpiFilter, string>> = {
-  sla:         'sla',
-  hitno:       'hitno',
-  zavrseno:    'zavrseni',
-  u_radu:      'u_radu',
-  u_izvrsenju: 'u_izvrsenju',
-  dodijeljeno: 'dodijeljeno',
-  kasni:       'kasni',
+  sla:            'sla',
+  hitno:          'hitno',
+  zavrseno:       'zavrseni',
+  zatvoreno:      'zatvoreni',
+  zavrseni_danas: 'zavrseni_danas',
+  u_radu:         'u_radu',
+  u_izvrsenju:    'u_izvrsenju',
+  dodijeljeno:    'dodijeljeno',
+  kasni:          'kasni',
 };
 
 // ─── Stranica ─────────────────────────────────────────────────────────────────
@@ -265,6 +279,7 @@ function DispecerIntervencijePageContent() {
   const filterIzUrla = URL_FILTER_MAP[searchParams.get('filter') ?? ''] ?? 'sve';
 
   const [intervencije, setIntervencije] = useState<IntervencijaRed[]>([]);
+  const [zatvoreni,    setZatvoreni]    = useState<ZahtjevZaDispecerskuKarticu[]>([]);
   const [ucitava,      setUcitava]      = useState(true);
   const [greska,       setGreska]       = useState<string | null>(null);
   const [aktivniKpi,   setAktivniKpi]   = useState<KpiFilter>(filterIzUrla);
@@ -273,13 +288,15 @@ function DispecerIntervencijePageContent() {
   const ucitaj = useCallback(async (tiho = false) => {
     if (!tiho) { setUcitava(true); setGreska(null); }
     try {
-      const r = await fetch(
-        '/api/dispecer/zahtjevi?status=dodijeljeno,u_radu,u_izvrsenju,zavrseno',
-        { cache: 'no-store' },
-      );
-      const d = await r.json();
-      if (!r.ok) throw new Error(d.error ?? 'Greška pri učitavanju.');
-      setIntervencije(d.zahtjevi ?? []);
+      const [rAktivne, rZatvorene] = await Promise.all([
+        fetch('/api/dispecer/zahtjevi?status=dodijeljeno,u_radu,u_izvrsenju,zavrseno', { cache: 'no-store' }),
+        fetch('/api/dispecer/zahtjevi?status=zatvoreno', { cache: 'no-store' }),
+      ]);
+      const [dAktivne, dZatvorene] = await Promise.all([rAktivne.json(), rZatvorene.json()]);
+      if (!rAktivne.ok) throw new Error(dAktivne.error ?? 'Greška pri učitavanju.');
+      if (!rZatvorene.ok) throw new Error(dZatvorene.error ?? 'Greška pri učitavanju zatvorenih.');
+      setIntervencije(dAktivne.zahtjevi ?? []);
+      setZatvoreni(dZatvorene.zahtjevi ?? []);
     } catch (err) {
       if (!tiho) setGreska(err instanceof Error ? err.message : 'Greška pri učitavanju intervencija.');
     } finally {
@@ -290,31 +307,49 @@ function DispecerIntervencijePageContent() {
   useEffect(() => { void ucitaj(); }, [ucitaj]);
 
   useEffect(() => {
+    setAktivniKpi(filterIzUrla);
+    setStranica(1);
+  }, [filterIzUrla]);
+
+  useEffect(() => {
     const t = setInterval(() => void ucitaj(true), 30_000);
     return () => clearInterval(t);
   }, [ucitaj]);
 
   // ─── KPI statistike ────────────────────────────────────────────────────────
 
-  const brSve         = intervencije.length;
-  const brHitnih      = useMemo(() => intervencije.filter(jeHitna).length, [intervencije]);
+  // Broj aktivnih = bez 'zavrseno' (završene su pod "Čeka zatvaranje", ne "Sve aktivne")
+  const brSve         = useMemo(() => intervencije.filter((z) => z.status !== 'zavrseno').length, [intervencije]);
+  const brHitnih      = useMemo(() => intervencije.filter(jeHitan).length, [intervencije]);
   const brNaTerenu    = useMemo(() => intervencije.filter((z) => z.status === 'u_izvrsenju').length, [intervencije]);
   const brNaPutu      = useMemo(() => intervencije.filter((z) => z.status === 'u_radu').length, [intervencije]);
   const brDodijeljeno = useMemo(() => intervencije.filter((z) => z.status === 'dodijeljeno').length, [intervencije]);
   const brKasni       = useMemo(() => intervencije.filter(jeKasni).length, [intervencije]);
-  const brZavrseno    = useMemo(() => intervencije.filter((z) => z.status === 'zavrseno' && !(z as any).closed_at).length, [intervencije]);
-  const brSlaPrekoraceno = useMemo(() => intervencije.filter((z) => getSlaStatus(z.created_at, z.final_priority, z.status) === 'prekoraceno').length, [intervencije]);
+  const brZavrseno    = useMemo(() => intervencije.filter((z) => z.status === 'zavrseno').length, [intervencije]);
+  const brZatvoreno   = useMemo(() => zatvoreni.length, [zatvoreni]);
+  const brSlaPrekoraceno = useMemo(() => intervencije.filter(jeSlaPrekoracen).length, [intervencije]);
 
-  const filtriran = useMemo(() => filtrirajPoKpi(intervencije, aktivniKpi), [intervencije, aktivniKpi]);
+  const jeZatvoreniTab = aktivniKpi === 'zatvoreno';
 
-  const sortirano = useMemo(() => [...filtriran].sort((a, b) => {
-    // Premium/Hitno first
-    if (Boolean(a.is_premium) !== Boolean(b.is_premium)) return a.is_premium ? -1 : 1;
-    // Kasne first
-    if (jeKasni(a) !== jeKasni(b)) return jeKasni(a) ? -1 : 1;
-    // Urgency
-    return (b.urgency_score ?? 0) - (a.urgency_score ?? 0);
-  }), [filtriran]);
+  const filtriran = useMemo(
+    () => (jeZatvoreniTab ? [] : filtrirajPoKpi(intervencije, aktivniKpi)),
+    [intervencije, aktivniKpi, jeZatvoreniTab],
+  );
+
+  const sortirano = useMemo(() => {
+    if (jeZatvoreniTab) {
+      return [...zatvoreni].sort((a, b) => {
+        const ta = new Date((a as { closed_at?: string }).closed_at ?? a.updated_at ?? a.created_at).getTime();
+        const tb = new Date((b as { closed_at?: string }).closed_at ?? b.updated_at ?? b.created_at).getTime();
+        return tb - ta;
+      });
+    }
+    return [...filtriran].sort((a, b) => {
+      if (Boolean(a.is_premium) !== Boolean(b.is_premium)) return a.is_premium ? -1 : 1;
+      if (jeKasni(a) !== jeKasni(b)) return jeKasni(a) ? -1 : 1;
+      return (b.urgency_score ?? 0) - (a.urgency_score ?? 0);
+    });
+  }, [filtriran, jeZatvoreniTab, zatvoreni]);
 
   const ukupnoStranica = Math.max(1, Math.ceil(sortirano.length / STRANICA_VELICINA));
   const trenutnaStranica = Math.min(stranica, ukupnoStranica);
@@ -329,6 +364,7 @@ function DispecerIntervencijePageContent() {
     { key: 'dodijeljeno' as KpiFilter, oznaka: 'Čekaju prihv.',  v: brDodijeljeno, boja: '#D97706',                   Ikona: Clock         },
     { key: 'kasni'       as KpiFilter, oznaka: 'Kašnjenja',      v: brKasni,       boja: brKasni > 0 ? '#DC2626' : 'var(--first-nonary)', Ikona: AlertCircle },
     { key: 'zavrseno'   as KpiFilter, oznaka: 'Čeka zatvaranje', v: brZavrseno,       boja: brZavrseno > 0 ? '#D97706' : 'var(--first-nonary)',       Ikona: CheckCircle2 },
+    { key: 'zatvoreno'  as KpiFilter, oznaka: 'Završeni',        v: brZatvoreno,      boja: brZatvoreno > 0 ? '#166534' : 'var(--first-nonary)',       Ikona: Star },
     { key: 'sla'        as KpiFilter, oznaka: 'Prekoračen SLA',  v: brSlaPrekoraceno, boja: brSlaPrekoraceno > 0 ? '#DC2626' : 'var(--first-nonary)', Ikona: AlertTriangle },
   ];
 
@@ -384,7 +420,7 @@ function DispecerIntervencijePageContent() {
       {greska && <div className="mb-5"><AlertMessage variant="error" message={greska} /></div>}
 
       {/* KPI kartice */}
-      <div className="mb-6 grid grid-cols-2 gap-2.5 sm:grid-cols-4 lg:grid-cols-8">
+      <div className="mb-6 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-9">
         {kpiKartice.map(({ key, oznaka, v, boja, Ikona }) => (
           <KpiKartica
             key={key}
@@ -441,45 +477,71 @@ function DispecerIntervencijePageContent() {
           )}
         </div>
 
-        <ul className="flex flex-col gap-2 p-3">
-          {ucitava && (
-            <li className="flex items-center justify-center py-12">
-              <div className="flex flex-col items-center gap-3">
-                <div className="h-7 w-7 animate-spin rounded-full border-2 border-transparent"
-                  style={{ borderTopColor: 'var(--first-secondary)' }} />
-                <p className="text-sm" style={{ color: 'var(--first-nonary)' }}>Učitavanje intervencija...</p>
-              </div>
-            </li>
-          )}
+        {ucitava && (
+          <div className="flex items-center justify-center py-12">
+            <div className="flex flex-col items-center gap-3">
+              <div className="h-7 w-7 animate-spin rounded-full border-2 border-transparent"
+                style={{ borderTopColor: 'var(--first-secondary)' }} />
+              <p className="text-sm" style={{ color: 'var(--first-nonary)' }}>Učitavanje intervencija...</p>
+            </div>
+          </div>
+        )}
 
-          {!ucitava && sortirano.length === 0 && (
-            <li className="flex flex-col items-center gap-3 py-12 text-center">
-              <CheckCircle2 className="h-10 w-10" style={{ color: 'var(--first-quinary)' }} />
-              <div>
-                <p className="font-semibold" style={{ color: 'var(--first-octonary)' }}>
-                  {aktivniKpi !== 'sve' ? `Nema intervencija za filter "${aktivniLabel}"` : 'Nema aktivnih intervencija'}
-                </p>
-                <p className="mt-1 text-sm" style={{ color: 'var(--first-nonary)' }}>
-                  {aktivniKpi !== 'sve' ? 'Promijenite filter ili osvježite prikaz.' : 'Sve intervencije su završene.'}
-                </p>
-              </div>
-              {aktivniKpi !== 'sve' && (
-                <button
-                  type="button"
-                  onClick={() => promijeniFilter('sve')}
-                  className="text-sm font-medium transition-opacity hover:opacity-70"
-                  style={{ color: 'var(--first-secondary)' }}
-                >
-                  Prikaži sve intervencije
-                </button>
-              )}
-            </li>
-          )}
+        {!ucitava && sortirano.length === 0 && (
+          <div className="flex flex-col items-center gap-3 px-3 py-12 text-center">
+            {jeZatvoreniTab
+              ? <Star className="h-10 w-10" style={{ color: 'var(--first-quinary)' }} />
+              : <CheckCircle2 className="h-10 w-10" style={{ color: 'var(--first-quinary)' }} />}
+            <div>
+              <p className="font-semibold" style={{ color: 'var(--first-octonary)' }}>
+                {jeZatvoreniTab
+                  ? 'Nema formalno zatvorenih intervencija'
+                  : aktivniKpi !== 'sve'
+                    ? `Nema intervencija za filter "${aktivniLabel}"`
+                    : 'Nema aktivnih intervencija'}
+              </p>
+              <p className="mt-1 text-sm" style={{ color: 'var(--first-nonary)' }}>
+                {jeZatvoreniTab
+                  ? 'Zatvorene intervencije i korisničke ocjene pojavit će se ovdje nakon formalnog zatvaranja.'
+                  : aktivniKpi !== 'sve'
+                    ? 'Promijenite filter ili osvježite prikaz.'
+                    : 'Sve intervencije su završene.'}
+              </p>
+            </div>
+            {aktivniKpi !== 'sve' && (
+              <button
+                type="button"
+                onClick={() => promijeniFilter('sve')}
+                className="text-sm font-medium transition-opacity hover:opacity-70"
+                style={{ color: 'var(--first-secondary)' }}
+              >
+                Prikaži sve intervencije
+              </button>
+            )}
+          </div>
+        )}
 
-          {!ucitava && sortiranoNaStranici.map((z) => (
-            <IntervencijaKartica key={z.id} z={z} />
-          ))}
-        </ul>
+        {!ucitava && !jeZatvoreniTab && sortirano.length > 0 && (
+          <ul className="flex flex-col gap-2 p-3">
+            {sortiranoNaStranici.map((z) => (
+              <IntervencijaKartica key={z.id} z={z as IntervencijaRed} />
+            ))}
+          </ul>
+        )}
+
+        {!ucitava && jeZatvoreniTab && sortirano.length > 0 && (
+          <ul
+            className="grid min-w-0 gap-5 p-3
+              [grid-template-columns:repeat(auto-fill,minmax(min(100%,17.5rem),22rem))]"
+            aria-label="Završene intervencije s ocjenama korisnika"
+          >
+            {sortiranoNaStranici.map((z) => (
+              <li key={z.id} className="min-w-0 w-full">
+                <DispecerskaZahtjevPregledGridKartica zahtjev={z as ZahtjevZaDispecerskuKarticu} />
+              </li>
+            ))}
+          </ul>
+        )}
 
         {/* Paginacija */}
         {!ucitava && ukupnoStranica > 1 && (

@@ -25,55 +25,76 @@ export function statusUIndeks(status: string): number {
 
 // ─── Horizontalni progress za kartice ────────────────────────────────────────
 
+const ZIVE_FAZE = new Set(['u_radu', 'u_izvrsenju']);
+
 export function IntervencijaWorkflowProgress({ status }: { status: string }) {
   const aktivniIndeks = statusUIndeks(status);
+  const jeZiva = ZIVE_FAZE.has(status);
 
   return (
-    <div className="flex items-center gap-0.5">
-      {WORKFLOW_FAZE.map((faza, i) => {
-        const jeZavrsena = aktivniIndeks > i;
-        const jeAktivna  = aktivniIndeks === i;
-        const jeHorizontalna = i < WORKFLOW_FAZE.length - 1;
+    <div className="space-y-1.5">
+      {jeZiva && (
+        <div className="flex items-center gap-1.5">
+          <span className="relative flex h-2 w-2 flex-shrink-0">
+            <span
+              className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-70"
+              style={{ backgroundColor: 'var(--first-secondary)' }}
+            />
+            <span
+              className="relative inline-flex h-2 w-2 rounded-full"
+              style={{ backgroundColor: 'var(--first-secondary)' }}
+            />
+          </span>
+          <span
+            className="text-[10px] font-bold uppercase tracking-wide"
+            style={{ color: 'var(--first-secondary)' }}
+          >
+            U toku
+          </span>
+        </div>
+      )}
+      <div className="flex items-center gap-0.5">
+        {WORKFLOW_FAZE.map((faza, i) => {
+          const jeZavrsena    = aktivniIndeks > i;
+          const jeAktivna     = aktivniIndeks === i;
+          const jeHorizontalna = i < WORKFLOW_FAZE.length - 1;
 
-        return (
-          <div key={faza.kljuc} className="flex flex-1 items-center">
-            {/* Segment */}
-            <div
-              className="flex flex-col items-center gap-0.5"
-              title={faza.naziv}
-            >
-              <div
-                className="flex h-5 w-5 items-center justify-center rounded-full"
-                style={{
-                  backgroundColor: jeZavrsena
-                    ? 'var(--first-secondary)'
-                    : jeAktivna
+          return (
+            <div key={faza.kljuc} className="flex flex-1 items-center">
+              <div className="flex flex-col items-center gap-0.5" title={faza.naziv}>
+                <div
+                  className="flex h-5 w-5 items-center justify-center rounded-full"
+                  style={{
+                    backgroundColor: jeZavrsena || jeAktivna
                       ? 'var(--first-secondary)'
                       : 'rgb(var(--first-quaternary-rgb)/0.35)',
-                  boxShadow: jeAktivna ? '0 0 0 3px rgba(45,91,159,0.18)' : 'none',
-                  transition: 'background-color 0.2s',
-                }}
-              >
-                {jeZavrsena
-                  ? <Check className="h-2.5 w-2.5 text-white" strokeWidth={3} />
-                  : <faza.Ikona className="h-2.5 w-2.5" style={{ color: jeAktivna ? '#fff' : 'var(--first-nonary)' }} />}
+                    boxShadow: jeAktivna ? '0 0 0 3px rgba(45,91,159,0.18)' : 'none',
+                    transition: 'background-color 0.2s',
+                  }}
+                >
+                  {jeZavrsena
+                    ? <Check className="h-2.5 w-2.5 text-white" strokeWidth={3} />
+                    : <faza.Ikona
+                        className="h-2.5 w-2.5"
+                        style={{ color: jeAktivna ? '#fff' : 'var(--first-nonary)' }}
+                      />}
+                </div>
               </div>
+              {jeHorizontalna && (
+                <div
+                  className="mx-0.5 h-0.5 flex-1"
+                  style={{
+                    backgroundColor: jeZavrsena
+                      ? 'var(--first-secondary)'
+                      : 'rgb(var(--first-quaternary-rgb)/0.3)',
+                    transition: 'background-color 0.2s',
+                  }}
+                />
+              )}
             </div>
-            {/* Linija između */}
-            {jeHorizontalna && (
-              <div
-                className="h-0.5 flex-1 mx-0.5"
-                style={{
-                  backgroundColor: jeZavrsena
-                    ? 'var(--first-secondary)'
-                    : 'rgb(var(--first-quaternary-rgb)/0.3)',
-                  transition: 'background-color 0.2s',
-                }}
-              />
-            )}
-          </div>
-        );
-      })}
+          );
+        })}
+      </div>
     </div>
   );
 }

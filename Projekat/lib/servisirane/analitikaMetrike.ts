@@ -48,6 +48,20 @@ export interface PonovniCiklusiMetrika {
   ukupno_ciklusa:          number;
 }
 
+export interface OcjenaRaspodjela {
+  ocjena: number;
+  broj:   number;
+}
+
+export interface OcjeneMetrika {
+  ukupno_zatvorenih:      number;
+  ukupno_ocijenjeno:      number;
+  stopa_odgovora_posto:    number | null;
+  prosjecna_ocjena:        number | null;
+  raspodjela:             OcjenaRaspodjela[];
+  trend_ocijenjenih:      VremenskiTrend[];
+}
+
 export interface AnalitikaMetrike {
   period:               { od: string; do: string };
   ukupno_zahtjeva:      number;
@@ -59,6 +73,7 @@ export interface AnalitikaMetrike {
   opterecenje_servisera: ServiserOpterecenje[];
   ponovni_ciklusi:      PonovniCiklusiMetrika;
   trend_zavrsenih:      VremenskiTrend[];
+  ocjene:               OcjeneMetrika;
 }
 
 export interface AnalitikaUlaz {
@@ -73,6 +88,10 @@ export interface AnalitikaUlaz {
   odziviMinuta:      number[];
   /** Mapiranje serviser_id → puno ime (ime prezime). */
   imenaServisera:    Record<string, string>;
+  /** Formalno zatvorene intervencije u periodu (po closed_at). */
+  zatvoreniZahtjevi: number;
+  /** Ocjene ostavljene u periodu (po created_at). */
+  ocjene:            { ocjena: number; created_at: string }[];
 }
 
 // ─── Statusi koji se broje kao aktivno opterećenje servisera ────────────────────
@@ -187,6 +206,57 @@ export function trendZavrsenih(
     .sort((a, b) => a.datum.localeCompare(b.datum));
 }
 
+/** Raspodjela ocjena 1–5 (uvijek svih pet redova, čak i s nulom). */
+export function raspodjelaPoOcjeni(
+  ocjene: Pick<{ ocjena: number }, 'ocjena'>[],
+): OcjenaRaspodjela[] {
+  const map = new Map<number, number>();
+  for (let i = 1; i <= 5; i++) map.set(i, 0);
+  for (const o of ocjene) {
+    if (o.ocjena >= 1 && o.ocjena <= 5) {
+      map.set(o.ocjena, (map.get(o.ocjena) ?? 0) + 1);
+    }
+  }
+  return [...map.entries()]
+    .map(([ocjena, broj]) => ({ ocjena, broj }))
+    .sort((a, b) => a.ocjena - b.ocjena);
+}
+
+/** Trend broja ocjena po danu (sortirano uzlazno po datumu). */
+export function trendOcjena(
+  ocjene: Pick<{ created_at: string }, 'created_at'>[],
+): VremenskiTrend[] {
+  const map = new Map<string, number>();
+  for (const o of ocjene) {
+    const datum = o.created_at.substring(0, 10);
+    map.set(datum, (map.get(datum) ?? 0) + 1);
+  }
+  return [...map.entries()]
+    .map(([datum, broj]) => ({ datum, broj }))
+    .sort((a, b) => a.datum.localeCompare(b.datum));
+}
+
+/** Metrike korisničkih ocjena za zatvorene intervencije. */
+export function ocjeneMetrika(
+  zatvoreniZahtjevi: number,
+  ocjene: { ocjena: number; created_at: string }[],
+): OcjeneMetrika {
+  const ukupnoOcijenjeno = ocjene.length;
+  const stopa =
+    zatvoreniZahtjevi > 0
+      ? Math.round((ukupnoOcijenjeno / zatvoreniZahtjevi) * 100)
+      : null;
+
+  return {
+    ukupno_zatvorenih:   zatvoreniZahtjevi,
+    ukupno_ocijenjeno:   ukupnoOcijenjeno,
+    stopa_odgovora_posto: stopa,
+    prosjecna_ocjena:    prosjek(ocjene.map((o) => o.ocjena)),
+    raspodjela:          raspodjelaPoOcjeni(ocjene),
+    trend_ocijenjenih:   trendOcjena(ocjene),
+  };
+}
+
 // ─── Kompozitni izračun ──────────────────────────────────────────────────────────
 
 export function sastaviMetrike(ulaz: AnalitikaUlaz): AnalitikaMetrike {
@@ -201,5 +271,6 @@ export function sastaviMetrike(ulaz: AnalitikaUlaz): AnalitikaMetrike {
     opterecenje_servisera: opterecenjePoServiseru(ulaz.sviZahtjevi, ulaz.zavrseniZahtjevi, ulaz.imenaServisera),
     ponovni_ciklusi:       ponovniCiklusiMetrika(ulaz.sviZahtjevi),
     trend_zavrsenih:       trendZavrsenih(ulaz.zavrseniZahtjevi),
+    ocjene:                ocjeneMetrika(ulaz.zatvoreniZahtjevi, ulaz.ocjene),
   };
 }
