@@ -144,7 +144,7 @@ export function OcjenaIntervencije({ zahtjevId }: OcjenaIntervencijeProps) {
             style={{ borderLeftColor: 'var(--first-secondary)', backgroundColor: 'rgb(var(--first-secondary-rgb)/0.04)' }}>
             <MessageSquare className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" style={{ color: 'var(--first-nonary)' }} />
             <p className="text-sm leading-relaxed italic" style={{ color: 'var(--first-octonary)' }}>
-              "{ocjena.komentar}"
+              {`"${ocjena.komentar}"`}
             </p>
           </div>
         )}

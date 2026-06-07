@@ -135,7 +135,7 @@ function HistorijaKartica({ zahtjev }: { zahtjev: ZahtjevHistorije }) {
             <MiniZvjezdice vrijednost={zahtjev.ocjena.ocjena} />
             {zahtjev.ocjena.komentar && (
               <p className="min-w-0 truncate text-xs italic" style={{ color: 'var(--first-nonary)' }}>
-                "{zahtjev.ocjena.komentar}"
+                {`"${zahtjev.ocjena.komentar}"`}
               </p>
             )}
           </div>
