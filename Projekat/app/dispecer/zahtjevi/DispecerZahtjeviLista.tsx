@@ -20,6 +20,7 @@ import {
 import {
   operativnaFazaZahtjeva,
   jeZahtjevIntakeFaza,
+  jeDugoCeka,
 } from '@/lib/servisirane/operativnaFaza';
 import { sastaviDispecerskiInboxRedoslijed } from '@/lib/servisirane/urgency';
 
@@ -32,11 +33,12 @@ const ZAHTJEVA_PO_STRANICI = 12;
  * Izvršenje (dodijeljeno/u_radu/u_izvrsenju/zavrseno) prikazuje se isključivo na /dispecer/intervencije.
  */
 const STATUS_FILTRI = [
-  { value: 'svi',          label: 'Sve',          title: 'Svi zahtjevi u obradi — od prijave do dodjele servisera.' },
-  { value: 'novi',         label: 'Novi',          title: 'Zahtjevi koji čekaju dispečersku procjenu (nije postavljen operativni prioritet).' },
-  { value: 'u_obradi',     label: 'U obradi',      title: 'Zahtjevi s postavljenim prioritetom — u toku dogovora termina, izbora servisera ili potvrde.' },
-  { value: 'ceka_dodjelu', label: 'Čeka dodjelu',  title: 'Wizard završen — čeka se dodjela servisera ili prihvat.' },
-  { value: 'odbijeni',     label: 'Odbijeni',      title: 'Serviser je odbio zahtjev — čeka ponovnu dodjelu.' },
+  { value: 'svi',           label: 'Sve',            title: 'Svi zahtjevi u obradi — od prijave do dodjele servisera.' },
+  { value: 'novi',          label: 'Novi',            title: 'Zahtjevi koji čekaju dispečersku procjenu (nije postavljen operativni prioritet).' },
+  { value: 'u_obradi',      label: 'U obradi',        title: 'Zahtjevi s postavljenim prioritetom — u toku dogovora termina, izbora servisera ili potvrde.' },
+  { value: 'ceka_dodjelu',  label: 'Čeka dodjelu',    title: 'Wizard završen — čeka se dodjela servisera ili prihvat.' },
+  { value: 'odbijeni',      label: 'Odbijeni',        title: 'Serviser je odbio zahtjev — čeka ponovnu dodjelu.' },
+  { value: 'dugo_cekanje',  label: 'Dugo čekaju',     title: 'Zahtjevi koji predugo čekaju obradu, dodjelu ili prihvat servisera.' },
 ] as const;
 
 type StatusFilter = typeof STATUS_FILTRI[number]['value'];
@@ -58,7 +60,7 @@ const DOZVOLJENI_STATUS_FILTRI = STATUS_FILTRI.map((f) => f.value);
 const DOZVOLJENE_FAZE          = FAZA_FILTRI.map((f) => f.value);
 
 /** Filteri koji koriste urgency-based inbox-redoslijed za sortiranje. */
-const INBOX_REDOSLIJED_STATUSI = new Set<StatusFilter>(['svi', 'novi', 'u_obradi', 'odbijeni']);
+const INBOX_REDOSLIJED_STATUSI = new Set<StatusFilter>(['svi', 'novi', 'u_obradi', 'odbijeni', 'dugo_cekanje']);
 
 // ─── Logika filtriranja ───────────────────────────────────────────────────────
 
@@ -79,6 +81,8 @@ function filterPoStatusu(
       return zahtjevi.filter((z) => operativnaFazaZahtjeva(z) === 'ceka_dodjelu');
     case 'odbijeni':
       return zahtjevi.filter((z) => operativnaFazaZahtjeva(z) === 'odbijen_serviser');
+    case 'dugo_cekanje':
+      return zahtjevi.filter((z) => jeZahtjevIntakeFaza(operativnaFazaZahtjeva(z)) && jeDugoCeka(z));
     default: // 'svi' — sve intake faze, bez izvršenja
       return zahtjevi.filter((z) => jeZahtjevIntakeFaza(operativnaFazaZahtjeva(z)));
   }
@@ -133,32 +137,39 @@ function StatusFilterTraka({
       {STATUS_FILTRI.map((opcija) => {
         const br      = filterPoStatusu(zahtjevi, opcija.value).length;
         const aktiv   = opcija.value === aktivan;
-        const jeOdbij     = opcija.value === 'odbijeni';
+        const jeOdbij       = opcija.value === 'odbijeni';
         const jeCekaDodjelu = opcija.value === 'ceka_dodjelu';
-        // Crvena za Odbijeni, zelena za Čeka dodjelu, plava za ostale
+        const jeDugo        = opcija.value === 'dugo_cekanje';
+        // Crvena za Odbijeni, zelena za Čeka dodjelu, narandžasta za Dugo čekaju, plava za ostale
         const boja =
-          jeOdbij     ? '#DC2626'
+          jeOdbij       ? '#DC2626'
           : jeCekaDodjelu ? '#16A34A'
+          : jeDugo        ? '#B45309'
           : 'var(--first-secondary)';
         const bojaPoz =
-          jeOdbij     ? 'rgba(220,38,38,0.12)'
+          jeOdbij       ? 'rgba(220,38,38,0.12)'
           : jeCekaDodjelu ? 'rgba(22,163,74,0.1)'
+          : jeDugo        ? 'rgba(180,83,9,0.1)'
           : 'rgb(var(--first-secondary-rgb) / 0.12)';
         const bojaBorder =
-          jeOdbij     ? '1px solid rgba(220,38,38,0.35)'
+          jeOdbij       ? '1px solid rgba(220,38,38,0.35)'
           : jeCekaDodjelu ? '1px solid rgba(22,163,74,0.3)'
+          : jeDugo        ? '1px solid rgba(180,83,9,0.35)'
           : '1px solid rgb(var(--first-secondary-rgb) / 0.35)';
         const bojaBadge =
-          jeOdbij     ? 'rgba(220,38,38,0.15)'
+          jeOdbij       ? 'rgba(220,38,38,0.15)'
           : jeCekaDodjelu ? 'rgba(22,163,74,0.12)'
+          : jeDugo        ? 'rgba(180,83,9,0.15)'
           : 'rgb(var(--first-secondary-rgb) / 0.15)';
         const neaktivnaBoja =
-          jeOdbij && br > 0       ? '#DC2626'
-          : jeCekaDodjelu && br > 0 ? '#16A34A'
+          jeOdbij && br > 0         ? '#DC2626'
+          : jeCekaDodjelu && br > 0   ? '#16A34A'
+          : jeDugo && br > 0          ? '#B45309'
           : 'var(--first-nonary)';
         const neaktivnaBadgePoz =
-          jeOdbij && br > 0       ? 'rgba(220,38,38,0.1)'
-          : jeCekaDodjelu && br > 0 ? 'rgba(22,163,74,0.1)'
+          jeOdbij && br > 0         ? 'rgba(220,38,38,0.1)'
+          : jeCekaDodjelu && br > 0   ? 'rgba(22,163,74,0.1)'
+          : jeDugo && br > 0          ? 'rgba(180,83,9,0.1)'
           : 'rgb(var(--first-quaternary-rgb) / 0.35)';
 
         return (

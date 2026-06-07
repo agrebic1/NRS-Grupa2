@@ -27,6 +27,7 @@ import {
 } from '@/lib/servisirane/dispecerskeFaze';
 import { SlaStatusBadge } from '@/components/dispecer/SlaStatusBadge';
 import { PonovniCiklusBadge } from '@/components/servisirane/PonovniCiklusBadge';
+import { DugoChekanjeBadge } from '@/components/servisirane/DugoChekanjeBadge';
 
 function sljedecaAkcijaZaOperatera(zahtjev: ServisniZahtjev): string {
   if (zahtjev.serviser_odbio_razlog) return '⚠ Serviser odbio — odaberite drugog servisera.';
@@ -122,6 +123,11 @@ export function DispecerskaZahtjevPregledGridKartica({ zahtjev }: { zahtjev: Zah
             {(zahtjev.broj_ponovnih_ciklusa ?? 0) > 0 && (
               <PonovniCiklusBadge broj={zahtjev.broj_ponovnih_ciklusa!} />
             )}
+            <DugoChekanjeBadge
+              status={zahtjev.status}
+              createdAt={zahtjev.created_at}
+              kompaktan
+            />
           </span>
           <div className="shrink-0 text-right">
             <p className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: 'rgb(var(--first-nonary-rgb) / 0.78)' }}>

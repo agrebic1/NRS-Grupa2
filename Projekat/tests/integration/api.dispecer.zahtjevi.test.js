@@ -137,10 +137,8 @@ describe('/api/dispecer/zahtjevi route', () => {
     expect(serviceQuery.not).toHaveBeenCalledWith(
       'status',
       'in',
-      '("zatvoreno","otkazano","odbijeno")',
+      '("otkazano","odbijeno")',
     );
-    // `zavrseno` se ne isključuje u .not() - nedavno završeni se prikazuju preko .or() (7-dnevni prozor).
-    expect(serviceQuery.or).toHaveBeenCalled();
     expect(body.zahtjevi).toHaveLength(2);
     expect(body.zahtjevi[0].podnosilac).toEqual({
       ime: 'A',

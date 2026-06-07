@@ -420,7 +420,7 @@ function DispecerPageContent() {
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               {([
                 slaPrekoracenoBr > 0 ? { oznaka: 'Prekoračen SLA', v: slaPrekoracenoBr, boja: '#DC2626', Ikona: Clock,         href: '/dispecer/intervencije?filter=sla' } : null,
-                dugoChekajuBr > 0    ? { oznaka: 'Dugo čekaju',    v: dugoChekajuBr,    boja: '#B45309', Ikona: AlertTriangle, href: '/dispecer/zahtjevi' }                : null,
+                dugoChekajuBr > 0    ? { oznaka: 'Dugo čekaju',    v: dugoChekajuBr,    boja: '#B45309', Ikona: AlertTriangle, href: '/dispecer/zahtjevi?filter=dugo_cekanje' } : null,
                 brKasni > 0          ? { oznaka: 'Kašnjenja',       v: brKasni,          boja: '#DC2626', Ikona: Clock,         href: '/dispecer/intervencije?filter=kasni' } : null,
               ] as const).filter((x): x is NonNullable<typeof x> => x !== null).map(({ oznaka, v, boja, Ikona, href }) => (
                 <Link key={oznaka} href={href}

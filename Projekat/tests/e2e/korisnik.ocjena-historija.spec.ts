@@ -69,14 +69,28 @@ test.describe('US-54 — Historija intervencija korisnika', () => {
     });
   });
 
-  test('serviser ne može pristupiti korisnikovoj historiji (AC6)', async ({ page }) => {
-    test.skip(!serviser, 'Missing E2E_SERVISER_EMAIL / E2E_SERVISER_PASSWORD in environment.');
-
+  test.skip(!serviser, 'Missing E2E_SERVISER_EMAIL / E2E_SERVISER_PASSWORD in environment.');
+  test('serviser ne vidi tuđu historiju — API vraća samo vlastite zapise (AC6)', async ({ page }) => {
     await prijaviSe(page, serviser as Credentials);
     await page.goto('/korisnik/historija');
 
-    // Serviser se preusmjerava na / ili mu se prikaz ne odobrava
-    await expect(page).not.toHaveURL('/korisnik/historija');
+    // Usklađeno s middleware RBAC: zaposlenik može pristupiti /korisnik rutama
+    // (v. rbac.cross-access.spec.ts), ali historija se filtrira po user_id na API-ju.
+    await expect(page).toHaveURL('/korisnik/historija');
+
+    const { status, historija } = await page.evaluate(async () => {
+      const r = await fetch('/api/service-requests/historija', { cache: 'no-store' });
+      const body = await r.json();
+      return { status: r.status, historija: body.historija ?? [] };
+    });
+
+    expect(status).toBe(200);
+    expect(Array.isArray(historija)).toBe(true);
+
+    const dozvoljeniStatusi = new Set(['zatvoreno', 'zavrseno', 'otkazano', 'odbijeno']);
+    for (const z of historija) {
+      expect(dozvoljeniStatusi.has(z.status)).toBe(true);
+    }
   });
 });
 

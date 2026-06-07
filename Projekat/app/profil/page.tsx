@@ -239,8 +239,14 @@ function BaznaLokacijaSekcija({
   const [greska,  setGreska]  = useState<string | null>(null);
   const [slanje,  setSlanje]  = useState(false);
   const [izmjena, setIzmjena] = useState(false);
+  // lokacijaSpremljena prati da li je lokacija tek uspješno sačuvana (prije ponovnog učitavanja profila)
+  const [lokacijaSpremljena, setLokacijaSpremljena] = useState(
+    profil.bazna_latitude != null && profil.bazna_longitude != null,
+  );
 
-  const imaLokaciju   = profil.bazna_latitude != null && profil.bazna_longitude != null;
+  const imaLokaciju   = lokacijaSpremljena || (profil.bazna_latitude != null && profil.bazna_longitude != null);
+  const prikazLat     = lat ?? profil.bazna_latitude ?? null;
+  const prikazLng     = lng ?? profil.bazna_longitude ?? null;
   const promijenjeno  =
     lat !== (profil.bazna_latitude ?? null) || lng !== (profil.bazna_longitude ?? null);
 
@@ -258,6 +264,7 @@ function BaznaLokacijaSekcija({
       if (!odgovor.ok) throw new Error(r.error ?? 'Greška pri spremanju.');
       setUspjelo(true);
       setIzmjena(false);
+      setLokacijaSpremljena(lat != null && lng != null);
       onAzuriranje();
     } catch (err) {
       setGreska(err instanceof Error ? err.message : 'Greška pri spremanju lokacije.');
@@ -309,14 +316,14 @@ function BaznaLokacijaSekcija({
           </div>
           <MiniMapa
             adresa=""
-            lat={profil.bazna_latitude}
-            lng={profil.bazna_longitude}
+            lat={prikazLat}
+            lng={prikazLng}
             visina={200}
             prikaziFooter={false}
             kartica
           />
           <p className="mt-1.5 text-xs" style={{ color: 'var(--first-nonary)' }}>
-            {profil.bazna_latitude?.toFixed(5)}, {profil.bazna_longitude?.toFixed(5)}
+            {prikazLat?.toFixed(5)}, {prikazLng?.toFixed(5)}
           </p>
         </div>
       )}
@@ -357,6 +364,7 @@ function BaznaLokacijaSekcija({
                   setLng(profil.bazna_longitude ?? null);
                   setIzmjena(false);
                   setGreska(null);
+                  setLokacijaSpremljena(profil.bazna_latitude != null && profil.bazna_longitude != null);
                 }}
               >
                 Otkaži
