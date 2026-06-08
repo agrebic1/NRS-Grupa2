@@ -12,12 +12,18 @@ import {
   Lock,
   ChevronRight,
 } from 'lucide-react';
-import type { ServisniZahtjev, StatusZahtjeva } from '@/domain/types/servisirane';
+import type {
+  ServisniZahtjev,
+  StatusZahtjeva,
+} from '@/domain/types/servisirane';
 import { brojZahtjevaZaPrikaz } from '@/lib/servisirane/korisnickiBrojZahtjeva';
 import { korisnikSmijeMijenjatiIliOtkazatiZahtjev } from '@/lib/servisirane/statusZahtjeva';
 import { inboxGrupaIzKorisnickeProcjene } from '@/lib/servisirane/urgency';
 import { labelKategorije } from '@/lib/servisirane/kategorije';
-import { preferiraniTerminZaDispecera, relativnoPrijavljenoZaDispecera } from '@/lib/servisirane/zahtjevPrikaz';
+import {
+  preferiraniTerminZaDispecera,
+  relativnoPrijavljenoZaDispecera,
+} from '@/lib/servisirane/zahtjevPrikaz';
 import {
   bojaRelativnogPrijaveDispecera,
   DISPECER_PALETA_HITNOST,
@@ -144,7 +150,9 @@ export function StatusBadge({
       : FALLBACK_STATUS;
   const Ikona = cfg.Ikona;
   const oznaka =
-    prikazZaKorisnika && status === 'in_review' ? 'Dispečer obrađuje' : cfg.oznaka;
+    prikazZaKorisnika && status === 'in_review'
+      ? 'Dispečer obrađuje'
+      : cfg.oznaka;
   return (
     <span
       className="inline-flex max-w-[min(100%,14rem)] shrink-0 items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold sm:max-w-none"
@@ -168,7 +176,11 @@ interface ZahtjevKarticaProps {
   onOtkazi?: (zahtjev: ServisniZahtjev) => void;
 }
 
-export function ZahtjevKartica({ zahtjev, onUredi, onOtkazi }: ZahtjevKarticaProps) {
+export function ZahtjevKartica({
+  zahtjev,
+  onUredi,
+  onOtkazi,
+}: ZahtjevKarticaProps) {
   const { glavna, podkategorija } = labelKategorije(zahtjev);
   const { tekstCijeli: terminTekst } = preferiraniTerminZaDispecera(zahtjev);
   const grupaInboxaPoKorisniku = inboxGrupaIzKorisnickeProcjene(zahtjev);
@@ -213,7 +225,9 @@ export function ZahtjevKartica({ zahtjev, onUredi, onOtkazi }: ZahtjevKarticaPro
               >
                 #{brojZahtjevaZaPrikaz(zahtjev)}
               </span>
-              {zahtjev.is_premium ? <DispecerPremiumKruna className="translate-y-px" /> : null}
+              {zahtjev.is_premium ? (
+                <DispecerPremiumKruna className="translate-y-px" />
+              ) : null}
             </span>
             <div className="min-w-0 max-w-full">
               <KorisnikPregledTokaBadzevi zahtjev={zahtjev} />
@@ -238,7 +252,10 @@ export function ZahtjevKartica({ zahtjev, onUredi, onOtkazi }: ZahtjevKarticaPro
               {podkategorija}
             </p>
           ) : null}
-          <p className="break-words text-sm font-medium leading-snug" style={{ color: 'var(--first-nonary)' }}>
+          <p
+            className="break-words text-sm font-medium leading-snug"
+            style={{ color: 'var(--first-nonary)' }}
+          >
             {(zahtjev.address ?? '').trim() || '-'}
           </p>
         </div>
@@ -249,17 +266,23 @@ export function ZahtjevKartica({ zahtjev, onUredi, onOtkazi }: ZahtjevKarticaPro
             className="min-w-0 truncate text-xs font-medium leading-snug tabular-nums"
             title={`${datumZaKarticu} · ${prijavljenoRel.label} (${terminTekst})`}
           >
-            <span style={{ color: 'var(--first-nonary)' }}>{datumZaKarticu}</span>
-            <span style={{ color: 'rgb(var(--first-nonary-rgb) / 0.45)' }}> · </span>
+            <span style={{ color: 'var(--first-nonary)' }}>
+              {datumZaKarticu}
+            </span>
+            <span style={{ color: 'rgb(var(--first-nonary-rgb) / 0.45)' }}>
+              {' '}
+              ·{' '}
+            </span>
             <span
-              className={prijavljenoRel.ton === 'stale' ? 'font-bold' : 'font-semibold'}
+              className={
+                prijavljenoRel.ton === 'stale' ? 'font-bold' : 'font-semibold'
+              }
               style={{ color: prijavljenoBoja }}
             >
               {prijavljenoRel.label}
             </span>
           </p>
         </div>
-
       </div>
 
       <div

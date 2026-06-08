@@ -23,7 +23,8 @@ export function korisnickiDashboardStatus(
   if (s === 'potvrdeno' || s === 'dodijeljeno') return 'potvrdeno';
 
   if (s === 'in_review') return 'u_obradi';
-  if ((s === 'pending_review' || s === 'na_cekanju') && imaOperativniPrioritet) return 'u_obradi';
+  if ((s === 'pending_review' || s === 'na_cekanju') && imaOperativniPrioritet)
+    return 'u_obradi';
 
   return 'novi';
 }

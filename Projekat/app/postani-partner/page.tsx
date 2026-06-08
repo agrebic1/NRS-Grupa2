@@ -1,7 +1,14 @@
 import Link from 'next/link';
 import {
-  Settings, ArrowLeft, Users, Wrench, Shield,
-  ClipboardList, SearchCheck, Mail, Rocket,
+  Settings,
+  ArrowLeft,
+  Users,
+  Wrench,
+  Shield,
+  ClipboardList,
+  SearchCheck,
+  Mail,
+  Rocket,
 } from 'lucide-react';
 import { PartnerApplicationForm } from '@/components/forms/PartnerApplicationForm';
 
@@ -9,19 +16,19 @@ import { PartnerApplicationForm } from '@/components/forms/PartnerApplicationFor
 
 const BENEFITI = [
   {
-    Ikona:  Users,
+    Ikona: Users,
     naslov: 'Stabilan tok posla',
-    opis:   'Primajte intervencije direktno kroz platformu bez ručne koordinacije.',
+    opis: 'Primajte intervencije direktno kroz platformu bez ručne koordinacije.',
   },
   {
-    Ikona:  Wrench,
+    Ikona: Wrench,
     naslov: 'Digitalni radni nalozi',
-    opis:   'Sve informacije na jednom mjestu - adresa, opis, prioritet.',
+    opis: 'Sve informacije na jednom mjestu - adresa, opis, prioritet.',
   },
   {
-    Ikona:  Shield,
+    Ikona: Shield,
     naslov: 'Pravovremena plaćanja',
-    opis:   'Transparentan sistem evidencije završenih radova i naknada.',
+    opis: 'Transparentan sistem evidencije završenih radova i naknada.',
   },
 ];
 
@@ -29,24 +36,24 @@ const BENEFITI = [
 
 const KORACI = [
   {
-    Ikona:  ClipboardList,
+    Ikona: ClipboardList,
     naslov: 'Popunite aplikaciju',
-    opis:   'Unesite lične podatke i priložite dokaz o stručnosti',
+    opis: 'Unesite lične podatke i priložite dokaz o stručnosti',
   },
   {
-    Ikona:  SearchCheck,
+    Ikona: SearchCheck,
     naslov: 'Pregled aplikacije',
-    opis:   'Administrator pregleda vašu prijavu u roku od 24h',
+    opis: 'Administrator pregleda vašu prijavu u roku od 24h',
   },
   {
-    Ikona:  Mail,
+    Ikona: Mail,
     naslov: 'Dobijate pristupne podatke',
-    opis:   'Email s privremenom lozinkom za aktivaciju naloga',
+    opis: 'Email s privremenom lozinkom za aktivaciju naloga',
   },
   {
-    Ikona:  Rocket,
+    Ikona: Rocket,
     naslov: 'Počnite primati intervencije',
-    opis:   'Vaš profil je aktivan i vidljiv dispečerima',
+    opis: 'Vaš profil je aktivan i vidljiv dispečerima',
   },
 ];
 
@@ -54,15 +61,17 @@ const KORACI = [
 
 export default function PostaniPartnerPage() {
   return (
-    <div className="min-h-screen" style={{ backgroundColor: 'var(--first-tertiary)' }}>
-
+    <div
+      className="min-h-screen"
+      style={{ backgroundColor: 'var(--first-tertiary)' }}
+    >
       {/* Navigacija */}
       <header
         className="sticky top-0 z-40 flex items-center justify-between px-5 py-4 sm:px-8"
         style={{
           backgroundColor: 'rgb(var(--first-tertiary-rgb) / 0.92)',
-          backdropFilter:  'blur(12px)',
-          borderBottom:    '1px solid rgb(var(--first-quaternary-rgb) / 0.3)',
+          backdropFilter: 'blur(12px)',
+          borderBottom: '1px solid rgb(var(--first-quaternary-rgb) / 0.3)',
         }}
       >
         <Link href="/" className="flex items-center gap-2">
@@ -72,7 +81,10 @@ export default function PostaniPartnerPage() {
           >
             <Settings className="h-4 w-4 text-white" />
           </div>
-          <span className="font-bold tracking-tight" style={{ color: 'var(--first-octonary)' }}>
+          <span
+            className="font-bold tracking-tight"
+            style={{ color: 'var(--first-octonary)' }}
+          >
             InterServ
           </span>
         </Link>
@@ -94,8 +106,8 @@ export default function PostaniPartnerPage() {
               uppercase tracking-wide"
             style={{
               backgroundColor: 'rgb(var(--first-septenary-rgb) / 0.2)',
-              color:           'var(--first-senary)',
-              border:          '1px solid rgb(var(--first-septenary-rgb) / 0.4)',
+              color: 'var(--first-senary)',
+              border: '1px solid rgb(var(--first-septenary-rgb) / 0.4)',
             }}
           >
             Partneri platforme
@@ -117,13 +129,14 @@ export default function PostaniPartnerPage() {
 
         {/* 60/40 split: lijevo benefiti+stepper, desno forma */}
         <div className="mx-auto grid max-w-6xl gap-10 lg:grid-cols-[3fr_2fr]">
-
           {/* ── Lijevo (60%): Benefiti + Vizuelni stepper ──────────────── */}
           <div className="flex flex-col gap-8">
-
             {/* Benefiti */}
             <div>
-              <h2 className="mb-5 text-xl font-bold" style={{ color: 'var(--first-octonary)' }}>
+              <h2
+                className="mb-5 text-xl font-bold"
+                style={{ color: 'var(--first-octonary)' }}
+              >
                 Zašto postati partner?
               </h2>
               <div className="flex flex-col gap-4">
@@ -131,15 +144,27 @@ export default function PostaniPartnerPage() {
                   <div key={naslov} className="flex items-start gap-4">
                     <div
                       className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl"
-                      style={{ backgroundColor: 'rgb(var(--first-secondary-rgb) / 0.12)' }}
+                      style={{
+                        backgroundColor:
+                          'rgb(var(--first-secondary-rgb) / 0.12)',
+                      }}
                     >
-                      <Ikona className="h-5 w-5" style={{ color: 'var(--first-secondary)' }} />
+                      <Ikona
+                        className="h-5 w-5"
+                        style={{ color: 'var(--first-secondary)' }}
+                      />
                     </div>
                     <div>
-                      <p className="font-semibold" style={{ color: 'var(--first-octonary)' }}>
+                      <p
+                        className="font-semibold"
+                        style={{ color: 'var(--first-octonary)' }}
+                      >
                         {naslov}
                       </p>
-                      <p className="mt-0.5 text-sm leading-relaxed" style={{ color: 'var(--first-nonary)' }}>
+                      <p
+                        className="mt-0.5 text-sm leading-relaxed"
+                        style={{ color: 'var(--first-nonary)' }}
+                      >
                         {opis}
                       </p>
                     </div>
@@ -153,7 +178,7 @@ export default function PostaniPartnerPage() {
               className="rounded-2xl p-6"
               style={{
                 backgroundColor: 'rgb(var(--first-primary-rgb) / 0.05)',
-                border:          '1px solid rgb(var(--first-primary-rgb) / 0.12)',
+                border: '1px solid rgb(var(--first-primary-rgb) / 0.12)',
               }}
             >
               <h3
@@ -173,7 +198,7 @@ export default function PostaniPartnerPage() {
                           rounded-full text-sm font-bold"
                         style={{
                           backgroundColor: 'var(--first-primary)',
-                          color:           'white',
+                          color: 'white',
                         }}
                       >
                         <Ikona className="h-4 w-4" />
@@ -181,20 +206,28 @@ export default function PostaniPartnerPage() {
                       {i < KORACI.length - 1 && (
                         <div
                           className="w-0.5 flex-1 my-1"
-                          style={{ backgroundColor: 'rgb(var(--first-primary-rgb) / 0.2)' }}
+                          style={{
+                            backgroundColor:
+                              'rgb(var(--first-primary-rgb) / 0.2)',
+                          }}
                         />
                       )}
                     </div>
 
                     {/* Tekst */}
-                    <div className={`pb-${i < KORACI.length - 1 ? '4' : '0'} min-w-0`}>
+                    <div
+                      className={`pb-${i < KORACI.length - 1 ? '4' : '0'} min-w-0`}
+                    >
                       <p
                         className="text-sm font-semibold"
                         style={{ color: 'var(--first-octonary)' }}
                       >
                         {naslov}
                       </p>
-                      <p className="mt-0.5 text-xs leading-relaxed" style={{ color: 'var(--first-nonary)' }}>
+                      <p
+                        className="mt-0.5 text-xs leading-relaxed"
+                        style={{ color: 'var(--first-nonary)' }}
+                      >
                         {opis}
                       </p>
                     </div>
@@ -209,10 +242,13 @@ export default function PostaniPartnerPage() {
             className="rounded-3xl p-7 shadow-2xl sm:p-8"
             style={{
               backgroundColor: '#ffffff',
-              border:          '1px solid rgb(var(--first-quaternary-rgb) / 0.35)',
+              border: '1px solid rgb(var(--first-quaternary-rgb) / 0.35)',
             }}
           >
-            <h2 className="mb-6 text-lg font-bold" style={{ color: 'var(--first-octonary)' }}>
+            <h2
+              className="mb-6 text-lg font-bold"
+              style={{ color: 'var(--first-octonary)' }}
+            >
               Aplikacija za partnerstvo
             </h2>
             <PartnerApplicationForm />

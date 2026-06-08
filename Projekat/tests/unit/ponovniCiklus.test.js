@@ -1,9 +1,14 @@
-const { inkrementirajPonovniCiklus, labelPonovnogCiklusa } = require('@/lib/servisirane/ponovniCiklus');
+const {
+  inkrementirajPonovniCiklus,
+  labelPonovnogCiklusa,
+} = require('@/lib/servisirane/ponovniCiklus');
 
 describe('labelPonovnogCiklusa', () => {
   test('null za 0', () => expect(labelPonovnogCiklusa(0)).toBeNull());
-  test('prvi ciklus', () => expect(labelPonovnogCiklusa(1)).toBe('Nije riješeno iz prve'));
-  test('više ciklusa', () => expect(labelPonovnogCiklusa(2)).toBe('Ponovni ciklus (2)'));
+  test('prvi ciklus', () =>
+    expect(labelPonovnogCiklusa(1)).toBe('Nije riješeno iz prve'));
+  test('više ciklusa', () =>
+    expect(labelPonovnogCiklusa(2)).toBe('Ponovni ciklus (2)'));
 });
 
 describe('inkrementirajPonovniCiklus', () => {
@@ -26,7 +31,12 @@ describe('inkrementirajPonovniCiklus', () => {
       error: null,
     });
     const db = {
-      rpc: jest.fn().mockResolvedValue({ data: null, error: { message: 'function not found' } }),
+      rpc: jest
+        .fn()
+        .mockResolvedValue({
+          data: null,
+          error: { message: 'function not found' },
+        }),
       from: jest.fn((table) => {
         if (table !== 'service_requests') throw new Error('unexpected table');
         return {
@@ -48,11 +58,15 @@ describe('inkrementirajPonovniCiklus', () => {
 
   test('baca grešku kada ni RPC ni fallback ne uspiju', async () => {
     const db = {
-      rpc: jest.fn().mockResolvedValue({ data: null, error: { message: 'rpc fail' } }),
+      rpc: jest
+        .fn()
+        .mockResolvedValue({ data: null, error: { message: 'rpc fail' } }),
       from: jest.fn(() => ({
         select: jest.fn(() => ({
           eq: jest.fn(() => ({
-            maybeSingle: jest.fn().mockResolvedValue({ data: null, error: null }),
+            maybeSingle: jest
+              .fn()
+              .mockResolvedValue({ data: null, error: null }),
           })),
         })),
       })),

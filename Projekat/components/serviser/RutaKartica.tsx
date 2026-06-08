@@ -10,7 +10,14 @@
  * - Fallback kada koordinate nisu dostupne
  */
 
-import { Navigation, Home, MapPin, Clock, Ruler, AlertCircle } from 'lucide-react';
+import {
+  Navigation,
+  Home,
+  MapPin,
+  Clock,
+  Ruler,
+  AlertCircle,
+} from 'lucide-react';
 import { RutaMapa } from '@/components/serviser/RutaMapa';
 import {
   izracunajRutu,
@@ -22,22 +29,28 @@ import Link from 'next/link';
 // ─── Interfejs ────────────────────────────────────────────────────────────────
 
 interface RutaKarticaProps {
-  baznaLat:              number | null;
-  baznaLng:              number | null;
-  intervencijaLat:       number | null | undefined;
-  intervencijaLng:       number | null | undefined;
-  adresaIntervencije?:   string | null;
+  baznaLat: number | null;
+  baznaLng: number | null;
+  intervencijaLat: number | null | undefined;
+  intervencijaLng: number | null | undefined;
+  adresaIntervencije?: string | null;
 }
 
 // ─── Stat blok ────────────────────────────────────────────────────────────────
 
 function StatBlok({
-  Ikona, oznaka, vrijednost, boja,
+  Ikona,
+  oznaka,
+  vrijednost,
+  boja,
 }: {
-  Ikona:     React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
-  oznaka:    string;
+  Ikona: React.ComponentType<{
+    className?: string;
+    style?: React.CSSProperties;
+  }>;
+  oznaka: string;
   vrijednost: string;
-  boja:      string;
+  boja: string;
 }) {
   return (
     <div className="flex flex-1 flex-col items-center gap-0.5 px-3 py-3">
@@ -47,10 +60,16 @@ function StatBlok({
       >
         <Ikona className="h-4 w-4" style={{ color: boja }} />
       </div>
-      <span className="text-[10px] font-semibold uppercase tracking-wide" style={{ color: 'var(--first-nonary)' }}>
+      <span
+        className="text-[10px] font-semibold uppercase tracking-wide"
+        style={{ color: 'var(--first-nonary)' }}
+      >
         {oznaka}
       </span>
-      <span className="text-base font-bold tabular-nums" style={{ color: 'var(--first-octonary)' }}>
+      <span
+        className="text-base font-bold tabular-nums"
+        style={{ color: 'var(--first-octonary)' }}
+      >
         {vrijednost}
       </span>
     </div>
@@ -59,7 +78,11 @@ function StatBlok({
 
 // ─── Bazna lokacija nije postavljena ─────────────────────────────────────────
 
-function NemaBazne({ adresaIntervencije }: { adresaIntervencije?: string | null }) {
+function NemaBazne({
+  adresaIntervencije,
+}: {
+  adresaIntervencije?: string | null;
+}) {
   const mapsUrl = adresaIntervencije
     ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(adresaIntervencije)}`
     : null;
@@ -76,24 +99,39 @@ function NemaBazne({ adresaIntervencije }: { adresaIntervencije?: string | null 
         className="flex items-center gap-2 border-b px-4 py-3"
         style={{ borderColor: 'rgb(var(--first-quaternary-rgb)/0.2)' }}
       >
-        <Navigation className="h-3.5 w-3.5" style={{ color: 'var(--first-nonary)' }} />
-        <p className="text-[10px] font-bold uppercase tracking-wide" style={{ color: 'var(--first-nonary)' }}>
+        <Navigation
+          className="h-3.5 w-3.5"
+          style={{ color: 'var(--first-nonary)' }}
+        />
+        <p
+          className="text-[10px] font-bold uppercase tracking-wide"
+          style={{ color: 'var(--first-nonary)' }}
+        >
           Navigacija
         </p>
       </div>
       <div className="flex flex-col gap-3 px-4 py-4">
         <div
           className="flex items-start gap-3 rounded-xl p-3"
-          style={{ backgroundColor: 'rgba(217,119,6,0.06)', border: '1px solid rgba(217,119,6,0.2)' }}
+          style={{
+            backgroundColor: 'rgba(217,119,6,0.06)',
+            border: '1px solid rgba(217,119,6,0.2)',
+          }}
         >
-          <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" style={{ color: '#B45309' }} />
+          <AlertCircle
+            className="mt-0.5 h-4 w-4 flex-shrink-0"
+            style={{ color: '#B45309' }}
+          />
           <div>
             <p className="text-xs font-semibold" style={{ color: '#92400E' }}>
               Bazna lokacija nije postavljena
             </p>
-            <p className="mt-0.5 text-xs leading-relaxed" style={{ color: '#B45309' }}>
-              Postavite baznu lokaciju u profilu kako biste dobili procjenu udaljenosti
-              i rutu s dva markera na mapi.
+            <p
+              className="mt-0.5 text-xs leading-relaxed"
+              style={{ color: '#B45309' }}
+            >
+              Postavite baznu lokaciju u profilu kako biste dobili procjenu
+              udaljenosti i rutu s dva markera na mapi.
             </p>
           </div>
         </div>
@@ -129,7 +167,11 @@ function NemaBazne({ adresaIntervencije }: { adresaIntervencije?: string | null 
 
 // ─── Nema koordinata intervencije ─────────────────────────────────────────────
 
-function NemaOdredista({ adresaIntervencije }: { adresaIntervencije?: string | null }) {
+function NemaOdredista({
+  adresaIntervencije,
+}: {
+  adresaIntervencije?: string | null;
+}) {
   const mapsUrl = adresaIntervencije
     ? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(adresaIntervencije)}`
     : null;
@@ -146,8 +188,14 @@ function NemaOdredista({ adresaIntervencije }: { adresaIntervencije?: string | n
         className="flex items-center gap-2 border-b px-4 py-3"
         style={{ borderColor: 'rgb(var(--first-quaternary-rgb)/0.2)' }}
       >
-        <MapPin className="h-3.5 w-3.5" style={{ color: 'var(--first-nonary)' }} />
-        <p className="text-[10px] font-bold uppercase tracking-wide" style={{ color: 'var(--first-nonary)' }}>
+        <MapPin
+          className="h-3.5 w-3.5"
+          style={{ color: 'var(--first-nonary)' }}
+        />
+        <p
+          className="text-[10px] font-bold uppercase tracking-wide"
+          style={{ color: 'var(--first-nonary)' }}
+        >
           Lokacija intervencije
         </p>
       </div>
@@ -168,7 +216,10 @@ function NemaOdredista({ adresaIntervencije }: { adresaIntervencije?: string | n
           </a>
         </div>
       ) : (
-        <p className="px-4 py-4 text-xs" style={{ color: 'var(--first-nonary)' }}>
+        <p
+          className="px-4 py-4 text-xs"
+          style={{ color: 'var(--first-nonary)' }}
+        >
           Lokacija intervencije nije dostupna.
         </p>
       )}
@@ -179,8 +230,10 @@ function NemaOdredista({ adresaIntervencije }: { adresaIntervencije?: string | n
 // ─── Glavna komponenta ────────────────────────────────────────────────────────
 
 export function RutaKartica({
-  baznaLat, baznaLng,
-  intervencijaLat, intervencijaLng,
+  baznaLat,
+  baznaLng,
+  intervencijaLat,
+  intervencijaLng,
   adresaIntervencije,
 }: RutaKarticaProps) {
   // Fallback: nema koordinata intervencije
@@ -193,7 +246,12 @@ export function RutaKartica({
     return <NemaBazne adresaIntervencije={adresaIntervencije} />;
   }
 
-  const ruta    = izracunajRutu(baznaLat, baznaLng, intervencijaLat, intervencijaLng);
+  const ruta = izracunajRutu(
+    baznaLat,
+    baznaLng,
+    intervencijaLat,
+    intervencijaLng,
+  );
   const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${baznaLat},${baznaLng}&destination=${intervencijaLat},${intervencijaLng}`;
 
   return (
@@ -209,7 +267,8 @@ export function RutaKartica({
         className="flex items-center justify-between px-4 py-3"
         style={{
           borderBottom: '1px solid rgb(var(--first-quaternary-rgb)/0.2)',
-          background: 'linear-gradient(135deg, rgb(var(--first-secondary-rgb)/0.06) 0%, transparent 100%)',
+          background:
+            'linear-gradient(135deg, rgb(var(--first-secondary-rgb)/0.06) 0%, transparent 100%)',
         }}
       >
         <div className="flex items-center gap-2">
@@ -217,13 +276,22 @@ export function RutaKartica({
             className="flex h-7 w-7 items-center justify-center rounded-lg"
             style={{ backgroundColor: 'rgb(var(--first-secondary-rgb)/0.12)' }}
           >
-            <Navigation className="h-3.5 w-3.5" style={{ color: 'var(--first-secondary)' }} />
+            <Navigation
+              className="h-3.5 w-3.5"
+              style={{ color: 'var(--first-secondary)' }}
+            />
           </div>
           <div>
-            <p className="text-[10px] font-bold uppercase tracking-wide" style={{ color: 'var(--first-secondary)' }}>
+            <p
+              className="text-[10px] font-bold uppercase tracking-wide"
+              style={{ color: 'var(--first-secondary)' }}
+            >
               Ruta do intervencije
             </p>
-            <p className="text-[10px] mt-px" style={{ color: 'var(--first-nonary)' }}>
+            <p
+              className="text-[10px] mt-px"
+              style={{ color: 'var(--first-nonary)' }}
+            >
               Procjena na osnovu cestovne udaljenosti
             </p>
           </div>
@@ -257,17 +325,47 @@ export function RutaKartica({
           backgroundColor: 'rgb(var(--first-quinary-rgb)/0.12)',
         }}
       >
-        <div className="flex items-center gap-1.5 text-[10px]" style={{ color: 'var(--first-nonary)' }}>
-          <div style={{ width: 10, height: 10, borderRadius: '50%', backgroundColor: '#D97706', border: '2px solid white', boxShadow: '0 1px 3px rgba(0,0,0,0.3)', flexShrink: 0 }} />
+        <div
+          className="flex items-center gap-1.5 text-[10px]"
+          style={{ color: 'var(--first-nonary)' }}
+        >
+          <div
+            style={{
+              width: 10,
+              height: 10,
+              borderRadius: '50%',
+              backgroundColor: '#D97706',
+              border: '2px solid white',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
+              flexShrink: 0,
+            }}
+          />
           Vaša baza
         </div>
-        <div className="flex items-center gap-1.5 text-[10px]" style={{ color: 'var(--first-nonary)' }}>
-          <MapPin className="h-3 w-3 flex-shrink-0" style={{ color: 'var(--first-primary)' }} />
+        <div
+          className="flex items-center gap-1.5 text-[10px]"
+          style={{ color: 'var(--first-nonary)' }}
+        >
+          <MapPin
+            className="h-3 w-3 flex-shrink-0"
+            style={{ color: 'var(--first-primary)' }}
+          />
           Intervencija
         </div>
-        <div className="flex items-center gap-1.5 text-[10px]" style={{ color: 'var(--first-nonary)' }}>
+        <div
+          className="flex items-center gap-1.5 text-[10px]"
+          style={{ color: 'var(--first-nonary)' }}
+        >
           <svg width="18" height="6" aria-hidden>
-            <line x1="0" y1="3" x2="18" y2="3" stroke="var(--first-secondary)" strokeWidth="2" strokeDasharray="5 3" />
+            <line
+              x1="0"
+              y1="3"
+              x2="18"
+              y2="3"
+              stroke="var(--first-secondary)"
+              strokeWidth="2"
+              strokeDasharray="5 3"
+            />
           </svg>
           Ruta
         </div>
@@ -284,7 +382,11 @@ export function RutaKartica({
           vrijednost={formatirajUdaljenost(ruta.procjenaKm)}
           boja="var(--first-secondary)"
         />
-        <div style={{ borderLeft: '1px solid rgb(var(--first-quaternary-rgb)/0.2)' }}>
+        <div
+          style={{
+            borderLeft: '1px solid rgb(var(--first-quaternary-rgb)/0.2)',
+          }}
+        >
           <StatBlok
             Ikona={Clock}
             oznaka="Trajanje"
@@ -309,8 +411,12 @@ export function RutaKartica({
           <Navigation className="h-4 w-4" />
           Otvori rutu u Google Maps navigaciji
         </a>
-        <p className="mt-2.5 text-center text-[10px]" style={{ color: 'var(--first-nonary)' }}>
-          * Procjena na osnovu pribl. {Math.round(ruta.pravacKm * 10) / 10} km pravocrtne udaljenosti
+        <p
+          className="mt-2.5 text-center text-[10px]"
+          style={{ color: 'var(--first-nonary)' }}
+        >
+          * Procjena na osnovu pribl. {Math.round(ruta.pravacKm * 10) / 10} km
+          pravocrtne udaljenosti
         </p>
       </div>
     </div>

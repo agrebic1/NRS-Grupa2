@@ -1,4 +1,8 @@
-function pushUrl(out: string[], seen: Set<string>, u: string | null | undefined) {
+function pushUrl(
+  out: string[],
+  seen: Set<string>,
+  u: string | null | undefined,
+) {
   const t = u?.trim();
   if (!t || seen.has(t)) return;
   seen.add(t);
@@ -32,7 +36,9 @@ type ZahtjevSaSlikama = {
 /**
  * URL-ovi priloženih slika - spaja photo_url, poznata polja i uobičajene JSON ključeve.
  */
-export function urlsPrilozenihSlika(zahtjev: ZahtjevSaSlikama & Record<string, unknown>): string[] {
+export function urlsPrilozenihSlika(
+  zahtjev: ZahtjevSaSlikama & Record<string, unknown>,
+): string[] {
   const out: string[] = [];
   const seen = new Set<string>();
 

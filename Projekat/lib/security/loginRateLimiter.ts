@@ -12,7 +12,9 @@ const BLOKADA_MS = 5 * 60 * 1000; // 5 min
 
 function getStore(): AttemptStore {
   const key = '__login_rate_limit_store__';
-  const globalRef = globalThis as typeof globalThis & { [key: string]: AttemptStore | undefined };
+  const globalRef = globalThis as typeof globalThis & {
+    [key: string]: AttemptStore | undefined;
+  };
   if (!globalRef[key]) {
     globalRef[key] = new Map<string, AttemptState>();
   }

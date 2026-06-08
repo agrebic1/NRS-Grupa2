@@ -68,7 +68,9 @@ describe('RegisterForm', () => {
 
   test('shows error on failed registration', async () => {
     const user = userEvent.setup();
-    mockRegistracija.mockRejectedValue(new Error('Kreiranje naloga nije uspjelo.'));
+    mockRegistracija.mockRejectedValue(
+      new Error('Kreiranje naloga nije uspjelo.'),
+    );
     render(<RegisterForm />);
 
     await user.type(screen.getByLabelText('Ime'), 'Amina');
@@ -81,17 +83,24 @@ describe('RegisterForm', () => {
     await user.type(screen.getByLabelText('Potvrda lozinke'), 'Abcd123!');
     await user.click(screen.getByRole('button', { name: 'Kreiraj nalog' }));
 
-    expect(await screen.findByText('Kreiranje naloga nije uspjelo.')).toBeInTheDocument();
+    expect(
+      await screen.findByText('Kreiranje naloga nije uspjelo.'),
+    ).toBeInTheDocument();
   });
 
   test('after registration needing email confirmation, shows verify screen and countdown', async () => {
     const user = userEvent.setup();
-    mockRegistracija.mockRejectedValueOnce(new PotrebnaPotvrdaEmailaError('potvrda@example.com'));
+    mockRegistracija.mockRejectedValueOnce(
+      new PotrebnaPotvrdaEmailaError('potvrda@example.com'),
+    );
     render(<RegisterForm />);
 
     await user.type(screen.getByLabelText('Ime'), 'Amina');
     await user.type(screen.getByLabelText('Prezime'), 'Hodzic');
-    await user.type(screen.getByLabelText('Email adresa'), 'potvrda@example.com');
+    await user.type(
+      screen.getByLabelText('Email adresa'),
+      'potvrda@example.com',
+    );
     await user.type(screen.getByLabelText('Broj telefona'), '+38761111222');
     await user.click(screen.getByRole('button', { name: 'Nastavi' }));
 
@@ -99,9 +108,13 @@ describe('RegisterForm', () => {
     await user.type(screen.getByLabelText('Potvrda lozinke'), 'Abcd123!');
     await user.click(screen.getByRole('button', { name: 'Kreiraj nalog' }));
 
-    expect(await screen.findByRole('heading', { name: /Provjerite email/i })).toBeInTheDocument();
+    expect(
+      await screen.findByRole('heading', { name: /Provjerite email/i }),
+    ).toBeInTheDocument();
     expect(screen.getByText(/potvrda@example\.com/)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Pošalji novi link' })).toBeDisabled();
+    expect(
+      screen.getByRole('button', { name: 'Pošalji novi link' }),
+    ).toBeDisabled();
     expect(screen.getByText(/60/)).toBeInTheDocument();
   });
 });

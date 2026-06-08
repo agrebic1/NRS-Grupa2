@@ -8,14 +8,17 @@ type DbClient = { from: (table: string) => unknown };
 
 export async function ucitajAktivnostiSaAutorom(
   db: DbClient,
-  zahtjevId: number
+  zahtjevId: number,
 ): Promise<AktivnostSaAutorom[]> {
   const table = db.from('intervention_activities') as {
     select: (cols: string) => {
-      eq: (col: string, val: number) => {
+      eq: (
+        col: string,
+        val: number,
+      ) => {
         order: (
           col: string,
-          opts: { ascending: boolean }
+          opts: { ascending: boolean },
         ) => Promise<{
           data: Record<string, unknown>[] | null;
           error: { message: string } | null;
@@ -35,13 +38,15 @@ export async function ucitajAktivnostiSaAutorom(
   }
   if (!rows?.length) return [];
 
-  const autorIds = [...new Set(rows.map((r) => r.autor_id as string).filter(Boolean))];
+  const autorIds = [
+    ...new Set(rows.map((r) => r.autor_id as string).filter(Boolean)),
+  ];
 
   const osobaTable = db.from('osoba') as {
     select: (cols: string) => {
       in: (
         col: string,
-        vals: string[]
+        vals: string[],
       ) => Promise<{
         data: { id_osobe: string; ime: string; prezime: string }[] | null;
         error: { message: string } | null;
@@ -60,9 +65,14 @@ export async function ucitajAktivnostiSaAutorom(
     select: (cols: string) => {
       in: (
         col: string,
-        vals: string[]
+        vals: string[],
       ) => Promise<{
-        data: { id_uposlenika: string; uloga: { naziv: string } | { naziv: string }[] | null }[] | null;
+        data:
+          | {
+              id_uposlenika: string;
+              uloga: { naziv: string } | { naziv: string }[] | null;
+            }[]
+          | null;
       }>;
     };
   };
@@ -72,9 +82,7 @@ export async function ucitajAktivnostiSaAutorom(
 
   const ulogaIzUposlenika = new Map<string, string>();
   for (const u of uposlenici ?? []) {
-    const naziv = Array.isArray(u.uloga)
-      ? u.uloga[0]?.naziv
-      : u.uloga?.naziv;
+    const naziv = Array.isArray(u.uloga) ? u.uloga[0]?.naziv : u.uloga?.naziv;
     if (naziv) {
       ulogaIzUposlenika.set(
         u.id_uposlenika,
@@ -82,13 +90,13 @@ export async function ucitajAktivnostiSaAutorom(
           ? 'dispecer'
           : naziv.toLowerCase().includes('servis')
             ? 'serviser'
-            : naziv.toLowerCase()
+            : naziv.toLowerCase(),
       );
     }
   }
 
   const osobaMap = new Map(
-    (osobe ?? []).map((o) => [o.id_osobe, { ime: o.ime, prezime: o.prezime }])
+    (osobe ?? []).map((o) => [o.id_osobe, { ime: o.ime, prezime: o.prezime }]),
   );
 
   return rows.map((a) => {

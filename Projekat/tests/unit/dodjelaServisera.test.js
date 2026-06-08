@@ -15,7 +15,7 @@ function supabaseZaVlasnistvo(data) {
   return {
     from: jest.fn(() => ({
       select: jest.fn().mockReturnThis(),
-      eq:     jest.fn().mockReturnThis(),
+      eq: jest.fn().mockReturnThis(),
       maybeSingle: jest.fn().mockResolvedValue({ data, error: null }),
     })),
   };
@@ -46,7 +46,8 @@ function supabaseZaPristup({
         return chain;
       }
       if (table === 'work_evidence' || table === 'intervention_activities') {
-        const count = table === 'work_evidence' ? evidencijaBroj : aktivnostiBroj;
+        const count =
+          table === 'work_evidence' ? evidencijaBroj : aktivnostiBroj;
         return {
           select: jest.fn(() => ({
             eq: jest.fn().mockReturnValue({
@@ -64,8 +65,8 @@ function supabaseZaPristup({
 
 describe('serviserSmijeMijenjatiStatus', () => {
   test.each([
-    ['dodijeljeno', 'u_radu',      true],
-    ['u_radu',      'u_izvrsenju', true],
+    ['dodijeljeno', 'u_radu', true],
+    ['u_radu', 'u_izvrsenju', true],
   ])('%s → %s: dozvoljeno=%s', (iz, u, ocekivano) => {
     expect(serviserSmijeMijenjatiStatus(iz, u)).toBe(ocekivano);
   });
@@ -74,11 +75,11 @@ describe('serviserSmijeMijenjatiStatus', () => {
     ['u_izvrsenju', 'zavrseno'],
     ['u_izvrsenju', 'u_radu'],
     ['dodijeljeno', 'u_izvrsenju'],
-    ['u_radu',      'dodijeljeno'],
-    ['potvrdeno',   'u_radu'],
-    ['zavrseno',    'u_radu'],
-    ['',            'u_radu'],
-    ['nepoznato',   'u_radu'],
+    ['u_radu', 'dodijeljeno'],
+    ['potvrdeno', 'u_radu'],
+    ['zavrseno', 'u_radu'],
+    ['', 'u_radu'],
+    ['nepoznato', 'u_radu'],
   ])('blokira %s → %s', (iz, u) => {
     expect(serviserSmijeMijenjatiStatus(iz, u)).toBe(false);
   });
@@ -234,7 +235,9 @@ describe('provjeriServiserPristupDetalju', () => {
 
 describe('odbijZadatakSchema - validacija razloga odbijanja', () => {
   test('prihvata razlog koji zadovoljava minimum', () => {
-    expect(odbijZadatakSchema.safeParse({ razlog: 'Nema kapaciteta.' }).success).toBe(true);
+    expect(
+      odbijZadatakSchema.safeParse({ razlog: 'Nema kapaciteta.' }).success,
+    ).toBe(true);
   });
 
   test('odbija prazan razlog', () => {
@@ -242,7 +245,9 @@ describe('odbijZadatakSchema - validacija razloga odbijanja', () => {
   });
 
   test('odbija razlog kraći od 10 karaktera', () => {
-    expect(odbijZadatakSchema.safeParse({ razlog: 'Kratko' }).success).toBe(false);
+    expect(odbijZadatakSchema.safeParse({ razlog: 'Kratko' }).success).toBe(
+      false,
+    );
   });
 
   test('odbija razlog dulji od 500 karaktera', () => {
@@ -251,7 +256,9 @@ describe('odbijZadatakSchema - validacija razloga odbijanja', () => {
   });
 
   test('prihvata razlog od tačno 10 karaktera', () => {
-    expect(odbijZadatakSchema.safeParse({ razlog: '1234567890' }).success).toBe(true);
+    expect(odbijZadatakSchema.safeParse({ razlog: '1234567890' }).success).toBe(
+      true,
+    );
   });
 });
 
@@ -259,7 +266,7 @@ describe('odbijZadatakSchema - validacija razloga odbijanja', () => {
 
 describe('dodijelijeSchema - validacija dodjele servisera', () => {
   const validan = {
-    action:      'dodijeli',
+    action: 'dodijeli',
     serviser_id: '00000000-0000-0000-0000-000000000001',
   };
 
@@ -273,22 +280,31 @@ describe('dodijelijeSchema - validacija dodjele servisera', () => {
   });
 
   test('odbija neispravan UUID za serviser_id', () => {
-    expect(dodijelijeSchema.safeParse({ ...validan, serviser_id: 'nije-uuid' }).success).toBe(false);
+    expect(
+      dodijelijeSchema.safeParse({ ...validan, serviser_id: 'nije-uuid' })
+        .success,
+    ).toBe(false);
   });
 
   test('prihvata opcionalne termin i trajanje', () => {
     const payload = {
       ...validan,
       termin_planirani_pocetak: '2026-06-01T08:00:00+02:00',
-      termin_planirani_kraj:    '2026-06-01T10:00:00+02:00',
-      procijenjeno_trajanje:    90,
-      dispecer_napomene:        'Nositi alat.',
+      termin_planirani_kraj: '2026-06-01T10:00:00+02:00',
+      procijenjeno_trajanje: 90,
+      dispecer_napomene: 'Nositi alat.',
     };
     expect(dodijelijeSchema.safeParse(payload).success).toBe(true);
   });
 
   test('odbija procijenjeno_trajanje izvan opsega', () => {
-    expect(dodijelijeSchema.safeParse({ ...validan, procijenjeno_trajanje: 4 }).success).toBe(false);
-    expect(dodijelijeSchema.safeParse({ ...validan, procijenjeno_trajanje: 1441 }).success).toBe(false);
+    expect(
+      dodijelijeSchema.safeParse({ ...validan, procijenjeno_trajanje: 4 })
+        .success,
+    ).toBe(false);
+    expect(
+      dodijelijeSchema.safeParse({ ...validan, procijenjeno_trajanje: 1441 })
+        .success,
+    ).toBe(false);
   });
 });

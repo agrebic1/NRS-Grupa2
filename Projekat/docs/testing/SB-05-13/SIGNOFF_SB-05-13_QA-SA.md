@@ -8,13 +8,12 @@
 - Okruzenje: Production
 - Build/commit: main@9f2c1ab
 
-
 ## Rezime rezultata
 
 - Ukupan broj scenarija: 43
 - Prošlo: 31
-- Nije prošlo: 9 
-- Djelimično prošlo: 3 
+- Nije prošlo: 9
+- Djelimično prošlo: 3
 - Nije testirano: 0
 
 ## Otvoreni rizici / izuzeci
@@ -39,4 +38,3 @@
 - QA ime i prezime: Eldin Begić
 - QA potpis: Eldin Begić
 - Datum: 29.04.2026
-

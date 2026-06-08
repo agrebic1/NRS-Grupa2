@@ -3,8 +3,16 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
-  ArrowLeft, ChevronRight, History, Star, Calendar,
-  MapPin, CheckCircle2, XCircle, Ban, Clock,
+  ArrowLeft,
+  ChevronRight,
+  History,
+  Star,
+  Calendar,
+  MapPin,
+  CheckCircle2,
+  XCircle,
+  Ban,
+  Clock,
 } from 'lucide-react';
 import { AppShell } from '@/components/layout/AppShell';
 import { AlertMessage } from '@/components/ui/AlertMessage';
@@ -23,10 +31,15 @@ interface ZahtjevHistorije extends ServisniZahtjev {
 // ─── Grupiranje po periodu ────────────────────────────────────────────────────
 
 function periodnaNaziv(iso: string): string {
-  return new Date(iso).toLocaleDateString('bs-BA', { year: 'numeric', month: 'long' });
+  return new Date(iso).toLocaleDateString('bs-BA', {
+    year: 'numeric',
+    month: 'long',
+  });
 }
 
-function grupirajPoPerioду(zahtjevi: ZahtjevHistorije[]): [string, ZahtjevHistorije[]][] {
+function grupirajPoPerioду(
+  zahtjevi: ZahtjevHistorije[],
+): [string, ZahtjevHistorije[]][] {
   const mapa = new Map<string, ZahtjevHistorije[]>();
   for (const z of zahtjevi) {
     const kljuc = periodnaNaziv(z.created_at);
@@ -40,14 +53,22 @@ function grupirajPoPerioду(zahtjevi: ZahtjevHistorije[]): [string, ZahtjevHist
 
 function MiniZvjezdice({ vrijednost }: { vrijednost: number }) {
   return (
-    <span className="inline-flex items-center gap-0.5" aria-label={`Ocjena: ${vrijednost} od 5`}>
+    <span
+      className="inline-flex items-center gap-0.5"
+      aria-label={`Ocjena: ${vrijednost} od 5`}
+    >
       {[1, 2, 3, 4, 5].map((n) => (
         <Star
           key={n}
           className="h-3 w-3"
           strokeWidth={1.5}
           fill={n <= vrijednost ? 'var(--first-senary)' : 'transparent'}
-          style={{ color: n <= vrijednost ? 'var(--first-senary)' : 'rgb(var(--first-quaternary-rgb)/0.5)' }}
+          style={{
+            color:
+              n <= vrijednost
+                ? 'var(--first-senary)'
+                : 'rgb(var(--first-quaternary-rgb)/0.5)',
+          }}
         />
       ))}
     </span>
@@ -57,17 +78,21 @@ function MiniZvjezdice({ vrijednost }: { vrijednost: number }) {
 // ─── Status ikona ─────────────────────────────────────────────────────────────
 
 function StatusIkona({ status }: { status: string }) {
-  const props = { className: 'h-4 w-4 flex-shrink-0', style: { color: statusBoja(status) } };
-  if (status === 'zatvoreno' || status === 'zavrseno') return <CheckCircle2 {...props} />;
-  if (status === 'otkazano')  return <XCircle {...props} />;
-  if (status === 'odbijeno')  return <Ban {...props} />;
+  const props = {
+    className: 'h-4 w-4 flex-shrink-0',
+    style: { color: statusBoja(status) },
+  };
+  if (status === 'zatvoreno' || status === 'zavrseno')
+    return <CheckCircle2 {...props} />;
+  if (status === 'otkazano') return <XCircle {...props} />;
+  if (status === 'odbijeno') return <Ban {...props} />;
   return <Clock {...props} />;
 }
 
 // ─── Kartica historijske intervencije ─────────────────────────────────────────
 
 function HistorijaKartica({ zahtjev }: { zahtjev: ZahtjevHistorije }) {
-  const kat   = labelKategorije(zahtjev);
+  const kat = labelKategorije(zahtjev);
   const naziv = kat.podkategorija ? `${kat.podkategorija}` : kat.glavna;
   const sboja = statusBoja(zahtjev.status);
 
@@ -89,23 +114,35 @@ function HistorijaKartica({ zahtjev }: { zahtjev: ZahtjevHistorije }) {
             <div className="flex flex-wrap items-center gap-2">
               <span
                 className="rounded-md px-1.5 py-0.5 text-[10px] font-bold tabular-nums"
-                style={{ backgroundColor: 'rgb(var(--first-quaternary-rgb)/0.2)', color: 'var(--first-nonary)' }}
+                style={{
+                  backgroundColor: 'rgb(var(--first-quaternary-rgb)/0.2)',
+                  color: 'var(--first-nonary)',
+                }}
               >
                 #{zahtjev.korisnicki_broj_zahtjeva ?? zahtjev.id}
               </span>
               <span
                 className="inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-bold"
-                style={{ backgroundColor: `${sboja}14`, color: sboja, border: `1px solid ${sboja}28` }}
+                style={{
+                  backgroundColor: `${sboja}14`,
+                  color: sboja,
+                  border: `1px solid ${sboja}28`,
+                }}
               >
                 <StatusIkona status={zahtjev.status} />
                 {statusOznaka(zahtjev.status)}
               </span>
             </div>
-            <p className="truncate text-sm font-bold" style={{ color: 'var(--first-octonary)' }}>
+            <p
+              className="truncate text-sm font-bold"
+              style={{ color: 'var(--first-octonary)' }}
+            >
               {naziv}
             </p>
             {kat.podkategorija && (
-              <p className="text-xs" style={{ color: 'var(--first-nonary)' }}>{kat.glavna}</p>
+              <p className="text-xs" style={{ color: 'var(--first-nonary)' }}>
+                {kat.glavna}
+              </p>
             )}
           </div>
           <ChevronRight
@@ -115,7 +152,10 @@ function HistorijaKartica({ zahtjev }: { zahtjev: ZahtjevHistorije }) {
         </div>
 
         {/* Meta informacije */}
-        <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs" style={{ color: 'var(--first-nonary)' }}>
+        <div
+          className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs"
+          style={{ color: 'var(--first-nonary)' }}
+        >
           <span className="flex items-center gap-1.5">
             <Calendar className="h-3 w-3 flex-shrink-0" />
             {formatirajDatumPrikaz(zahtjev.created_at, '-')}
@@ -130,11 +170,19 @@ function HistorijaKartica({ zahtjev }: { zahtjev: ZahtjevHistorije }) {
 
         {/* Ocjena */}
         {zahtjev.ocjena ? (
-          <div className="mt-3 flex items-center gap-2 rounded-lg px-3 py-2"
-            style={{ backgroundColor: 'rgba(217,132,0,0.06)', border: '1px solid rgba(217,132,0,0.2)' }}>
+          <div
+            className="mt-3 flex items-center gap-2 rounded-lg px-3 py-2"
+            style={{
+              backgroundColor: 'rgba(217,132,0,0.06)',
+              border: '1px solid rgba(217,132,0,0.2)',
+            }}
+          >
             <MiniZvjezdice vrijednost={zahtjev.ocjena.ocjena} />
             {zahtjev.ocjena.komentar && (
-              <p className="min-w-0 truncate text-xs italic" style={{ color: 'var(--first-nonary)' }}>
+              <p
+                className="min-w-0 truncate text-xs italic"
+                style={{ color: 'var(--first-nonary)' }}
+              >
                 {`"${zahtjev.ocjena.komentar}"`}
               </p>
             )}
@@ -155,18 +203,30 @@ function PeriodHeader({ naziv, broj }: { naziv: string; broj: number }) {
   return (
     <div className="flex items-center gap-3">
       <div className="flex items-center gap-2">
-        <Calendar className="h-3.5 w-3.5" style={{ color: 'var(--first-nonary)' }} />
-        <h2 className="text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--first-nonary)' }}>
+        <Calendar
+          className="h-3.5 w-3.5"
+          style={{ color: 'var(--first-nonary)' }}
+        />
+        <h2
+          className="text-xs font-bold uppercase tracking-wide"
+          style={{ color: 'var(--first-nonary)' }}
+        >
           {naziv}
         </h2>
       </div>
       <span
         className="rounded-full px-2 py-0.5 text-[10px] font-bold"
-        style={{ backgroundColor: 'rgb(var(--first-quaternary-rgb)/0.2)', color: 'var(--first-nonary)' }}
+        style={{
+          backgroundColor: 'rgb(var(--first-quaternary-rgb)/0.2)',
+          color: 'var(--first-nonary)',
+        }}
       >
         {broj}
       </span>
-      <div className="flex-1 border-b" style={{ borderColor: 'rgb(var(--first-quaternary-rgb)/0.25)' }} />
+      <div
+        className="flex-1 border-b"
+        style={{ borderColor: 'rgb(var(--first-quaternary-rgb)/0.25)' }}
+      />
     </div>
   );
 }
@@ -186,14 +246,21 @@ function PraznoStanje() {
         className="flex h-14 w-14 items-center justify-center rounded-2xl"
         style={{ backgroundColor: 'rgb(var(--first-secondary-rgb) / 0.1)' }}
       >
-        <History className="h-7 w-7" style={{ color: 'var(--first-secondary)' }} />
+        <History
+          className="h-7 w-7"
+          style={{ color: 'var(--first-secondary)' }}
+        />
       </div>
       <div>
-        <p className="text-base font-bold" style={{ color: 'var(--first-octonary)' }}>
+        <p
+          className="text-base font-bold"
+          style={{ color: 'var(--first-octonary)' }}
+        >
           Nema prethodnih intervencija
         </p>
         <p className="mt-1 text-sm" style={{ color: 'var(--first-nonary)' }}>
-          Vaše završene, zatvorene, otkazane ili odbijene intervencije će se prikazati ovdje.
+          Vaše završene, zatvorene, otkazane ili odbijene intervencije će se
+          prikazati ovdje.
         </p>
       </div>
       <Link
@@ -211,24 +278,33 @@ function PraznoStanje() {
 
 export default function HistorijaPage() {
   const [historija, setHistorija] = useState<ZahtjevHistorije[]>([]);
-  const [ucitava,   setUcitava]   = useState(true);
-  const [greska,    setGreska]    = useState<string | null>(null);
+  const [ucitava, setUcitava] = useState(true);
+  const [greska, setGreska] = useState<string | null>(null);
 
   useEffect(() => {
     let aktivan = true;
     (async () => {
       try {
-        const r = await fetch('/api/service-requests/historija', { cache: 'no-store' });
+        const r = await fetch('/api/service-requests/historija', {
+          cache: 'no-store',
+        });
         const d = await r.json();
         if (!r.ok) throw new Error(d.error ?? 'Greška pri učitavanju.');
         if (aktivan) setHistorija(d.historija ?? []);
       } catch (err) {
-        if (aktivan) setGreska(err instanceof Error ? err.message : 'Greška pri učitavanju historije.');
+        if (aktivan)
+          setGreska(
+            err instanceof Error
+              ? err.message
+              : 'Greška pri učitavanju historije.',
+          );
       } finally {
         if (aktivan) setUcitava(false);
       }
     })();
-    return () => { aktivan = false; };
+    return () => {
+      aktivan = false;
+    };
   }, []);
 
   const grupe = grupirajPoPerioду(historija);
@@ -243,22 +319,38 @@ export default function HistorijaPage() {
             className="flex h-8 w-8 items-center justify-center rounded-lg transition-all hover:bg-black/[0.05] focus:outline-none focus-visible:ring-2"
             aria-label="Nazad na pregled"
           >
-            <ArrowLeft className="h-4 w-4" style={{ color: 'var(--first-nonary)' }} />
+            <ArrowLeft
+              className="h-4 w-4"
+              style={{ color: 'var(--first-nonary)' }}
+            />
           </Link>
           <div className="flex items-center gap-2.5">
             <div
               className="flex h-9 w-9 items-center justify-center rounded-xl"
-              style={{ backgroundColor: 'rgb(var(--first-secondary-rgb) / 0.12)' }}
+              style={{
+                backgroundColor: 'rgb(var(--first-secondary-rgb) / 0.12)',
+              }}
             >
-              <History style={{ color: 'var(--first-secondary)', width: '1.125rem', height: '1.125rem' }} />
+              <History
+                style={{
+                  color: 'var(--first-secondary)',
+                  width: '1.125rem',
+                  height: '1.125rem',
+                }}
+              />
             </div>
             <div>
-              <h1 className="text-xl font-bold tracking-tight" style={{ color: 'var(--first-octonary)' }}>
+              <h1
+                className="text-xl font-bold tracking-tight"
+                style={{ color: 'var(--first-octonary)' }}
+              >
                 Historija intervencija
               </h1>
               {!ucitava && historija.length > 0 && (
                 <p className="text-xs" style={{ color: 'var(--first-nonary)' }}>
-                  {historija.length} {historija.length === 1 ? 'intervencija' : 'intervencija'} u {grupe.length} {grupe.length === 1 ? 'periodu' : 'perioda'}
+                  {historija.length}{' '}
+                  {historija.length === 1 ? 'intervencija' : 'intervencija'} u{' '}
+                  {grupe.length} {grupe.length === 1 ? 'periodu' : 'perioda'}
                 </p>
               )}
             </div>
@@ -273,7 +365,9 @@ export default function HistorijaPage() {
                 className="h-6 w-6 animate-spin rounded-full border-2 border-transparent"
                 style={{ borderTopColor: 'var(--first-secondary)' }}
               />
-              <p className="text-sm" style={{ color: 'var(--first-nonary)' }}>Učitavanje historije...</p>
+              <p className="text-sm" style={{ color: 'var(--first-nonary)' }}>
+                Učitavanje historije...
+              </p>
             </div>
           </div>
         )}
@@ -282,9 +376,7 @@ export default function HistorijaPage() {
           <AlertMessage variant="error" message={greska} />
         )}
 
-        {!ucitava && !greska && historija.length === 0 && (
-          <PraznoStanje />
-        )}
+        {!ucitava && !greska && historija.length === 0 && <PraznoStanje />}
 
         {/* Timeline grupiran po periodu */}
         {!ucitava && !greska && grupe.length > 0 && (

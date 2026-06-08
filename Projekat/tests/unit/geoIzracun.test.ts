@@ -17,7 +17,7 @@ describe('haversineKm — Haversine formula za pravocrtnu udaljenost', () => {
   });
 
   it('Sarajevo Centar → Stari Grad ≈ 1–3 km', () => {
-    const d = haversineKm(43.8563, 18.4131, 43.8600, 18.4320);
+    const d = haversineKm(43.8563, 18.4131, 43.86, 18.432);
     expect(d).toBeGreaterThan(0.5);
     expect(d).toBeLessThan(5);
   });
@@ -35,8 +35,8 @@ describe('haversineKm — Haversine formula za pravocrtnu udaljenost', () => {
   });
 
   it('simetrija: d(A,B) === d(B,A)', () => {
-    const d1 = haversineKm(43.8486, 18.3564, 43.9100, 18.3400);
-    const d2 = haversineKm(43.9100, 18.3400, 43.8486, 18.3564);
+    const d1 = haversineKm(43.8486, 18.3564, 43.91, 18.34);
+    const d2 = haversineKm(43.91, 18.34, 43.8486, 18.3564);
     expect(d1).toBeCloseTo(d2, 6);
   });
 
@@ -49,8 +49,10 @@ describe('haversineKm — Haversine formula za pravocrtnu udaljenost', () => {
 // ─── izracunajRutu ────────────────────────────────────────────────────────────
 
 describe('izracunajRutu — procjena cestovne rute', () => {
-  const LAT1 = 43.8486, LNG1 = 18.3564;
-  const LAT2 = 43.9100, LNG2 = 18.3400;
+  const LAT1 = 43.8486,
+    LNG1 = 18.3564;
+  const LAT2 = 43.91,
+    LNG2 = 18.34;
 
   it('vraća objekt s pravacKm, procjenaKm i minuteProcjena', () => {
     const r = izracunajRutu(LAT1, LNG1, LAT2, LNG2);
@@ -88,7 +90,7 @@ describe('izracunajRutu — procjena cestovne rute', () => {
 
   it('dulja ruta daje veće minuteProcjena od kraće', () => {
     const kratka = izracunajRutu(43.86, 18.43, 43.861, 18.431);
-    const duga   = izracunajRutu(43.8486, 18.3564, 43.9100, 18.3400);
+    const duga = izracunajRutu(43.8486, 18.3564, 43.91, 18.34);
     expect(duga.minuteProcjena).toBeGreaterThan(kratka.minuteProcjena);
   });
 });

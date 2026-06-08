@@ -4,7 +4,7 @@ type Credentials = { email: string; password: string };
 
 function ucitajKredencijale(role: 'korisnik' | 'serviser'): Credentials | null {
   const prefix = role === 'korisnik' ? 'E2E_KORISNIK' : 'E2E_SERVISER';
-  const email    = process.env[`${prefix}_EMAIL`];
+  const email = process.env[`${prefix}_EMAIL`];
   const password = process.env[`${prefix}_PASSWORD`];
   if (!email || !password) return null;
   return { email, password };
@@ -30,9 +30,14 @@ test.describe('US-54 — Historija intervencija korisnika', () => {
   });
 
   test.describe('Prijavljeni korisnik', () => {
-    test.skip(!korisnik, 'Missing E2E_KORISNIK_EMAIL / E2E_KORISNIK_PASSWORD in environment.');
+    test.skip(
+      !korisnik,
+      'Missing E2E_KORISNIK_EMAIL / E2E_KORISNIK_PASSWORD in environment.',
+    );
 
-    test('historija se učitava i prikazuje listu ili prazno stanje (AC1/AC5)', async ({ page }) => {
+    test('historija se učitava i prikazuje listu ili prazno stanje (AC1/AC5)', async ({
+      page,
+    }) => {
       await prijaviSe(page, korisnik as Credentials);
       await page.goto('/korisnik/historija');
       await expect(page).toHaveURL('/korisnik/historija');
@@ -42,35 +47,53 @@ test.describe('US-54 — Historija intervencija korisnika', () => {
       await expect(page).not.toHaveURL(/\/error/);
     });
 
-    test('API /api/service-requests/historija vraća 200 za prijavljenog korisnika (AC4)', async ({ page }) => {
+    test('API /api/service-requests/historija vraća 200 za prijavljenog korisnika (AC4)', async ({
+      page,
+    }) => {
       await prijaviSe(page, korisnik as Credentials);
       await page.goto('/korisnik');
 
       const status = await page.evaluate(async () => {
-        const r = await fetch('/api/service-requests/historija', { cache: 'no-store' });
+        const r = await fetch('/api/service-requests/historija', {
+          cache: 'no-store',
+        });
         return r.status;
       });
       expect(status).toBe(200);
     });
 
-    test('API vraća samo historijske statuse — nema aktivnih (AC4)', async ({ page }) => {
+    test('API vraća samo historijske statuse — nema aktivnih (AC4)', async ({
+      page,
+    }) => {
       await prijaviSe(page, korisnik as Credentials);
       await page.goto('/korisnik');
 
       const body = await page.evaluate(async () => {
-        const r = await fetch('/api/service-requests/historija', { cache: 'no-store' });
+        const r = await fetch('/api/service-requests/historija', {
+          cache: 'no-store',
+        });
         return r.json();
       });
 
-      const dozvoljeniStatusi = new Set(['zatvoreno', 'zavrseno', 'otkazano', 'odbijeno']);
+      const dozvoljeniStatusi = new Set([
+        'zatvoreno',
+        'zavrseno',
+        'otkazano',
+        'odbijeno',
+      ]);
       for (const z of body.historija ?? []) {
         expect(dozvoljeniStatusi.has(z.status)).toBe(true);
       }
     });
   });
 
-  test.skip(!serviser, 'Missing E2E_SERVISER_EMAIL / E2E_SERVISER_PASSWORD in environment.');
-  test('serviser ne vidi tuđu historiju — API vraća samo vlastite zapise (AC6)', async ({ page }) => {
+  test.skip(
+    !serviser,
+    'Missing E2E_SERVISER_EMAIL / E2E_SERVISER_PASSWORD in environment.',
+  );
+  test('serviser ne vidi tuđu historiju — API vraća samo vlastite zapise (AC6)', async ({
+    page,
+  }) => {
     await prijaviSe(page, serviser as Credentials);
     await page.goto('/korisnik/historija');
 
@@ -79,7 +102,9 @@ test.describe('US-54 — Historija intervencija korisnika', () => {
     await expect(page).toHaveURL('/korisnik/historija');
 
     const { status, historija } = await page.evaluate(async () => {
-      const r = await fetch('/api/service-requests/historija', { cache: 'no-store' });
+      const r = await fetch('/api/service-requests/historija', {
+        cache: 'no-store',
+      });
       const body = await r.json();
       return { status: r.status, historija: body.historija ?? [] };
     });
@@ -87,7 +112,12 @@ test.describe('US-54 — Historija intervencija korisnika', () => {
     expect(status).toBe(200);
     expect(Array.isArray(historija)).toBe(true);
 
-    const dozvoljeniStatusi = new Set(['zatvoreno', 'zavrseno', 'otkazano', 'odbijeno']);
+    const dozvoljeniStatusi = new Set([
+      'zatvoreno',
+      'zavrseno',
+      'otkazano',
+      'odbijeno',
+    ]);
     for (const z of historija) {
       expect(dozvoljeniStatusi.has(z.status)).toBe(true);
     }
@@ -97,7 +127,9 @@ test.describe('US-54 — Historija intervencija korisnika', () => {
 // ─── US-52: Ocjena intervencije ───────────────────────────────────────────────
 
 test.describe('US-52 — Ocjena zatvorene intervencije', () => {
-  test('neautentificiran korisnik dobija 401 na POST ocjena', async ({ page }) => {
+  test('neautentificiran korisnik dobija 401 na POST ocjena', async ({
+    page,
+  }) => {
     await page.goto('/auth/login');
 
     const status = await page.evaluate(async () => {
@@ -112,7 +144,9 @@ test.describe('US-52 — Ocjena zatvorene intervencije', () => {
     expect(status).toBe(401);
   });
 
-  test('neautentificiran korisnik dobija 401 na GET ocjena', async ({ page }) => {
+  test('neautentificiran korisnik dobija 401 na GET ocjena', async ({
+    page,
+  }) => {
     await page.goto('/auth/login');
 
     const status = await page.evaluate(async () => {
@@ -125,20 +159,29 @@ test.describe('US-52 — Ocjena zatvorene intervencije', () => {
   });
 
   test.describe('Prijavljeni korisnik', () => {
-    test.skip(!korisnik, 'Missing E2E_KORISNIK_EMAIL / E2E_KORISNIK_PASSWORD in environment.');
+    test.skip(
+      !korisnik,
+      'Missing E2E_KORISNIK_EMAIL / E2E_KORISNIK_PASSWORD in environment.',
+    );
 
-    test('nepostojeći zahtjev vraća 404 za GET ocjena (AC5)', async ({ page }) => {
+    test('nepostojeći zahtjev vraća 404 za GET ocjena (AC5)', async ({
+      page,
+    }) => {
       await prijaviSe(page, korisnik as Credentials);
       await page.goto('/korisnik');
 
       const status = await page.evaluate(async () => {
-        const r = await fetch('/api/service-requests/999999/ocjena', { cache: 'no-store' });
+        const r = await fetch('/api/service-requests/999999/ocjena', {
+          cache: 'no-store',
+        });
         return r.status;
       });
       expect(status).toBe(404);
     });
 
-    test('ocjena 0 na POST vraća 400 (AC2 — validacija raspona)', async ({ page }) => {
+    test('ocjena 0 na POST vraća 400 (AC2 — validacija raspona)', async ({
+      page,
+    }) => {
       await prijaviSe(page, korisnik as Credentials);
       await page.goto('/korisnik');
 
@@ -154,7 +197,9 @@ test.describe('US-52 — Ocjena zatvorene intervencije', () => {
       expect(status).toBe(400);
     });
 
-    test('ocjena 6 na POST vraća 400 (AC2 — validacija raspona)', async ({ page }) => {
+    test('ocjena 6 na POST vraća 400 (AC2 — validacija raspona)', async ({
+      page,
+    }) => {
       await prijaviSe(page, korisnik as Credentials);
       await page.goto('/korisnik');
 
@@ -194,19 +239,25 @@ test.describe('US-52 — Ocjena zatvorene intervencije', () => {
 // ─── RBAC: Historija nije dostupna bez prijave ────────────────────────────────
 
 test.describe('RBAC — Historija i ocjene zahtijevaju autentifikaciju', () => {
-  test('GET /api/service-requests/historija bez sesije → 401', async ({ page }) => {
+  test('GET /api/service-requests/historija bez sesije → 401', async ({
+    page,
+  }) => {
     // Osiguravamo da nema aktivne sesije
     await page.context().clearCookies();
     await page.goto('/');
 
     const status = await page.evaluate(async () => {
-      const r = await fetch('/api/service-requests/historija', { cache: 'no-store' });
+      const r = await fetch('/api/service-requests/historija', {
+        cache: 'no-store',
+      });
       return r.status;
     });
     expect(status).toBe(401);
   });
 
-  test('POST /api/service-requests/1/ocjena bez sesije → 401', async ({ page }) => {
+  test('POST /api/service-requests/1/ocjena bez sesije → 401', async ({
+    page,
+  }) => {
     await page.context().clearCookies();
     await page.goto('/');
 

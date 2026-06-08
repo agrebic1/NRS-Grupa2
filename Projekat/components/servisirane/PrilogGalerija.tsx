@@ -30,7 +30,10 @@ export function PrilogGalerija({ urls, className = '' }: PrilogGalerijaProps) {
 
   return (
     <div className={className}>
-      <div className="rounded-2xl p-[3px] shadow-md" style={{ background: GALERIJA_GRADIJENT }}>
+      <div
+        className="rounded-2xl p-[3px] shadow-md"
+        style={{ background: GALERIJA_GRADIJENT }}
+      >
         <div
           className="relative overflow-hidden rounded-[13px]"
           style={{
@@ -58,9 +61,7 @@ export function PrilogGalerija({ urls, className = '' }: PrilogGalerijaProps) {
                 className="h-full w-full object-cover"
               />
               <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-black/[0.03] opacity-70 transition group-hover:opacity-100" />
-              <span
-                className="pointer-events-none absolute bottom-2.5 right-2.5 inline-flex items-center gap-1 rounded-lg bg-black/50 px-2.5 py-1.5 text-[11px] font-semibold text-white/95 shadow-lg backdrop-blur-[2px]"
-              >
+              <span className="pointer-events-none absolute bottom-2.5 right-2.5 inline-flex items-center gap-1 rounded-lg bg-black/50 px-2.5 py-1.5 text-[11px] font-semibold text-white/95 shadow-lg backdrop-blur-[2px]">
                 <ZoomIn className="h-3.5 w-3.5 opacity-90" aria-hidden />
                 Povećaj
               </span>
@@ -70,7 +71,10 @@ export function PrilogGalerija({ urls, className = '' }: PrilogGalerijaProps) {
       </div>
 
       {urls.length > 1 && (
-        <ul className="mt-3.5 flex flex-wrap gap-2.5" aria-label="Miniture priloženih slika">
+        <ul
+          className="mt-3.5 flex flex-wrap gap-2.5"
+          aria-label="Miniture priloženih slika"
+        >
           {urls.map((url, i) => {
             const odabrano = i === bez;
             return (
@@ -92,12 +96,18 @@ export function PrilogGalerija({ urls, className = '' }: PrilogGalerijaProps) {
                       ? 'border-[3px] border-celestial-teal shadow-md'
                       : 'border border-[rgb(var(--first-quaternary-rgb)/0.5)] hover:border-[rgb(var(--first-secondary-rgb)/0.65)] hover:shadow',
                   ].join(' ')}
-                  style={{ backgroundColor: 'rgb(var(--first-quinary-rgb) / 0.14)' }}
+                  style={{
+                    backgroundColor: 'rgb(var(--first-quinary-rgb) / 0.14)',
+                  }}
                   aria-label={`Prikaži sliku ${i + 1} od ${urls.length}`}
                   aria-current={odabrano ? 'true' : undefined}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={url} alt="" className="h-full w-full object-cover" />
+                  <img
+                    src={url}
+                    alt=""
+                    className="h-full w-full object-cover"
+                  />
                 </button>
               </li>
             );
@@ -106,7 +116,10 @@ export function PrilogGalerija({ urls, className = '' }: PrilogGalerijaProps) {
       )}
 
       {urls.length === 1 && (
-        <p className="mt-2 text-center text-[11px] leading-snug" style={{ color: 'rgb(var(--first-nonary-rgb) / 0.68)' }}>
+        <p
+          className="mt-2 text-center text-[11px] leading-snug"
+          style={{ color: 'rgb(var(--first-nonary-rgb) / 0.68)' }}
+        >
           Klik na sliku za puni pregled
         </p>
       )}
@@ -137,9 +150,15 @@ type OkvirGalerijeProps = {
 };
 
 /** Istovjetan okvir kao glavna slika u PrilogGaleriji - za blob pregled u čarobnjaku / kartice. */
-export function OkvirGalerije({ children, className = '' }: OkvirGalerijeProps) {
+export function OkvirGalerije({
+  children,
+  className = '',
+}: OkvirGalerijeProps) {
   return (
-    <div className={`rounded-2xl p-[3px] shadow-md ${className}`} style={{ background: GALERIJA_GRADIJENT }}>
+    <div
+      className={`rounded-2xl p-[3px] shadow-md ${className}`}
+      style={{ background: GALERIJA_GRADIJENT }}
+    >
       <div
         className="overflow-hidden rounded-[13px]"
         style={{

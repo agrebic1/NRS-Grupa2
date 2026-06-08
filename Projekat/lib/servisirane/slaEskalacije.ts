@@ -1,19 +1,32 @@
 import { getSlaStatus } from '@/lib/servisirane/slaPravila';
 import { zabiljeziAktivnost } from '@/lib/servisirane/aktivnostiAudit';
-import { dohvatiUposlenikIdsPoUlogama, kreirajViseNotifikacija } from '@/lib/servisirane/notifikacijeHelper';
+import {
+  dohvatiUposlenikIdsPoUlogama,
+  kreirajViseNotifikacija,
+} from '@/lib/servisirane/notifikacijeHelper';
 
 type AnyDB = {
   from: (t: string) => {
     select: (c: string) => {
-      eq: (col: string, val: unknown) => {
-        filter: (a: string, b: string, c: string) => {
+      eq: (
+        col: string,
+        val: unknown,
+      ) => {
+        filter: (
+          a: string,
+          b: string,
+          c: string,
+        ) => {
           maybeSingle: () => Promise<{ data: unknown }>;
         };
         maybeSingle: () => Promise<{ data: unknown }>;
       };
     };
     update: (p: Record<string, unknown>) => {
-      eq: (col: string, val: unknown) => Promise<{ error: { message: string } | null }>;
+      eq: (
+        col: string,
+        val: unknown,
+      ) => Promise<{ error: { message: string } | null }>;
     };
   };
 };
@@ -46,26 +59,33 @@ export async function obradiSlaEskalacijuZaZahtjev(
     if (Date.now() - zadnja < COOLDOWN_MS) return false;
   }
 
-  const ids = await dohvatiUposlenikIdsPoUlogama(db as any, ['Dispečer', 'dispečer', 'dispecer']);
+  const ids = await dohvatiUposlenikIdsPoUlogama(db as any, [
+    'Dispečer',
+    'dispečer',
+    'dispecer',
+  ]);
 
   if (ids.length) {
-    await kreirajViseNotifikacija(db as any, ids.map((id) => ({
-      korisnik_id:     id,
-      uloga_korisnika: 'Dispečer',
-      tip:             'sla_eskalacija',
-      naslov:          'SLA prekoračen - potrebna reakcija',
-      poruka:          `Intervencija #${zahtjev.id} prekoračila je dogovoreni SLA rok. Provjerite prioritet i dodjelu.`,
-      zahtjev_id:      zahtjev.id,
-    })));
+    await kreirajViseNotifikacija(
+      db as any,
+      ids.map((id) => ({
+        korisnik_id: id,
+        uloga_korisnika: 'Dispečer',
+        tip: 'sla_eskalacija',
+        naslov: 'SLA prekoračen - potrebna reakcija',
+        poruka: `Intervencija #${zahtjev.id} prekoračila je dogovoreni SLA rok. Provjerite prioritet i dodjelu.`,
+        zahtjev_id: zahtjev.id,
+      })),
+    );
   }
 
   await zabiljeziAktivnost(db as any, {
     zahtjev_id: zahtjev.id,
-    autor_id:   sistemAutorId,
-    tip:        'sla_eskalacija',
-    sadrzaj:    'Sistem eskalirao prekoračen SLA dispečerima.',
+    autor_id: sistemAutorId,
+    tip: 'sla_eskalacija',
+    sadrzaj: 'Sistem eskalirao prekoračen SLA dispečerima.',
     actor_role: 'sistem',
-    metadata:   { prioritet: zahtjev.operativni_prioritet },
+    metadata: { prioritet: zahtjev.operativni_prioritet },
   });
 
   await (db as any)

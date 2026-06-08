@@ -22,8 +22,10 @@ export default function RegistracijaPage() {
           backgroundImage:
             'linear-gradient(rgb(var(--first-secondary-rgb) / 0.06) 1px, transparent 1px), linear-gradient(90deg, rgb(var(--first-secondary-rgb) / 0.06) 1px, transparent 1px)',
           backgroundSize: '30px 30px',
-          maskImage: 'radial-gradient(circle at center, black 38%, transparent 85%)',
-          WebkitMaskImage: 'radial-gradient(circle at center, black 38%, transparent 85%)',
+          maskImage:
+            'radial-gradient(circle at center, black 38%, transparent 85%)',
+          WebkitMaskImage:
+            'radial-gradient(circle at center, black 38%, transparent 85%)',
         }}
         aria-hidden
       />
@@ -48,7 +50,10 @@ export default function RegistracijaPage() {
         >
           <Settings className="h-5 w-5 text-white" />
         </div>
-        <span className="text-lg font-bold tracking-tight" style={{ color: 'var(--first-octonary)' }}>
+        <span
+          className="text-lg font-bold tracking-tight"
+          style={{ color: 'var(--first-octonary)' }}
+        >
           InterServ
         </span>
       </Link>
@@ -65,11 +70,18 @@ export default function RegistracijaPage() {
           }}
         >
           <div className="mb-6">
-            <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--first-octonary)' }}>
+            <h1
+              className="text-2xl font-bold tracking-tight"
+              style={{ color: 'var(--first-octonary)' }}
+            >
               Kreirajte korisnički nalog
             </h1>
-            <p className="mt-2 text-sm leading-relaxed" style={{ color: 'var(--first-nonary)' }}>
-              Registracija je namijenjena korisnicima usluge koji žele prijaviti servisnu intervenciju.
+            <p
+              className="mt-2 text-sm leading-relaxed"
+              style={{ color: 'var(--first-nonary)' }}
+            >
+              Registracija je namijenjena korisnicima usluge koji žele prijaviti
+              servisnu intervenciju.
             </p>
           </div>
 
@@ -81,10 +93,17 @@ export default function RegistracijaPage() {
               borderColor: 'rgb(var(--first-senary-rgb) / 0.25)',
             }}
           >
-            <ShieldAlert className="mt-0.5 h-4 w-4 flex-shrink-0" style={{ color: 'var(--first-senary)' }} />
-            <p className="text-xs leading-relaxed" style={{ color: 'var(--first-senary)' }}>
-              <span className="font-semibold">Napomena za uposlenike:</span>{' '}
-              Ako ste serviser ili uposlenik sistema, nalog vam kreira administrator. Ne registrujte se ovdje.
+            <ShieldAlert
+              className="mt-0.5 h-4 w-4 flex-shrink-0"
+              style={{ color: 'var(--first-senary)' }}
+            />
+            <p
+              className="text-xs leading-relaxed"
+              style={{ color: 'var(--first-senary)' }}
+            >
+              <span className="font-semibold">Napomena za uposlenike:</span> Ako
+              ste serviser ili uposlenik sistema, nalog vam kreira
+              administrator. Ne registrujte se ovdje.
             </p>
           </div>
 
@@ -94,7 +113,10 @@ export default function RegistracijaPage() {
             className="mt-6 border-t pt-5"
             style={{ borderColor: 'rgb(var(--first-quaternary-rgb) / 0.4)' }}
           >
-            <p className="text-center text-sm" style={{ color: 'var(--first-nonary)' }}>
+            <p
+              className="text-center text-sm"
+              style={{ color: 'var(--first-nonary)' }}
+            >
               Već imate nalog?{' '}
               <Link
                 href="/auth/login"
@@ -112,9 +134,13 @@ export default function RegistracijaPage() {
           className="mt-4 flex items-start gap-2 rounded-xl px-4 py-3 text-xs"
           style={{ color: 'var(--first-nonary)' }}
         >
-          <Info className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" style={{ color: 'var(--first-secondary)' }} />
+          <Info
+            className="mt-0.5 h-3.5 w-3.5 flex-shrink-0"
+            style={{ color: 'var(--first-secondary)' }}
+          />
           <span>
-            Kreiranjem naloga prihvatate naše uslove korištenja. Vaši podaci su zaštićeni i neće biti dijeljeni s trećim stranama.
+            Kreiranjem naloga prihvatate naše uslove korištenja. Vaši podaci su
+            zaštićeni i neće biti dijeljeni s trećim stranama.
           </span>
         </div>
       </div>

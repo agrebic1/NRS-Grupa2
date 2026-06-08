@@ -11,7 +11,7 @@
  */
 
 const mockGetUser = jest.fn();
-const mockFrom    = jest.fn();
+const mockFrom = jest.fn();
 
 jest.mock('@/lib/supabase/server', () => ({
   createClient: () => ({
@@ -49,14 +49,23 @@ function zahtjevZaHistoriju(overrides = {}) {
   };
 }
 
-function flexChain({ listData = [], listError = null, singleData = null, singleError = null } = {}) {
+function flexChain({
+  listData = [],
+  listError = null,
+  singleData = null,
+  singleError = null,
+} = {}) {
   return {
     select: jest.fn().mockReturnThis(),
-    eq:     jest.fn().mockReturnThis(),
-    in:     jest.fn().mockResolvedValue({ data: listData, error: listError }),
-    order:  jest.fn().mockReturnThis(),
-    maybeSingle: jest.fn().mockResolvedValue({ data: singleData, error: singleError }),
-    single: jest.fn().mockResolvedValue({ data: singleData, error: singleError }),
+    eq: jest.fn().mockReturnThis(),
+    in: jest.fn().mockResolvedValue({ data: listData, error: listError }),
+    order: jest.fn().mockReturnThis(),
+    maybeSingle: jest
+      .fn()
+      .mockResolvedValue({ data: singleData, error: singleError }),
+    single: jest
+      .fn()
+      .mockResolvedValue({ data: singleData, error: singleError }),
   };
 }
 
@@ -79,9 +88,9 @@ describe('GET /api/service-requests/historija', () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'u1' } } });
     mockFrom.mockImplementation(() => ({
       select: jest.fn().mockReturnThis(),
-      eq:     jest.fn().mockReturnThis(),
-      in:     jest.fn().mockReturnThis(),
-      order:  jest.fn().mockResolvedValue({ data: [], error: null }),
+      eq: jest.fn().mockReturnThis(),
+      in: jest.fn().mockReturnThis(),
+      order: jest.fn().mockResolvedValue({ data: [], error: null }),
     }));
 
     const res = await GET();
@@ -92,27 +101,31 @@ describe('GET /api/service-requests/historija', () => {
 
   it('200 — vraća historiju s ocjenom priključenom (AC2)', async () => {
     const zahtjev1 = zahtjevZaHistoriju({ id: 10 });
-    const zahtjev2 = zahtjevZaHistoriju({ id: 11, status: 'otkazano', cancel_reason: 'Sam riješio.' });
+    const zahtjev2 = zahtjevZaHistoriju({
+      id: 11,
+      status: 'otkazano',
+      cancel_reason: 'Sam riješio.',
+    });
 
-    const ocjene = [
-      { zahtjev_id: 10, ocjena: 5, komentar: 'Odlično!' },
-    ];
+    const ocjene = [{ zahtjev_id: 10, ocjena: 5, komentar: 'Odlično!' }];
 
     mockGetUser.mockResolvedValue({ data: { user: { id: 'u1' } } });
     mockFrom.mockImplementation((table) => {
       if (table === 'service_requests') {
         return {
           select: jest.fn().mockReturnThis(),
-          eq:     jest.fn().mockReturnThis(),
-          in:     jest.fn().mockReturnThis(),
-          order:  jest.fn().mockResolvedValue({ data: [zahtjev1, zahtjev2], error: null }),
+          eq: jest.fn().mockReturnThis(),
+          in: jest.fn().mockReturnThis(),
+          order: jest
+            .fn()
+            .mockResolvedValue({ data: [zahtjev1, zahtjev2], error: null }),
         };
       }
       if (table === 'intervencija_ocjene') {
         return {
           select: jest.fn().mockReturnThis(),
-          eq:     jest.fn().mockReturnThis(),
-          in:     jest.fn().mockResolvedValue({ data: ocjene, error: null }),
+          eq: jest.fn().mockReturnThis(),
+          in: jest.fn().mockResolvedValue({ data: ocjene, error: null }),
         };
       }
       return flexChain();
@@ -147,16 +160,16 @@ describe('GET /api/service-requests/historija', () => {
       if (table === 'service_requests') {
         return {
           select: jest.fn().mockReturnThis(),
-          eq:     jest.fn().mockReturnThis(),
-          in:     jest.fn().mockReturnThis(),
-          order:  jest.fn().mockResolvedValue({ data: zahtjevi, error: null }),
+          eq: jest.fn().mockReturnThis(),
+          in: jest.fn().mockReturnThis(),
+          order: jest.fn().mockResolvedValue({ data: zahtjevi, error: null }),
         };
       }
       if (table === 'intervencija_ocjene') {
         return {
           select: jest.fn().mockReturnThis(),
-          eq:     jest.fn().mockReturnThis(),
-          in:     jest.fn().mockResolvedValue({ data: [], error: null }),
+          eq: jest.fn().mockReturnThis(),
+          in: jest.fn().mockResolvedValue({ data: [], error: null }),
         };
       }
       return flexChain();
@@ -185,16 +198,16 @@ describe('GET /api/service-requests/historija', () => {
       if (table === 'service_requests') {
         return {
           select: jest.fn().mockReturnThis(),
-          eq:     jest.fn().mockReturnThis(),
-          in:     jest.fn().mockReturnThis(),
-          order:  jest.fn().mockResolvedValue({ data: zahtjevi, error: null }),
+          eq: jest.fn().mockReturnThis(),
+          in: jest.fn().mockReturnThis(),
+          order: jest.fn().mockResolvedValue({ data: zahtjevi, error: null }),
         };
       }
       if (table === 'intervencija_ocjene') {
         return {
           select: jest.fn().mockReturnThis(),
-          eq:     jest.fn().mockReturnThis(),
-          in:     jest.fn().mockResolvedValue({ data: [], error: null }),
+          eq: jest.fn().mockReturnThis(),
+          in: jest.fn().mockResolvedValue({ data: [], error: null }),
         };
       }
       return flexChain();
@@ -211,9 +224,11 @@ describe('GET /api/service-requests/historija', () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'u1' } } });
     mockFrom.mockImplementation(() => ({
       select: jest.fn().mockReturnThis(),
-      eq:     jest.fn().mockReturnThis(),
-      in:     jest.fn().mockReturnThis(),
-      order:  jest.fn().mockResolvedValue({ data: null, error: { message: 'DB error' } }),
+      eq: jest.fn().mockReturnThis(),
+      in: jest.fn().mockReturnThis(),
+      order: jest
+        .fn()
+        .mockResolvedValue({ data: null, error: { message: 'DB error' } }),
     }));
 
     const res = await GET();
@@ -223,14 +238,16 @@ describe('GET /api/service-requests/historija', () => {
   it('200 — nema lažnih intervencija (AC4: user_id filter sprječava IDOR)', async () => {
     // API ruta koristi .eq('user_id', user.id) — simuliramo da DB vraća []
     // za korisnika koji zapravo nema historije (eq filter eliminira tuđe)
-    mockGetUser.mockResolvedValue({ data: { user: { id: 'u_bez_historije' } } });
+    mockGetUser.mockResolvedValue({
+      data: { user: { id: 'u_bez_historije' } },
+    });
     mockFrom.mockImplementation((table) => {
       if (table === 'service_requests') {
         return {
           select: jest.fn().mockReturnThis(),
-          eq:     jest.fn().mockReturnThis(),
-          in:     jest.fn().mockReturnThis(),
-          order:  jest.fn().mockResolvedValue({ data: [], error: null }),
+          eq: jest.fn().mockReturnThis(),
+          in: jest.fn().mockReturnThis(),
+          order: jest.fn().mockResolvedValue({ data: [], error: null }),
         };
       }
       return flexChain();
@@ -250,16 +267,16 @@ describe('GET /api/service-requests/historija', () => {
       if (table === 'service_requests') {
         return {
           select: jest.fn().mockReturnThis(),
-          eq:     jest.fn().mockReturnThis(),
-          in:     jest.fn().mockReturnThis(),
-          order:  jest.fn().mockResolvedValue({ data: [zahtjev], error: null }),
+          eq: jest.fn().mockReturnThis(),
+          in: jest.fn().mockReturnThis(),
+          order: jest.fn().mockResolvedValue({ data: [zahtjev], error: null }),
         };
       }
       if (table === 'intervencija_ocjene') {
         return {
           select: jest.fn().mockReturnThis(),
-          eq:     jest.fn().mockReturnThis(),
-          in:     jest.fn().mockResolvedValue({ data: [], error: null }),
+          eq: jest.fn().mockReturnThis(),
+          in: jest.fn().mockResolvedValue({ data: [], error: null }),
         };
       }
       return flexChain();

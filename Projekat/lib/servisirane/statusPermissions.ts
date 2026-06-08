@@ -7,7 +7,12 @@ import {
 
 export function zahtjevCekaObraduUInboxuDispecera(status: string): boolean {
   const s = status.toLowerCase();
-  return s === 'pending_review' || s === 'na_cekanju' || s === 'in_review' || s === 'potvrdeno';
+  return (
+    s === 'pending_review' ||
+    s === 'na_cekanju' ||
+    s === 'in_review' ||
+    s === 'potvrdeno'
+  );
 }
 
 /** Još nije otvoren dispečerski čarobnjak (prije koraka Prioritet / Termin…). */
@@ -47,6 +52,10 @@ export function zahtjevJeUToku(status: string): boolean {
   return ['dodijeljeno', 'u_radu', 'u_izvrsenju'].includes(status);
 }
 
-export function dispecerSmijeMijenjatiOperativniPrioritet(status: string): boolean {
-  return STATUSI_ZA_DISPECERSKU_IZMJENU_PRIORITETA.has(status as StatusZahtjeva);
+export function dispecerSmijeMijenjatiOperativniPrioritet(
+  status: string,
+): boolean {
+  return STATUSI_ZA_DISPECERSKU_IZMJENU_PRIORITETA.has(
+    status as StatusZahtjeva,
+  );
 }

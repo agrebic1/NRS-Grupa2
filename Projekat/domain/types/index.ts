@@ -9,10 +9,10 @@ export type StatusIntervencije = 'planirana' | 'u_toku' | 'zavrsena';
 // ─── Konstante ────────────────────────────────────────────────────────────────
 
 export const PREUSMJERANJE_PO_ULOZI: Record<UserRole, string> = {
-  korisnik:  '/korisnik',
-  serviser:  '/serviser',
-  dispecer:  '/dispecer',
-  admin:     '/admin',
+  korisnik: '/korisnik',
+  serviser: '/serviser',
+  dispecer: '/dispecer',
+  admin: '/admin',
 } as const;
 
 // ─── Domain interfejsi ────────────────────────────────────────────────────────
@@ -48,4 +48,3 @@ export interface Zahtjev {
   razlog_otkazivanja: string | null;
   vrijeme: string | null;
 }
-

@@ -16,7 +16,9 @@ jest.mock('@/lib/supabase/admin', () => ({
     storage: {
       from: () => ({
         upload: mockStorageUpload,
-        getPublicUrl: () => ({ data: { publicUrl: 'https://example.com/slika.jpg' } }),
+        getPublicUrl: () => ({
+          data: { publicUrl: 'https://example.com/slika.jpg' },
+        }),
       }),
     },
     from: mockFrom,
@@ -31,7 +33,9 @@ const { NextRequest } = require('next/server');
 const { GET, POST } = require('@/app/api/slike/route');
 
 function slikeUrl(query = '') {
-  return new NextRequest(`http://localhost/api/slike${query ? `?${query}` : ''}`);
+  return new NextRequest(
+    `http://localhost/api/slike${query ? `?${query}` : ''}`,
+  );
 }
 
 function listChain(data = []) {
@@ -69,7 +73,9 @@ describe('/api/slike - Sprint 9 (US-43)', () => {
     mockSessionGetUser.mockResolvedValue({ data: { user: { id: 's1' } } });
     mockFrom.mockImplementation((table) => {
       if (table === 'slike_intervencija') {
-        return listChain([{ id: 1, zahtjev_id: 5, image_url: 'https://example.com/a.jpg' }]);
+        return listChain([
+          { id: 1, zahtjev_id: 5, image_url: 'https://example.com/a.jpg' },
+        ]);
       }
       return listChain([]);
     });
@@ -86,7 +92,12 @@ describe('/api/slike - Sprint 9 (US-43)', () => {
 
     const form = new FormData();
     form.append('zahtjev_id', '1');
-    const response = await POST(new NextRequest('http://localhost/api/slike', { method: 'POST', body: form }));
+    const response = await POST(
+      new NextRequest('http://localhost/api/slike', {
+        method: 'POST',
+        body: form,
+      }),
+    );
     expect(response.status).toBe(401);
   });
 
@@ -97,7 +108,9 @@ describe('/api/slike - Sprint 9 (US-43)', () => {
       select: jest.fn().mockReturnThis(),
       eq: jest.fn().mockReturnThis(),
       single: jest.fn().mockResolvedValue({
-        data: { serviser_dodijeljen_id: '11111111-1111-1111-1111-111111111101' },
+        data: {
+          serviser_dodijeljen_id: '11111111-1111-1111-1111-111111111101',
+        },
         error: null,
       }),
     }));
@@ -107,7 +120,12 @@ describe('/api/slike - Sprint 9 (US-43)', () => {
     form.append('file', file);
     form.append('zahtjev_id', '1');
 
-    const response = await POST(new NextRequest('http://localhost/api/slike', { method: 'POST', body: form }));
+    const response = await POST(
+      new NextRequest('http://localhost/api/slike', {
+        method: 'POST',
+        body: form,
+      }),
+    );
     expect(response.status).toBe(403);
   });
 
@@ -125,7 +143,12 @@ describe('/api/slike - Sprint 9 (US-43)', () => {
     const form = new FormData();
     form.append('zahtjev_id', '1');
 
-    const response = await POST(new NextRequest('http://localhost/api/slike', { method: 'POST', body: form }));
+    const response = await POST(
+      new NextRequest('http://localhost/api/slike', {
+        method: 'POST',
+        body: form,
+      }),
+    );
     expect(response.status).toBe(400);
   });
 
@@ -150,7 +173,12 @@ describe('/api/slike - Sprint 9 (US-43)', () => {
     form.append('file', file);
     form.append('zahtjev_id', '1');
 
-    const response = await POST(new NextRequest('http://localhost/api/slike', { method: 'POST', body: form }));
+    const response = await POST(
+      new NextRequest('http://localhost/api/slike', {
+        method: 'POST',
+        body: form,
+      }),
+    );
     expect(response.status).toBe(400);
   });
 });

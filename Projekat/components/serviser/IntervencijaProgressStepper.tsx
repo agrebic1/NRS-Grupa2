@@ -1,26 +1,55 @@
 'use client';
 
-import { Check, ClipboardList, Truck, CheckCircle2, XCircle } from 'lucide-react';
+import {
+  Check,
+  ClipboardList,
+  Truck,
+  CheckCircle2,
+  XCircle,
+} from 'lucide-react';
 
 // ─── Definicija koraka ────────────────────────────────────────────────────────
 
 interface Korak {
-  kljuc:  string;
-  naziv:  string;
+  kljuc: string;
+  naziv: string;
   skrNaziv: string; // Za mobilni prikaz
-  Ikona:  React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
+  Ikona: React.ComponentType<{
+    className?: string;
+    style?: React.CSSProperties;
+  }>;
 }
 
 const KORACI: Korak[] = [
-  { kljuc: 'dodijeljeno',  naziv: 'Dodijeljeno', skrNaziv: 'Dodjela', Ikona: ClipboardList },
-  { kljuc: 'u_radu',       naziv: 'Prihvaćeno',  skrNaziv: 'Prihv.',  Ikona: CheckCircle2  },
-  { kljuc: 'u_izvrsenju',  naziv: 'Na terenu',   skrNaziv: 'Teren',   Ikona: Truck         },
-  { kljuc: 'zavrseno',     naziv: 'Završeno',    skrNaziv: 'Završ.',  Ikona: CheckCircle2  },
+  {
+    kljuc: 'dodijeljeno',
+    naziv: 'Dodijeljeno',
+    skrNaziv: 'Dodjela',
+    Ikona: ClipboardList,
+  },
+  {
+    kljuc: 'u_radu',
+    naziv: 'Prihvaćeno',
+    skrNaziv: 'Prihv.',
+    Ikona: CheckCircle2,
+  },
+  { kljuc: 'u_izvrsenju', naziv: 'Na terenu', skrNaziv: 'Teren', Ikona: Truck },
+  {
+    kljuc: 'zavrseno',
+    naziv: 'Završeno',
+    skrNaziv: 'Završ.',
+    Ikona: CheckCircle2,
+  },
 ];
 
 // ─── Redoslijed statusa ───────────────────────────────────────────────────────
 
-const REDOSLIJED: string[] = ['dodijeljeno', 'u_radu', 'u_izvrsenju', 'zavrseno'];
+const REDOSLIJED: string[] = [
+  'dodijeljeno',
+  'u_radu',
+  'u_izvrsenju',
+  'zavrseno',
+];
 
 function indeksKoraka(status: string): number {
   return REDOSLIJED.indexOf(status);
@@ -28,17 +57,16 @@ function indeksKoraka(status: string): number {
 
 // ─── Boje ─────────────────────────────────────────────────────────────────────
 
-const ZELENA    = '#22C55E';
-const CRVENA    = '#DC2626';
-const SIVA_BG   = 'rgba(156,163,175,0.18)';
+const ZELENA = '#22C55E';
+const CRVENA = '#DC2626';
+const SIVA_BG = 'rgba(156,163,175,0.18)';
 const SIVA_RUBA = 'rgba(156,163,175,0.4)';
-const SIVA_TXT  = '#9CA3AF';
+const SIVA_TXT = '#9CA3AF';
 
 // ─── Komponenta ───────────────────────────────────────────────────────────────
 
 export function IntervencijaProgressStepper({ status }: { status: string }) {
-  const jeOtkazanoOdbijeno =
-    status === 'otkazano' || status === 'odbijeno';
+  const jeOtkazanoOdbijeno = status === 'otkazano' || status === 'odbijeno';
 
   const aktivniIndeks = indeksKoraka(status);
 
@@ -51,7 +79,7 @@ export function IntervencijaProgressStepper({ status }: { status: string }) {
           className="flex h-12 w-12 items-center justify-center rounded-full"
           style={{
             backgroundColor: 'rgba(220,38,38,0.12)',
-            border:          `2px solid rgba(220,38,38,0.35)`,
+            border: `2px solid rgba(220,38,38,0.35)`,
           }}
         >
           <XCircle className="h-6 w-6" style={{ color: CRVENA }} />
@@ -72,13 +100,16 @@ export function IntervencijaProgressStepper({ status }: { status: string }) {
       <div className="flex items-start">
         {KORACI.map((korak, idx) => {
           const jeZavrsen = aktivniIndeks > idx;
-          const jeAktivan  = aktivniIndeks === idx;
-          const jeBudući   = aktivniIndeks < idx;
+          const jeAktivan = aktivniIndeks === idx;
+          const jeBudući = aktivniIndeks < idx;
           const jePoslednji = idx === KORACI.length - 1;
           const IkonaKoraka = korak.Ikona;
 
           return (
-            <div key={korak.kljuc} className="flex flex-1 flex-col items-center">
+            <div
+              key={korak.kljuc}
+              className="flex flex-1 flex-col items-center"
+            >
               {/* Gornji red: krug + linija */}
               <div className="flex w-full items-center">
                 {/* Lijeva linija (nije kod prvog) */}
@@ -86,9 +117,8 @@ export function IntervencijaProgressStepper({ status }: { status: string }) {
                   <div
                     className="h-0.5 flex-1 transition-colors duration-500"
                     style={{
-                      backgroundColor: jeZavrsen || jeAktivan
-                        ? ZELENA
-                        : SIVA_RUBA,
+                      backgroundColor:
+                        jeZavrsen || jeAktivan ? ZELENA : SIVA_RUBA,
                     }}
                   />
                 )}
@@ -106,16 +136,17 @@ export function IntervencijaProgressStepper({ status }: { status: string }) {
                   <div
                     className="relative flex items-center justify-center rounded-full transition-all duration-300"
                     style={{
-                      width:           jeAktivan ? '2.25rem' : '1.875rem',
-                      height:          jeAktivan ? '2.25rem' : '1.875rem',
+                      width: jeAktivan ? '2.25rem' : '1.875rem',
+                      height: jeAktivan ? '2.25rem' : '1.875rem',
                       backgroundColor: jeZavrsen
                         ? ZELENA
                         : jeAktivan
                           ? 'var(--first-secondary)'
                           : SIVA_BG,
-                      border: jeZavrsen || jeAktivan
-                        ? 'none'
-                        : `2px solid ${SIVA_RUBA}`,
+                      border:
+                        jeZavrsen || jeAktivan
+                          ? 'none'
+                          : `2px solid ${SIVA_RUBA}`,
                     }}
                   >
                     {jeZavrsen ? (
@@ -142,9 +173,7 @@ export function IntervencijaProgressStepper({ status }: { status: string }) {
                   <div
                     className="h-0.5 flex-1 transition-colors duration-500"
                     style={{
-                      backgroundColor: jeZavrsen
-                        ? ZELENA
-                        : SIVA_RUBA,
+                      backgroundColor: jeZavrsen ? ZELENA : SIVA_RUBA,
                     }}
                   />
                 )}

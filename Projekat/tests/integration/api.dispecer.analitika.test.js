@@ -62,7 +62,9 @@ describe('/api/dispecer/analitika - Sprint 10 (US-49)', () => {
   test('GET → 401 bez sesije', async () => {
     mockSessionGetUser.mockResolvedValue({ data: { user: null } });
 
-    const response = await GET(new Request('http://localhost/api/dispecer/analitika'));
+    const response = await GET(
+      new Request('http://localhost/api/dispecer/analitika'),
+    );
     expect(response.status).toBe(401);
   });
 
@@ -70,7 +72,9 @@ describe('/api/dispecer/analitika - Sprint 10 (US-49)', () => {
     mockSessionGetUser.mockResolvedValue({ data: { user: { id: 'u1' } } });
     mockAssertDispatcherAccess.mockResolvedValue(false);
 
-    const response = await GET(new Request('http://localhost/api/dispecer/analitika'));
+    const response = await GET(
+      new Request('http://localhost/api/dispecer/analitika'),
+    );
     expect(response.status).toBe(403);
   });
 
@@ -79,7 +83,9 @@ describe('/api/dispecer/analitika - Sprint 10 (US-49)', () => {
     mockAssertDispatcherAccess.mockResolvedValue(true);
 
     const response = await GET(
-      new Request('http://localhost/api/dispecer/analitika?od=xyz&do=2026-06-01'),
+      new Request(
+        'http://localhost/api/dispecer/analitika?od=xyz&do=2026-06-01',
+      ),
     );
     expect(response.status).toBe(400);
   });
@@ -107,7 +113,9 @@ describe('/api/dispecer/analitika - Sprint 10 (US-49)', () => {
     });
 
     const response = await GET(
-      new Request('http://localhost/api/dispecer/analitika?od=2026-06-01&do=2026-06-30'),
+      new Request(
+        'http://localhost/api/dispecer/analitika?od=2026-06-01&do=2026-06-30',
+      ),
     );
     const body = await response.json();
 
@@ -177,7 +185,9 @@ describe('/api/dispecer/analitika - Sprint 10 (US-49)', () => {
     });
 
     const response = await GET(
-      new Request('http://localhost/api/dispecer/analitika?od=2026-06-01&do=2026-06-30'),
+      new Request(
+        'http://localhost/api/dispecer/analitika?od=2026-06-01&do=2026-06-30',
+      ),
     );
     const body = await response.json();
 

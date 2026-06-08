@@ -3,10 +3,10 @@ import type { ServiserZaDodjelu } from '@/domain/types/servisirane';
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 export interface PreporukaServisera {
-  serviser:      ServiserZaDodjelu;
-  score:         number;          // 0-100 (weighted composite)
-  razlozi:       string[];        // human-readable reasons shown in UI
-  jePreporucen:  boolean;         // true only for the top-ranked entry
+  serviser: ServiserZaDodjelu;
+  score: number; // 0-100 (weighted composite)
+  razlozi: string[]; // human-readable reasons shown in UI
+  jePreporucen: boolean; // true only for the top-ranked entry
   /** US-48: udaljenost (km) od lokacije kvara. null kad koordinate nedostaju. */
   udaljenost_km: number | null;
 }
@@ -23,10 +23,10 @@ export interface PreporukaServisera {
 // težina). Kad blizina nije primjenjiva, prve tri normalizuju na 0.40/0.35/0.25
 // — identično ponašanju prije US-48 (graceful fallback, postojeći scoring se ne mijenja).
 
-const W_STRUCNOST    = 0.40;
-const W_OPTERECENJE  = 0.35;
+const W_STRUCNOST = 0.4;
+const W_OPTERECENJE = 0.35;
 const W_VERIFIKACIJA = 0.25;
-const W_BLIZINA      = 0.20;
+const W_BLIZINA = 0.2;
 
 /** Udaljenost (km) na kojoj bodovi blizine padaju na 0. */
 const MAX_BLIZINA_KM = 50;
@@ -45,7 +45,12 @@ function jeBroj(v: number | null | undefined): v is number {
 }
 
 /** Haversine udaljenost u kilometrima između dvije geografske tačke. */
-export function haversineKm(lat1: number, lng1: number, lat2: number, lng2: number): number {
+export function haversineKm(
+  lat1: number,
+  lng1: number,
+  lat2: number,
+  lng2: number,
+): number {
   const R = 6371; // Zemljin radijus (km)
   const toRad = (d: number) => (d * Math.PI) / 180;
   const dLat = toRad(lat2 - lat1);
@@ -60,7 +65,9 @@ export function haversineKm(lat1: number, lng1: number, lat2: number, lng2: numb
 function blizinaScore(km: number): number {
   if (km <= FULL_BLIZINA_KM) return 100;
   if (km >= MAX_BLIZINA_KM) return 0;
-  return Math.round(100 * (1 - (km - FULL_BLIZINA_KM) / (MAX_BLIZINA_KM - FULL_BLIZINA_KM)));
+  return Math.round(
+    100 * (1 - (km - FULL_BLIZINA_KM) / (MAX_BLIZINA_KM - FULL_BLIZINA_KM)),
+  );
 }
 
 // ─── Core ranking function ────────────────────────────────────────────────────
@@ -69,24 +76,26 @@ export function izracunajPreporuke(
   serviseri: ServiserZaDodjelu[],
   options: {
     kategorija?: string | null;
-    izuzeti?:    string[];          // serviser IDs to exclude from ranking
-    zahtjevLat?: number | null;     // US-48: lokacija kvara
+    izuzeti?: string[]; // serviser IDs to exclude from ranking
+    zahtjevLat?: number | null; // US-48: lokacija kvara
     zahtjevLng?: number | null;
-  } = {}
+  } = {},
 ): PreporukaServisera[] {
   const { kategorija, izuzeti = [], zahtjevLat, zahtjevLng } = options;
   const zahtjevImaKoord = jeBroj(zahtjevLat) && jeBroj(zahtjevLng);
-  const dostupni = serviseri.filter(s => !izuzeti.includes(s.id));
+  const dostupni = serviseri.filter((s) => !izuzeti.includes(s.id));
 
-  const rangirani = dostupni.map(s => {
+  const rangirani = dostupni.map((s) => {
     const razlozi: string[] = [];
 
     // ── Stručnost ────────────────────────────────────────────────────────────
     let strucnostScore = 0;
     if (s.specialnosti.length > 0 && kategorija) {
       const kat = kategorija.toLowerCase();
-      const matchIdx = s.specialnosti.findIndex(sp =>
-        sp.toLowerCase().includes(kat) || kat.includes(sp.toLowerCase().split(' ')[0] ?? '')
+      const matchIdx = s.specialnosti.findIndex(
+        (sp) =>
+          sp.toLowerCase().includes(kat) ||
+          kat.includes(sp.toLowerCase().split(' ')[0] ?? ''),
       );
       if (matchIdx >= 0) {
         strucnostScore = 100;
@@ -104,7 +113,9 @@ export function izracunajPreporuke(
     if (s.aktivnih_zadataka === 0) {
       razlozi.push('Slobodan');
     } else {
-      razlozi.push(`${s.aktivnih_zadataka} aktiv. ${s.aktivnih_zadataka === 1 ? 'zadatak' : 'zadatka'}`);
+      razlozi.push(
+        `${s.aktivnih_zadataka} aktiv. ${s.aktivnih_zadataka === 1 ? 'zadatak' : 'zadatka'}`,
+      );
     }
 
     // ── Verifikacija ─────────────────────────────────────────────────────────
@@ -116,16 +127,22 @@ export function izracunajPreporuke(
     let blizScore = 0;
     let blizinaPrimjenjiva = false;
     if (zahtjevImaKoord && jeBroj(s.latitude) && jeBroj(s.longitude)) {
-      udaljenost_km = Math.round(haversineKm(zahtjevLat!, zahtjevLng!, s.latitude, s.longitude) * 10) / 10;
+      udaljenost_km =
+        Math.round(
+          haversineKm(zahtjevLat!, zahtjevLng!, s.latitude, s.longitude) * 10,
+        ) / 10;
       blizScore = blizinaScore(udaljenost_km);
       blizinaPrimjenjiva = true;
     }
 
     // ── Ponderisani zbir s dinamičkom normalizacijom ──────────────────────────
-    let suma   = strucnostScore * W_STRUCNOST + opScore * W_OPTERECENJE + verScore * W_VERIFIKACIJA;
+    let suma =
+      strucnostScore * W_STRUCNOST +
+      opScore * W_OPTERECENJE +
+      verScore * W_VERIFIKACIJA;
     let tezine = W_STRUCNOST + W_OPTERECENJE + W_VERIFIKACIJA;
     if (blizinaPrimjenjiva) {
-      suma   += blizScore * W_BLIZINA;
+      suma += blizScore * W_BLIZINA;
       tezine += W_BLIZINA;
     }
     const score = Math.round(suma / tezine);

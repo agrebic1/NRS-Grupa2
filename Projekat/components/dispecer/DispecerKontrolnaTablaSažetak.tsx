@@ -11,7 +11,10 @@ import {
   uRecenicu,
 } from '@/lib/servisirane/zahtjevPrikaz';
 import { DispecerPregledTokaBadzevi } from '@/components/dispecer/DispecerPregledTokaBadzevi';
-import { DispecerPremiumKruna, KorisnickaHitnostOutlinedChip } from '@/components/servisirane/zahtjevBadgeovi';
+import {
+  DispecerPremiumKruna,
+  KorisnickaHitnostOutlinedChip,
+} from '@/components/servisirane/zahtjevBadgeovi';
 import { efektivniKorisnickiUrgencyScore } from '@/lib/servisirane/urgency';
 import { ZahtjevKorisnickaPorukaBubble } from '@/components/servisirane/ZahtjevTimelineIPoruka';
 import { oznakaZaDispecerskiPrikazBroja } from '@/lib/servisirane/korisnickiBrojZahtjeva';
@@ -21,7 +24,11 @@ const POLJE_OZNAKA_KLASA =
 const POLJE_OZNAKA_BOJA = { color: 'var(--first-nonary)' } as const;
 
 /** Sažetak za desni panel na kontrolnoj tabli (bez obrade / potvrde). */
-export function DispecerKontrolnaTablaSažetak({ zahtjev }: { zahtjev: ZahtjevZaDispecerskuKarticu }) {
+export function DispecerKontrolnaTablaSažetak({
+  zahtjev,
+}: {
+  zahtjev: ZahtjevZaDispecerskuKarticu;
+}) {
   const podnosilac = zahtjev.podnosilac;
   const { glavna, podkategorija } = labelKategorije(zahtjev);
   const naslovKratki = podkategorija || glavna;
@@ -30,9 +37,12 @@ export function DispecerKontrolnaTablaSažetak({ zahtjev }: { zahtjev: ZahtjevZa
   const { tekstCijeli: terminTekst } = preferiraniTerminZaDispecera(zahtjev, {
     dispecerskiPregled: true,
   });
-  const terminPrikaz = terminTekst.includes(',') ? terminTekst.replace(',', ' ·') : terminTekst;
+  const terminPrikaz = terminTekst.includes(',')
+    ? terminTekst.replace(',', ' ·')
+    : terminTekst;
 
-  const telefonSirovo = podnosilac?.broj_telefona?.trim() || zahtjev.contact_phone?.trim() || '';
+  const telefonSirovo =
+    podnosilac?.broj_telefona?.trim() || zahtjev.contact_phone?.trim() || '';
   const telefon = telefonSirovo || '-';
   const telefonHref = telefonSirovo ? hrefZaTelefon(telefonSirovo) : null;
   const imePrezime = imePrezimePodnosioca(podnosilac);
@@ -60,7 +70,10 @@ export function DispecerKontrolnaTablaSažetak({ zahtjev }: { zahtjev: ZahtjevZa
             <span className="min-w-0">{naslovKratki}</span>
           </h2>
           {podnaslovKategorije ? (
-            <p className="mt-1.5 text-sm font-medium leading-snug" style={{ color: 'var(--first-nonary)' }}>
+            <p
+              className="mt-1.5 text-sm font-medium leading-snug"
+              style={{ color: 'var(--first-nonary)' }}
+            >
               {podnaslovKategorije}
             </p>
           ) : null}
@@ -77,7 +90,10 @@ export function DispecerKontrolnaTablaSažetak({ zahtjev }: { zahtjev: ZahtjevZa
 
       <div className="mt-4 flex min-w-0 flex-wrap items-center gap-x-2 gap-y-2">
         <DispecerPregledTokaBadzevi zahtjev={zahtjev} />
-        <span className="text-xs font-medium" style={{ color: 'var(--first-nonary)' }}>
+        <span
+          className="text-xs font-medium"
+          style={{ color: 'var(--first-nonary)' }}
+        >
           Procjena hitnosti:
         </span>
         <KorisnickaHitnostOutlinedChip score={korisnickiUrgencyZaPrikaz} />
@@ -92,7 +108,10 @@ export function DispecerKontrolnaTablaSažetak({ zahtjev }: { zahtjev: ZahtjevZa
             <p className={POLJE_OZNAKA_KLASA} style={POLJE_OZNAKA_BOJA}>
               Korisnik
             </p>
-            <p className="text-base font-semibold leading-snug" style={{ color: 'var(--first-octonary)' }}>
+            <p
+              className="text-base font-semibold leading-snug"
+              style={{ color: 'var(--first-octonary)' }}
+            >
               {imePrezime}
             </p>
           </div>
@@ -109,7 +128,10 @@ export function DispecerKontrolnaTablaSažetak({ zahtjev }: { zahtjev: ZahtjevZa
                 {telefon}
               </a>
             ) : (
-              <p className="text-base font-semibold leading-snug" style={{ color: 'var(--first-octonary)' }}>
+              <p
+                className="text-base font-semibold leading-snug"
+                style={{ color: 'var(--first-octonary)' }}
+              >
                 {telefon}
               </p>
             )}
@@ -120,7 +142,10 @@ export function DispecerKontrolnaTablaSažetak({ zahtjev }: { zahtjev: ZahtjevZa
           <p className={POLJE_OZNAKA_KLASA} style={POLJE_OZNAKA_BOJA}>
             Adresa
           </p>
-          <p className="break-words text-sm font-medium leading-snug" style={{ color: 'var(--first-octonary)' }}>
+          <p
+            className="break-words text-sm font-medium leading-snug"
+            style={{ color: 'var(--first-octonary)' }}
+          >
             {(zahtjev.address ?? '').trim() || '-'}
           </p>
         </div>
@@ -129,14 +154,20 @@ export function DispecerKontrolnaTablaSažetak({ zahtjev }: { zahtjev: ZahtjevZa
           <p className={POLJE_OZNAKA_KLASA} style={POLJE_OZNAKA_BOJA}>
             Preferirani termin
           </p>
-          <p className="text-sm font-semibold tabular-nums leading-snug" style={{ color: 'var(--first-octonary)' }}>
+          <p
+            className="text-sm font-semibold tabular-nums leading-snug"
+            style={{ color: 'var(--first-octonary)' }}
+          >
             {terminPrikaz}
           </p>
         </div>
       </div>
 
       {opisUNavodnicima ? (
-        <ZahtjevKorisnickaPorukaBubble tekst={opisUNavodnicima} className="mt-5 mb-0" />
+        <ZahtjevKorisnickaPorukaBubble
+          tekst={opisUNavodnicima}
+          className="mt-5 mb-0"
+        />
       ) : null}
     </div>
   );

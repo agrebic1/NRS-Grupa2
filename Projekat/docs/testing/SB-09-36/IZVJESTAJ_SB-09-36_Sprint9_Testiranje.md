@@ -47,12 +47,12 @@ Napomena: inicijalni run `2026-05-22_21-08-17` imao je 1 pad E2E (RBAC redoslije
 Izvor test case matrice: `TC_SB-09-36_Sprint9_ManualFlows.csv`  
 Izvor izvršenja: `EXEC_SB-09-36_Sprint9_ManualFlows.csv`
 
-| Tester | Opseg (TC ID) | Broj |
-| ------ | ------------- | ---- |
-| Hamza Bunar | TC-S9-01 – TC-S9-20 (dispečer, Sprint 7 regresija) | 20 |
-| Eldin Begić | TC-S9-21 – TC-S9-40 (serviser, Sprint 8/9) | 20 |
-| Kerim Gazić | TC-S9-41 – TC-S9-60 (audit, SLA, izvještaji) | 20 |
-| Suada Peci | TC-S9-61 – TC-S9-80 (admin, notifikacije, E2E) | 20 |
+| Tester      | Opseg (TC ID)                                      | Broj |
+| ----------- | -------------------------------------------------- | ---- |
+| Hamza Bunar | TC-S9-01 – TC-S9-20 (dispečer, Sprint 7 regresija) | 20   |
+| Eldin Begić | TC-S9-21 – TC-S9-40 (serviser, Sprint 8/9)         | 20   |
+| Kerim Gazić | TC-S9-41 – TC-S9-60 (audit, SLA, izvještaji)       | 20   |
+| Suada Peci  | TC-S9-61 – TC-S9-80 (admin, notifikacije, E2E)     | 20   |
 
 Rezultat:
 

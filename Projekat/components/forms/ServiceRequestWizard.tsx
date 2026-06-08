@@ -20,16 +20,35 @@ import { AlertMessage } from '@/components/ui/AlertMessage';
 import { PreciznaLokacijaChip } from '@/components/servisirane/zahtjevBadgeovi';
 import { OkvirGalerije } from '@/components/servisirane/PrilogGalerija';
 import { KorakKategorija } from '@/components/wizard/KorakKategorija';
-import { KorakLokacija }    from '@/components/wizard/KorakLokacija';
-import { KorakTermin }      from '@/components/wizard/KorakTermin';
-import type { TerminSlot }  from '@/domain/types/servisirane';
-import { KorakOpis }        from '@/components/wizard/KorakOpis';
-import { KorakTrijaza, type TriageFormState, INITIAL_TRIAGE } from '@/components/wizard/KorakTrijaza';
-import { jeValidanKontaktTelefon, wizardKorak2Schema, wizardKorak3Schema } from '@/lib/validations/servisirane';
+import { KorakLokacija } from '@/components/wizard/KorakLokacija';
+import { KorakTermin } from '@/components/wizard/KorakTermin';
+import type { TerminSlot } from '@/domain/types/servisirane';
+import { KorakOpis } from '@/components/wizard/KorakOpis';
+import {
+  KorakTrijaza,
+  type TriageFormState,
+  INITIAL_TRIAGE,
+} from '@/components/wizard/KorakTrijaza';
+import {
+  jeValidanKontaktTelefon,
+  wizardKorak2Schema,
+  wizardKorak3Schema,
+} from '@/lib/validations/servisirane';
 import type { TriageOdgovori } from '@/domain/types/servisirane';
-import { formatirajDatumPrikaz, formatirajDatumVrijemeZaPrikaz } from '@/lib/format/datumi';
-import { izracunajUrgency, oznakaHitnostiZaKorisnika } from '@/lib/servisirane/urgency';
-import { glavnaKategorijaPoId, labelKategorije, serializujKategoriju, validnaKombinacijaKategorije } from '@/lib/servisirane/kategorije';
+import {
+  formatirajDatumPrikaz,
+  formatirajDatumVrijemeZaPrikaz,
+} from '@/lib/format/datumi';
+import {
+  izracunajUrgency,
+  oznakaHitnostiZaKorisnika,
+} from '@/lib/servisirane/urgency';
+import {
+  glavnaKategorijaPoId,
+  labelKategorije,
+  serializujKategoriju,
+  validnaKombinacijaKategorije,
+} from '@/lib/servisirane/kategorije';
 import { kreirajKlijenta } from '@/lib/supabase/klijent';
 
 // ─── Konstante ────────────────────────────────────────────────────────────────
@@ -40,59 +59,65 @@ const SERVICE_REQUEST_PHOTOS_BUCKET = 'service-request-photos';
 
 interface WizardState {
   // Step 1 - Kategorija
-  selectedCategory:    string | null;
+  selectedCategory: string | null;
   selectedSubcategory: string | null;
   // Step 2 - Lokacija
-  address:                  string;
-  latitude:                 number | null;
-  longitude:                number | null;
-  isLocating:               boolean;
-  locationError:            string | null;
-  hasSelectedMapLocation:   boolean;
-  isMapVisible:             boolean;
-  locationSuccessMessage:   string | null;
+  address: string;
+  latitude: number | null;
+  longitude: number | null;
+  isLocating: boolean;
+  locationError: string | null;
+  hasSelectedMapLocation: boolean;
+  isMapVisible: boolean;
+  locationSuccessMessage: string | null;
   // Step 3 - Preferirani termini (do 3 slota)
-  termini:             TerminSlot[];
-  noPreferredTime:     boolean;
+  termini: TerminSlot[];
+  noPreferredTime: boolean;
   timeValidationError: string | null;
   // Step 4 - Opis
-  description:      string;
-  contactPhone:     string;
-  accountPhone:     string;
-  useAccountPhone:  boolean;
-  photoFile:        File | null;
+  description: string;
+  contactPhone: string;
+  accountPhone: string;
+  useAccountPhone: boolean;
+  photoFile: File | null;
   // Step 5 - Trijaža
-  triage:           TriageFormState;
-  isPremiumUser:    boolean;
+  triage: TriageFormState;
+  isPremiumUser: boolean;
   /** Lifecycle iz /api/profil (za poruke kada nije `active`). */
-  premiumLifecycleStatus: 'inactive' | 'pending_payment' | 'active' | 'expired' | 'cancelled' | null;
+  premiumLifecycleStatus:
+    | 'inactive'
+    | 'pending_payment'
+    | 'active'
+    | 'expired'
+    | 'cancelled'
+    | null;
   premiumRequested: boolean;
   premiumTermsAccepted: boolean;
 }
 
 const INITIAL: WizardState = {
-  selectedCategory:    null,
+  selectedCategory: null,
   selectedSubcategory: null,
-  address:                  '',
-  latitude:                 null,
-  longitude:                null,
-  isLocating:               false,
-  locationError:            null,
-  hasSelectedMapLocation:   false,
-  isMapVisible:             true,
-  locationSuccessMessage:   null,
-  termini:             [],
-  noPreferredTime:     false,
+  address: '',
+  latitude: null,
+  longitude: null,
+  isLocating: false,
+  locationError: null,
+  hasSelectedMapLocation: false,
+  isMapVisible: true,
+  locationSuccessMessage: null,
+  termini: [],
+  noPreferredTime: false,
   timeValidationError: null,
-  description:         '',
-  contactPhone:        '',
-  accountPhone:        '',
-  useAccountPhone:     false,
-  photoFile:           null,
-  triage:              INITIAL_TRIAGE,
-  isPremiumUser:       false,
+  description: '',
+  contactPhone: '',
+  accountPhone: '',
+  useAccountPhone: false,
+  photoFile: null,
+  triage: INITIAL_TRIAGE,
+  isPremiumUser: false,
   premiumLifecycleStatus: null,
-  premiumRequested:    false,
+  premiumRequested: false,
   premiumTermsAccepted: false,
 };
 
@@ -101,12 +126,17 @@ const ODUSTANI_PORUKA =
 
 /** Validnost prvog koraka: glavna kategorija ili Ostalo + podkategorija. */
 export function isStepOneValid(s: WizardState): boolean {
-  return validnaKombinacijaKategorije(s.selectedCategory, s.selectedSubcategory);
+  return validnaKombinacijaKategorije(
+    s.selectedCategory,
+    s.selectedSubcategory,
+  );
 }
 
 /** Korak 2: adresa (≥5 znakova) i GPS koordinate su obavezne. */
 export function isStepTwoValid(s: WizardState): boolean {
-  return s.address.trim().length >= 5 && s.latitude !== null && s.longitude !== null;
+  return (
+    s.address.trim().length >= 5 && s.latitude !== null && s.longitude !== null
+  );
 }
 
 export function danasIsoLokalno(): string {
@@ -115,9 +145,14 @@ export function danasIsoLokalno(): string {
 }
 
 /** Polja koraka „Preferirani termini”. */
-export type StanjePreferiranogTermina = Pick<WizardState, 'termini' | 'noPreferredTime'>;
+export type StanjePreferiranogTermina = Pick<
+  WizardState,
+  'termini' | 'noPreferredTime'
+>;
 
-export function isPreferiraniTerminKorakValid(s: StanjePreferiranogTermina): boolean {
+export function isPreferiraniTerminKorakValid(
+  s: StanjePreferiranogTermina,
+): boolean {
   if (s.noPreferredTime) return true;
   if (s.termini.length === 0) return false;
   const t = s.termini[0];
@@ -131,12 +166,16 @@ export function isStepThreeValid(s: WizardState): boolean {
   return isPreferiraniTerminKorakValid(s);
 }
 
-export function isStepFourValid(s: Pick<WizardState, 'description' | 'contactPhone'>): boolean {
-  return s.description.trim().length >= 20 && jeValidanKontaktTelefon(s.contactPhone);
+export function isStepFourValid(
+  s: Pick<WizardState, 'description' | 'contactPhone'>,
+): boolean {
+  return (
+    s.description.trim().length >= 20 && jeValidanKontaktTelefon(s.contactPhone)
+  );
 }
 
 export function izracunajGreskuPreferiranogVremena(
-  s: StanjePreferiranogTermina
+  s: StanjePreferiranogTermina,
 ): string | null {
   if (s.noPreferredTime) return null;
   const t = s.termini[0];
@@ -145,27 +184,39 @@ export function izracunajGreskuPreferiranogVremena(
   return null;
 }
 
-export function porukaValidacijePreferiranogTermina(s: StanjePreferiranogTermina): string | null {
+export function porukaValidacijePreferiranogTermina(
+  s: StanjePreferiranogTermina,
+): string | null {
   if (s.noPreferredTime) return null;
   const t = s.termini[0];
-  if (!t?.date) return 'Odaberite datum ili označite da nemate preferirani termin.';
-  if (t.date < danasIsoLokalno()) return 'Primarni datum ne smije biti u prošlosti.';
-  if (!t.from || !t.to) return 'Odaberite vremenski raspon primarnog termina (od - do).';
+  if (!t?.date)
+    return 'Odaberite datum ili označite da nemate preferirani termin.';
+  if (t.date < danasIsoLokalno())
+    return 'Primarni datum ne smije biti u prošlosti.';
+  if (!t.from || !t.to)
+    return 'Odaberite vremenski raspon primarnog termina (od - do).';
   if (t.from >= t.to) return '"Vrijeme do" mora biti nakon "Vrijeme od".';
   return null;
 }
 
 // ─── Step indicator ───────────────────────────────────────────────────────────
 
-const STEP_OZNAKE = ['Vrsta zahtjeva', 'Lokacija', 'Termin', 'Opis', 'Hitnost', 'Pregled'];
+const STEP_OZNAKE = [
+  'Vrsta zahtjeva',
+  'Lokacija',
+  'Termin',
+  'Opis',
+  'Hitnost',
+  'Pregled',
+];
 
 function StepIndicator({ currentStep }: { currentStep: number }) {
   return (
     <div className="mb-8 flex items-center justify-center gap-1">
       {STEP_OZNAKE.map((oznaka, i) => {
-        const step     = i + 1;
+        const step = i + 1;
         const isActive = step === currentStep;
-        const isDone   = step < currentStep;
+        const isDone = step < currentStep;
         return (
           <div key={step} className="flex items-center gap-1">
             <div className="flex flex-col items-center gap-1">
@@ -176,8 +227,8 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
                   backgroundColor: isDone
                     ? 'var(--first-secondary)'
                     : isActive
-                    ? 'var(--first-primary)'
-                    : 'rgb(var(--first-quinary-rgb) / 0.4)',
+                      ? 'var(--first-primary)'
+                      : 'rgb(var(--first-quinary-rgb) / 0.4)',
                   color: isDone || isActive ? 'white' : 'var(--first-nonary)',
                 }}
               >
@@ -185,7 +236,11 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
               </div>
               <span
                 className="hidden text-xs font-medium sm:block"
-                style={{ color: isActive ? 'var(--first-primary)' : 'var(--first-nonary)' }}
+                style={{
+                  color: isActive
+                    ? 'var(--first-primary)'
+                    : 'var(--first-nonary)',
+                }}
               >
                 {oznaka}
               </span>
@@ -212,18 +267,23 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
 function validirajKorak(k: number, s: WizardState): string | null {
   if (k === 1) {
     if (!s.selectedCategory) return 'Odaberite vrstu zahtjeva prije nastavka.';
-    if (!validnaKombinacijaKategorije(s.selectedCategory, s.selectedSubcategory)) {
+    if (
+      !validnaKombinacijaKategorije(s.selectedCategory, s.selectedSubcategory)
+    ) {
       return 'Odabrana kombinacija kategorije i podkategorije nije ispravna.';
     }
     return null;
   }
   if (k === 2) {
     if (isStepTwoValid(s)) {
-      if (s.address.trim().length > 500) return 'Adresa ne smije biti duža od 500 karaktera.';
+      if (s.address.trim().length > 500)
+        return 'Adresa ne smije biti duža od 500 karaktera.';
       return null;
     }
-    if (s.address.trim().length === 0) return 'Unesite adresu intervencije prije nastavka.';
-    if (s.address.trim().length < 5) return 'Adresa mora sadržavati dovoljno informacija za pronalazak lokacije.';
+    if (s.address.trim().length === 0)
+      return 'Unesite adresu intervencije prije nastavka.';
+    if (s.address.trim().length < 5)
+      return 'Adresa mora sadržavati dovoljno informacija za pronalazak lokacije.';
     if (s.latitude === null || s.longitude === null) {
       return 'Označite tačnu lokaciju na mapi, koristite GPS ili odaberite adresu iz padajuće liste.';
     }
@@ -233,17 +293,19 @@ function validirajKorak(k: number, s: WizardState): string | null {
     return porukaValidacijePreferiranogTermina(s);
   }
   if (k === 4) {
-    if (s.description.trim().length === 0) return 'Unesite opis zahtjeva prije nastavka.';
+    if (s.description.trim().length === 0)
+      return 'Unesite opis zahtjeva prije nastavka.';
     if (s.description.trim().length < 20) {
       return 'Opis mora sadržavati dovoljno informacija za obradu zahtjeva.';
     }
     const r = wizardKorak2Schema.safeParse({
-      description:  s.description,
+      description: s.description,
       contactPhone: s.contactPhone.trim(),
     });
     if (!r.success) return r.error.errors[0].message;
     if (!s.contactPhone.trim()) return 'Unesite kontakt telefon.';
-    if (!jeValidanKontaktTelefon(s.contactPhone)) return 'Unesite ispravan kontakt telefon.';
+    if (!jeValidanKontaktTelefon(s.contactPhone))
+      return 'Unesite ispravan kontakt telefon.';
     return null;
   }
   if (k === 5) {
@@ -325,8 +387,11 @@ function formatirajTermin(state: WizardState): string {
   if (state.termini.length === 0) return 'Nema preferirani termin';
   const oznake = ['Primarni', 'Alt. 1', 'Alt. 2'];
   return state.termini
-    .filter(t => t?.date)
-    .map((t, i) => `${oznake[i]}: ${formatirajDatumPrikaz(t.date)}${t.from && t.to ? ` (${t.from}-${t.to})` : ''}`)
+    .filter((t) => t?.date)
+    .map(
+      (t, i) =>
+        `${oznake[i]}: ${formatirajDatumPrikaz(t.date)}${t.from && t.to ? ` (${t.from}-${t.to})` : ''}`,
+    )
     .join(' · ');
 }
 
@@ -376,7 +441,9 @@ function PregledZahtjevaKorak({
   const hitnost =
     state.premiumRequested && state.isPremiumUser
       ? 'Hitna intervencija (premium)'
-      : oznakaHitnostiZaKorisnika(izracunajUrgency(state.triage as TriageOdgovori));
+      : oznakaHitnostiZaKorisnika(
+          izracunajUrgency(state.triage as TriageOdgovori),
+        );
   const kategorija = labelKategorije({
     category_main: state.selectedCategory,
     category_sub: state.selectedSubcategory,
@@ -386,36 +453,89 @@ function PregledZahtjevaKorak({
   return (
     <div className="flex flex-col gap-4">
       <div>
-        <h2 className="mb-1 text-xl font-bold" style={{ color: 'var(--first-octonary)' }}>
+        <h2
+          className="mb-1 text-xl font-bold"
+          style={{ color: 'var(--first-octonary)' }}
+        >
           Pregled zahtjeva
         </h2>
-        <p className="text-sm leading-relaxed" style={{ color: 'var(--first-nonary)' }}>
+        <p
+          className="text-sm leading-relaxed"
+          style={{ color: 'var(--first-nonary)' }}
+        >
           Pregledajte unesene podatke prije slanja zahtjeva.
         </p>
       </div>
 
-      <div className="rounded-xl border p-4" style={{ borderColor: 'rgb(var(--first-quaternary-rgb) / 0.35)', backgroundColor: 'rgb(255 255 255 / 0.5)' }}>
+      <div
+        className="rounded-xl border p-4"
+        style={{
+          borderColor: 'rgb(var(--first-quaternary-rgb) / 0.35)',
+          backgroundColor: 'rgb(255 255 255 / 0.5)',
+        }}
+      >
         <div className="mb-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <Wrench className="h-4 w-4" style={{ color: 'var(--first-primary)' }} />
-            <h3 className="text-sm font-semibold" style={{ color: 'var(--first-octonary)' }}>Vrsta zahtjeva</h3>
+            <Wrench
+              className="h-4 w-4"
+              style={{ color: 'var(--first-primary)' }}
+            />
+            <h3
+              className="text-sm font-semibold"
+              style={{ color: 'var(--first-octonary)' }}
+            >
+              Vrsta zahtjeva
+            </h3>
           </div>
-          <Button type="button" variant="ghost" size="sm" onClick={() => onEditStep(1)}>Uredi</Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => onEditStep(1)}
+          >
+            Uredi
+          </Button>
         </div>
         <p className="text-sm" style={{ color: 'var(--first-octonary)' }}>
-          {kategorija.podkategorija ? `${kategorija.glavna} - ${kategorija.podkategorija}` : kategorija.glavna}
+          {kategorija.podkategorija
+            ? `${kategorija.glavna} - ${kategorija.podkategorija}`
+            : kategorija.glavna}
         </p>
       </div>
 
-      <div className="rounded-xl border p-4" style={{ borderColor: 'rgb(var(--first-quaternary-rgb) / 0.35)', backgroundColor: 'rgb(255 255 255 / 0.5)' }}>
+      <div
+        className="rounded-xl border p-4"
+        style={{
+          borderColor: 'rgb(var(--first-quaternary-rgb) / 0.35)',
+          backgroundColor: 'rgb(255 255 255 / 0.5)',
+        }}
+      >
         <div className="mb-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <MapPin className="h-4 w-4" style={{ color: 'var(--first-primary)' }} />
-            <h3 className="text-sm font-semibold" style={{ color: 'var(--first-octonary)' }}>Lokacija</h3>
+            <MapPin
+              className="h-4 w-4"
+              style={{ color: 'var(--first-primary)' }}
+            />
+            <h3
+              className="text-sm font-semibold"
+              style={{ color: 'var(--first-octonary)' }}
+            >
+              Lokacija
+            </h3>
           </div>
-          <Button type="button" variant="ghost" size="sm" onClick={() => onEditStep(2)}>Uredi</Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => onEditStep(2)}
+          >
+            Uredi
+          </Button>
         </div>
-        <p className="text-sm break-words [overflow-wrap:anywhere]" style={{ color: 'var(--first-octonary)' }}>
+        <p
+          className="text-sm break-words [overflow-wrap:anywhere]"
+          style={{ color: 'var(--first-octonary)' }}
+        >
           {(state.address ?? '').trim() || '-'}
         </p>
         {imaKoordinate && (
@@ -425,27 +545,71 @@ function PregledZahtjevaKorak({
         )}
       </div>
 
-      <div className="rounded-xl border p-4" style={{ borderColor: 'rgb(var(--first-quaternary-rgb) / 0.35)', backgroundColor: 'rgb(255 255 255 / 0.5)' }}>
+      <div
+        className="rounded-xl border p-4"
+        style={{
+          borderColor: 'rgb(var(--first-quaternary-rgb) / 0.35)',
+          backgroundColor: 'rgb(255 255 255 / 0.5)',
+        }}
+      >
         <div className="mb-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <CalendarClock className="h-4 w-4" style={{ color: 'var(--first-primary)' }} />
-            <h3 className="text-sm font-semibold" style={{ color: 'var(--first-octonary)' }}>Preferirani termin</h3>
+            <CalendarClock
+              className="h-4 w-4"
+              style={{ color: 'var(--first-primary)' }}
+            />
+            <h3
+              className="text-sm font-semibold"
+              style={{ color: 'var(--first-octonary)' }}
+            >
+              Preferirani termin
+            </h3>
           </div>
-          <Button type="button" variant="ghost" size="sm" onClick={() => onEditStep(3)}>Uredi</Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => onEditStep(3)}
+          >
+            Uredi
+          </Button>
         </div>
-        <p className="text-sm" style={{ color: 'var(--first-octonary)' }}>{formatirajTermin(state)}</p>
+        <p className="text-sm" style={{ color: 'var(--first-octonary)' }}>
+          {formatirajTermin(state)}
+        </p>
         <p className="mt-1 text-xs" style={{ color: 'var(--first-nonary)' }}>
           Konačan termin potvrđuje dispečer.
         </p>
       </div>
 
-      <div className="rounded-xl border p-4" style={{ borderColor: 'rgb(var(--first-quaternary-rgb) / 0.35)', backgroundColor: 'rgb(255 255 255 / 0.5)' }}>
+      <div
+        className="rounded-xl border p-4"
+        style={{
+          borderColor: 'rgb(var(--first-quaternary-rgb) / 0.35)',
+          backgroundColor: 'rgb(255 255 255 / 0.5)',
+        }}
+      >
         <div className="mb-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <Phone className="h-4 w-4" style={{ color: 'var(--first-primary)' }} />
-            <h3 className="text-sm font-semibold" style={{ color: 'var(--first-octonary)' }}>Opis i kontakt</h3>
+            <Phone
+              className="h-4 w-4"
+              style={{ color: 'var(--first-primary)' }}
+            />
+            <h3
+              className="text-sm font-semibold"
+              style={{ color: 'var(--first-octonary)' }}
+            >
+              Opis i kontakt
+            </h3>
           </div>
-          <Button type="button" variant="ghost" size="sm" onClick={() => onEditStep(4)}>Uredi</Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => onEditStep(4)}
+          >
+            Uredi
+          </Button>
         </div>
         <p
           className="text-sm whitespace-pre-wrap break-words [overflow-wrap:anywhere]"
@@ -458,7 +622,10 @@ function PregledZahtjevaKorak({
         </p>
         {state.photoFile ? (
           <div className="mt-2">
-            <p className="inline-flex items-center gap-1 text-xs" style={{ color: 'var(--first-nonary)' }}>
+            <p
+              className="inline-flex items-center gap-1 text-xs"
+              style={{ color: 'var(--first-nonary)' }}
+            >
               <ImageIcon className="h-3.5 w-3.5" />
               Fotografija je dodana ({state.photoFile.name}).
             </p>
@@ -471,15 +638,41 @@ function PregledZahtjevaKorak({
         )}
       </div>
 
-      <div className="rounded-xl border p-4" style={{ borderColor: 'rgb(var(--first-quaternary-rgb) / 0.35)', backgroundColor: 'rgb(255 255 255 / 0.5)' }}>
+      <div
+        className="rounded-xl border p-4"
+        style={{
+          borderColor: 'rgb(var(--first-quaternary-rgb) / 0.35)',
+          backgroundColor: 'rgb(255 255 255 / 0.5)',
+        }}
+      >
         <div className="mb-3 flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <TriangleAlert className="h-4 w-4" style={{ color: 'var(--first-primary)' }} />
-            <h3 className="text-sm font-semibold" style={{ color: 'var(--first-octonary)' }}>Hitnost</h3>
+            <TriangleAlert
+              className="h-4 w-4"
+              style={{ color: 'var(--first-primary)' }}
+            />
+            <h3
+              className="text-sm font-semibold"
+              style={{ color: 'var(--first-octonary)' }}
+            >
+              Hitnost
+            </h3>
           </div>
-          <Button type="button" variant="ghost" size="sm" onClick={() => onEditStep(5)}>Uredi</Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => onEditStep(5)}
+          >
+            Uredi
+          </Button>
         </div>
-        <p className="text-sm font-semibold" style={{ color: 'var(--first-octonary)' }}>{hitnost}</p>
+        <p
+          className="text-sm font-semibold"
+          style={{ color: 'var(--first-octonary)' }}
+        >
+          {hitnost}
+        </p>
         {state.premiumRequested && state.isPremiumUser && (
           <p className="mt-2 text-xs" style={{ color: 'var(--first-nonary)' }}>
             Trijaža nije potrebna - prioritet određuje premium paket.
@@ -498,10 +691,22 @@ function ConfirmationScreen({
   onReset: () => void;
 }) {
   return (
-    <div className="flex flex-col gap-5 rounded-2xl border p-6" style={{ borderColor: 'rgb(var(--first-quaternary-rgb) / 0.35)', backgroundColor: 'rgb(var(--first-quinary-rgb) / 0.22)' }}>
+    <div
+      className="flex flex-col gap-5 rounded-2xl border p-6"
+      style={{
+        borderColor: 'rgb(var(--first-quaternary-rgb) / 0.35)',
+        backgroundColor: 'rgb(var(--first-quinary-rgb) / 0.22)',
+      }}
+    >
       <div className="flex items-center gap-2">
-        <CheckCircle2 className="h-6 w-6" style={{ color: 'var(--first-secondary)' }} />
-        <h2 className="text-xl font-bold" style={{ color: 'var(--first-octonary)' }}>
+        <CheckCircle2
+          className="h-6 w-6"
+          style={{ color: 'var(--first-secondary)' }}
+        />
+        <h2
+          className="text-xl font-bold"
+          style={{ color: 'var(--first-octonary)' }}
+        >
           Zahtjev je uspješno poslan
         </h2>
       </div>
@@ -509,21 +714,39 @@ function ConfirmationScreen({
         Vaš zahtjev je evidentiran i čeka obradu.
       </p>
 
-      <div className="grid gap-3 rounded-xl border p-4" style={{ borderColor: 'rgb(var(--first-quaternary-rgb) / 0.35)', backgroundColor: 'rgb(255 255 255 / 0.6)' }}>
+      <div
+        className="grid gap-3 rounded-xl border p-4"
+        style={{
+          borderColor: 'rgb(var(--first-quaternary-rgb) / 0.35)',
+          backgroundColor: 'rgb(255 255 255 / 0.6)',
+        }}
+      >
         <p className="text-sm" style={{ color: 'var(--first-octonary)' }}>
-          Broj zahtjeva: <span className="font-semibold">#{confirmation.requestNumber}</span>
+          Broj zahtjeva:{' '}
+          <span className="font-semibold">#{confirmation.requestNumber}</span>
         </p>
         <p className="text-sm" style={{ color: 'var(--first-octonary)' }}>
-          Status: <span className="font-semibold">{formatirajStatusZaPrikaz(confirmation.status)}</span>
+          Status:{' '}
+          <span className="font-semibold">
+            {formatirajStatusZaPrikaz(confirmation.status)}
+          </span>
         </p>
         <p className="text-sm" style={{ color: 'var(--first-octonary)' }}>
-          Datum prijave: <span className="font-semibold">{formatirajDatumVrijemeZaPrikaz(confirmation.createdAt)}</span>
+          Datum prijave:{' '}
+          <span className="font-semibold">
+            {formatirajDatumVrijemeZaPrikaz(confirmation.createdAt)}
+          </span>
         </p>
       </div>
 
       <div className="flex flex-col gap-2 sm:flex-row">
-        <Link href={`/korisnik/zahtjevi/${confirmation.id}`} className="w-full sm:w-auto">
-          <Button size="md" className="w-full">Pregledaj zahtjev</Button>
+        <Link
+          href={`/korisnik/zahtjevi/${confirmation.id}`}
+          className="w-full sm:w-auto"
+        >
+          <Button size="md" className="w-full">
+            Pregledaj zahtjev
+          </Button>
         </Link>
         <Button type="button" variant="secondary" size="md" onClick={onReset}>
           Kreiraj novi zahtjev
@@ -538,12 +761,14 @@ export function ServiceRequestWizard({
   odustaniHref = '/korisnik/zahtjevi',
 }: ServiceRequestWizardProps) {
   const router = useRouter();
-  const [korak,       setKorak]      = useState(1);
-  const [state,       setState]      = useState<WizardState>(INITIAL);
-  const [greska,      setGreska]     = useState<string | null>(null);
+  const [korak, setKorak] = useState(1);
+  const [state, setState] = useState<WizardState>(INITIAL);
+  const [greska, setGreska] = useState<string | null>(null);
   const [triageError, setTriageError] = useState<string | null>(null);
-  const [jeSlanje,    setJeSlanje]   = useState(false);
-  const [confirmation, setConfirmation] = useState<ConfirmationData | null>(null);
+  const [jeSlanje, setJeSlanje] = useState(false);
+  const [confirmation, setConfirmation] = useState<ConfirmationData | null>(
+    null,
+  );
   const [odustaniModalOtvoren, setOdustaniModalOtvoren] = useState(false);
 
   useEffect(() => {
@@ -566,13 +791,15 @@ export function ServiceRequestWizard({
           const aktivanPremium = ps === 'active';
           setState((prev) => ({
             ...prev,
-            address:      prev.address      || d.profil.adresa        || '',
+            address: prev.address || d.profil.adresa || '',
             contactPhone: prev.contactPhone || d.profil.broj_telefona || '',
             accountPhone: d.profil.broj_telefona || '',
             premiumLifecycleStatus: ps,
             isPremiumUser: aktivanPremium,
             premiumRequested: aktivanPremium ? prev.premiumRequested : false,
-            premiumTermsAccepted: aktivanPremium ? prev.premiumTermsAccepted : false,
+            premiumTermsAccepted: aktivanPremium
+              ? prev.premiumTermsAccepted
+              : false,
           }));
         }
       })
@@ -617,7 +844,10 @@ export function ServiceRequestWizard({
       return;
     }
     const err = validirajKorak(korak, state);
-    if (err) { setGreska(err); return; }
+    if (err) {
+      setGreska(err);
+      return;
+    }
     setGreska(null);
     setKorak((k) => Math.min(k + 1, 6));
   }
@@ -664,40 +894,48 @@ export function ServiceRequestWizard({
     setTriageError(null);
 
     try {
-      const photoUrl = state.photoFile ? await uploadFotografijuKvara(state.photoFile) : null;
+      const photoUrl = state.photoFile
+        ? await uploadFotografijuKvara(state.photoFile)
+        : null;
       if (!state.selectedCategory) {
         throw new Error('Odaberite glavnu kategoriju prije slanja.');
       }
-      const kategorijaPayload = serializujKategoriju(state.selectedCategory, state.selectedSubcategory);
+      const kategorijaPayload = serializujKategoriju(
+        state.selectedCategory,
+        state.selectedSubcategory,
+      );
 
       const odgovor = await fetch('/api/service-requests', {
-        method:  'POST',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          category:      kategorijaPayload.category,
+          category: kategorijaPayload.category,
           category_main: kategorijaPayload.category_main,
-          category_sub:  kategorijaPayload.category_sub,
-          address:       state.address.trim(),
-          description:   state.description,
+          category_sub: kategorijaPayload.category_sub,
+          address: state.address.trim(),
+          description: state.description,
           contact_phone: state.contactPhone,
-          photo_url:     photoUrl,
+          photo_url: photoUrl,
           is_premium: state.premiumRequested,
           premium_terms_accepted: state.premiumTermsAccepted,
-          latitude:      state.latitude,
-          longitude:     state.longitude,
+          latitude: state.latitude,
+          longitude: state.longitude,
           preferred_schedule: state.noPreferredTime
             ? { termini: [], no_preferred_time: true }
             : {
-                termini:           state.termini.filter(t => t?.date && t.from && t.to),
+                termini: state.termini.filter((t) => t?.date && t.from && t.to),
                 no_preferred_time: false,
               },
           triage:
-            state.premiumRequested && state.isPremiumUser ? null : (state.triage as TriageOdgovori),
+            state.premiumRequested && state.isPremiumUser
+              ? null
+              : (state.triage as TriageOdgovori),
         }),
       });
 
       const podaci = await odgovor.json();
-      if (!odgovor.ok) throw new Error(podaci.error ?? 'Greška pri slanju zahtjeva.');
+      if (!odgovor.ok)
+        throw new Error(podaci.error ?? 'Greška pri slanju zahtjeva.');
       setConfirmation({
         id: podaci.zahtjev.id,
         requestNumber:
@@ -709,7 +947,9 @@ export function ServiceRequestWizard({
       });
       await onSubmitted?.();
     } catch (err) {
-      setGreska(err instanceof Error ? err.message : 'Greška pri slanju zahtjeva.');
+      setGreska(
+        err instanceof Error ? err.message : 'Greška pri slanju zahtjeva.',
+      );
     } finally {
       setJeSlanje(false);
     }
@@ -728,210 +968,226 @@ export function ServiceRequestWizard({
     );
   }
 
-  const blokiran     = jeKorakBlokiran(korak, state);
+  const blokiran = jeKorakBlokiran(korak, state);
   const jePosljednji = korak === 6;
 
   return (
     <>
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-end">
-        {!jeSlanje && (
-          <button
-            type="button"
-            onClick={() => setOdustaniModalOtvoren(true)}
-            className="inline-flex items-center justify-center gap-1.5 self-stretch rounded-xl border px-3 py-2 text-sm font-semibold transition-colors duration-150 hover:bg-soft-beige/25 sm:self-auto sm:border-0 sm:px-2 sm:py-1"
-            style={{
-              borderColor: 'rgb(var(--first-quaternary-rgb) / 0.45)',
-              color: 'var(--first-nonary)',
-            }}
-          >
-            <X className="h-4 w-4 shrink-0" aria-hidden />
-            Odustani od prijave
-          </button>
+      <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-end">
+          {!jeSlanje && (
+            <button
+              type="button"
+              onClick={() => setOdustaniModalOtvoren(true)}
+              className="inline-flex items-center justify-center gap-1.5 self-stretch rounded-xl border px-3 py-2 text-sm font-semibold transition-colors duration-150 hover:bg-soft-beige/25 sm:self-auto sm:border-0 sm:px-2 sm:py-1"
+              style={{
+                borderColor: 'rgb(var(--first-quaternary-rgb) / 0.45)',
+                color: 'var(--first-nonary)',
+              }}
+            >
+              <X className="h-4 w-4 shrink-0" aria-hidden />
+              Odustani od prijave
+            </button>
+          )}
+        </div>
+
+        <StepIndicator currentStep={korak} />
+
+        {korak !== 5 && korak !== 3 && greska && (
+          <AlertMessage variant="error" message={greska} />
         )}
-      </div>
 
-      <StepIndicator currentStep={korak} />
+        {blokiran &&
+          korak !== 1 &&
+          korak !== 2 &&
+          korak !== 3 &&
+          korak !== 4 && (
+            <AlertMessage variant="warning" message={porukaBlokiranja(korak)} />
+          )}
 
-      {korak !== 5 && korak !== 3 && greska && <AlertMessage variant="error" message={greska} />}
+        {korak === 1 && (
+          <KorakKategorija
+            selectedCategory={state.selectedCategory}
+            selectedSubcategory={state.selectedSubcategory}
+            onUpdate={azuriraj}
+          />
+        )}
+        {korak === 2 && (
+          <KorakLokacija
+            address={state.address}
+            latitude={state.latitude}
+            longitude={state.longitude}
+            isLocating={state.isLocating}
+            locationError={state.locationError}
+            locationSuccessMessage={state.locationSuccessMessage}
+            isMapVisible={state.isMapVisible}
+            onUpdate={azuriraj}
+            error={greska ?? undefined}
+          />
+        )}
+        {korak === 3 && (
+          <KorakTermin
+            termini={state.termini}
+            noPreferredTime={state.noPreferredTime}
+            validationError={state.timeValidationError ?? greska}
+            onUpdate={azuriraj}
+          />
+        )}
+        {korak === 4 && (
+          <KorakOpis
+            description={state.description}
+            contactPhone={state.contactPhone}
+            accountPhone={state.accountPhone}
+            useAccountPhone={state.useAccountPhone}
+            photoFile={state.photoFile}
+            onUpdate={azuriraj}
+            validationError={greska}
+          />
+        )}
+        {korak === 5 && (
+          <KorakTrijaza
+            triage={state.triage}
+            onUpdate={(u) => azuriraj({ triage: { ...state.triage, ...u } })}
+            triageError={triageError ?? greska}
+            isPremium={state.isPremiumUser}
+            premiumLifecycleStatus={state.premiumLifecycleStatus}
+            premiumRequested={state.premiumRequested}
+            premiumTermsAccepted={state.premiumTermsAccepted}
+            onPremiumRequestedChange={(value) =>
+              azuriraj({
+                premiumRequested: value,
+                premiumTermsAccepted: value
+                  ? state.premiumTermsAccepted
+                  : false,
+                ...(value && state.isPremiumUser
+                  ? { triage: INITIAL_TRIAGE }
+                  : {}),
+              })
+            }
+            onPremiumTermsAcceptedChange={(value) =>
+              azuriraj({ premiumTermsAccepted: value })
+            }
+          />
+        )}
+        {korak === 6 && (
+          <PregledZahtjevaKorak
+            state={state}
+            onEditStep={(step) => setKorak(step)}
+          />
+        )}
 
-      {blokiran && korak !== 1 && korak !== 2 && korak !== 3 && korak !== 4 && (
-        <AlertMessage variant="warning" message={porukaBlokiranja(korak)} />
-      )}
-
-      {korak === 1 && (
-        <KorakKategorija
-          selectedCategory={state.selectedCategory}
-          selectedSubcategory={state.selectedSubcategory}
-          onUpdate={azuriraj}
-        />
-      )}
-      {korak === 2 && (
-        <KorakLokacija
-          address={state.address}
-          latitude={state.latitude}
-          longitude={state.longitude}
-          isLocating={state.isLocating}
-          locationError={state.locationError}
-          locationSuccessMessage={state.locationSuccessMessage}
-          isMapVisible={state.isMapVisible}
-          onUpdate={azuriraj}
-          error={greska ?? undefined}
-        />
-      )}
-      {korak === 3 && (
-        <KorakTermin
-          termini={state.termini}
-          noPreferredTime={state.noPreferredTime}
-          validationError={state.timeValidationError ?? greska}
-          onUpdate={azuriraj}
-        />
-      )}
-      {korak === 4 && (
-        <KorakOpis
-          description={state.description}
-          contactPhone={state.contactPhone}
-          accountPhone={state.accountPhone}
-          useAccountPhone={state.useAccountPhone}
-          photoFile={state.photoFile}
-          onUpdate={azuriraj}
-          validationError={greska}
-        />
-      )}
-      {korak === 5 && (
-        <KorakTrijaza
-          triage={state.triage}
-          onUpdate={(u) => azuriraj({ triage: { ...state.triage, ...u } })}
-          triageError={triageError ?? greska}
-          isPremium={state.isPremiumUser}
-          premiumLifecycleStatus={state.premiumLifecycleStatus}
-          premiumRequested={state.premiumRequested}
-          premiumTermsAccepted={state.premiumTermsAccepted}
-          onPremiumRequestedChange={(value) =>
-            azuriraj({
-              premiumRequested: value,
-              premiumTermsAccepted: value ? state.premiumTermsAccepted : false,
-              ...(value && state.isPremiumUser ? { triage: INITIAL_TRIAGE } : {}),
-            })
-          }
-          onPremiumTermsAcceptedChange={(value) => azuriraj({ premiumTermsAccepted: value })}
-        />
-      )}
-      {korak === 6 && (
-        <PregledZahtjevaKorak state={state} onEditStep={(step) => setKorak(step)} />
-      )}
-
-      <div
-        className="mt-2 flex min-h-[52px] items-center justify-between gap-4 border-t border-slate-200/60 pt-5"
-      >
-        {korak > 1 ? (
-          <Button
-            type="button"
-            variant="ghost"
-            size="md"
-            onClick={prethodniKorak}
-            disabled={jeSlanje}
-            className="min-h-[44px] rounded-[12px] border border-slate-300/80 bg-white px-5 font-semibold !text-[var(--first-octonary)]
+        <div className="mt-2 flex min-h-[52px] items-center justify-between gap-4 border-t border-slate-200/60 pt-5">
+          {korak > 1 ? (
+            <Button
+              type="button"
+              variant="ghost"
+              size="md"
+              onClick={prethodniKorak}
+              disabled={jeSlanje}
+              className="min-h-[44px] rounded-[12px] border border-slate-300/80 bg-white px-5 font-semibold !text-[var(--first-octonary)]
               shadow-none hover:bg-slate-50 hover:!text-[var(--first-octonary)]"
-          >
-            <ChevronLeft className="h-4 w-4" />
-            Nazad
-          </Button>
-        ) : (
-          <div />
-        )}
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Nazad
+            </Button>
+          ) : (
+            <div />
+          )}
 
-        {!jePosljednji ? (
-          <Button
-            type="button"
-            size="md"
-            onClick={sljedeciKorak}
-            disabled={blokiran}
-            title={naslovDaljeDugmeta(korak, state)}
-            className="min-h-[44px] max-h-[48px] rounded-[12px] px-6"
-          >
-            Dalje
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        ) : (
-          <Button
-            type="button"
-            size="lg"
-            onClick={posaljiZahtjev}
-            isLoading={jeSlanje}
-            loadingText="Slanje zahtjeva..."
-            className="rounded-[12px]"
-          >
-            Pošalji zahtjev
-            <ChevronRight className="h-4 w-4" />
-          </Button>
-        )}
+          {!jePosljednji ? (
+            <Button
+              type="button"
+              size="md"
+              onClick={sljedeciKorak}
+              disabled={blokiran}
+              title={naslovDaljeDugmeta(korak, state)}
+              className="min-h-[44px] max-h-[48px] rounded-[12px] px-6"
+            >
+              Dalje
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          ) : (
+            <Button
+              type="button"
+              size="lg"
+              onClick={posaljiZahtjev}
+              isLoading={jeSlanje}
+              loadingText="Slanje zahtjeva..."
+              className="rounded-[12px]"
+            >
+              Pošalji zahtjev
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          )}
+        </div>
       </div>
-    </div>
 
-    {odustaniModalOtvoren && (
-      <div
-        className="fixed inset-0 z-[100] flex items-center justify-center px-4 backdrop-blur-sm"
-        style={{ backgroundColor: 'rgba(0,0,0,0.45)' }}
-        onClick={(e) => {
-          if (e.target === e.currentTarget) setOdustaniModalOtvoren(false);
-        }}
-        role="presentation"
-      >
+      {odustaniModalOtvoren && (
         <div
-          className="w-full max-w-md overflow-hidden rounded-2xl shadow-2xl"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="odustani-naslov"
-          style={{
-            backgroundColor: 'var(--first-tertiary)',
-            border: '1px solid rgb(var(--first-quaternary-rgb) / 0.4)',
+          className="fixed inset-0 z-[100] flex items-center justify-center px-4 backdrop-blur-sm"
+          style={{ backgroundColor: 'rgba(0,0,0,0.45)' }}
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setOdustaniModalOtvoren(false);
           }}
-          onClick={(e) => e.stopPropagation()}
+          role="presentation"
         >
           <div
-            className="border-b px-6 py-4"
-            style={{ borderColor: 'rgb(var(--first-quaternary-rgb) / 0.3)' }}
+            className="w-full max-w-md overflow-hidden rounded-2xl shadow-2xl"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="odustani-naslov"
+            style={{
+              backgroundColor: 'var(--first-tertiary)',
+              border: '1px solid rgb(var(--first-quaternary-rgb) / 0.4)',
+            }}
+            onClick={(e) => e.stopPropagation()}
           >
-            <h2
-              id="odustani-naslov"
-              className="text-lg font-bold"
-              style={{ color: 'var(--first-octonary)' }}
+            <div
+              className="border-b px-6 py-4"
+              style={{ borderColor: 'rgb(var(--first-quaternary-rgb) / 0.3)' }}
             >
-              Odustajanje od prijave
-            </h2>
-          </div>
-          <div className="px-6 py-4">
-            <p className="text-sm leading-relaxed" style={{ color: 'var(--first-nonary)' }}>
-              {ODUSTANI_PORUKA}
-            </p>
-            <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-              <Button
-                type="button"
-                variant="secondary"
-                size="md"
-                className="w-full sm:w-auto"
-                onClick={() => setOdustaniModalOtvoren(false)}
+              <h2
+                id="odustani-naslov"
+                className="text-lg font-bold"
+                style={{ color: 'var(--first-octonary)' }}
               >
-                Nastavi prijavu
-              </Button>
-              <Button
-                type="button"
-                variant="danger"
-                size="md"
-                className="w-full sm:w-auto"
-                onClick={() => {
-                  setOdustaniModalOtvoren(false);
-                  router.push(odustaniHref);
-                }}
+                Odustajanje od prijave
+              </h2>
+            </div>
+            <div className="px-6 py-4">
+              <p
+                className="text-sm leading-relaxed"
+                style={{ color: 'var(--first-nonary)' }}
               >
-                Da, odustajem
-              </Button>
+                {ODUSTANI_PORUKA}
+              </p>
+              <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                <Button
+                  type="button"
+                  variant="secondary"
+                  size="md"
+                  className="w-full sm:w-auto"
+                  onClick={() => setOdustaniModalOtvoren(false)}
+                >
+                  Nastavi prijavu
+                </Button>
+                <Button
+                  type="button"
+                  variant="danger"
+                  size="md"
+                  className="w-full sm:w-auto"
+                  onClick={() => {
+                    setOdustaniModalOtvoren(false);
+                    router.push(odustaniHref);
+                  }}
+                >
+                  Da, odustajem
+                </Button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-    )}
+      )}
     </>
   );
 }

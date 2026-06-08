@@ -29,11 +29,17 @@ import {
 } from '@/lib/servisirane/dispecerPaleta';
 
 const RAZLOZI_OTKAZIVANJA = [
-  { value: 'Kvar otklonjen samostalno',     label: 'Kvar otklonjen samostalno' },
-  { value: 'Greška pri prijavi',            label: 'Greška pri prijavi' },
-  { value: 'Promijenio/la sam mišljenje',   label: 'Promijenio/la sam mišljenje' },
-  { value: 'Angažovao/la drugog servisera', label: 'Angažovao/la drugog servisera' },
-  { value: 'Ostalo',                        label: 'Ostalo' },
+  { value: 'Kvar otklonjen samostalno', label: 'Kvar otklonjen samostalno' },
+  { value: 'Greška pri prijavi', label: 'Greška pri prijavi' },
+  {
+    value: 'Promijenio/la sam mišljenje',
+    label: 'Promijenio/la sam mišljenje',
+  },
+  {
+    value: 'Angažovao/la drugog servisera',
+    label: 'Angažovao/la drugog servisera',
+  },
+  { value: 'Ostalo', label: 'Ostalo' },
 ];
 
 // ─── Inline panel za izmjenu ──────────────────────────────────────────────────
@@ -43,27 +49,37 @@ function PanelZaIzmjenu({
   onUspjeh,
   onOdustanak,
 }: {
-  zahtjev:     ServisniZahtjev;
-  onUspjeh:    () => void;
+  zahtjev: ServisniZahtjev;
+  onUspjeh: () => void;
   onOdustanak: () => void;
 }) {
-  const [description,   setDescription]   = useState(zahtjev.description);
-  const [address,       setAddress]       = useState(zahtjev.address);
-  const [contactPhone,  setContactPhone]  = useState(zahtjev.contact_phone);
-  const [jeSlanje,      setJeSlanje]      = useState(false);
-  const [greska,        setGreska]        = useState<string | null>(null);
+  const [description, setDescription] = useState(zahtjev.description);
+  const [address, setAddress] = useState(zahtjev.address);
+  const [contactPhone, setContactPhone] = useState(zahtjev.contact_phone);
+  const [jeSlanje, setJeSlanje] = useState(false);
+  const [greska, setGreska] = useState<string | null>(null);
 
   async function spremi() {
-    if (description.trim().length < 10) { setGreska('Opis mora imati najmanje 10 karaktera.'); return; }
-    if (address.trim().length < 5)      { setGreska('Adresa mora imati najmanje 5 karaktera.'); return; }
+    if (description.trim().length < 10) {
+      setGreska('Opis mora imati najmanje 10 karaktera.');
+      return;
+    }
+    if (address.trim().length < 5) {
+      setGreska('Adresa mora imati najmanje 5 karaktera.');
+      return;
+    }
 
     setJeSlanje(true);
     setGreska(null);
     try {
       const odgovor = await fetch(`/api/service-requests/${zahtjev.id}`, {
-        method:  'PATCH',
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ description, address, contact_phone: contactPhone }),
+        body: JSON.stringify({
+          description,
+          address,
+          contact_phone: contactPhone,
+        }),
       });
       const podaci = await odgovor.json();
       if (!odgovor.ok) throw new Error(podaci.error ?? 'Greška pri izmjeni.');
@@ -144,27 +160,31 @@ function PanelZaOtkazivanje({
   onUspjeh,
   onOdustanak,
 }: {
-  zahtjevId:   number;
-  onUspjeh:    () => void;
+  zahtjevId: number;
+  onUspjeh: () => void;
   onOdustanak: () => void;
 }) {
-  const [razlog,    setRazlog]    = useState('');
-  const [jeSlanje,  setJeSlanje]  = useState(false);
-  const [greska,    setGreska]    = useState<string | null>(null);
+  const [razlog, setRazlog] = useState('');
+  const [jeSlanje, setJeSlanje] = useState(false);
+  const [greska, setGreska] = useState<string | null>(null);
 
   async function potvrdiOtkazivanje() {
-    if (!razlog) { setGreska('Odaberite razlog otkazivanja.'); return; }
+    if (!razlog) {
+      setGreska('Odaberite razlog otkazivanja.');
+      return;
+    }
 
     setJeSlanje(true);
     setGreska(null);
     try {
       const odgovor = await fetch(`/api/service-requests/${zahtjevId}`, {
-        method:  'PATCH',
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ action: 'cancel', cancel_reason: razlog }),
+        body: JSON.stringify({ action: 'cancel', cancel_reason: razlog }),
       });
       const podaci = await odgovor.json();
-      if (!odgovor.ok) throw new Error(podaci.error ?? 'Greška pri otkazivanju.');
+      if (!odgovor.ok)
+        throw new Error(podaci.error ?? 'Greška pri otkazivanju.');
       onUspjeh();
     } catch (err) {
       setGreska(err instanceof Error ? err.message : 'Greška pri otkazivanju.');
@@ -179,7 +199,10 @@ function PanelZaOtkazivanje({
       style={{ borderColor: 'rgba(220,38,38,0.3)' }}
     >
       <div className="flex items-center gap-2">
-        <AlertTriangle className="h-4 w-4" style={{ color: 'var(--first-senary)' }} />
+        <AlertTriangle
+          className="h-4 w-4"
+          style={{ color: 'var(--first-senary)' }}
+        />
         <h3
           className="text-[10px] font-semibold uppercase tracking-[0.12em]"
           style={{ color: 'var(--first-senary)' }}
@@ -249,22 +272,27 @@ function OtkaziFooterDugme({ onClick }: { onClick: () => void }) {
 export default function ZahtjevDetaljPage() {
   const params = useParams();
   const router = useRouter();
-  const id     = params.id as string;
+  const id = params.id as string;
 
-  const [zahtjev,          setZahtjev]          = useState<ServisniZahtjev | null>(null);
-  const [ucitava,          setUcitava]          = useState(true);
-  const [greska,           setGreska]           = useState<string | null>(null);
-  const [aktivniPanel,     setAktivniPanel]     = useState<'izmjena' | 'otkazivanje' | null>(null);
-  const [jeAkcijaDone,     setJeAkcijaDone]     = useState(false);
-  const [porukaProširena,  setPorukaProširena]  = useState(false);
+  const [zahtjev, setZahtjev] = useState<ServisniZahtjev | null>(null);
+  const [ucitava, setUcitava] = useState(true);
+  const [greska, setGreska] = useState<string | null>(null);
+  const [aktivniPanel, setAktivniPanel] = useState<
+    'izmjena' | 'otkazivanje' | null
+  >(null);
+  const [jeAkcijaDone, setJeAkcijaDone] = useState(false);
+  const [porukaProširena, setPorukaProširena] = useState(false);
 
   const ucitajZahtjev = useCallback(async () => {
     setUcitava(true);
     setGreska(null);
     try {
-      const odgovor = await fetch(`/api/service-requests/${id}`, { cache: 'no-store' });
-      const podaci  = await odgovor.json();
-      if (!odgovor.ok) throw new Error(podaci.error ?? 'Zahtjev nije pronađen.');
+      const odgovor = await fetch(`/api/service-requests/${id}`, {
+        cache: 'no-store',
+      });
+      const podaci = await odgovor.json();
+      if (!odgovor.ok)
+        throw new Error(podaci.error ?? 'Zahtjev nije pronađen.');
       setZahtjev(podaci.zahtjev);
     } catch (err) {
       setGreska(err instanceof Error ? err.message : 'Greška pri učitavanju.');
@@ -273,7 +301,9 @@ export default function ZahtjevDetaljPage() {
     }
   }, [id]);
 
-  useEffect(() => { ucitajZahtjev(); }, [ucitajZahtjev]);
+  useEffect(() => {
+    ucitajZahtjev();
+  }, [ucitajZahtjev]);
 
   useEffect(() => {
     setPorukaProširena(false);
@@ -289,7 +319,9 @@ export default function ZahtjevDetaljPage() {
     return (
       <AppShell uloga="korisnik">
         <div className="flex min-h-[40vh] items-center justify-center">
-          <p className="text-sm" style={{ color: 'var(--first-nonary)' }}>Učitavanje...</p>
+          <p className="text-sm" style={{ color: 'var(--first-nonary)' }}>
+            Učitavanje...
+          </p>
         </div>
       </AppShell>
     );
@@ -299,7 +331,10 @@ export default function ZahtjevDetaljPage() {
     return (
       <AppShell uloga="korisnik">
         <div className="flex flex-col gap-4">
-          <AlertMessage variant="error" message={greska ?? 'Zahtjev nije pronađen.'} />
+          <AlertMessage
+            variant="error"
+            message={greska ?? 'Zahtjev nije pronađen.'}
+          />
           <Link href="/korisnik/zahtjevi">
             <Button variant="secondary" size="md">
               <ArrowLeft className="h-4 w-4" />
@@ -317,8 +352,8 @@ export default function ZahtjevDetaljPage() {
   );
   const uAktivnojDispecerskojObradi =
     zahtjev.status === 'in_review' ||
-    (((zahtjev.status === 'na_cekanju' || zahtjev.status === 'pending_review') &&
-      Boolean((zahtjev.final_priority ?? '').trim())));
+    ((zahtjev.status === 'na_cekanju' || zahtjev.status === 'pending_review') &&
+      Boolean((zahtjev.final_priority ?? '').trim()));
 
   const kategorija = labelKategorije(zahtjev);
   const naslovZahtjeva = kategorija.podkategorija || kategorija.glavna;
@@ -340,7 +375,8 @@ export default function ZahtjevDetaljPage() {
   const imaRazlogOtkazivanja = Boolean(zahtjev.cancel_reason);
   const imaIzmjenuOdKreiranja =
     Boolean(zahtjev.updated_at) && zahtjev.updated_at !== zahtjev.created_at;
-  const imaOtkazaniDatum = zahtjev.status === 'otkazano' && Boolean(zahtjev.cancelled_at);
+  const imaOtkazaniDatum =
+    zahtjev.status === 'otkazano' && Boolean(zahtjev.cancelled_at);
   const prikaziDonjuNapomenu =
     !mozeBitMijenjan &&
     zahtjev.status !== 'otkazano' &&
@@ -388,7 +424,10 @@ export default function ZahtjevDetaljPage() {
             Moji zahtjevi
           </Link>
           <span style={{ color: 'var(--first-nonary)' }}>/</span>
-          <span className="font-medium" style={{ color: 'var(--first-octonary)' }}>
+          <span
+            className="font-medium"
+            style={{ color: 'var(--first-octonary)' }}
+          >
             #{brojZahtjevaZaPrikaz(zahtjev)} {naslovZahtjeva}
           </span>
         </nav>
@@ -408,7 +447,10 @@ export default function ZahtjevDetaljPage() {
           <div className="px-5 py-6 sm:px-7 sm:py-7">
             {jeAkcijaDone ? (
               <div className="mb-5">
-                <AlertMessage variant="success" message="Izmjena je uspješno sačuvana." />
+                <AlertMessage
+                  variant="success"
+                  message="Izmjena je uspješno sačuvana."
+                />
               </div>
             ) : null}
 
@@ -427,11 +469,17 @@ export default function ZahtjevDetaljPage() {
                 {imaRazlogOdbijanja ? (
                   <InlineNotice ton="danger">
                     <p className="font-semibold">Razlog odbijanja</p>
-                    <p className="mt-1 leading-relaxed">{zahtjev.rejection_reason!.trim()}</p>
+                    <p className="mt-1 leading-relaxed">
+                      {zahtjev.rejection_reason!.trim()}
+                    </p>
                     <Link
                       href="/korisnik/zahtjevi/novi"
                       className="mt-3 inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-semibold transition-colors"
-                      style={{ backgroundColor: 'rgba(220,38,38,0.12)', color: '#B91C1C', border: '1px solid rgba(220,38,38,0.25)' }}
+                      style={{
+                        backgroundColor: 'rgba(220,38,38,0.12)',
+                        color: '#B91C1C',
+                        border: '1px solid rgba(220,38,38,0.25)',
+                      }}
                     >
                       Pošalji novi zahtjev
                     </Link>
@@ -463,7 +511,9 @@ export default function ZahtjevDetaljPage() {
                 ) : null}
 
                 {prikaziDonjuNapomenu && donjiObjasnjenje ? (
-                  <KorisnikZahtjevDonjaNapomena>{donjiObjasnjenje}</KorisnikZahtjevDonjaNapomena>
+                  <KorisnikZahtjevDonjaNapomena>
+                    {donjiObjasnjenje}
+                  </KorisnikZahtjevDonjaNapomena>
                 ) : null}
               </div>
             ) : null}
@@ -499,7 +549,9 @@ export default function ZahtjevDetaljPage() {
               className="flex flex-col gap-2 border-t px-5 py-4 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end sm:gap-3 sm:px-7"
               style={{ borderColor: 'rgb(var(--first-quaternary-rgb) / 0.22)' }}
             >
-              <OtkaziFooterDugme onClick={() => setAktivniPanel('otkazivanje')} />
+              <OtkaziFooterDugme
+                onClick={() => setAktivniPanel('otkazivanje')}
+              />
               <Button
                 type="button"
                 variant="primary"
@@ -528,12 +580,21 @@ export default function ZahtjevDetaljPage() {
               style={{ borderColor: 'rgb(var(--first-quaternary-rgb) / 0.22)' }}
             >
               <div className="flex items-center gap-2">
-                <Star className="h-4 w-4" style={{ color: 'var(--first-senary)' }} />
-                <h2 className="text-sm font-bold" style={{ color: 'var(--first-octonary)' }}>
+                <Star
+                  className="h-4 w-4"
+                  style={{ color: 'var(--first-senary)' }}
+                />
+                <h2
+                  className="text-sm font-bold"
+                  style={{ color: 'var(--first-octonary)' }}
+                >
                   Vaša ocjena
                 </h2>
               </div>
-              <p className="mt-0.5 text-xs" style={{ color: 'var(--first-nonary)' }}>
+              <p
+                className="mt-0.5 text-xs"
+                style={{ color: 'var(--first-nonary)' }}
+              >
                 Ocijenite rad servisnog tima i kvalitet usluge
               </p>
             </div>
@@ -542,7 +603,6 @@ export default function ZahtjevDetaljPage() {
             </div>
           </div>
         )}
-
       </div>
     </AppShell>
   );

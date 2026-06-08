@@ -3,8 +3,16 @@
 import { useCallback, useEffect, useState } from 'react';
 import Link from 'next/link';
 import {
-  ArrowLeft, RefreshCw, Clock, CheckCircle2, Users,
-  TrendingUp, AlertTriangle, User, ChevronDown, ChevronUp,
+  ArrowLeft,
+  RefreshCw,
+  Clock,
+  CheckCircle2,
+  Users,
+  TrendingUp,
+  AlertTriangle,
+  User,
+  ChevronDown,
+  ChevronUp,
   XCircle,
 } from 'lucide-react';
 import { AppShell } from '@/components/layout/AppShell';
@@ -21,7 +29,8 @@ import type {
 function formatMin(min: number | null): string {
   if (min == null) return '-';
   if (min < 60) return `${min} min`;
-  const h = Math.floor(min / 60), m = min % 60;
+  const h = Math.floor(min / 60),
+    m = min % 60;
   return m ? `${h}h ${m}min` : `${h}h`;
 }
 
@@ -34,15 +43,20 @@ function slaBoja(posto: number | null): string {
 
 function fmtDatum(iso: string): string {
   return new Date(iso).toLocaleDateString('bs-BA', {
-    day: '2-digit', month: '2-digit', year: 'numeric',
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
   });
 }
 
 function prioritetBoja(p: string | null): string {
   if (!p) return 'var(--first-nonary)';
   const m: Record<string, string> = {
-    HITNO: '#DC2626', 'KRITIČNO': '#991B1B', VISOKO: '#EA580C',
-    SREDNJE: '#D97706', NISKO: 'var(--first-secondary)',
+    HITNO: '#DC2626',
+    KRITIČNO: '#991B1B',
+    VISOKO: '#EA580C',
+    SREDNJE: '#D97706',
+    NISKO: 'var(--first-secondary)',
   };
   return m[p] ?? 'var(--first-nonary)';
 }
@@ -59,12 +73,18 @@ function prvogMjeseca(): string {
 // ─── KPI kartica ──────────────────────────────────────────────────────────────
 
 function KpiKartica({
-  oznaka, vrijednost, boja, Ikona,
+  oznaka,
+  vrijednost,
+  boja,
+  Ikona,
 }: {
-  oznaka:     string;
+  oznaka: string;
   vrijednost: string;
-  boja:       string;
-  Ikona:      React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
+  boja: string;
+  Ikona: React.ComponentType<{
+    className?: string;
+    style?: React.CSSProperties;
+  }>;
 }) {
   return (
     <div
@@ -76,15 +96,23 @@ function KpiKartica({
     >
       <div
         className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl"
-        style={{ backgroundColor: `color-mix(in srgb, ${boja} 14%, transparent)` }}
+        style={{
+          backgroundColor: `color-mix(in srgb, ${boja} 14%, transparent)`,
+        }}
       >
         <Ikona className="h-5 w-5" style={{ color: boja }} />
       </div>
       <div>
-        <p className="text-xl font-extrabold leading-none tabular-nums" style={{ color: boja }}>
+        <p
+          className="text-xl font-extrabold leading-none tabular-nums"
+          style={{ color: boja }}
+        >
           {vrijednost}
         </p>
-        <p className="mt-0.5 text-[11px] font-medium" style={{ color: 'var(--first-nonary)' }}>
+        <p
+          className="mt-0.5 text-[11px] font-medium"
+          style={{ color: 'var(--first-nonary)' }}
+        >
           {oznaka}
         </p>
       </div>
@@ -94,12 +122,19 @@ function KpiKartica({
 
 // ─── Expand detalj — intervencije servisera ───────────────────────────────────
 
-function ServiserDetalj({ intervencije }: { intervencije: IntervencijaOdzivaRed[] }) {
+function ServiserDetalj({
+  intervencije,
+}: {
+  intervencije: IntervencijaOdzivaRed[];
+}) {
   if (intervencije.length === 0) {
     return (
       <tr>
         <td colSpan={5}>
-          <div className="px-8 py-4 text-sm" style={{ color: 'var(--first-nonary)' }}>
+          <div
+            className="px-8 py-4 text-sm"
+            style={{ color: 'var(--first-nonary)' }}
+          >
             Nema podataka o intervencijama.
           </div>
         </td>
@@ -120,9 +155,14 @@ function ServiserDetalj({ intervencije }: { intervencije: IntervencijaOdzivaRed[
           {/* Zaglavlje detalja */}
           <div
             className="px-4 py-2.5"
-            style={{ borderBottom: '1px solid rgb(var(--first-quaternary-rgb)/0.2)' }}
+            style={{
+              borderBottom: '1px solid rgb(var(--first-quaternary-rgb)/0.2)',
+            }}
           >
-            <p className="text-[11px] font-bold uppercase tracking-wide" style={{ color: 'var(--first-nonary)' }}>
+            <p
+              className="text-[11px] font-bold uppercase tracking-wide"
+              style={{ color: 'var(--first-nonary)' }}
+            >
               Detalji intervencija ({intervencije.length})
             </p>
           </div>
@@ -131,8 +171,20 @@ function ServiserDetalj({ intervencije }: { intervencije: IntervencijaOdzivaRed[
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-xs">
               <thead>
-                <tr style={{ borderBottom: '1px solid rgb(var(--first-quaternary-rgb)/0.2)' }}>
-                  {['#', 'Datum završetka', 'Prioritet', 'Odziv', 'Trajanje', 'SLA'].map((h) => (
+                <tr
+                  style={{
+                    borderBottom:
+                      '1px solid rgb(var(--first-quaternary-rgb)/0.2)',
+                  }}
+                >
+                  {[
+                    '#',
+                    'Datum završetka',
+                    'Prioritet',
+                    'Odziv',
+                    'Trajanje',
+                    'SLA',
+                  ].map((h) => (
                     <th
                       key={h}
                       className="px-4 py-2 text-left text-[10px] font-bold uppercase tracking-wide"
@@ -148,9 +200,10 @@ function ServiserDetalj({ intervencije }: { intervencije: IntervencijaOdzivaRed[
                   <tr
                     key={int.zahtjev_id}
                     style={{
-                      borderBottom: i < intervencije.length - 1
-                        ? '1px solid rgb(var(--first-quaternary-rgb)/0.14)'
-                        : 'none',
+                      borderBottom:
+                        i < intervencije.length - 1
+                          ? '1px solid rgb(var(--first-quaternary-rgb)/0.14)'
+                          : 'none',
                     }}
                   >
                     {/* Broj intervencije */}
@@ -165,7 +218,10 @@ function ServiserDetalj({ intervencije }: { intervencije: IntervencijaOdzivaRed[
                     </td>
 
                     {/* Datum završetka */}
-                    <td className="px-4 py-2.5 tabular-nums" style={{ color: 'var(--first-octonary)' }}>
+                    <td
+                      className="px-4 py-2.5 tabular-nums"
+                      style={{ color: 'var(--first-octonary)' }}
+                    >
                       {fmtDatum(int.zavrseno_at)}
                     </td>
 
@@ -188,12 +244,18 @@ function ServiserDetalj({ intervencije }: { intervencije: IntervencijaOdzivaRed[
                     </td>
 
                     {/* Odziv */}
-                    <td className="px-4 py-2.5 tabular-nums" style={{ color: 'var(--first-octonary)' }}>
+                    <td
+                      className="px-4 py-2.5 tabular-nums"
+                      style={{ color: 'var(--first-octonary)' }}
+                    >
                       {formatMin(int.odziv_minuta)}
                     </td>
 
                     {/* Trajanje */}
-                    <td className="px-4 py-2.5 tabular-nums" style={{ color: 'var(--first-octonary)' }}>
+                    <td
+                      className="px-4 py-2.5 tabular-nums"
+                      style={{ color: 'var(--first-octonary)' }}
+                    >
                       {formatMin(int.trajanje_minuta)}
                     </td>
 
@@ -202,12 +264,20 @@ function ServiserDetalj({ intervencije }: { intervencije: IntervencijaOdzivaRed[
                       {int.sla_ok === null ? (
                         <span style={{ color: 'var(--first-nonary)' }}>-</span>
                       ) : int.sla_ok ? (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-bold" style={{ color: '#16A34A' }}>
-                          <CheckCircle2 className="h-3 w-3" />OK
+                        <span
+                          className="inline-flex items-center gap-1 text-[10px] font-bold"
+                          style={{ color: '#16A34A' }}
+                        >
+                          <CheckCircle2 className="h-3 w-3" />
+                          OK
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 text-[10px] font-bold" style={{ color: '#DC2626' }}>
-                          <XCircle className="h-3 w-3" />Prekoračeno
+                        <span
+                          className="inline-flex items-center gap-1 text-[10px] font-bold"
+                          style={{ color: '#DC2626' }}
+                        >
+                          <XCircle className="h-3 w-3" />
+                          Prekoračeno
                         </span>
                       )}
                     </td>
@@ -225,12 +295,16 @@ function ServiserDetalj({ intervencije }: { intervencije: IntervencijaOdzivaRed[
 // ─── Red servisera (klikabilan) ───────────────────────────────────────────────
 
 function ServiserRed({
-  s, i, ukupno, otvoren, onToggle,
+  s,
+  i,
+  ukupno,
+  otvoren,
+  onToggle,
 }: {
-  s:        ServiserOdzivaRed;
-  i:        number;
-  ukupno:   number;
-  otvoren:  boolean;
+  s: ServiserOdzivaRed;
+  i: number;
+  ukupno: number;
+  otvoren: boolean;
   onToggle: () => void;
 }) {
   return (
@@ -238,12 +312,15 @@ function ServiserRed({
       <tr
         onClick={onToggle}
         style={{
-          borderBottom: !otvoren && i < ukupno - 1
-            ? '1px solid rgb(var(--first-quaternary-rgb)/0.18)'
-            : 'none',
+          borderBottom:
+            !otvoren && i < ukupno - 1
+              ? '1px solid rgb(var(--first-quaternary-rgb)/0.18)'
+              : 'none',
           backgroundColor: otvoren
             ? 'rgb(var(--first-secondary-rgb) / 0.04)'
-            : i % 2 === 0 ? 'transparent' : 'rgb(var(--first-quinary-rgb)/0.08)',
+            : i % 2 === 0
+              ? 'transparent'
+              : 'rgb(var(--first-quinary-rgb)/0.08)',
           cursor: 'pointer',
           transition: 'background-color 150ms',
         }}
@@ -261,9 +338,13 @@ function ServiserRed({
                 color: 'var(--first-secondary)',
               }}
             >
-              {s.ime[0]}{s.prezime[0]}
+              {s.ime[0]}
+              {s.prezime[0]}
             </div>
-            <span className="font-semibold" style={{ color: 'var(--first-octonary)' }}>
+            <span
+              className="font-semibold"
+              style={{ color: 'var(--first-octonary)' }}
+            >
               {s.ime} {s.prezime}
             </span>
           </div>
@@ -286,7 +367,12 @@ function ServiserRed({
         <td className="px-5 py-3.5">
           <span
             className="tabular-nums font-medium"
-            style={{ color: s.avg_odziv_minuta != null ? 'var(--first-octonary)' : 'var(--first-nonary)' }}
+            style={{
+              color:
+                s.avg_odziv_minuta != null
+                  ? 'var(--first-octonary)'
+                  : 'var(--first-nonary)',
+            }}
           >
             {formatMin(s.avg_odziv_minuta)}
           </span>
@@ -296,7 +382,12 @@ function ServiserRed({
         <td className="px-5 py-3.5">
           <span
             className="tabular-nums font-medium"
-            style={{ color: s.avg_trajanje_minuta != null ? 'var(--first-octonary)' : 'var(--first-nonary)' }}
+            style={{
+              color:
+                s.avg_trajanje_minuta != null
+                  ? 'var(--first-octonary)'
+                  : 'var(--first-nonary)',
+            }}
           >
             {formatMin(s.avg_trajanje_minuta)}
           </span>
@@ -309,7 +400,9 @@ function ServiserRed({
               <div className="flex items-center gap-2">
                 <div
                   className="h-2 w-20 overflow-hidden rounded-full"
-                  style={{ backgroundColor: 'rgb(var(--first-quaternary-rgb)/0.25)' }}
+                  style={{
+                    backgroundColor: 'rgb(var(--first-quaternary-rgb)/0.25)',
+                  }}
                 >
                   <div
                     className="h-full rounded-full transition-all duration-500"
@@ -336,12 +429,16 @@ function ServiserRed({
                 backgroundColor: otvoren
                   ? 'rgb(var(--first-secondary-rgb)/0.12)'
                   : 'rgb(var(--first-quaternary-rgb)/0.18)',
-                color: otvoren ? 'var(--first-secondary)' : 'var(--first-nonary)',
+                color: otvoren
+                  ? 'var(--first-secondary)'
+                  : 'var(--first-nonary)',
               }}
             >
-              {otvoren
-                ? <ChevronUp className="h-3.5 w-3.5" />
-                : <ChevronDown className="h-3.5 w-3.5" />}
+              {otvoren ? (
+                <ChevronUp className="h-3.5 w-3.5" />
+              ) : (
+                <ChevronDown className="h-3.5 w-3.5" />
+              )}
             </div>
           </div>
         </td>
@@ -355,7 +452,10 @@ function ServiserRed({
         <tr>
           <td
             colSpan={5}
-            style={{ borderBottom: '1px solid rgb(var(--first-quaternary-rgb)/0.18)', padding: 0 }}
+            style={{
+              borderBottom: '1px solid rgb(var(--first-quaternary-rgb)/0.18)',
+              padding: 0,
+            }}
           />
         </tr>
       )}
@@ -366,19 +466,21 @@ function ServiserRed({
 // ─── Stranica ─────────────────────────────────────────────────────────────────
 
 export default function IzvjestajOdzivaPage() {
-  const [podaci,   setPodaci]   = useState<IzvjestajOdzivaOdgovor | null>(null);
-  const [ucitava,  setUcitava]  = useState(true);
-  const [greska,   setGreska]   = useState<string | null>(null);
-  const [od,       setOd]       = useState(prvogMjeseca());
-  const [doDat,    setDoDat]    = useState(danasnjiDatum());
+  const [podaci, setPodaci] = useState<IzvjestajOdzivaOdgovor | null>(null);
+  const [ucitava, setUcitava] = useState(true);
+  const [greska, setGreska] = useState<string | null>(null);
+  const [od, setOd] = useState(prvogMjeseca());
+  const [doDat, setDoDat] = useState(danasnjiDatum());
   const [otvoriId, setOtvoriId] = useState<string | null>(null);
 
   const ucitaj = useCallback(async () => {
-    setUcitava(true); setGreska(null); setOtvoriId(null);
+    setUcitava(true);
+    setGreska(null);
+    setOtvoriId(null);
     try {
       const r = await fetch(
         `/api/dispecer/izvjestaj/odziva?od=${od}&do=${doDat}`,
-        { cache: 'no-store' }
+        { cache: 'no-store' },
       );
       const d = await r.json();
       if (!r.ok) throw new Error(d.error ?? 'Greška pri učitavanju.');
@@ -390,7 +492,9 @@ export default function IzvjestajOdzivaPage() {
     }
   }, [od, doDat]);
 
-  useEffect(() => { void ucitaj(); }, [ucitaj]);
+  useEffect(() => {
+    void ucitaj();
+  }, [ucitaj]);
 
   const uk = podaci?.ukupno;
 
@@ -414,39 +518,77 @@ export default function IzvjestajOdzivaPage() {
         </div>
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--first-octonary)' }}>
+            <h1
+              className="text-2xl font-bold tracking-tight"
+              style={{ color: 'var(--first-octonary)' }}
+            >
               Izvještaj odziva servisera
             </h1>
-            <p className="mt-1 text-sm" style={{ color: 'var(--first-nonary)' }}>
-              Analiza performansi tima po vremenskom periodu · kliknite na servisera za detalje
+            <p
+              className="mt-1 text-sm"
+              style={{ color: 'var(--first-nonary)' }}
+            >
+              Analiza performansi tima po vremenskom periodu · kliknite na
+              servisera za detalje
             </p>
           </div>
           {/* Filter datuma */}
           <div className="flex flex-wrap items-end gap-2">
             <div className="flex flex-col gap-1">
-              <label className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: 'var(--first-nonary)' }}>Od</label>
+              <label
+                className="text-[11px] font-semibold uppercase tracking-wide"
+                style={{ color: 'var(--first-nonary)' }}
+              >
+                Od
+              </label>
               <input
-                type="date" value={od} onChange={(e) => setOd(e.target.value)}
+                type="date"
+                value={od}
+                onChange={(e) => setOd(e.target.value)}
                 className="rounded-xl border px-3 py-2 text-sm focus:outline-none focus:ring-2"
-                style={{ borderColor: 'rgb(var(--first-quaternary-rgb)/0.45)', color: 'var(--first-octonary)' }}
+                style={{
+                  borderColor: 'rgb(var(--first-quaternary-rgb)/0.45)',
+                  color: 'var(--first-octonary)',
+                }}
               />
             </div>
             <div className="flex flex-col gap-1">
-              <label className="text-[11px] font-semibold uppercase tracking-wide" style={{ color: 'var(--first-nonary)' }}>Do</label>
+              <label
+                className="text-[11px] font-semibold uppercase tracking-wide"
+                style={{ color: 'var(--first-nonary)' }}
+              >
+                Do
+              </label>
               <input
-                type="date" value={doDat} onChange={(e) => setDoDat(e.target.value)}
+                type="date"
+                value={doDat}
+                onChange={(e) => setDoDat(e.target.value)}
                 className="rounded-xl border px-3 py-2 text-sm focus:outline-none focus:ring-2"
-                style={{ borderColor: 'rgb(var(--first-quaternary-rgb)/0.45)', color: 'var(--first-octonary)' }}
+                style={{
+                  borderColor: 'rgb(var(--first-quaternary-rgb)/0.45)',
+                  color: 'var(--first-octonary)',
+                }}
               />
             </div>
-            <Button variant="secondary" size="md" onClick={ucitaj} isLoading={ucitava} loadingText="Učitavanje...">
-              <RefreshCw className="h-4 w-4" />Primijeni
+            <Button
+              variant="secondary"
+              size="md"
+              onClick={ucitaj}
+              isLoading={ucitava}
+              loadingText="Učitavanje..."
+            >
+              <RefreshCw className="h-4 w-4" />
+              Primijeni
             </Button>
           </div>
         </div>
       </div>
 
-      {greska && <div className="mb-5"><AlertMessage variant="error" message={greska} /></div>}
+      {greska && (
+        <div className="mb-5">
+          <AlertMessage variant="error" message={greska} />
+        </div>
+      )}
 
       {/* KPI kartice */}
       {uk && (
@@ -471,9 +613,17 @@ export default function IzvjestajOdzivaPage() {
           />
           <KpiKartica
             oznaka="SLA compliance"
-            vrijednost={uk.sla_compliance_posto != null ? `${uk.sla_compliance_posto}%` : '-'}
+            vrijednost={
+              uk.sla_compliance_posto != null
+                ? `${uk.sla_compliance_posto}%`
+                : '-'
+            }
             boja={slaBoja(uk.sla_compliance_posto)}
-            Ikona={uk.sla_compliance_posto != null && uk.sla_compliance_posto < 70 ? AlertTriangle : CheckCircle2}
+            Ikona={
+              uk.sla_compliance_posto != null && uk.sla_compliance_posto < 70
+                ? AlertTriangle
+                : CheckCircle2
+            }
           />
         </div>
       )}
@@ -488,14 +638,25 @@ export default function IzvjestajOdzivaPage() {
       >
         <div
           className="flex items-center justify-between px-5 py-3.5"
-          style={{ borderBottom: '1px solid rgb(var(--first-quaternary-rgb)/0.28)' }}
+          style={{
+            borderBottom: '1px solid rgb(var(--first-quaternary-rgb)/0.28)',
+          }}
         >
           <div className="flex items-center gap-2">
-            <Users className="h-4 w-4" style={{ color: 'var(--first-secondary)' }} />
-            <h2 className="font-semibold" style={{ color: 'var(--first-octonary)' }}>
+            <Users
+              className="h-4 w-4"
+              style={{ color: 'var(--first-secondary)' }}
+            />
+            <h2
+              className="font-semibold"
+              style={{ color: 'var(--first-octonary)' }}
+            >
               Serviseri
               {podaci && (
-                <span className="ml-2 text-sm font-normal" style={{ color: 'var(--first-nonary)' }}>
+                <span
+                  className="ml-2 text-sm font-normal"
+                  style={{ color: 'var(--first-nonary)' }}
+                >
                   {podaci.period.od} — {podaci.period.do}
                 </span>
               )}
@@ -503,9 +664,12 @@ export default function IzvjestajOdzivaPage() {
           </div>
           {!ucitava && podaci && (
             <span className="text-xs" style={{ color: 'var(--first-nonary)' }}>
-              {podaci.serviseri.length} serviser{podaci.serviseri.length === 1 ? '' : 'a'}
+              {podaci.serviseri.length} serviser
+              {podaci.serviseri.length === 1 ? '' : 'a'}
               {' · '}
-              <span style={{ color: 'var(--first-secondary)' }}>kliknite red za detalje</span>
+              <span style={{ color: 'var(--first-secondary)' }}>
+                kliknite red za detalje
+              </span>
             </span>
           )}
         </div>
@@ -513,21 +677,32 @@ export default function IzvjestajOdzivaPage() {
         {ucitava && (
           <div className="flex items-center justify-center py-16">
             <div className="flex flex-col items-center gap-3">
-              <div className="h-7 w-7 animate-spin rounded-full border-2 border-transparent"
-                style={{ borderTopColor: 'var(--first-secondary)' }} />
-              <p className="text-sm" style={{ color: 'var(--first-nonary)' }}>Učitavanje izvještaja...</p>
+              <div
+                className="h-7 w-7 animate-spin rounded-full border-2 border-transparent"
+                style={{ borderTopColor: 'var(--first-secondary)' }}
+              />
+              <p className="text-sm" style={{ color: 'var(--first-nonary)' }}>
+                Učitavanje izvještaja...
+              </p>
             </div>
           </div>
         )}
 
         {!ucitava && podaci?.serviseri.length === 0 && (
           <div className="flex flex-col items-center gap-3 py-16 text-center">
-            <User className="h-10 w-10" style={{ color: 'var(--first-quinary)' }} />
-            <p className="font-semibold" style={{ color: 'var(--first-octonary)' }}>
+            <User
+              className="h-10 w-10"
+              style={{ color: 'var(--first-quinary)' }}
+            />
+            <p
+              className="font-semibold"
+              style={{ color: 'var(--first-octonary)' }}
+            >
               Nema podataka za odabrani period
             </p>
             <p className="text-sm" style={{ color: 'var(--first-nonary)' }}>
-              Promijenite datumski opseg ili provjerite da li postoje završene intervencije.
+              Promijenite datumski opseg ili provjerite da li postoje završene
+              intervencije.
             </p>
           </div>
         )}
@@ -536,8 +711,19 @@ export default function IzvjestajOdzivaPage() {
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-sm">
               <thead>
-                <tr style={{ borderBottom: '1px solid rgb(var(--first-quaternary-rgb)/0.25)' }}>
-                  {['Serviser', 'Intervencija', 'Prosjek odziva', 'Prosjek trajanja', 'SLA compliance'].map((h) => (
+                <tr
+                  style={{
+                    borderBottom:
+                      '1px solid rgb(var(--first-quaternary-rgb)/0.25)',
+                  }}
+                >
+                  {[
+                    'Serviser',
+                    'Intervencija',
+                    'Prosjek odziva',
+                    'Prosjek trajanja',
+                    'SLA compliance',
+                  ].map((h) => (
                     <th
                       key={h}
                       className="px-5 py-3 text-left text-[11px] font-bold uppercase tracking-wide"

@@ -95,11 +95,23 @@ describe('dispecerske faze pregleda', () => {
   });
 
   test('normalizuje stare i nepoznate filtere na kanonske vrijednosti', () => {
-    const dozvoljene = ['svi', 'novi', 'zakazivanje_termina', 'dodjela_servisera', 'korak_potvrde'];
+    const dozvoljene = [
+      'svi',
+      'novi',
+      'zakazivanje_termina',
+      'dodjela_servisera',
+      'korak_potvrde',
+    ];
 
-    expect(normalizujDispecerFilterIzParametra('ceka_prioritet', dozvoljene)).toBe('novi');
-    expect(normalizujDispecerFilterIzParametra('ceka_termin', dozvoljene)).toBe('zakazivanje_termina');
-    expect(normalizujDispecerFilterIzParametra('nepoznato', dozvoljene)).toBe('svi');
+    expect(
+      normalizujDispecerFilterIzParametra('ceka_prioritet', dozvoljene),
+    ).toBe('novi');
+    expect(normalizujDispecerFilterIzParametra('ceka_termin', dozvoljene)).toBe(
+      'zakazivanje_termina',
+    );
+    expect(normalizujDispecerFilterIzParametra('nepoznato', dozvoljene)).toBe(
+      'svi',
+    );
     expect(normalizujDispecerFilterIzParametra(null, dozvoljene)).toBe('svi');
   });
 });

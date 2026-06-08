@@ -2,9 +2,7 @@ const {
   serviserSmijeMijenjatiStatus,
 } = require('@/lib/servisirane/serviserPristup');
 
-const {
-  evidencijaRadaSchema,
-} = require('@/lib/validations/servisirane');
+const { evidencijaRadaSchema } = require('@/lib/validations/servisirane');
 
 // ─── serviserSmijeMijenjatiStatus - rub slučajevi ─────────────────────────────
 
@@ -20,7 +18,9 @@ describe('serviserSmijeMijenjatiStatus - rub slučajevi', () => {
 
   test('vraća false za isti status (nema prelaza u sebi)', () => {
     expect(serviserSmijeMijenjatiStatus('u_radu', 'u_radu')).toBe(false);
-    expect(serviserSmijeMijenjatiStatus('dodijeljeno', 'dodijeljeno')).toBe(false);
+    expect(serviserSmijeMijenjatiStatus('dodijeljeno', 'dodijeljeno')).toBe(
+      false,
+    );
   });
 
   test('vraća false za sve terminalne statuse', () => {
@@ -39,7 +39,7 @@ describe('serviserSmijeMijenjatiStatus - rub slučajevi', () => {
 
 describe('evidencijaRadaSchema - validacija evidencije rada', () => {
   const validan = {
-    opis_rada:       'Zamijenjen bojler u kupaonici.',
+    opis_rada: 'Zamijenjen bojler u kupaonici.',
     trajanje_minuta: 60,
   };
 
@@ -54,24 +54,39 @@ describe('evidencijaRadaSchema - validacija evidencije rada', () => {
   });
 
   test('odbija opis dulji od 2000 karaktera', () => {
-    const rez = evidencijaRadaSchema.safeParse({ ...validan, opis_rada: 'x'.repeat(2001) });
+    const rez = evidencijaRadaSchema.safeParse({
+      ...validan,
+      opis_rada: 'x'.repeat(2001),
+    });
     expect(rez.success).toBe(false);
   });
 
   test('prihvata opis od tačno 5 karaktera', () => {
-    expect(evidencijaRadaSchema.safeParse({ ...validan, opis_rada: '12345' }).success).toBe(true);
+    expect(
+      evidencijaRadaSchema.safeParse({ ...validan, opis_rada: '12345' })
+        .success,
+    ).toBe(true);
   });
 
   test('prihvata trajanje_minuta u granicama', () => {
-    expect(evidencijaRadaSchema.safeParse({ ...validan, trajanje_minuta: 60 }).success).toBe(true);
+    expect(
+      evidencijaRadaSchema.safeParse({ ...validan, trajanje_minuta: 60 })
+        .success,
+    ).toBe(true);
   });
 
   test('odbija trajanje_minuta manji od 1', () => {
-    expect(evidencijaRadaSchema.safeParse({ ...validan, trajanje_minuta: 0 }).success).toBe(false);
+    expect(
+      evidencijaRadaSchema.safeParse({ ...validan, trajanje_minuta: 0 })
+        .success,
+    ).toBe(false);
   });
 
   test('odbija trajanje_minuta veći od 1440 (24h)', () => {
-    expect(evidencijaRadaSchema.safeParse({ ...validan, trajanje_minuta: 1441 }).success).toBe(false);
+    expect(
+      evidencijaRadaSchema.safeParse({ ...validan, trajanje_minuta: 1441 })
+        .success,
+    ).toBe(false);
   });
 
   test('odbija evidenciju bez trajanja_minuta (obavezno polje)', () => {
@@ -81,10 +96,10 @@ describe('evidencijaRadaSchema - validacija evidencije rada', () => {
 
   test('prihvata sva opcionalna polja', () => {
     const payload = {
-      opis_rada:        'Detaljan opis izvršenog rada.',
-      trajanje_minuta:  120,
-      materijal:        'Novi bojler 50L',
-      napomene:         'Instalacija završena bez poteškoća.',
+      opis_rada: 'Detaljan opis izvršenog rada.',
+      trajanje_minuta: 120,
+      materijal: 'Novi bojler 50L',
+      napomene: 'Instalacija završena bez poteškoća.',
     };
     expect(evidencijaRadaSchema.safeParse(payload).success).toBe(true);
   });

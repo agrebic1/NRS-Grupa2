@@ -27,9 +27,14 @@ test.describe('Dispecer operativni tok', () => {
   const dispecer = ucitajKredencijale('dispecer');
   const serviser = ucitajKredencijale('serviser');
 
-  test.skip(!dispecer, 'Missing E2E dispatcher credentials in environment variables.');
+  test.skip(
+    !dispecer,
+    'Missing E2E dispatcher credentials in environment variables.',
+  );
 
-  test('dispecer moze otvoriti dashboard listu i detalj aktivnog zahtjeva', async ({ page }) => {
+  test('dispecer moze otvoriti dashboard listu i detalj aktivnog zahtjeva', async ({
+    page,
+  }) => {
     await prijaviSe(page, dispecer as RoleCreds);
 
     const dashboard = await page.goto('/dispecer');
@@ -39,9 +44,12 @@ test.describe('Dispecer operativni tok', () => {
     expect(lista?.ok()).toBeTruthy();
 
     const apiRezultat = await page.evaluate(async () => {
-      const r = await fetch('/api/dispecer/zahtjevi?status=pending_review,in_review', {
-        cache: 'no-store',
-      });
+      const r = await fetch(
+        '/api/dispecer/zahtjevi?status=pending_review,in_review',
+        {
+          cache: 'no-store',
+        },
+      );
       const body = await r.json().catch(() => ({}));
       return { status: r.status, body };
     });
@@ -56,7 +64,9 @@ test.describe('Dispecer operativni tok', () => {
     }
   });
 
-  test('dispecer dobija validacioni odgovor na PATCH bez mutiranja stvarnog zahtjeva', async ({ page }) => {
+  test('dispecer dobija validacioni odgovor na PATCH bez mutiranja stvarnog zahtjeva', async ({
+    page,
+  }) => {
     await prijaviSe(page, dispecer as RoleCreds);
     await page.goto('/dispecer');
 
@@ -64,7 +74,10 @@ test.describe('Dispecer operativni tok', () => {
       const r = await fetch('/api/dispecer/zahtjevi/0', {
         method: 'PATCH',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ action: 'promijeni_prioritet', final_priority: 'SREDNJE' }),
+        body: JSON.stringify({
+          action: 'promijeni_prioritet',
+          final_priority: 'SREDNJE',
+        }),
       });
       return r.status;
     });
@@ -72,8 +85,13 @@ test.describe('Dispecer operativni tok', () => {
     expect(status).toBe(400);
   });
 
-  test('serviser ne moze koristiti dispecerski PATCH endpoint', async ({ page }) => {
-    test.skip(!serviser, 'Missing E2E servicer credentials in environment variables.');
+  test('serviser ne moze koristiti dispecerski PATCH endpoint', async ({
+    page,
+  }) => {
+    test.skip(
+      !serviser,
+      'Missing E2E servicer credentials in environment variables.',
+    );
 
     await prijaviSe(page, serviser as RoleCreds);
     await page.goto('/korisnik');
@@ -82,7 +100,10 @@ test.describe('Dispecer operativni tok', () => {
       const r = await fetch('/api/dispecer/zahtjevi/1', {
         method: 'PATCH',
         headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ action: 'promijeni_prioritet', final_priority: 'SREDNJE' }),
+        body: JSON.stringify({
+          action: 'promijeni_prioritet',
+          final_priority: 'SREDNJE',
+        }),
       });
       return r.status;
     });

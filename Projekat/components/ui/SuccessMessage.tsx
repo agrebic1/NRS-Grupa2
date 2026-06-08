@@ -15,7 +15,10 @@ export function SuccessMessage({ message }: SuccessMessageProps) {
         color: 'var(--first-octonary)',
       }}
     >
-      <CheckCircle className="h-5 w-5 flex-shrink-0" style={{ color: 'var(--first-primary)' }} />
+      <CheckCircle
+        className="h-5 w-5 flex-shrink-0"
+        style={{ color: 'var(--first-primary)' }}
+      />
       {message}
     </div>
   );

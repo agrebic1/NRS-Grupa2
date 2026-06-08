@@ -18,10 +18,16 @@ import {
 import { DISPECER_HITNOST_KORISNIK_CHIP_TITLE } from '@/lib/servisirane/dispecerPojmovi';
 import { ZahtjevExpandSadrzaj } from '@/components/dispecer/ZahtjevExpandSadrzaj';
 import { DispecerPregledTokaBadzevi } from '@/components/dispecer/DispecerPregledTokaBadzevi';
-import { DispecerPremiumKruna, KorisnickaHitnostOutlinedChip } from '@/components/servisirane/zahtjevBadgeovi';
+import {
+  DispecerPremiumKruna,
+  KorisnickaHitnostOutlinedChip,
+} from '@/components/servisirane/zahtjevBadgeovi';
 import { PonovniCiklusBadge } from '@/components/servisirane/PonovniCiklusBadge';
 import { DugoChekanjeBadge } from '@/components/servisirane/DugoChekanjeBadge';
-import { efektivniKorisnickiUrgencyScore, inboxGrupaIzKorisnickeProcjene } from '@/lib/servisirane/urgency';
+import {
+  efektivniKorisnickiUrgencyScore,
+  inboxGrupaIzKorisnickeProcjene,
+} from '@/lib/servisirane/urgency';
 import { oznakaZaDispecerskiPrikazBroja } from '@/lib/servisirane/korisnickiBrojZahtjeva';
 
 /** @deprecated Koristite `zahtjevCekaObraduUInboxuDispecera` iz `@/lib/servisirane/statusZahtjeva`. */
@@ -30,7 +36,11 @@ export const zahtjevCekaObraduSprint7 = zahtjevCekaObraduUInboxuDispecera;
 export { DispecerStatusBadge } from '@/components/servisirane/zahtjevBadgeovi';
 
 export type ZahtjevZaDispecerskuKarticu = ServisniZahtjev & {
-  podnosilac: { ime: string; prezime: string; broj_telefona: string | null } | null;
+  podnosilac: {
+    ime: string;
+    prezime: string;
+    broj_telefona: string | null;
+  } | null;
   intervencija_ocjene?: { ocjena: number; komentar: string | null }[] | null;
 };
 
@@ -89,7 +99,11 @@ export function DispecerskaZahtjevKartica({
         type="button"
         onClick={toggleExpanded}
         className="flex w-full min-w-0 shrink-0 flex-col gap-0 px-3 py-3 text-left transition-colors hover:bg-black/[0.02] focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgb(var(--first-secondary-rgb)/0.45)] focus-visible:ring-offset-2 sm:px-4"
-        style={{ backgroundColor: selected ? 'rgb(var(--first-secondary-rgb) / 0.08)' : '#ffffff' }}
+        style={{
+          backgroundColor: selected
+            ? 'rgb(var(--first-secondary-rgb) / 0.08)'
+            : '#ffffff',
+        }}
         aria-expanded={expanded}
       >
         <div className="flex min-w-0 items-start justify-between gap-2">
@@ -105,7 +119,9 @@ export function DispecerskaZahtjevKartica({
               >
                 #{oznakaZaDispecerskiPrikazBroja(zahtjev)}
               </span>
-              {zahtjev.is_premium ? <DispecerPremiumKruna className="translate-y-px" /> : null}
+              {zahtjev.is_premium ? (
+                <DispecerPremiumKruna className="translate-y-px" />
+              ) : null}
               {(zahtjev.broj_ponovnih_ciklusa ?? 0) > 0 && (
                 <PonovniCiklusBadge broj={zahtjev.broj_ponovnih_ciklusa!} />
               )}
@@ -159,10 +175,17 @@ export function DispecerskaZahtjevKartica({
             className="min-w-0 truncate text-xs font-medium leading-snug tabular-nums"
             title={`${datumZaKarticu} · ${prijavljenoRel.label} (${terminTekst})`}
           >
-            <span style={{ color: 'var(--first-nonary)' }}>{datumZaKarticu}</span>
-            <span style={{ color: 'rgb(var(--first-nonary-rgb) / 0.45)' }}> · </span>
+            <span style={{ color: 'var(--first-nonary)' }}>
+              {datumZaKarticu}
+            </span>
+            <span style={{ color: 'rgb(var(--first-nonary-rgb) / 0.45)' }}>
+              {' '}
+              ·{' '}
+            </span>
             <span
-              className={prijavljenoRel.ton === 'stale' ? 'font-bold' : 'font-semibold'}
+              className={
+                prijavljenoRel.ton === 'stale' ? 'font-bold' : 'font-semibold'
+              }
               style={{ color: prijavljenoBoja }}
             >
               {prijavljenoRel.label}

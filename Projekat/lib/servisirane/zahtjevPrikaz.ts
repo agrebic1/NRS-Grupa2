@@ -1,4 +1,7 @@
-import type { PreferredSchedule, ServisniZahtjev } from '@/domain/types/servisirane';
+import type {
+  PreferredSchedule,
+  ServisniZahtjev,
+} from '@/domain/types/servisirane';
 import { formatirajDatumPrikaz } from '@/lib/format/datumi';
 
 export function skracenTekst(tekst: string, maxLen = 150): string {
@@ -39,7 +42,7 @@ export function preferiraniTerminZaDispecera(
   zahtjev: ServisniZahtjev,
   opcije?: OpcijePreferiranogTerminaDispecer,
 ): {
-  tekstCijeli:    string;
+  tekstCijeli: string;
   imaPreferirani: boolean;
 } {
   const bezPreferiranogTermina =
@@ -52,13 +55,16 @@ export function preferiraniTerminZaDispecera(
     !schedule ||
     schedule.no_preferred_time === true ||
     (schedule.termini?.length ?? 0) === 0;
-  if (nema) return { tekstCijeli: bezPreferiranogTermina, imaPreferirani: false };
+  if (nema)
+    return { tekstCijeli: bezPreferiranogTermina, imaPreferirani: false };
 
   const prvi = schedule.termini[0];
-  if (!prvi?.date) return { tekstCijeli: bezPreferiranogTermina, imaPreferirani: false };
+  if (!prvi?.date)
+    return { tekstCijeli: bezPreferiranogTermina, imaPreferirani: false };
 
   const datum = formatKratkiDatum(prvi.date);
-  const tekst = prvi.from && prvi.to ? `${datum}, ${prvi.from}-${prvi.to}` : datum;
+  const tekst =
+    prvi.from && prvi.to ? `${datum}, ${prvi.from}-${prvi.to}` : datum;
   return { tekstCijeli: tekst, imaPreferirani: true };
 }
 
@@ -67,15 +73,16 @@ export function sviPreferinaniTermini(
   zahtjev: ServisniZahtjev,
 ): Array<{ datum: string; od?: string; do?: string; tip: string }> {
   const schedule = zahtjev.preferred_schedule;
-  if (!schedule || schedule.no_preferred_time || !schedule.termini?.length) return [];
+  if (!schedule || schedule.no_preferred_time || !schedule.termini?.length)
+    return [];
   const tipovi = ['Primarni', 'Alternativni 1', 'Alternativni 2'];
   return schedule.termini
-    .filter(t => t?.date)
+    .filter((t) => t?.date)
     .map((t, i) => ({
       datum: formatKratkiDatum(t.date),
-      od:    t.from || undefined,
-      do:    t.to   || undefined,
-      tip:   tipovi[i] ?? `Termin ${i + 1}`,
+      od: t.from || undefined,
+      do: t.to || undefined,
+      tip: tipovi[i] ?? `Termin ${i + 1}`,
     }));
 }
 
@@ -98,7 +105,8 @@ function brojSatiHrvatski(n: number): string {
   const mod10 = n % 10;
   const mod100 = n % 100;
   if (mod10 === 1 && mod100 !== 11) return `${n} sat`;
-  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return `${n} sata`;
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14))
+    return `${n} sata`;
   return `${n} sati`;
 }
 
@@ -113,7 +121,11 @@ export type RelativnoPrijavljenoTonDispecer = 'fresh' | 'yesterday' | 'stale';
 export function relativnoPrijavljenoZaDispecera(
   iso: string,
   referenca: Date = new Date(),
-): { label: string; ton: RelativnoPrijavljenoTonDispecer; tooltipApsolutno: string } {
+): {
+  label: string;
+  ton: RelativnoPrijavljenoTonDispecer;
+  tooltipApsolutno: string;
+} {
   const kreirano = new Date(iso);
   const tooltipApsolutno = formatPrijavljenoDatumVrijeme(iso);
   if (Number.isNaN(kreirano.getTime())) {
@@ -134,17 +146,29 @@ export function relativnoPrijavljenoZaDispecera(
       return { label: `prije ${m} min`, ton: 'fresh', tooltipApsolutno };
     }
     const h = Math.max(1, Math.min(23, Math.floor(diffMs / MS_HOUR)));
-    return { label: `prije ${brojSatiHrvatski(h)}`, ton: 'fresh', tooltipApsolutno };
+    return {
+      label: `prije ${brojSatiHrvatski(h)}`,
+      ton: 'fresh',
+      tooltipApsolutno,
+    };
   }
 
   if (diffMs <= 2 * MS_DAY) {
     const hh = String(kreirano.getHours()).padStart(2, '0');
     const min = String(kreirano.getMinutes()).padStart(2, '0');
-    return { label: `jučer u ${hh}:${min}`, ton: 'yesterday', tooltipApsolutno };
+    return {
+      label: `jučer u ${hh}:${min}`,
+      ton: 'yesterday',
+      tooltipApsolutno,
+    };
   }
 
   const d = Math.max(1, Math.floor(diffMs / MS_DAY));
-  return { label: `prije ${brojDanaHrvatski(d)}`, ton: 'stale', tooltipApsolutno };
+  return {
+    label: `prije ${brojDanaHrvatski(d)}`,
+    ton: 'stale',
+    tooltipApsolutno,
+  };
 }
 
 /**
@@ -176,7 +200,8 @@ export function inicijaliPodnosiocaKratko(
   if (!podnosilac) return null;
   const i = (podnosilac.ime ?? '').trim().charAt(0);
   const p = (podnosilac.prezime ?? '').trim().charAt(0);
-  const slovo = (c: string) => (/[a-zA-ZČčĆćŽžŠšĐđ]/.test(c) ? c.toLocaleUpperCase('hr-HR') : '');
+  const slovo = (c: string) =>
+    /[a-zA-ZČčĆćŽžŠšĐđ]/.test(c) ? c.toLocaleUpperCase('hr-HR') : '';
   const ii = slovo(i);
   const pp = slovo(p);
   if (ii && pp) return `${ii}.${pp}`;

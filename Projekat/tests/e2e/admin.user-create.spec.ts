@@ -30,22 +30,30 @@ test.describe('Admin create user flow', () => {
 
   test.skip(!admin || !korisnik, 'Missing E2E admin/korisnik credentials.');
 
-  test('admin moze otvoriti stranicu za kreiranje internog naloga', async ({ page }) => {
+  test('admin moze otvoriti stranicu za kreiranje internog naloga', async ({
+    page,
+  }) => {
     await prijaviSe(page, admin as Creds);
     await page.goto('/admin/korisnici/novi');
-    await expect(page.getByRole('heading', { name: 'Kreiranje internog naloga' })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: 'Kreiranje internog naloga' }),
+    ).toBeVisible();
     await expect(page.getByLabel('Ime', { exact: true })).toBeVisible();
     await expect(page.getByLabel('Email adresa')).toBeVisible();
     await expect(page.getByLabel('Uloga')).toBeVisible();
   });
 
-  test('ne-admin ne moze otvoriti stranicu za kreiranje internog naloga', async ({ page }) => {
+  test('ne-admin ne moze otvoriti stranicu za kreiranje internog naloga', async ({
+    page,
+  }) => {
     await prijaviSe(page, korisnik as Creds);
     await page.goto('/admin/korisnici/novi');
     await expect(page).not.toHaveURL(/\/admin\/korisnici\/novi$/);
   });
 
-  test('admin submit forme vraca gresku za postojeci email', async ({ page }) => {
+  test('admin submit forme vraca gresku za postojeci email', async ({
+    page,
+  }) => {
     await prijaviSe(page, admin as Creds);
     await page.goto('/admin/korisnici/novi');
 
@@ -56,7 +64,9 @@ test.describe('Admin create user flow', () => {
     await page.getByRole('button', { name: 'Kreiraj nalog' }).click();
 
     await expect(
-      page.getByRole('alert').filter({ hasText: 'Korisnik sa ovom email adresom već postoji.' })
+      page
+        .getByRole('alert')
+        .filter({ hasText: 'Korisnik sa ovom email adresom već postoji.' }),
     ).toBeVisible();
   });
 });

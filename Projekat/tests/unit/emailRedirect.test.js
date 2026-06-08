@@ -1,5 +1,8 @@
 /** @jest-environment node */
-const { getAuthEmailRedirectUrl, AUTH_CALLBACK_PATH } = require('@/lib/auth/emailRedirect');
+const {
+  getAuthEmailRedirectUrl,
+  AUTH_CALLBACK_PATH,
+} = require('@/lib/auth/emailRedirect');
 
 describe('getAuthEmailRedirectUrl', () => {
   const originalSiteUrl = process.env.NEXT_PUBLIC_SITE_URL;
@@ -14,7 +17,9 @@ describe('getAuthEmailRedirectUrl', () => {
 
   test('uses NEXT_PUBLIC_SITE_URL when set', () => {
     process.env.NEXT_PUBLIC_SITE_URL = 'https://nrs-grupa2.vercel.app/';
-    expect(getAuthEmailRedirectUrl()).toBe(`https://nrs-grupa2.vercel.app${AUTH_CALLBACK_PATH}`);
+    expect(getAuthEmailRedirectUrl()).toBe(
+      `https://nrs-grupa2.vercel.app${AUTH_CALLBACK_PATH}`,
+    );
   });
 
   test('returns empty string when no site url and no window', () => {

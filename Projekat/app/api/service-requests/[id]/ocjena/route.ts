@@ -15,12 +15,21 @@ export async function GET(
   try {
     const zahtjevId = parseInt(params.id, 10);
     if (isNaN(zahtjevId)) {
-      return NextResponse.json({ error: 'Neispravan ID zahtjeva.' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Neispravan ID zahtjeva.' },
+        { status: 400 },
+      );
     }
 
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return NextResponse.json({ error: 'Niste prijavljeni.' }, { status: 401 });
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user)
+      return NextResponse.json(
+        { error: 'Niste prijavljeni.' },
+        { status: 401 },
+      );
 
     const db = supabase as any;
 
@@ -32,7 +41,10 @@ export async function GET(
       .maybeSingle();
 
     if (!zahtjev) {
-      return NextResponse.json({ error: 'Zahtjev nije pronađen.' }, { status: 404 });
+      return NextResponse.json(
+        { error: 'Zahtjev nije pronađen.' },
+        { status: 404 },
+      );
     }
 
     // Provjeri ulogu — korisnik, serviser ili dispečer/admin
@@ -46,15 +58,22 @@ export async function GET(
       .maybeSingle();
 
     const uloge: string[] = Array.isArray(uposlenik?.uloga)
-      ? (uposlenik.uloga as { naziv: string }[]).map((u) => u.naziv.toLowerCase())
+      ? (uposlenik.uloga as { naziv: string }[]).map((u) =>
+          u.naziv.toLowerCase(),
+        )
       : uposlenik?.uloga
-      ? [(uposlenik.uloga as { naziv: string }).naziv.toLowerCase()]
-      : [];
+        ? [(uposlenik.uloga as { naziv: string }).naziv.toLowerCase()]
+        : [];
 
-    const jeDispecer = uloge.some((u) => ['dispečer', 'dispecer', 'administrator', 'admin'].includes(u));
+    const jeDispecer = uloge.some((u) =>
+      ['dispečer', 'dispecer', 'administrator', 'admin'].includes(u),
+    );
 
     if (!jeVlasnik && !jeServiser && !jeDispecer) {
-      return NextResponse.json({ error: 'Nemate pristup ovom zahtjevu.' }, { status: 403 });
+      return NextResponse.json(
+        { error: 'Nemate pristup ovom zahtjevu.' },
+        { status: 403 },
+      );
     }
 
     const { data: ocjena } = await db
@@ -79,12 +98,21 @@ export async function POST(
   try {
     const zahtjevId = parseInt(params.id, 10);
     if (isNaN(zahtjevId)) {
-      return NextResponse.json({ error: 'Neispravan ID zahtjeva.' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Neispravan ID zahtjeva.' },
+        { status: 400 },
+      );
     }
 
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return NextResponse.json({ error: 'Niste prijavljeni.' }, { status: 401 });
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user)
+      return NextResponse.json(
+        { error: 'Niste prijavljeni.' },
+        { status: 401 },
+      );
 
     const body = await request.json();
     const rezultat = ocjenaSchema.safeParse(body);
@@ -130,7 +158,10 @@ export async function POST(
 
     if (postojecaOcjena) {
       return NextResponse.json(
-        { error: 'Već ste ocijenili ovu intervenciju.', ocjena: postojecaOcjena },
+        {
+          error: 'Već ste ocijenili ovu intervenciju.',
+          ocjena: postojecaOcjena,
+        },
         { status: 409 },
       );
     }
@@ -139,26 +170,29 @@ export async function POST(
     const { data: novaOcjena, error: greskaInsert } = await adminDb
       .from('intervencija_ocjene')
       .insert({
-        zahtjev_id:  zahtjevId,
+        zahtjev_id: zahtjevId,
         korisnik_id: user.id,
-        ocjena:      rezultat.data.ocjena,
-        komentar:    rezultat.data.komentar ?? null,
+        ocjena: rezultat.data.ocjena,
+        komentar: rezultat.data.komentar ?? null,
       })
       .select()
       .single();
 
     if (greskaInsert) {
-      return NextResponse.json({ error: greskaInsert.message }, { status: 500 });
+      return NextResponse.json(
+        { error: greskaInsert.message },
+        { status: 500 },
+      );
     }
 
     // Audit log
     await zabiljeziAktivnost(adminDb, {
       zahtjev_id: zahtjevId,
-      autor_id:   user.id,
-      tip:        'ocjena',
-      sadrzaj:    `Korisnik ocijenio intervenciju: ${rezultat.data.ocjena}/5${rezultat.data.komentar ? ` — "${rezultat.data.komentar}"` : ''}`,
+      autor_id: user.id,
+      tip: 'ocjena',
+      sadrzaj: `Korisnik ocijenio intervenciju: ${rezultat.data.ocjena}/5${rezultat.data.komentar ? ` — "${rezultat.data.komentar}"` : ''}`,
       actor_role: 'korisnik',
-      new_value:  String(rezultat.data.ocjena),
+      new_value: String(rezultat.data.ocjena),
     });
 
     return NextResponse.json({ ocjena: novaOcjena }, { status: 201 });

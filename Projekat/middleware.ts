@@ -64,11 +64,15 @@ export async function middleware(zahtjev: NextRequest) {
         getAll() {
           return zahtjev.cookies.getAll();
         },
-        setAll(kolacici: { name: string; value: string; options: CookieOptions }[]) {
-          kolacici.forEach(({ name, value }) => zahtjev.cookies.set(name, value));
+        setAll(
+          kolacici: { name: string; value: string; options: CookieOptions }[],
+        ) {
+          kolacici.forEach(({ name, value }) =>
+            zahtjev.cookies.set(name, value),
+          );
           supabaseResponse = NextResponse.next({ request: zahtjev });
           kolacici.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
+            supabaseResponse.cookies.set(name, value, options),
           );
         },
       },
@@ -81,11 +85,12 @@ export async function middleware(zahtjev: NextRequest) {
     user = authUser;
 
     if (authUser) {
-      const { data: korisnikUsluge, error: greskaKorisnikaUsluge } = await supabase
-        .from('korisnik_usluge')
-        .select('id_korisnika_usluge')
-        .eq('id_korisnika_usluge', authUser.id)
-        .maybeSingle();
+      const { data: korisnikUsluge, error: greskaKorisnikaUsluge } =
+        await supabase
+          .from('korisnik_usluge')
+          .select('id_korisnika_usluge')
+          .eq('id_korisnika_usluge', authUser.id)
+          .maybeSingle();
 
       const { data: uposlenik, error: greskaUposlenika } = await supabase
         .from('uposlenici' as any)
@@ -94,7 +99,8 @@ export async function middleware(zahtjev: NextRequest) {
         .maybeSingle();
 
       let uposlenikUloga: UserRole | null = null;
-      const idUloge = (uposlenik as { id_uloge?: number | null } | null)?.id_uloge;
+      const idUloge = (uposlenik as { id_uloge?: number | null } | null)
+        ?.id_uloge;
       if (!greskaUposlenika && idUloge) {
         const { data: ulogaPodaci, error: greskaUloge } = await supabase
           .from('uloga' as any)
@@ -104,21 +110,28 @@ export async function middleware(zahtjev: NextRequest) {
 
         if (!greskaUloge) {
           uposlenikUloga = mapirajNazivUloge(
-            (ulogaPodaci as { naziv?: string | null } | null)?.naziv
+            (ulogaPodaci as { naziv?: string | null } | null)?.naziv,
           );
         }
       }
 
       // Fallback na postojece RPC funkcije ako relacijski upit ne vrati ulogu.
-      if (!uposlenikUloga && (pathname.startsWith(ADMIN_PREFIX) || pathname.startsWith(SERVISER_PREFIX) || pathname.startsWith(DISPECER_PREFIX))) {
+      if (
+        !uposlenikUloga &&
+        (pathname.startsWith(ADMIN_PREFIX) ||
+          pathname.startsWith(SERVISER_PREFIX) ||
+          pathname.startsWith(DISPECER_PREFIX))
+      ) {
         if (pathname.startsWith(ADMIN_PREFIX)) {
           const { data: adminIzBaze, error } = await supabase.rpc('is_admin');
           jeAdministrator = !error && adminIzBaze === true;
         } else if (pathname.startsWith(SERVISER_PREFIX)) {
-          const { data: serviserIzBaze, error } = await supabase.rpc('is_serviser');
+          const { data: serviserIzBaze, error } =
+            await supabase.rpc('is_serviser');
           jeServiser = !error && serviserIzBaze === true;
         } else if (pathname.startsWith(DISPECER_PREFIX)) {
-          const { data: dispecerIzBaze, error } = await supabase.rpc('is_dispecer');
+          const { data: dispecerIzBaze, error } =
+            await supabase.rpc('is_dispecer');
           jeDispecer = !error && dispecerIzBaze === true;
         }
       } else {
@@ -137,11 +150,12 @@ export async function middleware(zahtjev: NextRequest) {
   }
 
   const jeJavnaRuta = JAVNE_RUTE.some(
-    (ruta) => pathname === ruta || pathname.startsWith(ruta + '/')
+    (ruta) => pathname === ruta || pathname.startsWith(ruta + '/'),
   );
   const jeJavniApiZaPartnerAplikaciju =
     method === 'POST' &&
-    (pathname === PARTNER_APPLICATIONS_API || pathname.startsWith(`${PARTNER_APPLICATIONS_API}/`));
+    (pathname === PARTNER_APPLICATIONS_API ||
+      pathname.startsWith(`${PARTNER_APPLICATIONS_API}/`));
   /** API rute moraju vratiti JSON (401/403), ne HTML redirect - inače klijent baca „Unexpected token '<'”. */
   const jeApiRuta = pathname.startsWith('/api/');
 

@@ -4,9 +4,9 @@ import { Check, Wrench, Briefcase, MapPin } from 'lucide-react';
 import type { ServiserZaDodjelu } from '@/domain/types/servisirane';
 
 interface ServiserOdabirKarticaProps {
-  serviser:  ServiserZaDodjelu;
-  odabran:   boolean;
-  onClick:   () => void;
+  serviser: ServiserZaDodjelu;
+  odabran: boolean;
+  onClick: () => void;
   disabled?: boolean;
   /** US-48: udaljenost (km) servisera od lokacije kvara. null/undefined kad nema koordinata. */
   udaljenostKm?: number | null;
@@ -26,7 +26,13 @@ export function ServiserOdabirKartica({
   const statusBoja =
     aktivnih === 0 ? '#22C55E' : aktivnih <= 2 ? '#D97706' : '#DC2626';
   const statusOznaka =
-    aktivnih === 0 ? 'Slobodan' : aktivnih === 1 ? '1 aktivni' : aktivnih < 5 ? `${aktivnih} aktivna` : `${aktivnih} aktivnih`;
+    aktivnih === 0
+      ? 'Slobodan'
+      : aktivnih === 1
+        ? '1 aktivni'
+        : aktivnih < 5
+          ? `${aktivnih} aktivna`
+          : `${aktivnih} aktivnih`;
 
   return (
     <button
@@ -36,26 +42,38 @@ export function ServiserOdabirKartica({
       className="flex w-full items-start gap-4 rounded-2xl border p-4 text-left transition-all
         duration-150 focus:outline-none focus:ring-2 disabled:cursor-not-allowed disabled:opacity-50"
       style={{
-        borderColor:     odabran ? 'var(--first-primary)' : 'rgb(var(--first-quaternary-rgb) / 0.4)',
-        backgroundColor: odabran ? 'rgb(var(--first-primary-rgb) / 0.06)' : 'rgb(255 255 255 / 0.7)',
-        boxShadow:       odabran ? '0 0 0 1px rgb(var(--first-primary-rgb) / 0.3)' : 'none',
+        borderColor: odabran
+          ? 'var(--first-primary)'
+          : 'rgb(var(--first-quaternary-rgb) / 0.4)',
+        backgroundColor: odabran
+          ? 'rgb(var(--first-primary-rgb) / 0.06)'
+          : 'rgb(255 255 255 / 0.7)',
+        boxShadow: odabran
+          ? '0 0 0 1px rgb(var(--first-primary-rgb) / 0.3)'
+          : 'none',
       }}
     >
       {/* Avatar inicijali */}
       <div
         className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl text-sm font-bold"
         style={{
-          backgroundColor: odabran ? 'var(--first-primary)' : 'rgb(var(--first-quaternary-rgb) / 0.3)',
-          color:           odabran ? '#ffffff' : 'var(--first-octonary)',
+          backgroundColor: odabran
+            ? 'var(--first-primary)'
+            : 'rgb(var(--first-quaternary-rgb) / 0.3)',
+          color: odabran ? '#ffffff' : 'var(--first-octonary)',
         }}
       >
-        {serviser.ime.charAt(0)}{serviser.prezime.charAt(0)}
+        {serviser.ime.charAt(0)}
+        {serviser.prezime.charAt(0)}
       </div>
 
       {/* Info */}
       <div className="min-w-0 flex-1">
         <div className="flex items-center justify-between gap-2">
-          <p className="font-semibold" style={{ color: 'var(--first-octonary)' }}>
+          <p
+            className="font-semibold"
+            style={{ color: 'var(--first-octonary)' }}
+          >
             {serviser.ime} {serviser.prezime}
           </p>
           {/* Dostupnost */}
@@ -63,7 +81,10 @@ export function ServiserOdabirKartica({
             className="flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold"
             style={{ backgroundColor: `${statusBoja}18`, color: statusBoja }}
           >
-            <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: statusBoja }} />
+            <span
+              className="h-1.5 w-1.5 rounded-full"
+              style={{ backgroundColor: statusBoja }}
+            />
             {statusOznaka}
           </span>
         </div>
@@ -77,7 +98,7 @@ export function ServiserOdabirKartica({
                 className="flex items-center gap-1 rounded-md px-2 py-0.5 text-xs"
                 style={{
                   backgroundColor: 'rgb(var(--first-quaternary-rgb) / 0.3)',
-                  color:           'var(--first-nonary)',
+                  color: 'var(--first-nonary)',
                 }}
               >
                 <Wrench className="h-2.5 w-2.5" />
@@ -88,7 +109,10 @@ export function ServiserOdabirKartica({
         )}
 
         {/* Broj aktivnih zadataka + udaljenost (US-48) */}
-        <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs" style={{ color: 'var(--first-nonary)' }}>
+        <div
+          className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs"
+          style={{ color: 'var(--first-nonary)' }}
+        >
           <span className="flex items-center gap-1">
             <Briefcase className="h-3 w-3" />
             {aktivnih === 0
@@ -101,11 +125,16 @@ export function ServiserOdabirKartica({
               style={
                 jeNajblizi
                   ? { backgroundColor: 'rgb(34,197,94,0.12)', color: '#16A34A' }
-                  : { backgroundColor: 'rgb(var(--first-quaternary-rgb) / 0.3)', color: 'var(--first-nonary)' }
+                  : {
+                      backgroundColor: 'rgb(var(--first-quaternary-rgb) / 0.3)',
+                      color: 'var(--first-nonary)',
+                    }
               }
             >
               <MapPin className="h-3 w-3" />
-              {jeNajblizi ? `Najbliži · ${udaljenostKm} km` : `${udaljenostKm} km`}
+              {jeNajblizi
+                ? `Najbliži · ${udaljenostKm} km`
+                : `${udaljenostKm} km`}
             </span>
           )}
         </div>

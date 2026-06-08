@@ -16,7 +16,9 @@ export function operativnaGrupaIzFinalnogPrioriteta(
 }
 
 /** Niži broj = viši prioritet (za sort). */
-export function rangOperativnogPrioriteta(finalPriority: string | null | undefined): number {
+export function rangOperativnogPrioriteta(
+  finalPriority: string | null | undefined,
+): number {
   const g = operativnaGrupaIzFinalnogPrioriteta(finalPriority);
   if (g === 'Hitno') return 0;
   if (g === 'Srednja') return 1;

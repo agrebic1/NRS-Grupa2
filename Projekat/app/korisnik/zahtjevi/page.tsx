@@ -23,25 +23,35 @@ function PraznoDashboard({ onZahtjevPoslan }: { onZahtjevPoslan: () => void }) {
           className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl"
           style={{ backgroundColor: 'rgb(var(--first-secondary-rgb) / 0.12)' }}
         >
-          <FileText className="h-8 w-8" style={{ color: 'var(--first-secondary)' }} />
+          <FileText
+            className="h-8 w-8"
+            style={{ color: 'var(--first-secondary)' }}
+          />
         </div>
-        <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--first-octonary)' }}>
+        <h1
+          className="text-2xl font-bold tracking-tight"
+          style={{ color: 'var(--first-octonary)' }}
+        >
           Dobrodošli!
         </h1>
         <p className="mt-2 text-sm" style={{ color: 'var(--first-nonary)' }}>
-          Nemate još nijednog zahtjeva. Kreirajte novu prijavu ispod i naš tim će se pobrinuti.
+          Nemate još nijednog zahtjeva. Kreirajte novu prijavu ispod i naš tim
+          će se pobrinuti.
         </p>
       </div>
       <div
         className="w-full max-w-2xl rounded-2xl p-7 shadow-card sm:p-8"
         style={{
           backgroundColor: 'rgb(var(--first-quinary-rgb) / 0.22)',
-          border:          '1px solid rgb(var(--first-quaternary-rgb) / 0.4)',
-          backdropFilter:  'blur(12px)',
+          border: '1px solid rgb(var(--first-quaternary-rgb) / 0.4)',
+          backdropFilter: 'blur(12px)',
         }}
       >
         <div className="mb-6">
-          <h2 className="text-xl font-bold" style={{ color: 'var(--first-octonary)' }}>
+          <h2
+            className="text-xl font-bold"
+            style={{ color: 'var(--first-octonary)' }}
+          >
             Kreiraj zahtjev
           </h2>
           <p className="mt-1 text-sm" style={{ color: 'var(--first-nonary)' }}>
@@ -61,7 +71,7 @@ function PraznoDashboard({ onZahtjevPoslan }: { onZahtjevPoslan: () => void }) {
 
 interface ListaDashboardProps {
   zahtjevi: ServisniZahtjev[];
-  onUredi:  (z: ServisniZahtjev) => void;
+  onUredi: (z: ServisniZahtjev) => void;
   onOtkazi: (z: ServisniZahtjev) => void;
 }
 
@@ -70,7 +80,10 @@ function ListaDashboard({ zahtjevi, onUredi, onOtkazi }: ListaDashboardProps) {
     <div>
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--first-octonary)' }}>
+          <h1
+            className="text-2xl font-bold tracking-tight"
+            style={{ color: 'var(--first-octonary)' }}
+          >
             Moji zahtjevi
           </h1>
           <p className="mt-1 text-sm" style={{ color: 'var(--first-nonary)' }}>
@@ -89,14 +102,19 @@ function ListaDashboard({ zahtjevi, onUredi, onOtkazi }: ListaDashboardProps) {
         className="rounded-2xl shadow-card"
         style={{
           backgroundColor: 'rgb(var(--first-quinary-rgb) / 0.22)',
-          border:          '1px solid rgb(var(--first-quaternary-rgb) / 0.35)',
+          border: '1px solid rgb(var(--first-quaternary-rgb) / 0.35)',
         }}
       >
         <div
           className="px-5 py-4"
-          style={{ borderBottom: '1px solid rgb(var(--first-quaternary-rgb) / 0.3)' }}
+          style={{
+            borderBottom: '1px solid rgb(var(--first-quaternary-rgb) / 0.3)',
+          }}
         >
-          <h2 className="font-semibold" style={{ color: 'var(--first-octonary)' }}>
+          <h2
+            className="font-semibold"
+            style={{ color: 'var(--first-octonary)' }}
+          >
             Aktivni zahtjevi ({zahtjevi.length})
           </h2>
         </div>
@@ -122,11 +140,13 @@ export default function KorisnikZahtjeviPage() {
   const router = useRouter();
 
   const [zahtjevi, setZahtjevi] = useState<ServisniZahtjev[]>([]);
-  const [ucitava,  setUcitava]  = useState(true);
-  const [greska,   setGreska]   = useState<string | null>(null);
+  const [ucitava, setUcitava] = useState(true);
+  const [greska, setGreska] = useState<string | null>(null);
 
   // Stanje za modal otkazivanja
-  const [otkaziTarget, setOtkaziTarget] = useState<ServisniZahtjev | null>(null);
+  const [otkaziTarget, setOtkaziTarget] = useState<ServisniZahtjev | null>(
+    null,
+  );
 
   async function ucitajZahtjeve() {
     setUcitava(true);
@@ -135,16 +155,22 @@ export default function KorisnikZahtjeviPage() {
       const r = await fetch('/api/service-requests', { cache: 'no-store' });
       const d = await r.json();
       if (!r.ok) throw new Error(d.error ?? 'Greška pri učitavanju.');
-      const aktivni = (d.zahtjevi ?? []).filter((z: ServisniZahtjev) => jeZahtjevAktivan(z.status));
+      const aktivni = (d.zahtjevi ?? []).filter((z: ServisniZahtjev) =>
+        jeZahtjevAktivan(z.status),
+      );
       setZahtjevi(aktivni);
     } catch (err) {
-      setGreska(err instanceof Error ? err.message : 'Greška pri učitavanju zahtjeva.');
+      setGreska(
+        err instanceof Error ? err.message : 'Greška pri učitavanju zahtjeva.',
+      );
     } finally {
       setUcitava(false);
     }
   }
 
-  useEffect(() => { ucitajZahtjeve(); }, []);
+  useEffect(() => {
+    ucitajZahtjeve();
+  }, []);
 
   useEffect(() => {
     function handleVisibilityChange() {
@@ -194,7 +220,12 @@ export default function KorisnikZahtjeviPage() {
       <AppShell uloga="korisnik">
         <div className="flex flex-col gap-4">
           <AlertMessage variant="error" message={greska} />
-          <Button variant="secondary" size="md" onClick={ucitajZahtjeve} className="w-fit">
+          <Button
+            variant="secondary"
+            size="md"
+            onClick={ucitajZahtjeve}
+            className="w-fit"
+          >
             <RefreshCw className="h-4 w-4" />
             Pokušaj ponovo
           </Button>

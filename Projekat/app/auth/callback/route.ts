@@ -22,7 +22,10 @@ export async function GET(request: Request) {
   }
 
   if (tokenHash && type) {
-    const { error } = await supabase.auth.verifyOtp({ type, token_hash: tokenHash });
+    const { error } = await supabase.auth.verifyOtp({
+      type,
+      token_hash: tokenHash,
+    });
     if (!error) {
       const successUrl = new URL(next, origin);
       successUrl.searchParams.set('verified', '1');

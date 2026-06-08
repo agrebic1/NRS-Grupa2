@@ -6,11 +6,13 @@ Okruzenje: production
 ## Automatski testovi
 
 Komande:
+
 - `npm test`
 - `npm run test:coverage`
 - `npm run test:e2e`
 
 Rezultat:
+
 - Unit testovi: 31/31 passed
 - Integration testovi: 27/27 passed
 - E2E testovi: 11/11 passed
@@ -29,6 +31,7 @@ Zakljucak: cilj pokrivenosti od najmanje 98% je ostvaren.
 Izvor: `EXEC_SB-06-20_Sprint6_ManualFlows.csv`
 
 Rezultat:
+
 - Ukupno testova: 24
 - Proslo: 24
 - Nije proslo: 0

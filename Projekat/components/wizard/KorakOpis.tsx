@@ -7,7 +7,12 @@ import { OkvirGalerije } from '@/components/servisirane/PrilogGalerija';
 import { jeValidanKontaktTelefon } from '@/lib/validations/servisirane';
 
 const MAX_PHOTO_BYTES = 5 * 1024 * 1024;
-const DOZVOLJENI_FORMATI = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
+const DOZVOLJENI_FORMATI = [
+  'image/jpeg',
+  'image/jpg',
+  'image/png',
+  'image/webp',
+];
 
 function validirajTelefon(tel: string): string | null {
   if (!tel.trim()) return 'Unesite kontakt telefon.';
@@ -16,16 +21,16 @@ function validirajTelefon(tel: string): string | null {
 }
 
 interface KorakOpisProps {
-  description:  string;
+  description: string;
   contactPhone: string;
   accountPhone?: string;
   useAccountPhone?: boolean;
-  photoFile:    File | null;
+  photoFile: File | null;
   onUpdate: (p: {
-    description?:  string;
+    description?: string;
     contactPhone?: string;
     useAccountPhone?: boolean;
-    photoFile?:    File | null;
+    photoFile?: File | null;
   }) => void;
   validationError?: string | null;
 }
@@ -48,13 +53,18 @@ export function KorakOpis({
     description.trim().length === 0
       ? 'Unesite opis zahtjeva prije nastavka.'
       : description.trim().length < 20
-      ? 'Opis mora sadržavati dovoljno informacija za obradu zahtjeva.'
-      : null;
+        ? 'Opis mora sadržavati dovoljno informacija za obradu zahtjeva.'
+        : null;
   const phoneError = validirajTelefon(contactPhone);
-  const previewUrl = useMemo(() => (photoFile ? URL.createObjectURL(photoFile) : null), [photoFile]);
+  const previewUrl = useMemo(
+    () => (photoFile ? URL.createObjectURL(photoFile) : null),
+    [photoFile],
+  );
   const imaPokusajSlanja = Boolean(validationError);
-  const prikaziDescriptionError = (descriptionTouched || imaPokusajSlanja) ? descriptionError : null;
-  const prikaziPhoneError = (phoneTouched || imaPokusajSlanja) ? phoneError : null;
+  const prikaziDescriptionError =
+    descriptionTouched || imaPokusajSlanja ? descriptionError : null;
+  const prikaziPhoneError =
+    phoneTouched || imaPokusajSlanja ? phoneError : null;
 
   useEffect(() => {
     return () => {
@@ -97,12 +107,18 @@ export function KorakOpis({
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h2 className="mb-1 text-xl font-bold" style={{ color: 'var(--first-octonary)' }}>
+        <h2
+          className="mb-1 text-xl font-bold"
+          style={{ color: 'var(--first-octonary)' }}
+        >
           Opis zahtjeva
         </h2>
-        <p className="text-sm leading-relaxed" style={{ color: 'var(--first-nonary)' }}>
-          Opišite šta se desilo, kada je problem počeo i šta ste već pokušali. Ovi podaci pomažu
-          dispečeru da pravilno obradi zahtjev.
+        <p
+          className="text-sm leading-relaxed"
+          style={{ color: 'var(--first-nonary)' }}
+        >
+          Opišite šta se desilo, kada je problem počeo i šta ste već pokušali.
+          Ovi podaci pomažu dispečeru da pravilno obradi zahtjev.
         </p>
       </div>
 
@@ -110,11 +126,19 @@ export function KorakOpis({
         <div className="mb-1.5 flex items-center gap-2">
           <div
             className="flex h-6 w-6 items-center justify-center rounded-md"
-            style={{ backgroundColor: 'rgb(var(--first-quaternary-rgb) / 0.4)' }}
+            style={{
+              backgroundColor: 'rgb(var(--first-quaternary-rgb) / 0.4)',
+            }}
           >
-            <FileText className="h-3.5 w-3.5" style={{ color: 'var(--first-nonary)' }} />
+            <FileText
+              className="h-3.5 w-3.5"
+              style={{ color: 'var(--first-nonary)' }}
+            />
           </div>
-          <span className="text-sm font-semibold" style={{ color: 'var(--first-octonary)' }}>
+          <span
+            className="text-sm font-semibold"
+            style={{ color: 'var(--first-octonary)' }}
+          >
             Opis zahtjeva *
           </span>
         </div>
@@ -140,11 +164,19 @@ export function KorakOpis({
         <div className="mb-0.5 flex items-center gap-2">
           <div
             className="flex h-6 w-6 items-center justify-center rounded-md"
-            style={{ backgroundColor: 'rgb(var(--first-quaternary-rgb) / 0.4)' }}
+            style={{
+              backgroundColor: 'rgb(var(--first-quaternary-rgb) / 0.4)',
+            }}
           >
-            <Phone className="h-3.5 w-3.5" style={{ color: 'var(--first-nonary)' }} />
+            <Phone
+              className="h-3.5 w-3.5"
+              style={{ color: 'var(--first-nonary)' }}
+            />
           </div>
-          <label className="text-sm font-semibold" style={{ color: 'var(--first-octonary)' }}>
+          <label
+            className="text-sm font-semibold"
+            style={{ color: 'var(--first-octonary)' }}
+          >
             Kontakt telefon *
           </label>
         </div>
@@ -162,14 +194,16 @@ export function KorakOpis({
             className="w-full rounded-xl border px-4 py-2.5 pr-10 text-sm transition-all duration-200
               placeholder:text-text-muted/60 focus:outline-none focus:ring-2 disabled:cursor-not-allowed"
             style={{
-              borderColor:     prikaziPhoneError ? '#DC2626' : 'rgb(var(--first-quaternary-rgb) / 0.4)',
+              borderColor: prikaziPhoneError
+                ? '#DC2626'
+                : 'rgb(var(--first-quaternary-rgb) / 0.4)',
               backgroundColor: useAccountPhone
                 ? 'rgb(var(--first-quaternary-rgb) / 0.25)'
                 : prikaziPhoneError
-                ? 'rgba(220,38,38,0.04)'
-                : 'rgb(255 255 255 / 0.6)',
-              color:           'var(--first-octonary)',
-              opacity:         useAccountPhone ? 0.78 : 1,
+                  ? 'rgba(220,38,38,0.04)'
+                  : 'rgb(255 255 255 / 0.6)',
+              color: 'var(--first-octonary)',
+              opacity: useAccountPhone ? 0.78 : 1,
             }}
           />
           {prikaziPhoneError && (
@@ -179,7 +213,8 @@ export function KorakOpis({
           )}
         </div>
         <p className="text-xs" style={{ color: 'var(--first-quinary)' }}>
-          Ovaj broj ćemo koristiti ako dispečer ili serviser treba dodatne informacije.
+          Ovaj broj ćemo koristiti ako dispečer ili serviser treba dodatne
+          informacije.
         </p>
         {accountPhone?.trim() && (
           <label className="mt-0.5 inline-flex w-fit cursor-pointer items-center gap-2 text-xs">
@@ -203,7 +238,10 @@ export function KorakOpis({
       </div>
 
       <div>
-        <label className="mb-1.5 block text-sm font-medium" style={{ color: 'var(--first-octonary)' }}>
+        <label
+          className="mb-1.5 block text-sm font-medium"
+          style={{ color: 'var(--first-octonary)' }}
+        >
           Fotografija (neobavezno)
         </label>
         <p className="mb-2 text-xs" style={{ color: 'var(--first-quinary)' }}>
@@ -214,7 +252,7 @@ export function KorakOpis({
           <div
             className="flex flex-col gap-3 rounded-xl border px-4 py-4"
             style={{
-              borderColor:     'rgb(var(--first-secondary-rgb) / 0.4)',
+              borderColor: 'rgb(var(--first-secondary-rgb) / 0.4)',
               backgroundColor: 'rgb(var(--first-secondary-rgb) / 0.06)',
             }}
           >
@@ -232,7 +270,10 @@ export function KorakOpis({
               </div>
             )}
             <div className="flex items-center justify-between gap-3">
-              <span className="min-w-0 truncate text-sm" style={{ color: 'var(--first-octonary)' }}>
+              <span
+                className="min-w-0 truncate text-sm"
+                style={{ color: 'var(--first-octonary)' }}
+              >
                 {photoFile.name}
               </span>
               <button
@@ -250,18 +291,36 @@ export function KorakOpis({
           <div
             className="flex cursor-pointer flex-col items-center gap-2 rounded-xl border-2 border-dashed px-5 py-8 text-center transition-colors duration-200"
             style={{
-              borderColor:     isDragging ? 'var(--first-secondary)' : 'rgb(var(--first-quaternary-rgb) / 0.5)',
-              backgroundColor: isDragging ? 'rgb(var(--first-secondary-rgb) / 0.05)' : 'transparent',
+              borderColor: isDragging
+                ? 'var(--first-secondary)'
+                : 'rgb(var(--first-quaternary-rgb) / 0.5)',
+              backgroundColor: isDragging
+                ? 'rgb(var(--first-secondary-rgb) / 0.05)'
+                : 'transparent',
             }}
-            onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+            onDragOver={(e) => {
+              e.preventDefault();
+              setIsDragging(true);
+            }}
             onDragLeave={() => setIsDragging(false)}
-            onDrop={(e) => { e.preventDefault(); setIsDragging(false); handleFile(e.dataTransfer.files[0] ?? null); }}
-            onClick={() => document.getElementById('wizard-foto-input')?.click()}
+            onDrop={(e) => {
+              e.preventDefault();
+              setIsDragging(false);
+              handleFile(e.dataTransfer.files[0] ?? null);
+            }}
+            onClick={() =>
+              document.getElementById('wizard-foto-input')?.click()
+            }
           >
-            <Upload className="h-7 w-7" style={{ color: 'var(--first-nonary)' }} />
+            <Upload
+              className="h-7 w-7"
+              style={{ color: 'var(--first-nonary)' }}
+            />
             <p className="text-sm" style={{ color: 'var(--first-nonary)' }}>
               Prevucite sliku ili{' '}
-              <span style={{ color: 'var(--first-secondary)' }}>kliknite za odabir</span>
+              <span style={{ color: 'var(--first-secondary)' }}>
+                kliknite za odabir
+              </span>
             </p>
             <p className="text-xs" style={{ color: 'var(--first-quinary)' }}>
               JPG, PNG ili WEBP, maksimalno 5 MB.

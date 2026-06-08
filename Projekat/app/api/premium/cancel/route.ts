@@ -13,16 +13,27 @@ export async function POST(request: Request) {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json({ error: 'Niste prijavljeni.' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Niste prijavljeni.' },
+        { status: 401 },
+      );
     }
 
     const body = await request.json().catch(() => ({}));
     const parsed = premiumCancelSchema.safeParse(body);
     if (!parsed.success) {
-      return NextResponse.json({ error: parsed.error.errors[0]?.message ?? 'Neispravan unos.' }, { status: 400 });
+      return NextResponse.json(
+        { error: parsed.error.errors[0]?.message ?? 'Neispravan unos.' },
+        { status: 400 },
+      );
     }
 
-    const rez = await premiumCancelSelfService(supabase as any, user.id, user.id, parsed.data.reason);
+    const rez = await premiumCancelSelfService(
+      supabase as any,
+      user.id,
+      user.id,
+      parsed.data.reason,
+    );
     if (!rez.ok) {
       return NextResponse.json({ error: rez.message }, { status: rez.status });
     }

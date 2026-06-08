@@ -1,14 +1,14 @@
 :root {
-  --first-primary-rgb: 16 37 65;        /* #102541 */
-  --first-secondary-rgb: 45 91 159;     /* #2D5B9F */
+  --first-primary-rgb: 16 37 65; /* #102541 */
+  --first-secondary-rgb: 45 91 159; /* #2D5B9F */
   /* Gotovo bijela stranica, blaga hladna nijansa (ne siva #fff). */
-  --first-tertiary-rgb: 252 253 255;    /* #FCFDFF */
-  --first-quaternary-rgb: 223 231 242;  /* #DFE7F2 */
-  --first-quinary-rgb: 255 255 255;     /* #FFFFFF */
-  --first-senary-rgb: 217 132 0;        /* #D98400 */
-  --first-septenary-rgb: 242 201 76;    /* #F2C94C */
-  --first-octonary-rgb: 11 21 38;       /* #0B1526 */
-  --first-nonary-rgb: 97 112 137;       /* #617089 */
+  --first-tertiary-rgb: 252 253 255; /* #FCFDFF */
+  --first-quaternary-rgb: 223 231 242; /* #DFE7F2 */
+  --first-quinary-rgb: 255 255 255; /* #FFFFFF */
+  --first-senary-rgb: 217 132 0; /* #D98400 */
+  --first-septenary-rgb: 242 201 76; /* #F2C94C */
+  --first-octonary-rgb: 11 21 38; /* #0B1526 */
+  --first-nonary-rgb: 97 112 137; /* #617089 */
 
   --first-primary: rgb(var(--first-primary-rgb));
   --first-secondary: rgb(var(--first-secondary-rgb));
@@ -26,7 +26,7 @@
   --surface-card-strong: rgb(var(--first-quinary-rgb) / 0.98);
   --surface-panel: rgb(255 255 255 / 0.72);
   --surface-info: rgb(var(--first-septenary-rgb) / 0.12);
-  --surface-warning: rgb(var(--first-senary-rgb) / 0.10);
+  --surface-warning: rgb(var(--first-senary-rgb) / 0.1);
   --surface-success: rgb(79 164 110 / 0.12);
 
   --border-soft: rgb(var(--first-quaternary-rgb) / 0.75);

@@ -16,7 +16,10 @@ import { Button } from '@/components/ui/Button';
 import { StatusBadge } from '@/components/servisirane/ZahtjevKartica';
 import type { ServisniZahtjev } from '@/domain/types/servisirane';
 import { formatirajDatumPrikaz } from '@/lib/format/datumi';
-import { BADGE_STATUSA, type StatusKorisnika } from '@/lib/admin/statusKorisnika';
+import {
+  BADGE_STATUSA,
+  type StatusKorisnika,
+} from '@/lib/admin/statusKorisnika';
 import {
   filtrirajKorisnikeListu,
   porukaPraznogStanjaKorisnika,
@@ -25,7 +28,12 @@ import {
 } from '@/lib/admin/korisniciFilter';
 import { AdminKorisniciPretragaFilter } from '@/components/admin/AdminKorisniciPretragaFilter';
 
-type PremiumLifecycleStatus = 'inactive' | 'pending_payment' | 'active' | 'expired' | 'cancelled';
+type PremiumLifecycleStatus =
+  | 'inactive'
+  | 'pending_payment'
+  | 'active'
+  | 'expired'
+  | 'cancelled';
 
 interface KorisnikSistema {
   id: string;
@@ -42,7 +50,11 @@ interface KorisnikSistema {
 }
 
 interface ZahtjevSaPodnosiocem extends ServisniZahtjev {
-  podnosilac: { ime: string; prezime: string; broj_telefona: string | null } | null;
+  podnosilac: {
+    ime: string;
+    prezime: string;
+    broj_telefona: string | null;
+  } | null;
 }
 
 export default function AdminPage() {
@@ -52,7 +64,8 @@ export default function AdminPage() {
   const [ucitava, setUcitava] = useState(true);
   const [premiumLoadingId, setPremiumLoadingId] = useState<string | null>(null);
   const [pretraga, setPretraga] = useState('');
-  const [statusFilter, setStatusFilter] = useState<StatusFilterKorisnika>('svi');
+  const [statusFilter, setStatusFilter] =
+    useState<StatusFilterKorisnika>('svi');
   const [ulogaFilter, setUlogaFilter] = useState<UlogaFilterKorisnika>('svi');
 
   async function ucitajKorisnike() {
@@ -69,7 +82,11 @@ export default function AdminPage() {
 
       setKorisnici(podaci.users ?? []);
     } catch (error) {
-      setGreska(error instanceof Error ? error.message : 'Nije moguce ucitati korisnike.');
+      setGreska(
+        error instanceof Error
+          ? error.message
+          : 'Nije moguce ucitati korisnike.',
+      );
     } finally {
       setUcitava(false);
     }
@@ -86,7 +103,10 @@ export default function AdminPage() {
       .catch(() => {});
   }, []);
 
-  async function primijeniPremiumLifecycle(korisnikId: string, lifecycle: PremiumLifecycleStatus) {
+  async function primijeniPremiumLifecycle(
+    korisnikId: string,
+    lifecycle: PremiumLifecycleStatus,
+  ) {
     setPremiumLoadingId(korisnikId);
     setGreska(null);
     try {
@@ -103,10 +123,15 @@ export default function AdminPage() {
         body: JSON.stringify({ action: actionMap[lifecycle] }),
       });
       const d = await r.json();
-      if (!r.ok) throw new Error(d.error ?? 'Neuspjela izmjena premium statusa.');
+      if (!r.ok)
+        throw new Error(d.error ?? 'Neuspjela izmjena premium statusa.');
       await ucitajKorisnike();
     } catch (error) {
-      setGreska(error instanceof Error ? error.message : 'Neuspjela izmjena premium statusa.');
+      setGreska(
+        error instanceof Error
+          ? error.message
+          : 'Neuspjela izmjena premium statusa.',
+      );
     } finally {
       setPremiumLoadingId(null);
     }
@@ -131,34 +156,48 @@ export default function AdminPage() {
 
   const kpiKartice = useMemo(
     () => [
-      { oznaka: 'Ukupno korisnika', vrijednost: korisnici.length, boja: 'var(--first-primary)', Ikona: Users },
+      {
+        oznaka: 'Ukupno korisnika',
+        vrijednost: korisnici.length,
+        boja: 'var(--first-primary)',
+        Ikona: Users,
+      },
       {
         oznaka: 'Aktivni',
-        vrijednost: korisnici.filter((korisnik) => korisnik.status === 'aktivan').length,
+        vrijednost: korisnici.filter(
+          (korisnik) => korisnik.status === 'aktivan',
+        ).length,
         boja: 'var(--first-secondary)',
         Ikona: UserCheck,
       },
       {
         oznaka: 'Neaktivni',
-        vrijednost: korisnici.filter((korisnik) => korisnik.status === 'neaktivan').length,
+        vrijednost: korisnici.filter(
+          (korisnik) => korisnik.status === 'neaktivan',
+        ).length,
         boja: 'var(--first-septenary)',
         Ikona: UserX,
       },
       {
         oznaka: 'Suspendovani',
-        vrijednost: korisnici.filter((korisnik) => korisnik.status === 'suspendovan').length,
+        vrijednost: korisnici.filter(
+          (korisnik) => korisnik.status === 'suspendovan',
+        ).length,
         boja: 'var(--first-senary)',
         Ikona: ShieldOff,
       },
     ],
-    [korisnici]
+    [korisnici],
   );
 
   return (
     <AppShell uloga="admin" imeKorisnika="Administrator">
       <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--first-octonary)' }}>
+          <h1
+            className="text-2xl font-bold tracking-tight"
+            style={{ color: 'var(--first-octonary)' }}
+          >
             Pregled sistema
           </h1>
           <p className="mt-1 text-sm" style={{ color: 'var(--first-nonary)' }}>
@@ -199,7 +238,9 @@ export default function AdminPage() {
           >
             <div
               className="flex h-10 w-10 items-center justify-center rounded-xl"
-              style={{ backgroundColor: `color-mix(in srgb, ${boja} 10%, transparent)` }}
+              style={{
+                backgroundColor: `color-mix(in srgb, ${boja} 10%, transparent)`,
+              }}
             >
               <Ikona className="h-5 w-5" style={{ color: boja }} />
             </div>
@@ -224,9 +265,14 @@ export default function AdminPage() {
       >
         <div
           className="flex items-center justify-between px-5 py-4"
-          style={{ borderBottom: '1px solid rgb(var(--first-quaternary-rgb) / 0.3)' }}
+          style={{
+            borderBottom: '1px solid rgb(var(--first-quaternary-rgb) / 0.3)',
+          }}
         >
-          <h2 className="font-semibold" style={{ color: 'var(--first-octonary)' }}>
+          <h2
+            className="font-semibold"
+            style={{ color: 'var(--first-octonary)' }}
+          >
             Korisnici sistema
           </h2>
           <Link
@@ -266,8 +312,21 @@ export default function AdminPage() {
         <div className="hidden overflow-x-auto sm:block">
           <table className="w-full text-sm">
             <thead>
-              <tr style={{ borderBottom: '1px solid rgb(var(--first-quaternary-rgb) / 0.25)' }}>
-                {['Ime i prezime', 'Email', 'Uloga', 'Status', 'Premium lifecycle', 'Registrovan', ''].map((zaglavlje) => (
+              <tr
+                style={{
+                  borderBottom:
+                    '1px solid rgb(var(--first-quaternary-rgb) / 0.25)',
+                }}
+              >
+                {[
+                  'Ime i prezime',
+                  'Email',
+                  'Uloga',
+                  'Status',
+                  'Premium lifecycle',
+                  'Registrovan',
+                  '',
+                ].map((zaglavlje) => (
                   <th
                     key={zaglavlje}
                     className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wider"
@@ -278,10 +337,17 @@ export default function AdminPage() {
                 ))}
               </tr>
             </thead>
-            <tbody className="divide-y" style={{ borderColor: 'rgb(var(--first-quaternary-rgb) / 0.2)' }}>
+            <tbody
+              className="divide-y"
+              style={{ borderColor: 'rgb(var(--first-quaternary-rgb) / 0.2)' }}
+            >
               {ucitava && (
                 <tr>
-                  <td colSpan={7} className="px-5 py-8 text-center" style={{ color: 'var(--first-nonary)' }}>
+                  <td
+                    colSpan={7}
+                    className="px-5 py-8 text-center"
+                    style={{ color: 'var(--first-nonary)' }}
+                  >
                     Učitavanje korisnika...
                   </td>
                 </tr>
@@ -289,7 +355,11 @@ export default function AdminPage() {
 
               {!ucitava && filtriraniKorisnici.length === 0 && !greska && (
                 <tr>
-                  <td colSpan={7} className="px-5 py-8 text-center" style={{ color: 'var(--first-nonary)' }}>
+                  <td
+                    colSpan={7}
+                    className="px-5 py-8 text-center"
+                    style={{ color: 'var(--first-nonary)' }}
+                  >
                     {porukaPraznoKorisnici}
                   </td>
                 </tr>
@@ -300,20 +370,35 @@ export default function AdminPage() {
                   const badge = BADGE_STATUSA[korisnik.status];
 
                   return (
-                    <tr key={korisnik.id} className="transition-colors hover:bg-soft-beige/10">
-                      <td className="px-5 py-3.5 font-medium" style={{ color: 'var(--first-octonary)' }}>
+                    <tr
+                      key={korisnik.id}
+                      className="transition-colors hover:bg-soft-beige/10"
+                    >
+                      <td
+                        className="px-5 py-3.5 font-medium"
+                        style={{ color: 'var(--first-octonary)' }}
+                      >
                         {korisnik.imeIPrezime}
                       </td>
-                      <td className="px-5 py-3.5" style={{ color: 'var(--first-nonary)' }}>
+                      <td
+                        className="px-5 py-3.5"
+                        style={{ color: 'var(--first-nonary)' }}
+                      >
                         {korisnik.email}
                       </td>
-                      <td className="px-5 py-3.5" style={{ color: 'var(--first-nonary)' }}>
+                      <td
+                        className="px-5 py-3.5"
+                        style={{ color: 'var(--first-nonary)' }}
+                      >
                         {korisnik.uloga}
                       </td>
                       <td className="px-5 py-3.5">
                         <span
                           className="rounded-full px-2.5 py-0.5 text-xs font-semibold"
-                          style={{ backgroundColor: badge.pozadina, color: badge.boja }}
+                          style={{
+                            backgroundColor: badge.pozadina,
+                            color: badge.boja,
+                          }}
                         >
                           {badge.oznaka}
                         </span>
@@ -324,34 +409,56 @@ export default function AdminPage() {
                             <select
                               className="rounded-lg border px-2 py-1.5 text-xs font-medium"
                               style={{
-                                borderColor: 'rgb(var(--first-quaternary-rgb) / 0.45)',
+                                borderColor:
+                                  'rgb(var(--first-quaternary-rgb) / 0.45)',
                                 color: 'var(--first-octonary)',
                                 backgroundColor: 'rgb(255 255 255 / 0.9)',
                               }}
-                              value={korisnik.premium_status ?? (korisnik.isPremium ? 'active' : 'inactive')}
+                              value={
+                                korisnik.premium_status ??
+                                (korisnik.isPremium ? 'active' : 'inactive')
+                              }
                               disabled={premiumLoadingId === korisnik.id}
                               onChange={(e) => {
-                                const v = e.target.value as PremiumLifecycleStatus;
+                                const v = e.target
+                                  .value as PremiumLifecycleStatus;
                                 void primijeniPremiumLifecycle(korisnik.id, v);
                               }}
                             >
                               <option value="inactive">Neaktivan</option>
-                              <option value="pending_payment">Čeka uplatu</option>
+                              <option value="pending_payment">
+                                Čeka uplatu
+                              </option>
                               <option value="active">Aktivan</option>
                               <option value="expired">Istekao</option>
                               <option value="cancelled">Otkazan</option>
                             </select>
-                            {korisnik.premium_expires_at && korisnik.premium_status === 'active' && (
-                              <span className="text-[10px]" style={{ color: 'var(--first-nonary)' }}>
-                                Vrijedi do: {formatirajDatumPrikaz(korisnik.premium_expires_at)}
-                              </span>
-                            )}
+                            {korisnik.premium_expires_at &&
+                              korisnik.premium_status === 'active' && (
+                                <span
+                                  className="text-[10px]"
+                                  style={{ color: 'var(--first-nonary)' }}
+                                >
+                                  Vrijedi do:{' '}
+                                  {formatirajDatumPrikaz(
+                                    korisnik.premium_expires_at,
+                                  )}
+                                </span>
+                              )}
                           </div>
                         ) : (
-                          <span className="text-xs" style={{ color: 'var(--first-nonary)' }}>-</span>
+                          <span
+                            className="text-xs"
+                            style={{ color: 'var(--first-nonary)' }}
+                          >
+                            -
+                          </span>
                         )}
                       </td>
-                      <td className="px-5 py-3.5" style={{ color: 'var(--first-nonary)' }}>
+                      <td
+                        className="px-5 py-3.5"
+                        style={{ color: 'var(--first-nonary)' }}
+                      >
                         {korisnik.datumRegistracije}
                       </td>
                       <td className="px-5 py-3.5 text-right">
@@ -370,15 +477,24 @@ export default function AdminPage() {
           </table>
         </div>
 
-        <ul className="divide-y sm:hidden" style={{ borderColor: 'rgb(var(--first-quaternary-rgb) / 0.25)' }}>
+        <ul
+          className="divide-y sm:hidden"
+          style={{ borderColor: 'rgb(var(--first-quaternary-rgb) / 0.25)' }}
+        >
           {ucitava && (
-            <li className="px-5 py-6 text-center text-sm" style={{ color: 'var(--first-nonary)' }}>
+            <li
+              className="px-5 py-6 text-center text-sm"
+              style={{ color: 'var(--first-nonary)' }}
+            >
               Učitavanje korisnika...
             </li>
           )}
 
           {!ucitava && filtriraniKorisnici.length === 0 && !greska && (
-            <li className="px-5 py-6 text-center text-sm" style={{ color: 'var(--first-nonary)' }}>
+            <li
+              className="px-5 py-6 text-center text-sm"
+              style={{ color: 'var(--first-nonary)' }}
+            >
               {porukaPraznoKorisnici}
             </li>
           )}
@@ -388,24 +504,41 @@ export default function AdminPage() {
               const badge = BADGE_STATUSA[korisnik.status];
 
               return (
-                <li key={korisnik.id} className="flex items-center justify-between px-5 py-4">
+                <li
+                  key={korisnik.id}
+                  className="flex items-center justify-between px-5 py-4"
+                >
                   <div>
-                    <p className="font-medium" style={{ color: 'var(--first-octonary)' }}>
+                    <p
+                      className="font-medium"
+                      style={{ color: 'var(--first-octonary)' }}
+                    >
                       {korisnik.imeIPrezime}
                     </p>
-                    <p className="text-xs" style={{ color: 'var(--first-nonary)' }}>
+                    <p
+                      className="text-xs"
+                      style={{ color: 'var(--first-nonary)' }}
+                    >
                       {korisnik.email}
                     </p>
                     {korisnik.tip === 'korisnik' && (
-                      <p className="mt-1 text-xs" style={{ color: 'var(--first-nonary)' }}>
-                        Premium: {korisnik.premium_status ?? (korisnik.isPremium ? 'active' : 'inactive')}
+                      <p
+                        className="mt-1 text-xs"
+                        style={{ color: 'var(--first-nonary)' }}
+                      >
+                        Premium:{' '}
+                        {korisnik.premium_status ??
+                          (korisnik.isPremium ? 'active' : 'inactive')}
                       </p>
                     )}
                   </div>
                   <div className="flex flex-col items-end gap-2">
                     <span
                       className="rounded-full px-2.5 py-0.5 text-xs font-semibold"
-                      style={{ backgroundColor: badge.pozadina, color: badge.boja }}
+                      style={{
+                        backgroundColor: badge.pozadina,
+                        color: badge.boja,
+                      }}
                     >
                       {badge.oznaka}
                     </span>
@@ -413,11 +546,15 @@ export default function AdminPage() {
                       <select
                         className="mt-1 w-full max-w-[11rem] rounded-lg border px-2 py-1.5 text-xs font-medium"
                         style={{
-                          borderColor: 'rgb(var(--first-quaternary-rgb) / 0.45)',
+                          borderColor:
+                            'rgb(var(--first-quaternary-rgb) / 0.45)',
                           color: 'var(--first-octonary)',
                           backgroundColor: 'rgb(255 255 255 / 0.9)',
                         }}
-                        value={korisnik.premium_status ?? (korisnik.isPremium ? 'active' : 'inactive')}
+                        value={
+                          korisnik.premium_status ??
+                          (korisnik.isPremium ? 'active' : 'inactive')
+                        }
                         disabled={premiumLoadingId === korisnik.id}
                         onChange={(e) => {
                           const v = e.target.value as PremiumLifecycleStatus;
@@ -447,17 +584,31 @@ export default function AdminPage() {
       >
         <div
           className="flex items-center justify-between px-5 py-4"
-          style={{ borderBottom: '1px solid rgb(var(--first-quaternary-rgb) / 0.3)' }}
+          style={{
+            borderBottom: '1px solid rgb(var(--first-quaternary-rgb) / 0.3)',
+          }}
         >
-          <h2 className="font-semibold" style={{ color: 'var(--first-octonary)' }}>
+          <h2
+            className="font-semibold"
+            style={{ color: 'var(--first-octonary)' }}
+          >
             Servisni zahtjevi ({zahtjevi.length})
           </h2>
         </div>
-        <ul className="divide-y" style={{ borderColor: 'rgb(var(--first-quaternary-rgb) / 0.2)' }}>
+        <ul
+          className="divide-y"
+          style={{ borderColor: 'rgb(var(--first-quaternary-rgb) / 0.2)' }}
+        >
           {zahtjevi.slice(0, 5).map((z) => (
-            <li key={z.id} className="flex items-center justify-between px-5 py-3">
+            <li
+              key={z.id}
+              className="flex items-center justify-between px-5 py-3"
+            >
               <div className="min-w-0">
-                <p className="truncate text-sm font-medium" style={{ color: 'var(--first-octonary)' }}>
+                <p
+                  className="truncate text-sm font-medium"
+                  style={{ color: 'var(--first-octonary)' }}
+                >
                   {z.category}
                 </p>
                 <p className="text-xs" style={{ color: 'var(--first-nonary)' }}>
@@ -468,7 +619,10 @@ export default function AdminPage() {
             </li>
           ))}
           {zahtjevi.length === 0 && (
-            <li className="px-5 py-4 text-sm" style={{ color: 'var(--first-nonary)' }}>
+            <li
+              className="px-5 py-4 text-sm"
+              style={{ color: 'var(--first-nonary)' }}
+            >
               Nema servisnih zahtjeva.
             </li>
           )}

@@ -1,6 +1,7 @@
 export function getUlogaNaziv(uloga: unknown): string {
   if (!uloga) return '';
-  if (Array.isArray(uloga)) return (uloga[0] as { naziv?: string })?.naziv ?? '';
+  if (Array.isArray(uloga))
+    return (uloga[0] as { naziv?: string })?.naziv ?? '';
   return (uloga as { naziv?: string })?.naziv ?? '';
 }
 

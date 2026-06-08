@@ -106,7 +106,12 @@ export const DISPECER_PALETA_PREMIUM = {
   toast: '#E11D48',
 } as const;
 
-export type OperativniPrioritetKljuc = 'NISKO' | 'SREDNJE' | 'VISOKO' | 'KRITIČNO' | 'HITNO';
+export type OperativniPrioritetKljuc =
+  | 'NISKO'
+  | 'SREDNJE'
+  | 'VISOKO'
+  | 'KRITIČNO'
+  | 'HITNO';
 
 /**
  * Boje isključivo za `final_priority` (trijaža dispečera).
@@ -131,7 +136,7 @@ export const DISPECER_PALETA_OPERATIVNI_PRIORITET: Record<
     pozadina: 'rgba(255, 237, 213, 0.96)',
     border: 'rgba(234, 88, 12, 0.42)',
   },
-  'KRITIČNO': {
+  KRITIČNO: {
     tekst: '#86198F',
     pozadina: 'rgba(250, 232, 255, 0.95)',
     border: 'rgba(134, 25, 143, 0.4)',
@@ -145,7 +150,9 @@ export const DISPECER_PALETA_OPERATIVNI_PRIORITET: Record<
 } as const;
 
 /** Mapira vrijednost iz baze na ključ palete (ASCII / dijakritika). */
-export function normalizujKljucOperativnogPrioriteta(oznakaRaw: string): OperativniPrioritetKljuc {
+export function normalizujKljucOperativnogPrioriteta(
+  oznakaRaw: string,
+): OperativniPrioritetKljuc {
   const u = oznakaRaw.trim().toUpperCase();
   if (u === 'NISKO') return 'NISKO';
   if (u === 'SREDNJE') return 'SREDNJE';
@@ -156,7 +163,9 @@ export function normalizujKljucOperativnogPrioriteta(oznakaRaw: string): Operati
 }
 
 export function vizuelOperativnogPrioriteta(oznakaRaw: string) {
-  return DISPECER_PALETA_OPERATIVNI_PRIORITET[normalizujKljucOperativnogPrioriteta(oznakaRaw)];
+  return DISPECER_PALETA_OPERATIVNI_PRIORITET[
+    normalizujKljucOperativnogPrioriteta(oznakaRaw)
+  ];
 }
 
 /** Tekstualni prikaz vrijednosti (detalji / expand) - ista semantika boja kao chip. */
@@ -169,7 +178,10 @@ export function stilTekstaOperativnogPrioriteta(vrijednost: string): {
   const naglasak = k === 'HITNO' || k === 'KRITIČNO' || k === 'VISOKO';
   const bojaTeksta = slot.tamnaPozadina ? slot.pozadina : slot.tekst;
   return {
-    className: ['text-sm leading-snug', naglasak ? 'font-bold' : 'font-semibold'].join(' '),
+    className: [
+      'text-sm leading-snug',
+      naglasak ? 'font-bold' : 'font-semibold',
+    ].join(' '),
     style: { color: bojaTeksta },
   };
 }
@@ -186,6 +198,8 @@ export const DISPECER_PALETA_RELATIVNO_VRIJEME = {
 /** KPI „Svi aktivni“ - siva (agregat, bez boje faze). */
 export const DISPECER_PALETA_KPI_AKTIVNI = '#64748B';
 
-export function bojaRelativnogPrijaveDispecera(ton: 'fresh' | 'yesterday' | 'stale'): string {
+export function bojaRelativnogPrijaveDispecera(
+  ton: 'fresh' | 'yesterday' | 'stale',
+): string {
   return DISPECER_PALETA_RELATIVNO_VRIJEME[ton];
 }

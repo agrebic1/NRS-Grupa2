@@ -7,19 +7,19 @@ import {
 import type { TriageOdgovori } from '@/domain/types/servisirane';
 
 const PRAZNA_TRIJAZA: TriageOdgovori = {
-  opasnost:       false,
+  opasnost: false,
   funkcionalnost: 'manja_smetnja',
-  steta:          false,
-  ranjivost:      false,
-  obuhvat:        false,
+  steta: false,
+  ranjivost: false,
+  obuhvat: false,
 };
 
 const PUNA_TRIJAZA: TriageOdgovori = {
-  opasnost:       true,
+  opasnost: true,
   funkcionalnost: 'potpuni_prekid',
-  steta:          true,
-  ranjivost:      true,
-  obuhvat:        true,
+  steta: true,
+  ranjivost: true,
+  obuhvat: true,
 };
 
 describe('izracunajUrgency', () => {
@@ -36,11 +36,15 @@ describe('izracunajUrgency', () => {
   });
 
   it('dodaje 25 boda za potpuni_prekid funkcionalnosti', () => {
-    expect(izracunajUrgency({ ...PRAZNA_TRIJAZA, funkcionalnost: 'potpuni_prekid' })).toBe(25);
+    expect(
+      izracunajUrgency({ ...PRAZNA_TRIJAZA, funkcionalnost: 'potpuni_prekid' }),
+    ).toBe(25);
   });
 
   it('dodaje 10 boda za otezanu funkcionalnost', () => {
-    expect(izracunajUrgency({ ...PRAZNA_TRIJAZA, funkcionalnost: 'otezana' })).toBe(10);
+    expect(
+      izracunajUrgency({ ...PRAZNA_TRIJAZA, funkcionalnost: 'otezana' }),
+    ).toBe(10);
   });
 
   it('dodaje 15 boda za steta', () => {
@@ -56,11 +60,15 @@ describe('izracunajUrgency', () => {
   });
 
   it('kombinacija opasnost + steta = 65 (VISOKO nivo)', () => {
-    expect(izracunajUrgency({ ...PRAZNA_TRIJAZA, opasnost: true, steta: true })).toBe(65);
+    expect(
+      izracunajUrgency({ ...PRAZNA_TRIJAZA, opasnost: true, steta: true }),
+    ).toBe(65);
   });
 
   it('ne prelazi URGENCY_SCORE_MAKS (110)', () => {
-    expect(izracunajUrgency(PUNA_TRIJAZA)).toBeLessThanOrEqual(URGENCY_SCORE_MAKS);
+    expect(izracunajUrgency(PUNA_TRIJAZA)).toBeLessThanOrEqual(
+      URGENCY_SCORE_MAKS,
+    );
   });
 });
 
@@ -101,14 +109,20 @@ describe('kategorizirajHitnost', () => {
 
 describe('efektivniKorisnickiUrgencyScore', () => {
   it('premium korisnik uvijek dobija URGENCY_SCORE_MAKS', () => {
-    expect(efektivniKorisnickiUrgencyScore({ is_premium: true, urgency_score: 0 }))
-      .toBe(URGENCY_SCORE_MAKS);
-    expect(efektivniKorisnickiUrgencyScore({ is_premium: true, urgency_score: 50 }))
-      .toBe(URGENCY_SCORE_MAKS);
+    expect(
+      efektivniKorisnickiUrgencyScore({ is_premium: true, urgency_score: 0 }),
+    ).toBe(URGENCY_SCORE_MAKS);
+    expect(
+      efektivniKorisnickiUrgencyScore({ is_premium: true, urgency_score: 50 }),
+    ).toBe(URGENCY_SCORE_MAKS);
   });
 
   it('ne-premium korisnik dobija stvarni urgency_score', () => {
-    expect(efektivniKorisnickiUrgencyScore({ is_premium: false, urgency_score: 65 })).toBe(65);
-    expect(efektivniKorisnickiUrgencyScore({ is_premium: false, urgency_score: 0 })).toBe(0);
+    expect(
+      efektivniKorisnickiUrgencyScore({ is_premium: false, urgency_score: 65 }),
+    ).toBe(65);
+    expect(
+      efektivniKorisnickiUrgencyScore({ is_premium: false, urgency_score: 0 }),
+    ).toBe(0);
   });
 });

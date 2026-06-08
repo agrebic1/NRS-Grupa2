@@ -5,9 +5,15 @@ import {
   preferredScheduleSchema,
   serviceRequestSchema,
 } from '@/lib/validations/servisirane';
-import { izracunajUrgency, URGENCY_SCORE_MAKS } from '@/lib/servisirane/urgency';
+import {
+  izracunajUrgency,
+  URGENCY_SCORE_MAKS,
+} from '@/lib/servisirane/urgency';
 import type { TriageOdgovori } from '@/domain/types/servisirane';
-import { serializujKategoriju, validnaKombinacijaKategorije } from '@/lib/servisirane/kategorije';
+import {
+  serializujKategoriju,
+  validnaKombinacijaKategorije,
+} from '@/lib/servisirane/kategorije';
 import { dodijeliKorisnickeBrojeveZahtjeva } from '@/lib/servisirane/korisnickiBrojZahtjeva';
 import {
   notifKorisnikusZahtjevPrimljen,
@@ -18,7 +24,12 @@ import { z } from 'zod';
 
 export const dynamic = 'force-dynamic';
 
-type PremiumStatus = 'inactive' | 'pending_payment' | 'active' | 'expired' | 'cancelled';
+type PremiumStatus =
+  | 'inactive'
+  | 'pending_payment'
+  | 'active'
+  | 'expired'
+  | 'cancelled';
 
 function danasIsoLokalno(): string {
   const d = new Date();
@@ -32,9 +43,9 @@ const scheduleSchema = z
     const base = preferredScheduleSchema.safeParse(data);
     if (!base.success) {
       ctx.addIssue({
-        code:    z.ZodIssueCode.custom,
+        code: z.ZodIssueCode.custom,
         message: base.error.errors[0].message,
-        path:    base.error.errors[0].path,
+        path: base.error.errors[0].path,
       });
       return;
     }
@@ -47,9 +58,9 @@ const scheduleSchema = z
     const t = data.termini[0];
     if (t.date < danasIsoLokalno()) {
       ctx.addIssue({
-        code:    z.ZodIssueCode.custom,
+        code: z.ZodIssueCode.custom,
         message: 'Datum ne smije biti u prošlosti.',
-        path:    ['termini', 0, 'date'],
+        path: ['termini', 0, 'date'],
       });
     }
   })
@@ -64,7 +75,10 @@ export async function GET() {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json({ error: 'Niste prijavljeni.' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Niste prijavljeni.' },
+        { status: 401 },
+      );
     }
 
     const db = supabase as any;
@@ -76,7 +90,8 @@ export async function GET() {
       .not('status', 'in', '("zavrseno","zatvoreno","otkazano","odbijeno")')
       .order('created_at', { ascending: false });
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error)
+      return NextResponse.json({ error: error.message }, { status: 500 });
     const zahtjevi = dodijeliKorisnickeBrojeveZahtjeva(data ?? []);
     return NextResponse.json({ zahtjevi });
   } catch (err) {
@@ -93,29 +108,35 @@ export async function POST(request: Request) {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json({ error: 'Niste prijavljeni.' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Niste prijavljeni.' },
+        { status: 401 },
+      );
     }
 
     if (!user.email_confirmed_at) {
       return NextResponse.json(
         { error: 'Potvrdite email adresu prije slanja zahtjeva.' },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
     // API-RISK-6: max 5 novih zahtjeva po korisniku u 60 sekundi
-    const rl = checkRateLimit(`service-request:${user.id}`, { windowMs: 60_000, max: 5 });
+    const rl = checkRateLimit(`service-request:${user.id}`, {
+      windowMs: 60_000,
+      max: 5,
+    });
     if (!rl.allowed) {
       return NextResponse.json(
         { error: 'Previše zahtjeva. Pričekajte minutu i pokušajte ponovo.' },
         {
           status: 429,
           headers: {
-            'Retry-After':        String(Math.ceil((rl.resetAt - Date.now()) / 1000)),
-            'X-RateLimit-Limit':  '5',
+            'Retry-After': String(Math.ceil((rl.resetAt - Date.now()) / 1000)),
+            'X-RateLimit-Limit': '5',
             'X-RateLimit-Remaining': '0',
           },
-        }
+        },
       );
     }
 
@@ -145,12 +166,15 @@ export async function POST(request: Request) {
     }
 
     if (korisnikUslugeError) {
-      return NextResponse.json({ error: korisnikUslugeError.message }, { status: 500 });
+      return NextResponse.json(
+        { error: korisnikUslugeError.message },
+        { status: 500 },
+      );
     }
     if (!korisnikUsluge) {
       return NextResponse.json(
         { error: 'Samo korisnik usluge može kreirati zahtjev.' },
-        { status: 403 }
+        { status: 403 },
       );
     }
 
@@ -161,7 +185,7 @@ export async function POST(request: Request) {
     if (!rezultat.success) {
       return NextResponse.json(
         { error: rezultat.error.errors[0].message },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -169,40 +193,52 @@ export async function POST(request: Request) {
     if (!scheduleResult.success) {
       return NextResponse.json(
         { error: scheduleResult.error.errors[0].message },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    const { triage, category, category_main, category_sub, is_premium, premium_terms_accepted, ...ostalo } = rezultat.data;
-    const premiumStatus = (korisnikUsluge.premium_status as PremiumStatus | null | undefined) ?? null;
+    const {
+      triage,
+      category,
+      category_main,
+      category_sub,
+      is_premium,
+      premium_terms_accepted,
+      ...ostalo
+    } = rezultat.data;
+    const premiumStatus =
+      (korisnikUsluge.premium_status as PremiumStatus | null | undefined) ??
+      null;
     const premiumAktivan =
-      premiumStatus === 'active' || (korisnikUsluge.is_premium === true && premiumStatus === null);
+      premiumStatus === 'active' ||
+      (korisnikUsluge.is_premium === true && premiumStatus === null);
     if (is_premium && !premiumAktivan) {
       const razlog =
         premiumStatus === 'pending_payment'
           ? 'Premium aktivacija je u toku. Dovršite aktivaciju prije slanja premium zahtjeva.'
           : premiumStatus === 'expired'
-          ? 'Premium paket je istekao. Obnovite premium uslugu prije slanja premium zahtjeva.'
-          : 'Premium hitna intervencija je dostupna samo za premium korisnike.';
-      return NextResponse.json(
-        { error: razlog },
-        { status: 403 }
-      );
+            ? 'Premium paket je istekao. Obnovite premium uslugu prije slanja premium zahtjeva.'
+            : 'Premium hitna intervencija je dostupna samo za premium korisnike.';
+      return NextResponse.json({ error: razlog }, { status: 403 });
     }
     if (is_premium && premium_terms_accepted !== true) {
       return NextResponse.json(
         { error: 'Potrebno je potvrditi uslove premium usluge.' },
-        { status: 400 }
+        { status: 400 },
       );
     }
-    const kombinacijaValidna = validnaKombinacijaKategorije(category_main, category_sub);
-    const resolvedCategory = kombinacijaValidna && category_main && category_sub
-      ? serializujKategoriju(category_main, category_sub)
-      : null;
+    const kombinacijaValidna = validnaKombinacijaKategorije(
+      category_main,
+      category_sub,
+    );
+    const resolvedCategory =
+      kombinacijaValidna && category_main && category_sub
+        ? serializujKategoriju(category_main, category_sub)
+        : null;
     if ((category_main || category_sub) && !kombinacijaValidna) {
       return NextResponse.json(
         { error: 'Neispravna kombinacija kategorije i podkategorije.' },
-        { status: 400 }
+        { status: 400 },
       );
     }
     const premiumZahtjev = is_premium === true;
@@ -212,21 +248,21 @@ export async function POST(request: Request) {
     const triage_json = premiumZahtjev ? null : (triage as TriageOdgovori);
 
     const insertPayload = {
-      user_id:            user.id,
+      user_id: user.id,
       ...ostalo,
-      category:           resolvedCategory?.category ?? category,
-      category_main:      resolvedCategory?.category_main ?? null,
-      category_sub:       resolvedCategory?.category_sub ?? null,
-      is_premium:         premiumZahtjev,
+      category: resolvedCategory?.category ?? category,
+      category_main: resolvedCategory?.category_main ?? null,
+      category_sub: resolvedCategory?.category_sub ?? null,
+      is_premium: premiumZahtjev,
       premium_terms_accepted: premiumZahtjev ? true : false,
       premium_requested_at: premiumZahtjev ? new Date().toISOString() : null,
-      urgent_requested:   premiumZahtjev,
+      urgent_requested: premiumZahtjev,
       urgent_requested_at: premiumZahtjev ? new Date().toISOString() : null,
       triage_json,
       urgency_score,
-      system_score:       urgency_score,
-      status:             'pending_review',
-      final_priority:     null,
+      system_score: urgency_score,
+      status: 'pending_review',
+      final_priority: null,
       preferred_schedule: scheduleResult.data,
     };
 
@@ -237,7 +273,10 @@ export async function POST(request: Request) {
       .single();
 
     // Fallback: ako DB još nema latitude/longitude kolone, pokušaj bez njih.
-    if (error?.message?.includes("'latitude' column") || error?.message?.includes("'longitude' column")) {
+    if (
+      error?.message?.includes("'latitude' column") ||
+      error?.message?.includes("'longitude' column")
+    ) {
       const bezKoordinata: Record<string, unknown> = { ...insertPayload };
       delete bezKoordinata.latitude;
       delete bezKoordinata.longitude;
@@ -251,8 +290,13 @@ export async function POST(request: Request) {
     }
 
     // Fallback: ako DB još nema category_main/category_sub kolone, pokušaj bez njih.
-    if (error?.message?.includes("'category_main' column") || error?.message?.includes("'category_sub' column")) {
-      const legacyKategorijePayload: Record<string, unknown> = { ...insertPayload };
+    if (
+      error?.message?.includes("'category_main' column") ||
+      error?.message?.includes("'category_sub' column")
+    ) {
+      const legacyKategorijePayload: Record<string, unknown> = {
+        ...insertPayload,
+      };
       delete legacyKategorijePayload.category_main;
       delete legacyKategorijePayload.category_sub;
       const retry = await db
@@ -270,7 +314,9 @@ export async function POST(request: Request) {
       error?.message?.includes("'premium_terms_accepted' column") ||
       error?.message?.includes("'premium_requested_at' column")
     ) {
-      const legacyPremiumPayload: Record<string, unknown> = { ...insertPayload };
+      const legacyPremiumPayload: Record<string, unknown> = {
+        ...insertPayload,
+      };
       delete legacyPremiumPayload.is_premium;
       delete legacyPremiumPayload.premium_terms_accepted;
       delete legacyPremiumPayload.premium_requested_at;
@@ -284,7 +330,10 @@ export async function POST(request: Request) {
     }
 
     // Fallback: ako DB još nema urgent_requested kolone, pokušaj bez njih.
-    if (error?.message?.includes("'urgent_requested' column") || error?.message?.includes("'urgent_requested_at' column")) {
+    if (
+      error?.message?.includes("'urgent_requested' column") ||
+      error?.message?.includes("'urgent_requested_at' column")
+    ) {
       const legacyUrgentPayload: Record<string, unknown> = { ...insertPayload };
       delete legacyUrgentPayload.urgent_requested;
       delete legacyUrgentPayload.urgent_requested_at;
@@ -312,7 +361,8 @@ export async function POST(request: Request) {
       error = legacyRetry.error;
     }
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error)
+      return NextResponse.json({ error: error.message }, { status: 500 });
 
     if (data?.id) {
       const kategorijaLabel =
@@ -333,11 +383,18 @@ export async function POST(request: Request) {
           ? (u.uloga[0] as { naziv?: string } | undefined)?.naziv
           : (u.uloga as { naziv?: string } | null)?.naziv;
         const n = (naziv ?? '').toLowerCase();
-        return n === 'dispečer' || n === 'dispecer' || n === 'administrator' || n === 'admin';
+        return (
+          n === 'dispečer' ||
+          n === 'dispecer' ||
+          n === 'administrator' ||
+          n === 'admin'
+        );
       });
       if (recipients.length > 0) {
         const isPremiumRequest = is_premium === true;
-        const alertTitle = isPremiumRequest ? 'Premium zahtjev' : 'Novi zahtjev';
+        const alertTitle = isPremiumRequest
+          ? 'Premium zahtjev'
+          : 'Novi zahtjev';
         const alertMessage = isPremiumRequest
           ? `Premium zahtjev #${data.id} čeka prioritetnu obradu.`
           : `Novi zahtjev #${data.id} je pristigao i čeka obradu.`;
@@ -347,7 +404,7 @@ export async function POST(request: Request) {
             service_request_id: data.id,
             title: alertTitle,
             message: alertMessage,
-          }))
+          })),
         );
       }
     }
@@ -360,14 +417,15 @@ export async function POST(request: Request) {
       .order('id', { ascending: true });
     const sBrojevima = dodijeliKorisnickeBrojeveZahtjeva(sviRedovi ?? []);
     const ovaj = sBrojevima.find((r: any) => r.id === data.id);
-    const korisnickiBrojZahtjeva = ovaj?.korisnicki_broj_zahtjeva ?? sBrojevima.length;
+    const korisnickiBrojZahtjeva =
+      ovaj?.korisnicki_broj_zahtjeva ?? sBrojevima.length;
 
     return NextResponse.json(
       {
         zahtjev: { ...data, korisnicki_broj_zahtjeva: korisnickiBrojZahtjeva },
         korisnicki_broj_zahtjeva: korisnickiBrojZahtjeva,
       },
-      { status: 201 }
+      { status: 201 },
     );
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Greška servera.';

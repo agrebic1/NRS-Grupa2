@@ -17,7 +17,9 @@ export type RazlozenaAdresa = {
   imaSkriveno: boolean;
 };
 
-export function razloziAdresu(cjelovita: string | null | undefined): RazlozenaAdresa {
+export function razloziAdresu(
+  cjelovita: string | null | undefined,
+): RazlozenaAdresa {
   const puna = (cjelovita ?? '').trim();
   if (!puna) {
     return {
@@ -28,7 +30,10 @@ export function razloziAdresu(cjelovita: string | null | undefined): RazlozenaAd
     };
   }
 
-  const dijelovi = puna.split(',').map((d) => d.trim()).filter(Boolean);
+  const dijelovi = puna
+    .split(',')
+    .map((d) => d.trim())
+    .filter(Boolean);
 
   if (dijelovi.length === 0) {
     return {
@@ -66,8 +71,12 @@ export function razloziAdresu(cjelovita: string | null | undefined): RazlozenaAd
     };
   }
 
-  const skraceniPrikaz = dijelovi.slice(0, SEGMENTA_NA_KRATKOM_PRIKAZU).join(', ');
-  const administrativniNastavak = dijelovi.slice(SEGMENTA_NA_KRATKOM_PRIKAZU).join(', ');
+  const skraceniPrikaz = dijelovi
+    .slice(0, SEGMENTA_NA_KRATKOM_PRIKAZU)
+    .join(', ');
+  const administrativniNastavak = dijelovi
+    .slice(SEGMENTA_NA_KRATKOM_PRIKAZU)
+    .join(', ');
   return {
     cjelovita: puna,
     skraceniPrikaz,

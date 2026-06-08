@@ -37,7 +37,9 @@ export function korisnikStatusDetaljTekst(zahtjev: ServisniZahtjev): string {
 
   const jeNovi = zahtjevJeNoviUPregleduDispecera(zahtjev);
   const faza = uzmiDispecerskuFazuZaPregled(zahtjev);
-  const glavni = jeNovi ? oznakaInboxHitnostiCekaObradu(zahtjev) : 'Dispečer obrađuje';
+  const glavni = jeNovi
+    ? oznakaInboxHitnostiCekaObradu(zahtjev)
+    : 'Dispečer obrađuje';
   const prikaziPodfazu = !jeNovi && faza !== 'ceka_operativni_prioritet';
   if (!prikaziPodfazu) return glavni;
   return `${glavni} · ${nazivFazeZaKorisnika(faza)}`;

@@ -10,23 +10,35 @@ function parsirajStatuseIzUpita(request: Request): string[] | null {
   const { searchParams } = new URL(request.url);
   const raw = searchParams.get('status');
   if (raw == null || raw.trim() === '') return null;
-  const lista = raw.split(',').map((s) => s.trim().toLowerCase()).filter(Boolean);
+  const lista = raw
+    .split(',')
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean);
   return lista.length > 0 ? lista : null;
 }
 
 export async function GET(request: Request) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return NextResponse.json({ error: 'Niste prijavljeni.' }, { status: 401 });
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user)
+      return NextResponse.json(
+        { error: 'Niste prijavljeni.' },
+        { status: 401 },
+      );
 
     const imaPriv = await assertDispatcherAccess(supabase, user.id);
-    if (!imaPriv) return NextResponse.json({ error: 'Pristup odbijen.' }, { status: 403 });
+    if (!imaPriv)
+      return NextResponse.json({ error: 'Pristup odbijen.' }, { status: 403 });
 
     const db = supabase as any;
     const statusFiltar = parsirajStatuseIzUpita(request);
 
-    let upit = db.from('service_requests').select('*, intervencija_ocjene(ocjena, komentar)');
+    let upit = db
+      .from('service_requests')
+      .select('*, intervencija_ocjene(ocjena, komentar)');
 
     if (statusFiltar) {
       upit = upit.in('status', statusFiltar);
@@ -41,7 +53,9 @@ export async function GET(request: Request) {
       .order('created_at', { ascending: true });
 
     if (error?.message?.includes("'is_premium' column")) {
-      let fb = db.from('service_requests').select('*, intervencija_ocjene(ocjena, komentar)');
+      let fb = db
+        .from('service_requests')
+        .select('*, intervencija_ocjene(ocjena, komentar)');
       if (statusFiltar) {
         fb = fb.in('status', statusFiltar);
       } else {
@@ -52,10 +66,16 @@ export async function GET(request: Request) {
       error = fallback.error;
     }
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error)
+      return NextResponse.json({ error: error.message }, { status: 500 });
 
-    const userIds = [...new Set((data ?? []).map((z: any) => z.user_id as string))];
-    let profili: Record<string, { ime: string; prezime: string; broj_telefona: string | null }> = {};
+    const userIds = [
+      ...new Set((data ?? []).map((z: any) => z.user_id as string)),
+    ];
+    let profili: Record<
+      string,
+      { ime: string; prezime: string; broj_telefona: string | null }
+    > = {};
     let idDoKorisnickogBroja = new Map<number, number>();
 
     if (userIds.length > 0) {
@@ -73,28 +93,34 @@ export async function GET(request: Request) {
         .in('id_osobe', userIds);
 
       for (const o of osobeData ?? []) {
-        profili[o.id_osobe] = { ime: o.ime, prezime: o.prezime, broj_telefona: o.broj_telefona };
+        profili[o.id_osobe] = {
+          ime: o.ime,
+          prezime: o.prezime,
+          broj_telefona: o.broj_telefona,
+        };
       }
     }
 
     await obradiSlaEskalacijeBatch(
       db,
       (data ?? []).map((z: any) => ({
-        id:                    z.id,
-        status:                z.status,
-        created_at:            z.created_at,
-        operativni_prioritet:  z.operativni_prioritet ?? null,
-        sla_eskalacija_at:     z.sla_eskalacija_at ?? null,
+        id: z.id,
+        status: z.status,
+        created_at: z.created_at,
+        operativni_prioritet: z.operativni_prioritet ?? null,
+        sla_eskalacija_at: z.sla_eskalacija_at ?? null,
       })),
       user.id,
     );
 
-    const zahtjeviSaPodnosiocima = (data ?? []).map((z: any, indeks: number) => ({
-      ...z,
-      podnosilac: profili[z.user_id] ?? null,
-      korisnicki_broj_zahtjeva: idDoKorisnickogBroja.get(z.id),
-      dispecerski_redni_u_pregledu: indeks + 1,
-    }));
+    const zahtjeviSaPodnosiocima = (data ?? []).map(
+      (z: any, indeks: number) => ({
+        ...z,
+        podnosilac: profili[z.user_id] ?? null,
+        korisnicki_broj_zahtjeva: idDoKorisnickogBroja.get(z.id),
+        dispecerski_redni_u_pregledu: indeks + 1,
+      }),
+    );
 
     return NextResponse.json({ zahtjevi: zahtjeviSaPodnosiocima });
   } catch (err) {

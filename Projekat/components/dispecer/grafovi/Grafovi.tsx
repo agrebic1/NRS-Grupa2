@@ -6,9 +6,9 @@
 // ─── Horizontalni bar chart (CSS) ───────────────────────────────────────────────
 
 export interface BarPodatak {
-  labela:     string;
+  labela: string;
   vrijednost: number;
-  boja?:      string;
+  boja?: string;
 }
 
 export function BarChart({
@@ -17,13 +17,20 @@ export function BarChart({
   formatVrijednost,
   praznoTekst = 'Nema podataka.',
 }: {
-  podaci:           BarPodatak[];
-  boja?:            string;
+  podaci: BarPodatak[];
+  boja?: string;
   formatVrijednost?: (v: number) => string;
-  praznoTekst?:     string;
+  praznoTekst?: string;
 }) {
   if (podaci.length === 0) {
-    return <p className="py-4 text-center text-xs" style={{ color: 'var(--first-nonary)' }}>{praznoTekst}</p>;
+    return (
+      <p
+        className="py-4 text-center text-xs"
+        style={{ color: 'var(--first-nonary)' }}
+      >
+        {praznoTekst}
+      </p>
+    );
   }
   const max = Math.max(1, ...podaci.map((d) => d.vrijednost));
   const opis = podaci.map((d) => `${d.labela}: ${d.vrijednost}`).join(', ');
@@ -43,11 +50,16 @@ export function BarChart({
             </span>
             <div
               className="relative h-5 flex-1 overflow-hidden rounded-full"
-              style={{ backgroundColor: 'rgb(var(--first-quaternary-rgb) / 0.2)' }}
+              style={{
+                backgroundColor: 'rgb(var(--first-quaternary-rgb) / 0.2)',
+              }}
             >
               <div
                 className="h-full rounded-full transition-all duration-500"
-                style={{ width: `${Math.max(pct, d.vrijednost > 0 ? 4 : 0)}%`, backgroundColor: d.boja ?? boja }}
+                style={{
+                  width: `${Math.max(pct, d.vrijednost > 0 ? 4 : 0)}%`,
+                  backgroundColor: d.boja ?? boja,
+                }}
               />
             </div>
             <span
@@ -66,9 +78,9 @@ export function BarChart({
 // ─── Donut chart (SVG) ──────────────────────────────────────────────────────────
 
 export interface DonutSegment {
-  labela:     string;
+  labela: string;
   vrijednost: number;
-  boja:       string;
+  boja: string;
 }
 
 export function DonutChart({
@@ -77,9 +89,9 @@ export function DonutChart({
   debljina = 22,
   centarLabela,
 }: {
-  segmenti:     DonutSegment[];
-  velicina?:    number;
-  debljina?:    number;
+  segmenti: DonutSegment[];
+  velicina?: number;
+  debljina?: number;
   centarLabela?: string;
 }) {
   const ukupno = segmenti.reduce((s, x) => s + x.vrijednost, 0);
@@ -102,7 +114,9 @@ export function DonutChart({
         <g transform={`rotate(-90 ${cx} ${cx})`}>
           {ukupno === 0 ? (
             <circle
-              cx={cx} cy={cx} r={r}
+              cx={cx}
+              cy={cx}
+              r={r}
               fill="none"
               stroke="rgb(var(--first-quaternary-rgb) / 0.3)"
               strokeWidth={debljina}
@@ -113,7 +127,9 @@ export function DonutChart({
               const el = (
                 <circle
                   key={seg.labela}
-                  cx={cx} cy={cx} r={r}
+                  cx={cx}
+                  cy={cx}
+                  r={r}
                   fill="none"
                   stroke={seg.boja}
                   strokeWidth={debljina}
@@ -127,7 +143,8 @@ export function DonutChart({
           )}
         </g>
         <text
-          x={cx} y={cx - 6}
+          x={cx}
+          y={cx - 6}
           textAnchor="middle"
           className="font-extrabold"
           style={{ fontSize: 26, fill: 'var(--first-octonary)' }}
@@ -136,7 +153,8 @@ export function DonutChart({
         </text>
         {centarLabela && (
           <text
-            x={cx} y={cx + 16}
+            x={cx}
+            y={cx + 16}
             textAnchor="middle"
             style={{ fontSize: 11, fill: 'var(--first-nonary)' }}
           >
@@ -148,12 +166,21 @@ export function DonutChart({
       {/* Legenda */}
       <ul className="flex flex-col gap-2">
         {segmenti.map((seg) => {
-          const pct = ukupno > 0 ? Math.round((seg.vrijednost / ukupno) * 100) : 0;
+          const pct =
+            ukupno > 0 ? Math.round((seg.vrijednost / ukupno) * 100) : 0;
           return (
             <li key={seg.labela} className="flex items-center gap-2 text-xs">
-              <span className="h-3 w-3 shrink-0 rounded-sm" style={{ backgroundColor: seg.boja }} />
-              <span style={{ color: 'var(--first-octonary)' }}>{seg.labela}</span>
-              <span className="font-bold tabular-nums" style={{ color: 'var(--first-nonary)' }}>
+              <span
+                className="h-3 w-3 shrink-0 rounded-sm"
+                style={{ backgroundColor: seg.boja }}
+              />
+              <span style={{ color: 'var(--first-octonary)' }}>
+                {seg.labela}
+              </span>
+              <span
+                className="font-bold tabular-nums"
+                style={{ color: 'var(--first-nonary)' }}
+              >
                 {seg.vrijednost} ({pct}%)
               </span>
             </li>
@@ -167,7 +194,7 @@ export function DonutChart({
 // ─── Line / area chart (SVG) ────────────────────────────────────────────────────
 
 export interface LineTacka {
-  labela:     string;
+  labela: string;
   vrijednost: number;
 }
 
@@ -177,16 +204,23 @@ export function LineChart({
   visina = 140,
   praznoTekst = 'Nema podataka za period.',
 }: {
-  tacke:        LineTacka[];
-  boja?:        string;
-  visina?:      number;
+  tacke: LineTacka[];
+  boja?: string;
+  visina?: number;
   praznoTekst?: string;
 }) {
   if (tacke.length === 0) {
-    return <p className="py-8 text-center text-xs" style={{ color: 'var(--first-nonary)' }}>{praznoTekst}</p>;
+    return (
+      <p
+        className="py-8 text-center text-xs"
+        style={{ color: 'var(--first-nonary)' }}
+      >
+        {praznoTekst}
+      </p>
+    );
   }
 
-  const W = 100;          // viewBox širina (responsive preko preserveAspectRatio)
+  const W = 100; // viewBox širina (responsive preko preserveAspectRatio)
   const H = visina;
   const max = Math.max(1, ...tacke.map((t) => t.vrijednost));
   const denom = Math.max(1, tacke.length - 1);
@@ -219,10 +253,20 @@ export function LineChart({
           vectorEffect="non-scaling-stroke"
         />
         {koords.map((k, i) => (
-          <circle key={i} cx={k.x} cy={k.y} r={1.8} fill={boja} vectorEffect="non-scaling-stroke" />
+          <circle
+            key={i}
+            cx={k.x}
+            cy={k.y}
+            r={1.8}
+            fill={boja}
+            vectorEffect="non-scaling-stroke"
+          />
         ))}
       </svg>
-      <div className="mt-1 flex justify-between text-[10px]" style={{ color: 'var(--first-nonary)' }}>
+      <div
+        className="mt-1 flex justify-between text-[10px]"
+        style={{ color: 'var(--first-nonary)' }}
+      >
         <span>{tacke[0].labela}</span>
         {tacke.length > 1 && <span>{tacke[tacke.length - 1].labela}</span>}
       </div>

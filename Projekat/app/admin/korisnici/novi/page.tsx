@@ -58,7 +58,9 @@ export default function NoviInterniKorisnikPage() {
   const [greske, setGreske] = useState<FormErrors>({});
   const [serverGreska, setServerGreska] = useState<string | null>(null);
   const [uspjeh, setUspjeh] = useState<string | null>(null);
-  const [privremenaLozinka, setPrivremenaLozinka] = useState<string | null>(null);
+  const [privremenaLozinka, setPrivremenaLozinka] = useState<string | null>(
+    null,
+  );
   const [loading, setLoading] = useState(false);
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -89,11 +91,15 @@ export default function NoviInterniKorisnikPage() {
         return;
       }
 
-      setUspjeh(`Interni korisnik ${body.user?.email ?? forma.email} je uspjesno kreiran.`);
+      setUspjeh(
+        `Interni korisnik ${body.user?.email ?? forma.email} je uspjesno kreiran.`,
+      );
       setPrivremenaLozinka(body.privremena_lozinka ?? null);
       setForma(inicijalnoStanje);
     } catch {
-      setServerGreska('Kreiranje internog naloga nije uspjelo. Pokusajte ponovo.');
+      setServerGreska(
+        'Kreiranje internog naloga nije uspjelo. Pokusajte ponovo.',
+      );
     } finally {
       setLoading(false);
     }
@@ -104,10 +110,16 @@ export default function NoviInterniKorisnikPage() {
       <div className="mx-auto w-full max-w-2xl">
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--first-octonary)' }}>
+            <h1
+              className="text-2xl font-bold tracking-tight"
+              style={{ color: 'var(--first-octonary)' }}
+            >
               Kreiranje internog naloga
             </h1>
-            <p className="mt-1 text-sm" style={{ color: 'var(--first-nonary)' }}>
+            <p
+              className="mt-1 text-sm"
+              style={{ color: 'var(--first-nonary)' }}
+            >
               Administrator kreira nalog i dodjeljuje internu ulogu.
             </p>
           </div>
@@ -128,14 +140,18 @@ export default function NoviInterniKorisnikPage() {
             <Input
               label="Ime"
               value={forma.first_name}
-              onChange={(e) => setForma((p) => ({ ...p, first_name: e.target.value }))}
+              onChange={(e) =>
+                setForma((p) => ({ ...p, first_name: e.target.value }))
+              }
               error={greske.first_name}
               required
             />
             <Input
               label="Prezime"
               value={forma.last_name}
-              onChange={(e) => setForma((p) => ({ ...p, last_name: e.target.value }))}
+              onChange={(e) =>
+                setForma((p) => ({ ...p, last_name: e.target.value }))
+              }
               error={greske.last_name}
               required
             />
@@ -159,7 +175,9 @@ export default function NoviInterniKorisnikPage() {
               { value: 'administrator', label: 'Administrator' },
             ]}
             value={forma.role}
-            onChange={(e) => setForma((p) => ({ ...p, role: e.target.value as UlogaOpcija }))}
+            onChange={(e) =>
+              setForma((p) => ({ ...p, role: e.target.value as UlogaOpcija }))
+            }
             error={greske.role}
             required
           />
@@ -201,7 +219,11 @@ export default function NoviInterniKorisnikPage() {
                 Otkazi
               </Button>
             </Link>
-            <Button type="submit" isLoading={loading} loadingText="Kreiranje...">
+            <Button
+              type="submit"
+              isLoading={loading}
+              loadingText="Kreiranje..."
+            >
               Kreiraj nalog
             </Button>
           </div>

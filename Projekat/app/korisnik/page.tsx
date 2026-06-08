@@ -73,10 +73,16 @@ export default async function KorisnikPage() {
   const zahtjeviPodaci = zahtjeviRaw ?? [];
 
   if (zahtjeviGreska) {
-    console.error('Neuspjelo učitavanje korisničkih zahtjeva:', zahtjeviGreska.message);
+    console.error(
+      'Neuspjelo učitavanje korisničkih zahtjeva:',
+      zahtjeviGreska.message,
+    );
   }
   if (profilGreska) {
-    console.error('Neuspjelo učitavanje korisničkog profila:', profilGreska.message);
+    console.error(
+      'Neuspjelo učitavanje korisničkog profila:',
+      profilGreska.message,
+    );
   }
 
   const imeKorisnika =
@@ -95,17 +101,14 @@ export default async function KorisnikPage() {
     const dolazakDatumIso = slot?.date ?? createdDay;
     const od = (slot?.from ?? '').trim();
     const doStr = (slot?.to ?? '').trim();
-    const dolazakVrijemeOpis =
-      od && doStr ? `${od}-${doStr}` : null;
+    const dolazakVrijemeOpis = od && doStr ? `${od}-${doStr}` : null;
 
     return {
       id: String(zahtjev.id),
       korisnickiBroj: zahtjev.korisnicki_broj_zahtjeva,
-      naslov: (zahtjev.category ?? '').trim() || izvuciNaslov(zahtjev.description),
-      status: korisnickiDashboardStatus(
-        zahtjev.status,
-        zahtjev.final_priority,
-      ),
+      naslov:
+        (zahtjev.category ?? '').trim() || izvuciNaslov(zahtjev.description),
+      status: korisnickiDashboardStatus(zahtjev.status, zahtjev.final_priority),
       datum: formatirajDatumPrikaz(zahtjev.created_at, '-'),
       lokacija: zahtjev.address ?? 'Lokacija nije unesena',
       dolazakDatumIso,
@@ -118,7 +121,10 @@ export default async function KorisnikPage() {
 
   return (
     <AppShell uloga="korisnik" imeKorisnika={imeKorisnika}>
-      <KorisnikPregledDashboard imeKorisnika={imeKorisnika} zahtjevi={zahtjevi} />
+      <KorisnikPregledDashboard
+        imeKorisnika={imeKorisnika}
+        zahtjevi={zahtjevi}
+      />
     </AppShell>
   );
 }

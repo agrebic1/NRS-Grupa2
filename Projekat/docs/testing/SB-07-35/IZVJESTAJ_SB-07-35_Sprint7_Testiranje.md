@@ -6,11 +6,13 @@ Okruzenje: local
 ## Automatski testovi
 
 Komande:
+
 - `npm test`
 - `npm run test:coverage`
 - `npm run test:e2e`
 
 Rezultat:
+
 - Unit testovi: 54/54 passed
 - Integration testovi: 41/41 passed
 - E2E testovi: 16/16 passed
@@ -40,6 +42,7 @@ Zakljucak: cilj pokrivenosti od najmanje 98% je ostvaren.
 Izvor: `EXEC_SB-07-35_Sprint7_DispecerManualFlows.csv`
 
 Rezultat:
+
 - Ukupno testova: 26
 - Proslo: 26
 - Nije proslo: 0
@@ -56,4 +59,4 @@ Izvor: `BUG_SB-07-35_Sprint7_DispecerManualFlows.csv`
 
 ## Zavrsna ocjena
 
-Sprint 7 automatsko i manuelno testiranje (SB-07-35) je uspjesno zavrseno. Automatski sloj pokriva dispecerski operativni tok, API validacije, role-based pristup, operativni prioritet i pravila statusa. Svi 26 manuelnih scenarija izvrseni su u lokalnom okruzenju sa statusom PASSED; otvorenih bugova nema. Zavrsni QA sign-off: Ajla Ćesir, 15/05/2026. 
+Sprint 7 automatsko i manuelno testiranje (SB-07-35) je uspjesno zavrseno. Automatski sloj pokriva dispecerski operativni tok, API validacije, role-based pristup, operativni prioritet i pravila statusa. Svi 26 manuelnih scenarija izvrseni su u lokalnom okruzenju sa statusom PASSED; otvorenih bugova nema. Zavrsni QA sign-off: Ajla Ćesir, 15/05/2026.

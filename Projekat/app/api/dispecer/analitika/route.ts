@@ -13,26 +13,42 @@ const ZAHTJEV_KOLONE =
 export async function GET(request: Request) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return NextResponse.json({ error: 'Niste prijavljeni.' }, { status: 401 });
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user)
+      return NextResponse.json(
+        { error: 'Niste prijavljeni.' },
+        { status: 401 },
+      );
 
     const imaPriv = await assertDispatcherAccess(supabase, user.id);
-    if (!imaPriv) return NextResponse.json({ error: 'Pristup odbijen.' }, { status: 403 });
+    if (!imaPriv)
+      return NextResponse.json({ error: 'Pristup odbijen.' }, { status: 403 });
 
     let db: any;
-    try { db = createAdminClient() as any; } catch { db = supabase as any; }
+    try {
+      db = createAdminClient() as any;
+    } catch {
+      db = supabase as any;
+    }
 
     // ── Datumski opseg ────────────────────────────────────────────────────────
-    const url     = new URL(request.url);
+    const url = new URL(request.url);
     const odParam = url.searchParams.get('od');
     const doParam = url.searchParams.get('do');
 
-    const sada  = new Date();
-    const odDat = odParam ? new Date(odParam) : new Date(sada.getFullYear(), sada.getMonth(), 1);
+    const sada = new Date();
+    const odDat = odParam
+      ? new Date(odParam)
+      : new Date(sada.getFullYear(), sada.getMonth(), 1);
     const doDat = doParam ? new Date(doParam + 'T23:59:59') : sada;
 
     if (isNaN(odDat.getTime()) || isNaN(doDat.getTime())) {
-      return NextResponse.json({ error: 'Neispravan format datuma (YYYY-MM-DD).' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Neispravan format datuma (YYYY-MM-DD).' },
+        { status: 400 },
+      );
     }
     const odISO = odDat.toISOString();
     const doISO = doDat.toISOString();
@@ -44,7 +60,8 @@ export async function GET(request: Request) {
       .select(ZAHTJEV_KOLONE)
       .gte('created_at', odISO)
       .lte('created_at', doISO);
-    if (zErr) return NextResponse.json({ error: zErr.message }, { status: 500 });
+    if (zErr)
+      return NextResponse.json({ error: zErr.message }, { status: 500 });
 
     // ── Završene intervencije u periodu (po updated_at) — kao US-42 izvještaj ────
     const { data: zavrseni, error: zavErr } = await db
@@ -54,7 +71,8 @@ export async function GET(request: Request) {
       .gte('updated_at', odISO)
       .lte('updated_at', doISO)
       .not('serviser_dodijeljen_id', 'is', null);
-    if (zavErr) return NextResponse.json({ error: zavErr.message }, { status: 500 });
+    if (zavErr)
+      return NextResponse.json({ error: zavErr.message }, { status: 500 });
 
     const zavrseniRedovi: AnalitikaZahtjevRed[] = zavrseni ?? [];
     const zavrseniIds = zavrseniRedovi.map((z) => z.id);
@@ -69,7 +87,10 @@ export async function GET(request: Request) {
       const trajPoZah = new Map<number, number>();
       for (const e of evidencije ?? []) {
         if (!e.trajanje_minuta) continue;
-        trajPoZah.set(e.zahtjev_id, (trajPoZah.get(e.zahtjev_id) ?? 0) + e.trajanje_minuta);
+        trajPoZah.set(
+          e.zahtjev_id,
+          (trajPoZah.get(e.zahtjev_id) ?? 0) + e.trajanje_minuta,
+        );
       }
       trajanjaMinuta.push(...trajPoZah.values());
     }
@@ -83,13 +104,20 @@ export async function GET(request: Request) {
         .in('zahtjev_id', zavrseniIds)
         .in('tip', ['dodjela', 'status_promjena']);
 
-      const parovi = new Map<number, { dodjelaAt: string | null; prihvatAt: string | null }>();
+      const parovi = new Map<
+        number,
+        { dodjelaAt: string | null; prihvatAt: string | null }
+      >();
       for (const a of aktivnosti ?? []) {
-        const cur = parovi.get(a.zahtjev_id) ?? { dodjelaAt: null, prihvatAt: null };
+        const cur = parovi.get(a.zahtjev_id) ?? {
+          dodjelaAt: null,
+          prihvatAt: null,
+        };
         if (a.tip === 'dodjela' && !cur.dodjelaAt) cur.dodjelaAt = a.created_at;
         if (
           a.tip === 'status_promjena' &&
-          typeof a.metadata === 'object' && a.metadata !== null &&
+          typeof a.metadata === 'object' &&
+          a.metadata !== null &&
           (a.metadata as Record<string, string>).u === 'u_radu' &&
           !cur.prihvatAt
         ) {
@@ -99,7 +127,9 @@ export async function GET(request: Request) {
       }
       for (const { dodjelaAt, prihvatAt } of parovi.values()) {
         if (dodjelaAt && prihvatAt) {
-          const odziv = (new Date(prihvatAt).getTime() - new Date(dodjelaAt).getTime()) / 60_000;
+          const odziv =
+            (new Date(prihvatAt).getTime() - new Date(dodjelaAt).getTime()) /
+            60_000;
           if (odziv >= 0) odziviMinuta.push(Math.round(odziv));
         }
       }
@@ -110,7 +140,9 @@ export async function GET(request: Request) {
       ...new Set(
         [
           ...zavrseniRedovi.map((z) => z.serviser_dodijeljen_id),
-          ...(sviZahtjevi ?? []).map((z: AnalitikaZahtjevRed) => z.serviser_dodijeljen_id),
+          ...(sviZahtjevi ?? []).map(
+            (z: AnalitikaZahtjevRed) => z.serviser_dodijeljen_id,
+          ),
         ].filter((x): x is string => Boolean(x)),
       ),
     ];
@@ -121,7 +153,8 @@ export async function GET(request: Request) {
         .select('id_osobe, ime, prezime')
         .in('id_osobe', serviserIds);
       for (const p of profili ?? []) {
-        imenaServisera[p.id_osobe] = `${p.ime ?? ''} ${p.prezime ?? ''}`.trim() || 'Nepoznat serviser';
+        imenaServisera[p.id_osobe] =
+          `${p.ime ?? ''} ${p.prezime ?? ''}`.trim() || 'Nepoznat serviser';
       }
     }
 
@@ -132,7 +165,8 @@ export async function GET(request: Request) {
       .eq('status', 'zatvoreno')
       .gte('closed_at', odISO)
       .lte('closed_at', doISO);
-    if (zatErr) return NextResponse.json({ error: zatErr.message }, { status: 500 });
+    if (zatErr)
+      return NextResponse.json({ error: zatErr.message }, { status: 500 });
 
     const zatvoreniBroj = (zatvoreni ?? []).length;
 
@@ -142,14 +176,18 @@ export async function GET(request: Request) {
       .select('ocjena, created_at')
       .gte('created_at', odISO)
       .lte('created_at', doISO);
-    if (ocjErr) return NextResponse.json({ error: ocjErr.message }, { status: 500 });
+    if (ocjErr)
+      return NextResponse.json({ error: ocjErr.message }, { status: 500 });
 
-    const ocjene = (ocjeneRedovi ?? []) as { ocjena: number; created_at: string }[];
+    const ocjene = (ocjeneRedovi ?? []) as {
+      ocjena: number;
+      created_at: string;
+    }[];
 
     const metrike = sastaviMetrike({
       period,
-      sviZahtjevi:       (sviZahtjevi ?? []) as AnalitikaZahtjevRed[],
-      zavrseniZahtjevi:  zavrseniRedovi,
+      sviZahtjevi: (sviZahtjevi ?? []) as AnalitikaZahtjevRed[],
+      zavrseniZahtjevi: zavrseniRedovi,
       trajanjaMinuta,
       odziviMinuta,
       imenaServisera,

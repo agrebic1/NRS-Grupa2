@@ -34,7 +34,11 @@ import { PrilogGalerija } from '@/components/servisirane/PrilogGalerija';
 import { stilTekstaOperativnogPrioriteta } from '@/lib/servisirane/dispecerPaleta';
 
 export type ZahtjevZaExpand = ServisniZahtjev & {
-  podnosilac: { ime: string; prezime: string; broj_telefona: string | null } | null;
+  podnosilac: {
+    ime: string;
+    prezime: string;
+    broj_telefona: string | null;
+  } | null;
 };
 
 /** Oznake polja (Korisnik, Kontakt, …) - tipografija + 2px do vrijednosti */
@@ -58,7 +62,9 @@ const GALERIJA_LABEL_KLASA =
 /** Grupna oznaka iznad blokova na stranici detalja zahtjeva (samo prikaziThumbnailPriloge). */
 const SEKCIJA_GRUPE_LABEL_KLASA =
   'mb-3 text-[10px] font-semibold uppercase tracking-[0.12em]';
-const SEKCIJA_GRUPE_BOJA = { color: 'rgb(var(--first-nonary-rgb) / 0.72)' } as const;
+const SEKCIJA_GRUPE_BOJA = {
+  color: 'rgb(var(--first-nonary-rgb) / 0.72)',
+} as const;
 const SEKCIJA_GRUPE_RAZDJELNIK_BOJA = 'rgb(var(--first-quaternary-rgb) / 0.22)';
 
 export function ZahtjevExpandSadrzaj({
@@ -73,63 +79,86 @@ export function ZahtjevExpandSadrzaj({
   const hitnostGrupaId = useId();
 
   const { glavna, podkategorija } = labelKategorije(zahtjev);
-  const { tekstCijeli: terminTekst, imaPreferirani } = preferiraniTerminZaDispecera(zahtjev, {
-    dispecerskiPregled: true,
-  });
+  const { tekstCijeli: terminTekst, imaPreferirani } =
+    preferiraniTerminZaDispecera(zahtjev, {
+      dispecerskiPregled: true,
+    });
   const imaKoordinate = zahtjev.latitude != null && zahtjev.longitude != null;
-  const slike = urlsPrilozenihSlika(zahtjev as ZahtjevZaExpand & Record<string, unknown>);
+  const slike = urlsPrilozenihSlika(
+    zahtjev as ZahtjevZaExpand & Record<string, unknown>,
+  );
   const opisSirovo = (zahtjev.description ?? '').trim();
   const opis = uRecenicu(skratiOpis ? skracenTekst(opisSirovo) : opisSirovo);
-  const telefonSirovo = podnosilac?.broj_telefona?.trim() || zahtjev.contact_phone?.trim() || '';
+  const telefonSirovo =
+    podnosilac?.broj_telefona?.trim() || zahtjev.contact_phone?.trim() || '';
   const telefon = telefonSirovo || '-';
   const telefonHref = telefonSirovo ? hrefZaTelefon(telefonSirovo) : null;
   const imePrezime = imePrezimePodnosioca(podnosilac);
   const imaOperativni = Boolean(zahtjev.final_priority?.trim());
   const fp = zahtjev.final_priority?.trim() ?? '';
-  const operativniStil = imaOperativni ? stilTekstaOperativnogPrioriteta(fp) : null;
+  const operativniStil = imaOperativni
+    ? stilTekstaOperativnogPrioriteta(fp)
+    : null;
   const korisnickiUrgencyZaPrikaz = efektivniKorisnickiUrgencyScore(zahtjev);
 
   return (
-    <div className={['min-w-0 max-w-full', className].filter(Boolean).join(' ')}>
-      {!prikaziThumbnailPriloge && (zahtjev.is_premium || prikaziNaslovKategorije) && (
-        <div className="mb-4 min-w-0">
-          {prikaziNaslovKategorije && (
-            <h3
-              className="text-base font-bold leading-snug sm:text-lg"
-              style={{ color: 'var(--first-octonary)' }}
-            >
-              {glavna}
-            </h3>
-          )}
-          {zahtjev.is_premium && (
-            <div className={prikaziNaslovKategorije ? 'mt-2' : ''}>
-              <PremiumHitnaBadge />
-            </div>
-          )}
-        </div>
-      )}
+    <div
+      className={['min-w-0 max-w-full', className].filter(Boolean).join(' ')}
+    >
+      {!prikaziThumbnailPriloge &&
+        (zahtjev.is_premium || prikaziNaslovKategorije) && (
+          <div className="mb-4 min-w-0">
+            {prikaziNaslovKategorije && (
+              <h3
+                className="text-base font-bold leading-snug sm:text-lg"
+                style={{ color: 'var(--first-octonary)' }}
+              >
+                {glavna}
+              </h3>
+            )}
+            {zahtjev.is_premium && (
+              <div className={prikaziNaslovKategorije ? 'mt-2' : ''}>
+                <PremiumHitnaBadge />
+              </div>
+            )}
+          </div>
+        )}
 
       {prikaziThumbnailPriloge ? (
         <>
           <div className="flex min-w-0 flex-col lg:flex-row lg:items-stretch">
             <section className="min-w-0 flex-1 basis-0 lg:min-w-0">
-              <p className={SEKCIJA_GRUPE_LABEL_KLASA} style={SEKCIJA_GRUPE_BOJA}>
+              <p
+                className={SEKCIJA_GRUPE_LABEL_KLASA}
+                style={SEKCIJA_GRUPE_BOJA}
+              >
                 Podaci o korisniku
               </p>
               <div className="flex min-w-0 flex-col gap-3">
                 <div className="flex gap-2">
-                  <User className={POLJE_IKONA_KLASA} style={POLJE_OZNAKA_BOJA} aria-hidden />
+                  <User
+                    className={POLJE_IKONA_KLASA}
+                    style={POLJE_OZNAKA_BOJA}
+                    aria-hidden
+                  />
                   <div className="min-w-0">
                     <p className={POLJE_OZNAKA_KLASA} style={POLJE_OZNAKA_BOJA}>
                       Korisnik
                     </p>
-                    <p className="text-base font-semibold leading-snug" style={{ color: 'var(--first-octonary)' }}>
+                    <p
+                      className="text-base font-semibold leading-snug"
+                      style={{ color: 'var(--first-octonary)' }}
+                    >
                       {imePrezime}
                     </p>
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Phone className={POLJE_IKONA_KLASA} style={POLJE_OZNAKA_BOJA} aria-hidden />
+                  <Phone
+                    className={POLJE_IKONA_KLASA}
+                    style={POLJE_OZNAKA_BOJA}
+                    aria-hidden
+                  />
                   <div className="min-w-0 text-sm">
                     <p className={POLJE_OZNAKA_KLASA} style={POLJE_OZNAKA_BOJA}>
                       Kontakt
@@ -143,19 +172,29 @@ export function ZahtjevExpandSadrzaj({
                         {telefon}
                       </a>
                     ) : (
-                      <p className="font-medium leading-snug" style={{ color: 'var(--first-octonary)' }}>
+                      <p
+                        className="font-medium leading-snug"
+                        style={{ color: 'var(--first-octonary)' }}
+                      >
                         {telefon}
                       </p>
                     )}
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <MapPin className={POLJE_IKONA_KLASA} style={POLJE_OZNAKA_BOJA} aria-hidden />
+                  <MapPin
+                    className={POLJE_IKONA_KLASA}
+                    style={POLJE_OZNAKA_BOJA}
+                    aria-hidden
+                  />
                   <div className="min-w-0 text-sm">
                     <p className={POLJE_OZNAKA_KLASA} style={POLJE_OZNAKA_BOJA}>
                       Adresa
                     </p>
-                    <p className="break-words font-medium leading-snug" style={{ color: 'var(--first-octonary)' }}>
+                    <p
+                      className="break-words font-medium leading-snug"
+                      style={{ color: 'var(--first-octonary)' }}
+                    >
                       {(zahtjev.address ?? '').trim() || '-'}
                     </p>
                     {imaKoordinate && (
@@ -172,7 +211,10 @@ export function ZahtjevExpandSadrzaj({
               className="mt-8 min-w-0 flex-1 basis-0 border-t pt-8 lg:mt-0 lg:border-t-0 lg:border-l lg:pt-0 lg:pl-8 lg:min-w-0"
               style={{ borderColor: SEKCIJA_GRUPE_RAZDJELNIK_BOJA }}
             >
-              <p className={SEKCIJA_GRUPE_LABEL_KLASA} style={SEKCIJA_GRUPE_BOJA}>
+              <p
+                className={SEKCIJA_GRUPE_LABEL_KLASA}
+                style={SEKCIJA_GRUPE_BOJA}
+              >
                 Podaci o zahtjevu
               </p>
               <h3
@@ -182,8 +224,14 @@ export function ZahtjevExpandSadrzaj({
                 {glavna}
               </h3>
               {podkategorija && (
-                <p className="mt-2 text-sm leading-snug" style={{ color: 'var(--first-octonary)' }}>
-                  <span className="font-medium" style={{ color: 'var(--first-nonary)' }}>
+                <p
+                  className="mt-2 text-sm leading-snug"
+                  style={{ color: 'var(--first-octonary)' }}
+                >
+                  <span
+                    className="font-medium"
+                    style={{ color: 'var(--first-nonary)' }}
+                  >
                     Podkategorija:{' '}
                   </span>
                   {podkategorija}
@@ -194,13 +242,23 @@ export function ZahtjevExpandSadrzaj({
                   <PremiumHitnaBadge />
                 </div>
               )}
-              <div className="mt-3 flex min-w-0 flex-col gap-3" role="group" aria-labelledby={hitnostGrupaId}>
+              <div
+                className="mt-3 flex min-w-0 flex-col gap-3"
+                role="group"
+                aria-labelledby={hitnostGrupaId}
+              >
                 <div className="min-w-0">
-                  <p id={hitnostGrupaId} className={POLJE_OZNAKA_KLASA} style={POLJE_OZNAKA_BOJA}>
+                  <p
+                    id={hitnostGrupaId}
+                    className={POLJE_OZNAKA_KLASA}
+                    style={POLJE_OZNAKA_BOJA}
+                  >
                     {DISPECER_HITNOST_KORISNIK_NASLOV}
                   </p>
                   <div className="mt-1.5">
-                    <KorisnickaHitnostOutlinedChip score={korisnickiUrgencyZaPrikaz} />
+                    <KorisnickaHitnostOutlinedChip
+                      score={korisnickiUrgencyZaPrikaz}
+                    />
                   </div>
                 </div>
                 <div className="min-w-0">
@@ -208,11 +266,17 @@ export function ZahtjevExpandSadrzaj({
                     {DISPECER_OPERATIVNI_NASLOV}
                   </p>
                   {imaOperativni && operativniStil ? (
-                    <p className={`mt-1.5 ${operativniStil.className}`} style={operativniStil.style}>
+                    <p
+                      className={`mt-1.5 ${operativniStil.className}`}
+                      style={operativniStil.style}
+                    >
                       {fp}
                     </p>
                   ) : (
-                    <p className="mt-1.5 text-sm leading-snug" style={{ color: 'rgb(var(--first-nonary-rgb) / 0.88)' }}>
+                    <p
+                      className="mt-1.5 text-sm leading-snug"
+                      style={{ color: 'rgb(var(--first-nonary-rgb) / 0.88)' }}
+                    >
                       {DISPECER_OPERATIVNI_OPIS_NEDOSTAJE}
                     </p>
                   )}
@@ -229,18 +293,26 @@ export function ZahtjevExpandSadrzaj({
               Termin i dokumentacija
             </p>
             <ZahtjevMiniTimeline
-              prijavljenoTekst={formatPrijavljenoDatumVrijeme(zahtjev.created_at)}
+              prijavljenoTekst={formatPrijavljenoDatumVrijeme(
+                zahtjev.created_at,
+              )}
               terminTekst={terminTekst}
             />
             <ZahtjevKorisnickaPorukaBubble tekst={opis} className="mt-4 mb-4" />
             <div className="mb-3 min-w-0">
-              <p className={GALERIJA_LABEL_KLASA} style={{ color: 'rgb(var(--first-nonary-rgb) / 0.78)' }}>
+              <p
+                className={GALERIJA_LABEL_KLASA}
+                style={{ color: 'rgb(var(--first-nonary-rgb) / 0.78)' }}
+              >
                 Priložene slike
               </p>
               {slike.length > 0 ? (
                 <PrilogGalerija urls={slike} className="max-w-2xl" />
               ) : (
-                <p className="text-[11px] leading-snug" style={{ color: 'rgb(var(--first-nonary-rgb) / 0.72)' }}>
+                <p
+                  className="text-[11px] leading-snug"
+                  style={{ color: 'rgb(var(--first-nonary-rgb) / 0.72)' }}
+                >
                   Nema priloženih slika
                 </p>
               )}
@@ -251,18 +323,29 @@ export function ZahtjevExpandSadrzaj({
         <div className="mb-4 grid grid-cols-1 items-start gap-x-5 sm:grid-cols-2">
           <div className="min-w-0 flex flex-col gap-3">
             <div className="flex gap-2">
-              <User className={POLJE_IKONA_KLASA} style={POLJE_OZNAKA_BOJA} aria-hidden />
+              <User
+                className={POLJE_IKONA_KLASA}
+                style={POLJE_OZNAKA_BOJA}
+                aria-hidden
+              />
               <div className="min-w-0">
                 <p className={POLJE_OZNAKA_KLASA} style={POLJE_OZNAKA_BOJA}>
                   Korisnik
                 </p>
-                <p className="text-base font-semibold leading-snug" style={{ color: 'var(--first-octonary)' }}>
+                <p
+                  className="text-base font-semibold leading-snug"
+                  style={{ color: 'var(--first-octonary)' }}
+                >
                   {imePrezime}
                 </p>
               </div>
             </div>
             <div className="flex gap-2">
-              <Phone className={POLJE_IKONA_KLASA} style={POLJE_OZNAKA_BOJA} aria-hidden />
+              <Phone
+                className={POLJE_IKONA_KLASA}
+                style={POLJE_OZNAKA_BOJA}
+                aria-hidden
+              />
               <div className="min-w-0 text-sm">
                 <p className={POLJE_OZNAKA_KLASA} style={POLJE_OZNAKA_BOJA}>
                   Kontakt
@@ -276,19 +359,29 @@ export function ZahtjevExpandSadrzaj({
                     {telefon}
                   </a>
                 ) : (
-                  <p className="font-medium leading-snug" style={{ color: 'var(--first-octonary)' }}>
+                  <p
+                    className="font-medium leading-snug"
+                    style={{ color: 'var(--first-octonary)' }}
+                  >
                     {telefon}
                   </p>
                 )}
               </div>
             </div>
             <div className="flex gap-2">
-              <MapPin className={POLJE_IKONA_KLASA} style={POLJE_OZNAKA_BOJA} aria-hidden />
+              <MapPin
+                className={POLJE_IKONA_KLASA}
+                style={POLJE_OZNAKA_BOJA}
+                aria-hidden
+              />
               <div className="min-w-0 text-sm">
                 <p className={POLJE_OZNAKA_KLASA} style={POLJE_OZNAKA_BOJA}>
                   Adresa
                 </p>
-                <p className="break-words font-medium leading-snug" style={{ color: 'var(--first-octonary)' }}>
+                <p
+                  className="break-words font-medium leading-snug"
+                  style={{ color: 'var(--first-octonary)' }}
+                >
                   {(zahtjev.address ?? '').trim() || '-'}
                 </p>
                 {imaKoordinate && (
@@ -306,15 +399,27 @@ export function ZahtjevExpandSadrzaj({
             aria-labelledby={hitnostGrupaId}
           >
             <div className="min-w-0">
-              <p id={hitnostGrupaId} className={POLJE_OZNAKA_KLASA} style={POLJE_OZNAKA_BOJA}>
+              <p
+                id={hitnostGrupaId}
+                className={POLJE_OZNAKA_KLASA}
+                style={POLJE_OZNAKA_BOJA}
+              >
                 {DISPECER_HITNOST_KORISNIK_NASLOV}
               </p>
               <div className="mt-1.5">
-                <KorisnickaHitnostOutlinedChip score={korisnickiUrgencyZaPrikaz} />
+                <KorisnickaHitnostOutlinedChip
+                  score={korisnickiUrgencyZaPrikaz}
+                />
               </div>
               {podkategorija && (
-                <p className="mt-2 text-sm leading-snug" style={{ color: 'var(--first-octonary)' }}>
-                  <span className="font-medium" style={{ color: 'var(--first-nonary)' }}>
+                <p
+                  className="mt-2 text-sm leading-snug"
+                  style={{ color: 'var(--first-octonary)' }}
+                >
+                  <span
+                    className="font-medium"
+                    style={{ color: 'var(--first-nonary)' }}
+                  >
                     Podkategorija:{' '}
                   </span>
                   {podkategorija}
@@ -326,11 +431,17 @@ export function ZahtjevExpandSadrzaj({
                 {DISPECER_OPERATIVNI_NASLOV}
               </p>
               {imaOperativni && operativniStil ? (
-                <p className={`mt-1.5 ${operativniStil.className}`} style={operativniStil.style}>
+                <p
+                  className={`mt-1.5 ${operativniStil.className}`}
+                  style={operativniStil.style}
+                >
                   {fp}
                 </p>
               ) : (
-                <p className="mt-1.5 text-sm leading-snug" style={{ color: 'rgb(var(--first-nonary-rgb) / 0.88)' }}>
+                <p
+                  className="mt-1.5 text-sm leading-snug"
+                  style={{ color: 'rgb(var(--first-nonary-rgb) / 0.88)' }}
+                >
                   {DISPECER_OPERATIVNI_OPIS_NEDOSTAJE}
                 </p>
               )}
@@ -349,13 +460,19 @@ export function ZahtjevExpandSadrzaj({
           <ZahtjevKorisnickaPorukaBubble tekst={opis} className="mt-4 mb-4" />
 
           <div className="mb-3 min-w-0">
-            <p className={GALERIJA_LABEL_KLASA} style={{ color: 'rgb(var(--first-nonary-rgb) / 0.78)' }}>
+            <p
+              className={GALERIJA_LABEL_KLASA}
+              style={{ color: 'rgb(var(--first-nonary-rgb) / 0.78)' }}
+            >
               Priložene slike
             </p>
             {slike.length > 0 ? (
               <PrilogGalerija urls={slike} className="max-w-2xl" />
             ) : (
-              <p className="text-[11px] leading-snug" style={{ color: 'rgb(var(--first-nonary-rgb) / 0.72)' }}>
+              <p
+                className="text-[11px] leading-snug"
+                style={{ color: 'rgb(var(--first-nonary-rgb) / 0.72)' }}
+              >
                 Nema priloženih slika
               </p>
             )}

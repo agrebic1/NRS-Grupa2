@@ -17,8 +17,16 @@ type MinZ = {
   serviser_odbio_razlog?: string | null;
 };
 
-function z(status: string, final_priority?: string | null, serviser_odbio_razlog?: string | null): MinZ {
-  return { status, final_priority: final_priority ?? null, serviser_odbio_razlog: serviser_odbio_razlog ?? null };
+function z(
+  status: string,
+  final_priority?: string | null,
+  serviser_odbio_razlog?: string | null,
+): MinZ {
+  return {
+    status,
+    final_priority: final_priority ?? null,
+    serviser_odbio_razlog: serviser_odbio_razlog ?? null,
+  };
 }
 
 // ─── Intake faze ──────────────────────────────────────────────────────────────
@@ -37,7 +45,9 @@ describe('operativnaFazaZahtjeva — intake', () => {
   });
 
   it('pending_review s prioritetom → u_obradi', () => {
-    expect(operativnaFazaZahtjeva(z('pending_review', 'VISOKO'))).toBe('u_obradi');
+    expect(operativnaFazaZahtjeva(z('pending_review', 'VISOKO'))).toBe(
+      'u_obradi',
+    );
   });
 
   it('in_review s prioritetom → u_obradi', () => {
@@ -46,12 +56,18 @@ describe('operativnaFazaZahtjeva — intake', () => {
 
   it('potvrdeno bez odbijanja → ceka_dodjelu', () => {
     expect(operativnaFazaZahtjeva(z('potvrdeno'))).toBe('ceka_dodjelu');
-    expect(operativnaFazaZahtjeva(z('potvrdeno', 'VISOKO'))).toBe('ceka_dodjelu');
+    expect(operativnaFazaZahtjeva(z('potvrdeno', 'VISOKO'))).toBe(
+      'ceka_dodjelu',
+    );
   });
 
   it('potvrdeno s razlogom odbijanja → odbijen_serviser', () => {
-    expect(operativnaFazaZahtjeva(z('potvrdeno', 'VISOKO', 'Ne mogu doći'))).toBe('odbijen_serviser');
-    expect(operativnaFazaZahtjeva(z('potvrdeno', null, 'Bolestan sam'))).toBe('odbijen_serviser');
+    expect(
+      operativnaFazaZahtjeva(z('potvrdeno', 'VISOKO', 'Ne mogu doći')),
+    ).toBe('odbijen_serviser');
+    expect(operativnaFazaZahtjeva(z('potvrdeno', null, 'Bolestan sam'))).toBe(
+      'odbijen_serviser',
+    );
   });
 });
 
@@ -99,16 +115,30 @@ describe('operativnaFazaZahtjeva — terminalni', () => {
 
 describe('MECE: svaki status → tačno jedna faza, bez preklapanja', () => {
   const sviStatusi = [
-    'pending_review', 'na_cekanju', 'in_review',
+    'pending_review',
+    'na_cekanju',
+    'in_review',
     'potvrdeno',
-    'dodijeljeno', 'u_radu', 'u_izvrsenju', 'zavrseno', 'zatvoreno',
-    'otkazano', 'odbijeno',
+    'dodijeljeno',
+    'u_radu',
+    'u_izvrsenju',
+    'zavrseno',
+    'zatvoreno',
+    'otkazano',
+    'odbijeno',
   ];
 
   const sveFaze: OperativnaFaza[] = [
-    'novi', 'u_obradi', 'ceka_dodjelu', 'odbijen_serviser',
-    'dodijeljeno', 'u_putu', 'na_terenu', 'ceka_zatvaranje',
-    'zatvoreno', 'otkazano',
+    'novi',
+    'u_obradi',
+    'ceka_dodjelu',
+    'odbijen_serviser',
+    'dodijeljeno',
+    'u_putu',
+    'na_terenu',
+    'ceka_zatvaranje',
+    'zatvoreno',
+    'otkazano',
   ];
 
   it('svaki status mapira na jednu od definisanih faza', () => {
@@ -128,7 +158,7 @@ describe('MECE: svaki status → tačno jedna faza, bez preklapanja', () => {
 
   it('in_review bez prioriteta → intake; s prioritetom → intake (uvijek zahtjev, nikad intervencija)', () => {
     const bezPri = operativnaFazaZahtjeva(z('in_review'));
-    const sPri   = operativnaFazaZahtjeva(z('in_review', 'HITNO'));
+    const sPri = operativnaFazaZahtjeva(z('in_review', 'HITNO'));
     expect(jeZahtjevIntakeFaza(bezPri)).toBe(true);
     expect(jeZahtjevIntakeFaza(sPri)).toBe(true);
     expect(jeIntervencijaFaza(bezPri)).toBe(false);
@@ -137,7 +167,7 @@ describe('MECE: svaki status → tačno jedna faza, bez preklapanja', () => {
 
   it('potvrdeno uvijek intake, nikad intervencija', () => {
     const bezOdb = operativnaFazaZahtjeva(z('potvrdeno'));
-    const sOdb   = operativnaFazaZahtjeva(z('potvrdeno', null, 'razlog'));
+    const sOdb = operativnaFazaZahtjeva(z('potvrdeno', null, 'razlog'));
     expect(jeZahtjevIntakeFaza(bezOdb)).toBe(true);
     expect(jeZahtjevIntakeFaza(sOdb)).toBe(true);
     expect(jeIntervencijaFaza(bezOdb)).toBe(false);
@@ -146,7 +176,7 @@ describe('MECE: svaki status → tačno jedna faza, bez preklapanja', () => {
 
   it('u_radu i u_izvrsenju su uvijek intervencija, nikad intake', () => {
     const uRadu = operativnaFazaZahtjeva(z('u_radu'));
-    const uIzv  = operativnaFazaZahtjeva(z('u_izvrsenju'));
+    const uIzv = operativnaFazaZahtjeva(z('u_izvrsenju'));
     expect(jeIntervencijaFaza(uRadu)).toBe(true);
     expect(jeIntervencijaFaza(uIzv)).toBe(true);
     expect(jeZahtjevIntakeFaza(uRadu)).toBe(false);

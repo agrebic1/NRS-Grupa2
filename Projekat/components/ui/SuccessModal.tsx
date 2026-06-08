@@ -37,32 +37,40 @@ function PaperAirplane({ className }: { className?: string }) {
 // ─── Lifecycle step ───────────────────────────────────────────────────────────
 
 interface LifecycleStepProps {
-  Ikona:   React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
-  oznaka:  string;
-  opis:    string;
-  boja:    string;
+  Ikona: React.ComponentType<{
+    className?: string;
+    style?: React.CSSProperties;
+  }>;
+  oznaka: string;
+  opis: string;
+  boja: string;
   aktivan: boolean;
 }
 
-function LifecycleStep({ Ikona, oznaka, opis, boja, aktivan }: LifecycleStepProps) {
+function LifecycleStep({
+  Ikona,
+  oznaka,
+  opis,
+  boja,
+  aktivan,
+}: LifecycleStepProps) {
   return (
     <div className="flex items-start gap-3">
       <div
         className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full"
         style={{
           backgroundColor: aktivan ? boja : `${boja}22`,
-          border:          `1.5px solid ${boja}50`,
+          border: `1.5px solid ${boja}50`,
         }}
       >
-        <Ikona
-          className="h-4 w-4"
-          style={{ color: aktivan ? '#fff' : boja }}
-        />
+        <Ikona className="h-4 w-4" style={{ color: aktivan ? '#fff' : boja }} />
       </div>
       <div className="min-w-0 flex-1">
         <p
           className="text-sm font-semibold"
-          style={{ color: aktivan ? 'var(--first-octonary)' : 'var(--first-nonary)' }}
+          style={{
+            color: aktivan ? 'var(--first-octonary)' : 'var(--first-nonary)',
+          }}
         >
           {oznaka}
           {aktivan && (
@@ -98,7 +106,7 @@ export function SuccessModal({ onZatvori }: SuccessModalProps) {
         className="relative w-full max-w-sm overflow-hidden rounded-3xl shadow-card-lg"
         style={{
           backgroundColor: 'var(--first-tertiary)',
-          border:          '1px solid rgb(var(--first-quaternary-rgb) / 0.4)',
+          border: '1px solid rgb(var(--first-quaternary-rgb) / 0.4)',
         }}
       >
         {/* Pozadinska dekoracija */}
@@ -153,7 +161,7 @@ export function SuccessModal({ onZatvori }: SuccessModalProps) {
           <div
             className="mb-5 rounded-2xl border p-4"
             style={{
-              borderColor:     'rgba(217,119,6,0.3)',
+              borderColor: 'rgba(217,119,6,0.3)',
               backgroundColor: 'rgba(217,119,6,0.06)',
             }}
           >

@@ -19,7 +19,7 @@ function uDatumZaPrikaz(vrijednost: string | Date): Date | null {
 
 export function formatirajDatumPrikaz(
   vrijednost: string | Date | null | undefined,
-  prazno = '-'
+  prazno = '-',
 ): string {
   if (vrijednost == null || vrijednost === '') return prazno;
   const d = uDatumZaPrikaz(vrijednost);
@@ -33,7 +33,7 @@ export function formatirajDatumPrikaz(
 /** Primjer: `02. 05. 2026. 14:30` */
 export function formatirajDatumVrijemeZaPrikaz(
   vrijednost: string | Date | null | undefined,
-  prazno = '-'
+  prazno = '-',
 ): string {
   if (vrijednost == null || vrijednost === '') return prazno;
   const d = vrijednost instanceof Date ? vrijednost : new Date(vrijednost);
@@ -49,12 +49,19 @@ export function formatirajDatumVrijemeZaPrikaz(
 
 /** Primjer: `14:30` */
 export function fmtSat(iso: string): string {
-  return new Date(iso).toLocaleTimeString('bs-BA', { hour: '2-digit', minute: '2-digit' });
+  return new Date(iso).toLocaleTimeString('bs-BA', {
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 }
 
 /** Primjer: `12.05.2026.` (kratki format bez razmaka) */
 export function fmtDatumKratki(iso: string): string {
-  return new Date(iso).toLocaleDateString('bs-BA', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  return new Date(iso).toLocaleDateString('bs-BA', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric',
+  });
 }
 
 /** Primjer: `12.05.2026., 08:30` */

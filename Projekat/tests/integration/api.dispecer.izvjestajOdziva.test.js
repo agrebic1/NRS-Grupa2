@@ -51,7 +51,9 @@ describe('/api/dispecer/izvjestaj/odziva - Sprint 9 (US-42)', () => {
   test('GET → 401 bez sesije', async () => {
     mockSessionGetUser.mockResolvedValue({ data: { user: null } });
 
-    const response = await GET(new Request('http://localhost/api/dispecer/izvjestaj/odziva'));
+    const response = await GET(
+      new Request('http://localhost/api/dispecer/izvjestaj/odziva'),
+    );
     expect(response.status).toBe(401);
   });
 
@@ -59,7 +61,9 @@ describe('/api/dispecer/izvjestaj/odziva - Sprint 9 (US-42)', () => {
     mockSessionGetUser.mockResolvedValue({ data: { user: { id: 'u1' } } });
     mockAssertDispatcherAccess.mockResolvedValue(false);
 
-    const response = await GET(new Request('http://localhost/api/dispecer/izvjestaj/odziva'));
+    const response = await GET(
+      new Request('http://localhost/api/dispecer/izvjestaj/odziva'),
+    );
     expect(response.status).toBe(403);
   });
 
@@ -68,7 +72,9 @@ describe('/api/dispecer/izvjestaj/odziva - Sprint 9 (US-42)', () => {
     mockAssertDispatcherAccess.mockResolvedValue(true);
 
     const response = await GET(
-      new Request('http://localhost/api/dispecer/izvjestaj/odziva?od=xyz&do=2026-05-22'),
+      new Request(
+        'http://localhost/api/dispecer/izvjestaj/odziva?od=xyz&do=2026-05-22',
+      ),
     );
     expect(response.status).toBe(400);
   });
@@ -85,7 +91,9 @@ describe('/api/dispecer/izvjestaj/odziva - Sprint 9 (US-42)', () => {
     });
 
     const response = await GET(
-      new Request('http://localhost/api/dispecer/izvjestaj/odziva?od=2026-05-01&do=2026-05-31'),
+      new Request(
+        'http://localhost/api/dispecer/izvjestaj/odziva?od=2026-05-01&do=2026-05-31',
+      ),
     );
     const body = await response.json();
 
@@ -116,7 +124,9 @@ describe('/api/dispecer/izvjestaj/odziva - Sprint 9 (US-42)', () => {
       }
       if (table === 'work_evidence') {
         return inChain({
-          data: [{ zahtjev_id: 10, trajanje_minuta: 90, serviser_id: serviserId }],
+          data: [
+            { zahtjev_id: 10, trajanje_minuta: 90, serviser_id: serviserId },
+          ],
           error: null,
         });
       }
@@ -133,7 +143,9 @@ describe('/api/dispecer/izvjestaj/odziva - Sprint 9 (US-42)', () => {
     });
 
     const response = await GET(
-      new Request('http://localhost/api/dispecer/izvjestaj/odziva?od=2026-05-01&do=2026-05-31'),
+      new Request(
+        'http://localhost/api/dispecer/izvjestaj/odziva?od=2026-05-01&do=2026-05-31',
+      ),
     );
     const body = await response.json();
 

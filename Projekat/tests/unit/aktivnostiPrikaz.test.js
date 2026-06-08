@@ -77,13 +77,19 @@ describe('aktivnostiPrikaz', () => {
       autor_id: 'd1',
       tip: 'dodjela',
       sadrzaj: 'Dodjela serviseru: Kenan Karić',
-      metadata: { serviser_ime: 'Kenan Karić', iz: 'potvrdeno', u: 'dodijeljeno' },
+      metadata: {
+        serviser_ime: 'Kenan Karić',
+        iz: 'potvrdeno',
+        u: 'dodijeljeno',
+      },
       old_value: 'potvrdeno',
       new_value: 'Kenan Karić',
       actor_role: 'dispecer',
       razlog: null,
       created_at: new Date().toISOString(),
     };
-    expect(prikazStareNoveVrijednostiAktivnosti(a).nova).toBe('Dodijeljeno — Kenan Karić');
+    expect(prikazStareNoveVrijednostiAktivnosti(a).nova).toBe(
+      'Dodijeljeno — Kenan Karić',
+    );
   });
 });

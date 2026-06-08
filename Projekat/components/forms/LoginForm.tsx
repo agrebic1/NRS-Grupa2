@@ -6,7 +6,10 @@ import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Eye, EyeOff, Info } from 'lucide-react';
 import Link from 'next/link';
-import { prijavnaShema, type PrijavniPodaci } from '@/lib/validations/authValidation';
+import {
+  prijavnaShema,
+  type PrijavniPodaci,
+} from '@/lib/validations/authValidation';
 import {
   prijaviSeEmailom,
   odrediRedirectNakonPrijave,
@@ -40,7 +43,9 @@ export function LoginForm() {
     setJePrijavljivanje(true);
     try {
       const rezultat = await prijaviSeEmailom(podaci);
-      const putanjaZaRedirect = await odrediRedirectNakonPrijave(rezultat.user.id);
+      const putanjaZaRedirect = await odrediRedirectNakonPrijave(
+        rezultat.user.id,
+      );
       setJePrijavljivanje(false);
       setPoruka('Uspješno ste prijavljeni.');
       await new Promise((resolve) => setTimeout(resolve, 900));
@@ -64,15 +69,26 @@ export function LoginForm() {
       style={{ color: 'var(--first-nonary)' }}
       aria-label={jeLozinkaVidljiva ? 'Sakrij lozinku' : 'Prikaži lozinku'}
     >
-      {jeLozinkaVidljiva ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+      {jeLozinkaVidljiva ? (
+        <EyeOff className="h-4 w-4" />
+      ) : (
+        <Eye className="h-4 w-4" />
+      )}
     </button>
   );
 
   return (
     <>
-      <LoadingOverlay isVisible={jePrijavljivanje} message="Prijavljivanje u sistem..." />
+      <LoadingOverlay
+        isVisible={jePrijavljivanje}
+        message="Prijavljivanje u sistem..."
+      />
 
-      <form onSubmit={handleSubmit(prijaviSe)} noValidate className="flex flex-col gap-5">
+      <form
+        onSubmit={handleSubmit(prijaviSe)}
+        noValidate
+        className="flex flex-col gap-5"
+      >
         {greska && <AlertMessage variant="error" message={greska} />}
         {poruka && <AlertMessage variant="success" message={poruka} />}
 
@@ -101,7 +117,10 @@ export function LoginForm() {
               className="h-4 w-4 cursor-pointer rounded"
               style={{ accentColor: 'var(--first-primary)' }}
             />
-            <span className="select-none text-sm" style={{ color: 'var(--first-nonary)' }}>
+            <span
+              className="select-none text-sm"
+              style={{ color: 'var(--first-nonary)' }}
+            >
               Zapamti me
             </span>
           </label>
@@ -133,9 +152,13 @@ export function LoginForm() {
             color: 'var(--first-nonary)',
           }}
         >
-          <Info className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" style={{ color: 'var(--first-secondary)' }} />
+          <Info
+            className="mt-0.5 h-3.5 w-3.5 flex-shrink-0"
+            style={{ color: 'var(--first-secondary)' }}
+          />
           <span>
-            Ako ste serviser ili uposlenik sistema, koristite nalog koji vam je dodijelio administrator.
+            Ako ste serviser ili uposlenik sistema, koristite nalog koji vam je
+            dodijelio administrator.
           </span>
         </div>
       </form>

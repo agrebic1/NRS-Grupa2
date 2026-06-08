@@ -5,15 +5,25 @@ import { dodijeliKorisnickeBrojeveZahtjeva } from '@/lib/servisirane/korisnickiB
 export const dynamic = 'force-dynamic';
 
 /** Statusi koji čine historiju (završene, zatvorene, otkazane, odbijene). */
-const HISTORIJSKI_STATUSI = ['zatvoreno', 'zavrseno', 'otkazano', 'odbijeno'] as const;
+const HISTORIJSKI_STATUSI = [
+  'zatvoreno',
+  'zavrseno',
+  'otkazano',
+  'odbijeno',
+] as const;
 
 export async function GET() {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json({ error: 'Niste prijavljeni.' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Niste prijavljeni.' },
+        { status: 401 },
+      );
     }
 
     const db = supabase as any;
@@ -23,8 +33,8 @@ export async function GET() {
       .from('service_requests')
       .select(
         'id, category, category_main, category_sub, address, created_at, status, ' +
-        'urgency_score, final_priority, closed_at, updated_at, is_premium, ' +
-        'cancel_reason, rejection_reason'
+          'urgency_score, final_priority, closed_at, updated_at, is_premium, ' +
+          'cancel_reason, rejection_reason',
       )
       .eq('user_id', user.id)
       .in('status', HISTORIJSKI_STATUSI)
@@ -39,7 +49,8 @@ export async function GET() {
 
     // Dohvati ocjene za historijske zahtjeve
     const ids = zahtjevi.map((z: { id: number }) => z.id);
-    let ocjeneMap: Record<number, { ocjena: number; komentar: string | null }> = {};
+    let ocjeneMap: Record<number, { ocjena: number; komentar: string | null }> =
+      {};
 
     if (ids.length > 0) {
       const { data: ocjene } = await db
@@ -50,8 +61,16 @@ export async function GET() {
 
       if (ocjene) {
         ocjeneMap = Object.fromEntries(
-          (ocjene as { zahtjev_id: number; ocjena: number; komentar: string | null }[])
-            .map((o) => [o.zahtjev_id, { ocjena: o.ocjena, komentar: o.komentar }])
+          (
+            ocjene as {
+              zahtjev_id: number;
+              ocjena: number;
+              komentar: string | null;
+            }[]
+          ).map((o) => [
+            o.zahtjev_id,
+            { ocjena: o.ocjena, komentar: o.komentar },
+          ]),
         );
       }
     }

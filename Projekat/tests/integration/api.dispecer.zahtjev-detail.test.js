@@ -21,30 +21,32 @@ jest.mock('@/lib/servisirane/dispecerPristup', () => ({
 }));
 
 jest.mock('@/lib/servisirane/notifikacijeHelper', () => ({
-  notifDodjelaIntervencije:            jest.fn().mockResolvedValue(undefined),
-  notifZatvaranjeIntervencije:         jest.fn().mockResolvedValue(undefined),
-  notifTimDodjela:                     jest.fn().mockResolvedValue(undefined),
-  notifKorisnikusServiserDodijeljen:   jest.fn().mockResolvedValue(undefined),
+  notifDodjelaIntervencije: jest.fn().mockResolvedValue(undefined),
+  notifZatvaranjeIntervencije: jest.fn().mockResolvedValue(undefined),
+  notifTimDodjela: jest.fn().mockResolvedValue(undefined),
+  notifKorisnikusServiserDodijeljen: jest.fn().mockResolvedValue(undefined),
   notifKorisnikusIntervencijaZavrsena: jest.fn().mockResolvedValue(undefined),
   notifKorisnikusIntervencijaZatvorena: jest.fn().mockResolvedValue(undefined),
-  notifKorisnikusZahtjevUObradi:       jest.fn().mockResolvedValue(undefined),
-  notifNovaNapomenaServiser:           jest.fn().mockResolvedValue(undefined),
+  notifKorisnikusZahtjevUObradi: jest.fn().mockResolvedValue(undefined),
+  notifNovaNapomenaServiser: jest.fn().mockResolvedValue(undefined),
 }));
 
 const { GET, PATCH } = require('@/app/api/dispecer/zahtjevi/[id]/route');
 
 function flexChain() {
   return {
-    select:      jest.fn().mockReturnThis(),
-    eq:          jest.fn().mockReturnThis(),
-    order:       jest.fn().mockReturnThis(),
-    limit:       jest.fn().mockReturnThis(),
-    neq:         jest.fn().mockReturnThis(),
-    in:          jest.fn().mockReturnThis(),
-    single:      jest.fn().mockResolvedValue({ data: null, error: null }),
+    select: jest.fn().mockReturnThis(),
+    eq: jest.fn().mockReturnThis(),
+    order: jest.fn().mockReturnThis(),
+    limit: jest.fn().mockReturnThis(),
+    neq: jest.fn().mockReturnThis(),
+    in: jest.fn().mockReturnThis(),
+    single: jest.fn().mockResolvedValue({ data: null, error: null }),
     maybeSingle: jest.fn().mockResolvedValue({ data: null, error: null }),
-    insert:      jest.fn().mockResolvedValue({ data: null, error: null }),
-    update:      jest.fn(() => ({ eq: jest.fn().mockResolvedValue({ error: null }) })),
+    insert: jest.fn().mockResolvedValue({ data: null, error: null }),
+    update: jest.fn(() => ({
+      eq: jest.fn().mockResolvedValue({ error: null }),
+    })),
   };
 }
 
@@ -66,9 +68,9 @@ function maybeSingleQuery(result) {
 
 function updateQuery(result = { error: null }, onUpdate = jest.fn()) {
   return {
-    select:      jest.fn().mockReturnThis(),
-    eq:          jest.fn().mockReturnThis(),
-    single:      jest.fn().mockResolvedValue({ data: null, error: null }),
+    select: jest.fn().mockReturnThis(),
+    eq: jest.fn().mockReturnThis(),
+    single: jest.fn().mockResolvedValue({ data: null, error: null }),
     maybeSingle: jest.fn().mockResolvedValue({ data: null, error: null }),
     update: jest.fn((payload) => {
       onUpdate(payload);
@@ -97,9 +99,12 @@ describe('/api/dispecer/zahtjevi/[id] route', () => {
   test('GET returns 401 without session', async () => {
     mockSessionGetUser.mockResolvedValue({ data: { user: null } });
 
-    const response = await GET(new Request('http://localhost/api/dispecer/zahtjevi/1'), {
-      params: { id: '1' },
-    });
+    const response = await GET(
+      new Request('http://localhost/api/dispecer/zahtjevi/1'),
+      {
+        params: { id: '1' },
+      },
+    );
 
     expect(response.status).toBe(401);
   });
@@ -107,9 +112,12 @@ describe('/api/dispecer/zahtjevi/[id] route', () => {
   test('GET returns 400 for invalid request id', async () => {
     mockSessionGetUser.mockResolvedValue({ data: { user: { id: 'd1' } } });
 
-    const response = await GET(new Request('http://localhost/api/dispecer/zahtjevi/x'), {
-      params: { id: 'x' },
-    });
+    const response = await GET(
+      new Request('http://localhost/api/dispecer/zahtjevi/x'),
+      {
+        params: { id: 'x' },
+      },
+    );
 
     expect(response.status).toBe(400);
   });
@@ -118,9 +126,12 @@ describe('/api/dispecer/zahtjevi/[id] route', () => {
     mockSessionGetUser.mockResolvedValue({ data: { user: { id: 'u1' } } });
     mockAssertDispatcherAccess.mockResolvedValue(false);
 
-    const response = await GET(new Request('http://localhost/api/dispecer/zahtjevi/1'), {
-      params: { id: '1' },
-    });
+    const response = await GET(
+      new Request('http://localhost/api/dispecer/zahtjevi/1'),
+      {
+        params: { id: '1' },
+      },
+    );
 
     expect(response.status).toBe(403);
   });
@@ -159,9 +170,12 @@ describe('/api/dispecer/zahtjevi/[id] route', () => {
       return flexChain();
     });
 
-    const response = await GET(new Request('http://localhost/api/dispecer/zahtjevi/1'), {
-      params: { id: '1' },
-    });
+    const response = await GET(
+      new Request('http://localhost/api/dispecer/zahtjevi/1'),
+      {
+        params: { id: '1' },
+      },
+    );
     const body = await response.json();
 
     expect(response.status).toBe(200);
@@ -183,14 +197,20 @@ describe('/api/dispecer/zahtjevi/[id] route', () => {
       if (table !== 'service_requests') return flexChain();
       serviceCalls += 1;
       if (serviceCalls === 1) {
-        return singleQuery({ data: { status: 'pending_review', is_premium: false }, error: null });
+        return singleQuery({
+          data: { status: 'pending_review', is_premium: false },
+          error: null,
+        });
       }
       return updateQuery({ error: null }, onUpdate);
     });
 
-    const response = await PATCH(jsonRequest({ action: 'potvrdi', final_priority: 'VISOKO' }), {
-      params: { id: '1' },
-    });
+    const response = await PATCH(
+      jsonRequest({ action: 'potvrdi', final_priority: 'VISOKO' }),
+      {
+        params: { id: '1' },
+      },
+    );
     const body = await response.json();
 
     expect(response.status).toBe(200);
@@ -208,14 +228,20 @@ describe('/api/dispecer/zahtjevi/[id] route', () => {
 
     mockFrom.mockImplementation((table) => {
       if (table === 'service_requests') {
-        return singleQuery({ data: { status: 'pending_review', is_premium: true }, error: null });
+        return singleQuery({
+          data: { status: 'pending_review', is_premium: true },
+          error: null,
+        });
       }
       return singleQuery({ data: null, error: null });
     });
 
-    const response = await PATCH(jsonRequest({ action: 'potvrdi', final_priority: 'SREDNJE' }), {
-      params: { id: '1' },
-    });
+    const response = await PATCH(
+      jsonRequest({ action: 'potvrdi', final_priority: 'SREDNJE' }),
+      {
+        params: { id: '1' },
+      },
+    );
     const body = await response.json();
 
     expect(response.status).toBe(400);
@@ -232,14 +258,20 @@ describe('/api/dispecer/zahtjevi/[id] route', () => {
       if (table !== 'service_requests') return flexChain();
       serviceCalls += 1;
       if (serviceCalls === 1) {
-        return singleQuery({ data: { status: 'pending_review', is_premium: true }, error: null });
+        return singleQuery({
+          data: { status: 'pending_review', is_premium: true },
+          error: null,
+        });
       }
       return updateQuery({ error: null }, onUpdate);
     });
 
-    const response = await PATCH(jsonRequest({ action: 'potvrdi', final_priority: 'VISOKO' }), {
-      params: { id: '1' },
-    });
+    const response = await PATCH(
+      jsonRequest({ action: 'potvrdi', final_priority: 'VISOKO' }),
+      {
+        params: { id: '1' },
+      },
+    );
     const body = await response.json();
 
     expect(response.status).toBe(200);
@@ -261,7 +293,10 @@ describe('/api/dispecer/zahtjevi/[id] route', () => {
       if (table !== 'service_requests') return flexChain();
       serviceCalls += 1;
       if (serviceCalls === 1) {
-        return singleQuery({ data: { status: 'na_cekanju', is_premium: false }, error: null });
+        return singleQuery({
+          data: { status: 'na_cekanju', is_premium: false },
+          error: null,
+        });
       }
       return updateQuery({ error: null }, onUpdate);
     });
@@ -285,7 +320,10 @@ describe('/api/dispecer/zahtjevi/[id] route', () => {
 
     mockFrom.mockImplementation((table) => {
       if (table === 'service_requests') {
-        return singleQuery({ data: { status: 'otkazano', is_premium: false }, error: null });
+        return singleQuery({
+          data: { status: 'otkazano', is_premium: false },
+          error: null,
+        });
       }
       return singleQuery({ data: null, error: null });
     });
@@ -308,13 +346,19 @@ describe('/api/dispecer/zahtjevi/[id] route', () => {
       if (table !== 'service_requests') return flexChain();
       serviceCalls += 1;
       if (serviceCalls === 1) {
-        return singleQuery({ data: { status: 'in_review', is_premium: false }, error: null });
+        return singleQuery({
+          data: { status: 'in_review', is_premium: false },
+          error: null,
+        });
       }
       return updateQuery({ error: null }, onUpdate);
     });
 
     const response = await PATCH(
-      jsonRequest({ action: 'odbij', rejection_reason: 'Kvar nije u podrzanoj kategoriji.' }),
+      jsonRequest({
+        action: 'odbij',
+        rejection_reason: 'Kvar nije u podrzanoj kategoriji.',
+      }),
       { params: { id: '1' } },
     );
     const body = await response.json();

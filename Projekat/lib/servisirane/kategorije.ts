@@ -138,12 +138,16 @@ type KategorijaLike = {
   category_sub?: string | null;
 };
 
-function nadjiGlavnu(id: string | null | undefined): GlavnaKategorijaDef | undefined {
+function nadjiGlavnu(
+  id: string | null | undefined,
+): GlavnaKategorijaDef | undefined {
   if (!id) return undefined;
   return KATEGORIJE_KVARA.find((k) => k.id === id);
 }
 
-export function glavnaKategorijaPoId(id: string | null | undefined): GlavnaKategorijaDef | null {
+export function glavnaKategorijaPoId(
+  id: string | null | undefined,
+): GlavnaKategorijaDef | null {
   return nadjiGlavnu(id) ?? null;
 }
 
@@ -154,11 +158,18 @@ function parseLegacyCategory(category: string | null | undefined): {
   const trimmed = (category ?? '').trim();
   if (!trimmed) return { glavnaLabel: 'Zahtjev', podkategorijaLabel: null };
   const match = trimmed.match(/^(.+?)\s*[-\u2013\u2014]\s*(.+)$/);
-  if (match) return { glavnaLabel: match[1].trim(), podkategorijaLabel: match[2].trim() || null };
+  if (match)
+    return {
+      glavnaLabel: match[1].trim(),
+      podkategorijaLabel: match[2].trim() || null,
+    };
   return { glavnaLabel: trimmed, podkategorijaLabel: null };
 }
 
-export function labelKategorije(input: KategorijaLike): { glavna: string; podkategorija: string | null } {
+export function labelKategorije(input: KategorijaLike): {
+  glavna: string;
+  podkategorija: string | null;
+} {
   const glavna = nadjiGlavnu(input.category_main);
   if (!glavna) {
     const leg = parseLegacyCategory(input.category);
@@ -172,7 +183,10 @@ export function labelKategorije(input: KategorijaLike): { glavna: string; podkat
   };
 }
 
-export function validnaKombinacijaKategorije(mainId: string | null | undefined, subId: string | null | undefined): boolean {
+export function validnaKombinacijaKategorije(
+  mainId: string | null | undefined,
+  subId: string | null | undefined,
+): boolean {
   if (!mainId) return false;
   const glavna = nadjiGlavnu(mainId);
   if (!glavna) return false;
@@ -181,13 +195,18 @@ export function validnaKombinacijaKategorije(mainId: string | null | undefined, 
   return glavna.podkategorije.some((p) => p.id === subId);
 }
 
-export function serializujKategoriju(mainId: string, subId?: string | null): {
+export function serializujKategoriju(
+  mainId: string,
+  subId?: string | null,
+): {
   category: string;
   category_main: string;
   category_sub: string | null;
 } {
   const glavna = nadjiGlavnu(mainId);
-  const pod = subId ? glavna?.podkategorije.find((p) => p.id === subId) : undefined;
+  const pod = subId
+    ? glavna?.podkategorije.find((p) => p.id === subId)
+    : undefined;
   const glavnaLabel = glavna?.label ?? mainId;
   const podLabel = pod?.label ?? null;
   return {

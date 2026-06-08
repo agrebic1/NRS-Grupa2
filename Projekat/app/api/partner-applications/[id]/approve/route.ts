@@ -1,26 +1,32 @@
 import { NextResponse } from 'next/server';
-import { createAdminClient }      from '@/lib/supabase/admin';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
-import { sendEmail, kreirajEmailOdobrenja }   from '@/lib/email/sendEmail';
+import { sendEmail, kreirajEmailOdobrenja } from '@/lib/email/sendEmail';
 
 export const dynamic = 'force-dynamic';
 
 function getUlogaNaziv(uloga: unknown): string {
   if (!uloga) return '';
-  if (Array.isArray(uloga)) return (uloga[0] as { naziv?: string })?.naziv ?? '';
+  if (Array.isArray(uloga))
+    return (uloga[0] as { naziv?: string })?.naziv ?? '';
   return (uloga as { naziv?: string })?.naziv ?? '';
 }
 
 export async function POST(
   _request: Request,
-  { params }: { params: { id: string } }
+  { params }: { params: { id: string } },
 ) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json({ error: 'Niste prijavljeni.' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Niste prijavljeni.' },
+        { status: 401 },
+      );
     }
 
     const db = supabase as any;
@@ -45,15 +51,21 @@ export async function POST(
       .single();
 
     if (greskaAplikacije || !aplikacija) {
-      return NextResponse.json({ error: 'Aplikacija nije pronađena.' }, { status: 404 });
+      return NextResponse.json(
+        { error: 'Aplikacija nije pronađena.' },
+        { status: 404 },
+      );
     }
 
     if (aplikacija.status !== 'na_cekanju') {
-      return NextResponse.json({ error: 'Aplikacija je već obrađena.' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Aplikacija je već obrađena.' },
+        { status: 400 },
+      );
     }
 
     // Generiši privremenu lozinku: Temp[Godina]![Prezime]
-    const godina          = new Date().getFullYear();
+    const godina = new Date().getFullYear();
     const privremenalozinka = `Temp${godina}!${aplikacija.last_name}`;
 
     const ulogaMetadata =
@@ -65,27 +77,32 @@ export async function POST(
       adminClient = createAdminClient();
     } catch {
       return NextResponse.json(
-        { error: 'Odobrenje zahtijeva SUPABASE_SERVICE_ROLE_KEY. Dodajte ovu env varijablu u Vercel podešavanja.' },
-        { status: 503 }
+        {
+          error:
+            'Odobrenje zahtijeva SUPABASE_SERVICE_ROLE_KEY. Dodajte ovu env varijablu u Vercel podešavanja.',
+        },
+        { status: 503 },
       );
     }
 
     const { data: authKorisnik, error: greskaKreiranja } =
       await adminClient.auth.admin.createUser({
-        email:         aplikacija.email,
-        password:      privremenalozinka,
+        email: aplikacija.email,
+        password: privremenalozinka,
         email_confirm: true,
         user_metadata: {
-          ime:     aplikacija.first_name,
+          ime: aplikacija.first_name,
           prezime: aplikacija.last_name,
-          uloga:   ulogaMetadata,
+          uloga: ulogaMetadata,
         },
       });
 
     if (greskaKreiranja || !authKorisnik.user) {
       return NextResponse.json(
-        { error: greskaKreiranja?.message ?? 'Greška pri kreiranju korisnika.' },
-        { status: 500 }
+        {
+          error: greskaKreiranja?.message ?? 'Greška pri kreiranju korisnika.',
+        },
+        { status: 500 },
       );
     }
 
@@ -103,17 +120,17 @@ export async function POST(
 
     // Pošalji email s pristupnim podacima
     const emailHtml = kreirajEmailOdobrenja({
-      ime:               aplikacija.first_name,
-      prezime:           aplikacija.last_name,
-      email:             aplikacija.email,
+      ime: aplikacija.first_name,
+      prezime: aplikacija.last_name,
+      email: aplikacija.email,
       privremena_lozinka: privremenalozinka,
-      uloga:             ulogaMetadata,
+      uloga: ulogaMetadata,
     });
 
     const emailRezultat = await sendEmail({
-      to:      aplikacija.email,
+      to: aplikacija.email,
       subject: 'Vaša prijava je odobrena - Pristupni podaci | InterServ',
-      html:    emailHtml,
+      html: emailHtml,
     });
 
     if (!emailRezultat.success) {
@@ -121,11 +138,11 @@ export async function POST(
     }
 
     return NextResponse.json({
-      success:            true,
+      success: true,
       privremena_lozinka: privremenalozinka,
-      korisnik_id:        authKorisnik.user.id,
-      email:              aplikacija.email,
-      email_poslan:       emailRezultat.success,
+      korisnik_id: authKorisnik.user.id,
+      email: aplikacija.email,
+      email_poslan: emailRezultat.success,
     });
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Greška servera.';

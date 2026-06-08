@@ -1,7 +1,7 @@
 import { Check, X } from 'lucide-react';
 import { ZAHTJEVI_LOZINKE } from '@/lib/validations/authValidation';
 
-// Nivoi snage lozinke 
+// Nivoi snage lozinke
 
 interface NivoSnage {
   oznaka: string;
@@ -10,22 +10,29 @@ interface NivoSnage {
 }
 
 const NIVOI_SNAGE: NivoSnage[] = [
-  { oznaka: 'Slaba lozinka',   boja: 'var(--first-senary)', minimalniBroj: 0 },
-  { oznaka: 'Srednja lozinka', boja: 'var(--first-septenary)', minimalniBroj: 3 },
-  { oznaka: 'Jaka lozinka',    boja: 'var(--first-primary)', minimalniBroj: 5 },
+  { oznaka: 'Slaba lozinka', boja: 'var(--first-senary)', minimalniBroj: 0 },
+  {
+    oznaka: 'Srednja lozinka',
+    boja: 'var(--first-septenary)',
+    minimalniBroj: 3,
+  },
+  { oznaka: 'Jaka lozinka', boja: 'var(--first-primary)', minimalniBroj: 5 },
 ];
 
 const UKUPAN_BROJ_TRAKA = 5;
 
 function odrediNivoSnage(lozinka: string): NivoSnage {
-  const brojIspunjenih = ZAHTJEVI_LOZINKE.filter((z) => z.provjeri(lozinka)).length;
+  const brojIspunjenih = ZAHTJEVI_LOZINKE.filter((z) =>
+    z.provjeri(lozinka),
+  ).length;
   return (
-    [...NIVOI_SNAGE].reverse().find((nivo) => brojIspunjenih >= nivo.minimalniBroj) ??
-    NIVOI_SNAGE[0]
+    [...NIVOI_SNAGE]
+      .reverse()
+      .find((nivo) => brojIspunjenih >= nivo.minimalniBroj) ?? NIVOI_SNAGE[0]
   );
 }
 
-// Komponenta 
+// Komponenta
 
 interface PasswordStrengthIndicatorProps {
   lozinka: string;
@@ -38,8 +45,10 @@ export function PasswordStrengthIndicator({
 }: PasswordStrengthIndicatorProps) {
   if (!lozinka) return null;
 
-  const brojIspunjenih = ZAHTJEVI_LOZINKE.filter((z) => z.provjeri(lozinka)).length;
-  const nivo           = odrediNivoSnage(lozinka);
+  const brojIspunjenih = ZAHTJEVI_LOZINKE.filter((z) =>
+    z.provjeri(lozinka),
+  ).length;
+  const nivo = odrediNivoSnage(lozinka);
 
   return (
     <div className="flex flex-col gap-3">
@@ -51,7 +60,8 @@ export function PasswordStrengthIndicator({
               key={i}
               className="h-1 flex-1 rounded-full transition-all duration-300"
               style={{
-                backgroundColor: i < brojIspunjenih ? nivo.boja : 'var(--first-quinary)',
+                backgroundColor:
+                  i < brojIspunjenih ? nivo.boja : 'var(--first-quinary)',
                 opacity: i < brojIspunjenih ? 1 : 0.35,
               }}
             />
@@ -73,13 +83,23 @@ export function PasswordStrengthIndicator({
             return (
               <div key={zahtjev.id} className="flex items-center gap-1.5">
                 {jeIspunjen ? (
-                  <Check className="h-3.5 w-3.5 flex-shrink-0" style={{ color: 'var(--first-secondary)' }} />
+                  <Check
+                    className="h-3.5 w-3.5 flex-shrink-0"
+                    style={{ color: 'var(--first-secondary)' }}
+                  />
                 ) : (
-                  <X className="h-3.5 w-3.5 flex-shrink-0" style={{ color: 'var(--first-senary)' }} />
+                  <X
+                    className="h-3.5 w-3.5 flex-shrink-0"
+                    style={{ color: 'var(--first-senary)' }}
+                  />
                 )}
                 <span
                   className="text-xs transition-colors duration-200"
-                  style={{ color: jeIspunjen ? 'var(--first-secondary)' : 'var(--first-senary)' }}
+                  style={{
+                    color: jeIspunjen
+                      ? 'var(--first-secondary)'
+                      : 'var(--first-senary)',
+                  }}
                 >
                   {zahtjev.oznaka}
                 </span>

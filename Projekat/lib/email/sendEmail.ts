@@ -1,14 +1,18 @@
 // Email utility - koristi Resend API ako je RESEND_API_KEY konfigurisan,
 // inače loguje email sadržaj u konzolu (development fallback).
 
+import { getAppBaseUrl } from '@/lib/auth/emailRedirect';
+
 interface EmailOpcije {
-  to:      string;
+  to: string;
   subject: string;
-  html:    string;
+  html: string;
 }
 
-export async function sendEmail(opcije: EmailOpcije): Promise<{ success: boolean; greska?: string }> {
-  const apiKey   = process.env.RESEND_API_KEY;
+export async function sendEmail(
+  opcije: EmailOpcije,
+): Promise<{ success: boolean; greska?: string }> {
+  const apiKey = process.env.RESEND_API_KEY;
   const fromAddr = process.env.EMAIL_FROM ?? 'InterServ <noreply@interserv.ba>';
 
   if (!apiKey) {
@@ -16,23 +20,28 @@ export async function sendEmail(opcije: EmailOpcije): Promise<{ success: boolean
     console.log('\n━━━ [EMAIL - RESEND_API_KEY nije konfigurisan] ━━━');
     console.log(`  TO:      ${opcije.to}`);
     console.log(`  SUBJECT: ${opcije.subject}`);
-    console.log(`  SADRŽAJ: ${opcije.html.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim()}`);
+    console.log(
+      `  SADRŽAJ: ${opcije.html
+        .replace(/<[^>]*>/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()}`,
+    );
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
     return { success: true };
   }
 
   try {
     const odgovor = await fetch('https://api.resend.com/emails', {
-      method:  'POST',
+      method: 'POST',
       headers: {
-        Authorization:  `Bearer ${apiKey}`,
+        Authorization: `Bearer ${apiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from:    fromAddr,
-        to:      opcije.to,
+        from: fromAddr,
+        to: opcije.to,
         subject: opcije.subject,
-        html:    opcije.html,
+        html: opcije.html,
       }),
     });
 
@@ -40,7 +49,8 @@ export async function sendEmail(opcije: EmailOpcije): Promise<{ success: boolean
       const err = await odgovor.json().catch(() => ({}));
       return {
         success: false,
-        greska:  (err as { message?: string }).message ?? 'Greška pri slanju emaila.',
+        greska:
+          (err as { message?: string }).message ?? 'Greška pri slanju emaila.',
       };
     }
 
@@ -48,7 +58,7 @@ export async function sendEmail(opcije: EmailOpcije): Promise<{ success: boolean
   } catch (err) {
     return {
       success: false,
-      greska:  err instanceof Error ? err.message : 'Greška pri slanju emaila.',
+      greska: err instanceof Error ? err.message : 'Greška pri slanju emaila.',
     };
   }
 }
@@ -56,11 +66,11 @@ export async function sendEmail(opcije: EmailOpcije): Promise<{ success: boolean
 // ─── HTML šablon za email odobrene prijave ────────────────────────────────────
 
 export function kreirajEmailOdobrenja(params: {
-  ime:               string;
-  prezime:           string;
-  email:             string;
+  ime: string;
+  prezime: string;
+  email: string;
   privremena_lozinka: string;
-  uloga:             string;
+  uloga: string;
 }): string {
   const { ime, prezime, email, privremena_lozinka, uloga } = params;
 
@@ -141,7 +151,7 @@ export function kreirajEmailOdobrenja(params: {
 
               <!-- CTA -->
               <div style="text-align:center;margin-bottom:24px;">
-                <a href="${process.env.NEXT_PUBLIC_APP_URL ?? 'https://interserv.ba'}/auth/login"
+                <a href="${getAppBaseUrl() || 'https://nrs-grupa2.vercel.app'}/auth/login"
                    style="display:inline-block;background:#102541;color:#ffffff;
                           font-size:15px;font-weight:600;padding:14px 32px;
                           border-radius:10px;text-decoration:none;letter-spacing:-0.2px;">

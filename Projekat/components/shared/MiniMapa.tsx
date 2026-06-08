@@ -16,30 +16,40 @@ import { MapPin, Plus, Minus, Navigation } from 'lucide-react';
 const TILE_SIZE = 256;
 
 function latLonToTileFloat(lat: number, lon: number, z: number) {
-  const n      = Math.pow(2, z);
-  const x      = ((lon + 180) / 360) * n;
+  const n = Math.pow(2, z);
+  const x = ((lon + 180) / 360) * n;
   const latRad = (lat * Math.PI) / 180;
-  const y      = ((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2) * n;
+  const y =
+    ((1 - Math.log(Math.tan(latRad) + 1 / Math.cos(latRad)) / Math.PI) / 2) * n;
   return { x, y };
 }
 
 // ─── Read-only TileMap ────────────────────────────────────────────────────────
 
 interface TileMapViewProps {
-  center:   { lat: number; lon: number };
-  pin:      { lat: number; lon: number } | null;
-  zoom:     number;
-  height:   number;
+  center: { lat: number; lon: number };
+  pin: { lat: number; lon: number } | null;
+  zoom: number;
+  height: number;
   onCenter: (c: { lat: number; lon: number }) => void;
-  onZoom:   (z: number) => void;
+  onZoom: (z: number) => void;
 }
 
-function TileMapView({ center, pin, zoom, height, onCenter, onZoom }: TileMapViewProps) {
+function TileMapView({
+  center,
+  pin,
+  zoom,
+  height,
+  onCenter,
+  onZoom,
+}: TileMapViewProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [w, setW]    = useState(600);
-  const dragRef      = useRef<{
-    startX: number; startY: number;
-    startLat: number; startLon: number;
+  const [w, setW] = useState(600);
+  const dragRef = useRef<{
+    startX: number;
+    startY: number;
+    startLat: number;
+    startLon: number;
     moved: boolean;
   } | null>(null);
 
@@ -53,14 +63,14 @@ function TileMapView({ center, pin, zoom, height, onCenter, onZoom }: TileMapVie
     return () => obs.disconnect();
   }, []);
 
-  const midX       = w / 2;
-  const midY       = height / 2;
+  const midX = w / 2;
+  const midY = height / 2;
   const centerTile = latLonToTileFloat(center.lat, center.lon, zoom);
-  const n          = Math.pow(2, zoom);
-  const countX     = Math.ceil(w / TILE_SIZE) + 2;
-  const countY     = Math.ceil(height / TILE_SIZE) + 2;
-  const baseX      = Math.floor(centerTile.x) - Math.floor(countX / 2);
-  const baseY      = Math.floor(centerTile.y) - Math.floor(countY / 2);
+  const n = Math.pow(2, zoom);
+  const countX = Math.ceil(w / TILE_SIZE) + 2;
+  const countY = Math.ceil(height / TILE_SIZE) + 2;
+  const baseX = Math.floor(centerTile.x) - Math.floor(countX / 2);
+  const baseY = Math.floor(centerTile.y) - Math.floor(countY / 2);
 
   const tiles: { tx: number; ty: number; left: number; top: number }[] = [];
   for (let dx = 0; dx <= countX; dx++) {
@@ -68,45 +78,58 @@ function TileMapView({ center, pin, zoom, height, onCenter, onZoom }: TileMapVie
       const tx = baseX + dx;
       const ty = baseY + dy;
       tiles.push({
-        tx, ty,
+        tx,
+        ty,
         left: (tx - centerTile.x) * TILE_SIZE + midX,
-        top:  (ty - centerTile.y) * TILE_SIZE + midY,
+        top: (ty - centerTile.y) * TILE_SIZE + midY,
       });
     }
   }
 
   let pinLeft: number | null = null;
-  let pinTop:  number | null = null;
+  let pinTop: number | null = null;
   if (pin) {
     const pt = latLonToTileFloat(pin.lat, pin.lon, zoom);
-    pinLeft  = (pt.x - centerTile.x) * TILE_SIZE + midX;
-    pinTop   = (pt.y - centerTile.y) * TILE_SIZE + midY;
+    pinLeft = (pt.x - centerTile.x) * TILE_SIZE + midX;
+    pinTop = (pt.y - centerTile.y) * TILE_SIZE + midY;
   }
 
   function handleMouseDown(e: React.MouseEvent) {
     dragRef.current = {
-      startX: e.clientX, startY: e.clientY,
-      startLat: center.lat, startLon: center.lon,
+      startX: e.clientX,
+      startY: e.clientY,
+      startLat: center.lat,
+      startLon: center.lon,
       moved: false,
     };
   }
 
-  const handleMouseMove = useCallback((e: React.MouseEvent) => {
-    if (!dragRef.current) return;
-    const dx = e.clientX - dragRef.current.startX;
-    const dy = e.clientY - dragRef.current.startY;
-    if (Math.abs(dx) > 3 || Math.abs(dy) > 3) dragRef.current.moved = true;
-    if (!dragRef.current.moved) return;
-    const st = latLonToTileFloat(dragRef.current.startLat, dragRef.current.startLon, zoom);
-    const tx = st.x - dx / TILE_SIZE;
-    const ty = st.y - dy / TILE_SIZE;
-    onCenter({
-      lon: (tx / n) * 360 - 180,
-      lat: (Math.atan(Math.sinh(Math.PI * (1 - (2 * ty) / n))) * 180) / Math.PI,
-    });
-  }, [zoom, n, onCenter]);
+  const handleMouseMove = useCallback(
+    (e: React.MouseEvent) => {
+      if (!dragRef.current) return;
+      const dx = e.clientX - dragRef.current.startX;
+      const dy = e.clientY - dragRef.current.startY;
+      if (Math.abs(dx) > 3 || Math.abs(dy) > 3) dragRef.current.moved = true;
+      if (!dragRef.current.moved) return;
+      const st = latLonToTileFloat(
+        dragRef.current.startLat,
+        dragRef.current.startLon,
+        zoom,
+      );
+      const tx = st.x - dx / TILE_SIZE;
+      const ty = st.y - dy / TILE_SIZE;
+      onCenter({
+        lon: (tx / n) * 360 - 180,
+        lat:
+          (Math.atan(Math.sinh(Math.PI * (1 - (2 * ty) / n))) * 180) / Math.PI,
+      });
+    },
+    [zoom, n, onCenter],
+  );
 
-  function handleMouseUp() { dragRef.current = null; }
+  function handleMouseUp() {
+    dragRef.current = null;
+  }
 
   return (
     <div
@@ -114,15 +137,15 @@ function TileMapView({ center, pin, zoom, height, onCenter, onZoom }: TileMapVie
       className="relative overflow-hidden"
       style={{
         height,
-        cursor:          'grab',
-        userSelect:      'none',
+        cursor: 'grab',
+        userSelect: 'none',
         backgroundColor: '#e8e0d8',
       }}
       onMouseDown={handleMouseDown}
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
-      onWheel={e => {
+      onWheel={(e) => {
         e.preventDefault();
         onZoom(e.deltaY < 0 ? Math.min(zoom + 1, 18) : Math.max(zoom - 1, 3));
       }}
@@ -138,11 +161,11 @@ function TileMapView({ center, pin, zoom, height, onCenter, onZoom }: TileMapVie
             alt=""
             draggable={false}
             style={{
-              position:      'absolute',
-              left:          Math.round(left),
-              top:           Math.round(top),
-              width:         TILE_SIZE,
-              height:        TILE_SIZE,
+              position: 'absolute',
+              left: Math.round(left),
+              top: Math.round(top),
+              width: TILE_SIZE,
+              height: TILE_SIZE,
               pointerEvents: 'none',
             }}
           />
@@ -152,14 +175,17 @@ function TileMapView({ center, pin, zoom, height, onCenter, onZoom }: TileMapVie
       {pin && pinLeft !== null && pinTop !== null && (
         <div
           style={{
-            position:      'absolute',
-            left:          Math.round(pinLeft) - 14,
-            top:           Math.round(pinTop!)  - 32,
+            position: 'absolute',
+            left: Math.round(pinLeft) - 14,
+            top: Math.round(pinTop!) - 32,
             pointerEvents: 'none',
-            filter:        'drop-shadow(0 2px 6px rgba(0,0,0,0.45))',
+            filter: 'drop-shadow(0 2px 6px rgba(0,0,0,0.45))',
           }}
         >
-          <MapPin className="h-8 w-8" style={{ color: 'var(--first-primary)' }} />
+          <MapPin
+            className="h-8 w-8"
+            style={{ color: 'var(--first-primary)' }}
+          />
         </div>
       )}
 
@@ -172,9 +198,15 @@ function TileMapView({ center, pin, zoom, height, onCenter, onZoom }: TileMapVie
           <button
             key={i}
             type="button"
-            onClick={e => { e.stopPropagation(); action(); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              action();
+            }}
             className="flex h-7 w-7 items-center justify-center rounded-lg text-sm font-bold shadow transition-colors hover:bg-gray-50"
-            style={{ backgroundColor: 'rgba(255,255,255,0.92)', color: '#1f2a30' }}
+            style={{
+              backgroundColor: 'rgba(255,255,255,0.92)',
+              color: '#1f2a30',
+            }}
             aria-label={i === 0 ? 'Približi' : 'Udalji'}
           >
             {label}
@@ -195,30 +227,38 @@ function TileMapView({ center, pin, zoom, height, onCenter, onZoom }: TileMapVie
 
 // ─── Nominatim geocoding ──────────────────────────────────────────────────────
 
-async function geocodeAdresa(adresa: string): Promise<{ lat: number; lon: number } | null> {
+async function geocodeAdresa(
+  adresa: string,
+): Promise<{ lat: number; lon: number } | null> {
   try {
-    const qs  = new URLSearchParams({ q: adresa, format: 'json', limit: '1' });
-    const res = await fetch(`https://nominatim.openstreetmap.org/search?${qs}`, {
-      headers: { 'Accept-Language': 'bs,hr,sr,en' },
-    });
+    const qs = new URLSearchParams({ q: adresa, format: 'json', limit: '1' });
+    const res = await fetch(
+      `https://nominatim.openstreetmap.org/search?${qs}`,
+      {
+        headers: { 'Accept-Language': 'bs,hr,sr,en' },
+      },
+    );
     const data = (await res.json()) as { lat: string; lon: string }[];
-    if (data[0]) return { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) };
+    if (data[0])
+      return { lat: parseFloat(data[0].lat), lon: parseFloat(data[0].lon) };
     return null;
-  } catch { return null; }
+  } catch {
+    return null;
+  }
 }
 
 // ─── MiniMapa (javna komponenta) ──────────────────────────────────────────────
 
 export interface MiniMapaProps {
-  adresa:          string;
-  lat?:            number | null;
-  lng?:            number | null;
+  adresa: string;
+  lat?: number | null;
+  lng?: number | null;
   /** Visina tile mape u pikselima (bez footera). @default 180 */
-  visina?:         number;
+  visina?: number;
   /** Prikazati footer s adresom i Google Maps linkom. @default true */
-  prikaziFooter?:  boolean;
+  prikaziFooter?: boolean;
   /** Zaobljeni uglovi + border na cijeloj kartici. @default true */
-  kartica?:        boolean;
+  kartica?: boolean;
 }
 
 const DEFAULT_CENTER = { lat: 43.8563, lon: 18.4131 }; // Sarajevo
@@ -227,23 +267,26 @@ export function MiniMapa({
   adresa,
   lat,
   lng,
-  visina        = 180,
+  visina = 180,
   prikaziFooter = true,
-  kartica       = true,
+  kartica = true,
 }: MiniMapaProps) {
   const imaStored = lat != null && lng != null;
 
-  const [center,    setCenter]    = useState<{ lat: number; lon: number }>(
-    imaStored ? { lat: lat!, lon: lng! } : DEFAULT_CENTER
+  const [center, setCenter] = useState<{ lat: number; lon: number }>(
+    imaStored ? { lat: lat!, lon: lng! } : DEFAULT_CENTER,
   );
-  const [pin,       setPin]       = useState<{ lat: number; lon: number } | null>(
-    imaStored ? { lat: lat!, lon: lng! } : null
+  const [pin, setPin] = useState<{ lat: number; lon: number } | null>(
+    imaStored ? { lat: lat!, lon: lng! } : null,
   );
-  const [zoom,      setZoom]      = useState(imaStored ? 15 : 13);
+  const [zoom, setZoom] = useState(imaStored ? 15 : 13);
   const [geocoding, setGeocoding] = useState(!imaStored);
 
   useEffect(() => {
-    if (!adresa.trim()) { setGeocoding(false); return; }
+    if (!adresa.trim()) {
+      setGeocoding(false);
+      return;
+    }
     const ctrl = new AbortController();
     setGeocoding(true);
 
@@ -272,7 +315,10 @@ export function MiniMapa({
           backgroundColor: 'rgb(255 255 255/0.95)',
         } as React.CSSProperties,
       }
-    : { className: 'overflow-hidden rounded-2xl', style: {} as React.CSSProperties };
+    : {
+        className: 'overflow-hidden rounded-2xl',
+        style: {} as React.CSSProperties,
+      };
 
   return (
     <div className={wrapper.className} style={wrapper.style}>
@@ -280,14 +326,19 @@ export function MiniMapa({
       {geocoding && !imaStored ? (
         <div
           className="flex items-center justify-center"
-          style={{ height: visina, backgroundColor: 'rgb(var(--first-quinary-rgb)/0.2)' }}
+          style={{
+            height: visina,
+            backgroundColor: 'rgb(var(--first-quinary-rgb)/0.2)',
+          }}
         >
           <div className="flex flex-col items-center gap-2">
             <div
               className="h-5 w-5 animate-spin rounded-full border-2 border-transparent"
               style={{ borderTopColor: 'var(--first-secondary)' }}
             />
-            <p className="text-[11px]" style={{ color: 'var(--first-nonary)' }}>Lociranje adrese…</p>
+            <p className="text-[11px]" style={{ color: 'var(--first-nonary)' }}>
+              Lociranje adrese…
+            </p>
           </div>
         </div>
       ) : (
@@ -306,13 +357,19 @@ export function MiniMapa({
         <div
           className="flex items-center justify-between gap-3 px-3 py-2.5"
           style={{
-            borderTop:       '1px solid rgb(var(--first-quaternary-rgb)/0.2)',
+            borderTop: '1px solid rgb(var(--first-quaternary-rgb)/0.2)',
             backgroundColor: 'rgb(255 255 255/0.97)',
           }}
         >
           <div className="flex min-w-0 items-start gap-2">
-            <MapPin className="mt-0.5 h-3.5 w-3.5 flex-shrink-0" style={{ color: 'var(--first-primary)' }} />
-            <p className="truncate text-xs font-medium leading-snug" style={{ color: 'var(--first-octonary)' }}>
+            <MapPin
+              className="mt-0.5 h-3.5 w-3.5 flex-shrink-0"
+              style={{ color: 'var(--first-primary)' }}
+            />
+            <p
+              className="truncate text-xs font-medium leading-snug"
+              style={{ color: 'var(--first-octonary)' }}
+            >
               {adresa || '-'}
             </p>
           </div>

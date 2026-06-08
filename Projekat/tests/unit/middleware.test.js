@@ -7,7 +7,10 @@ const mockNext = jest.fn((payload) => ({
   payload,
   cookies: { set: jest.fn() },
 }));
-const mockRedirect = jest.fn((url) => ({ type: 'redirect', url: url.toString() }));
+const mockRedirect = jest.fn((url) => ({
+  type: 'redirect',
+  url: url.toString(),
+}));
 
 jest.mock('@supabase/ssr', () => ({
   createServerClient: jest.fn(() => ({
@@ -36,7 +39,9 @@ function createQueryBuilder(table) {
   return {
     select: jest.fn(() => ({
       eq: jest.fn(() => ({
-        maybeSingle: jest.fn(async () => tableResponses[table] ?? { data: null, error: null }),
+        maybeSingle: jest.fn(
+          async () => tableResponses[table] ?? { data: null, error: null },
+        ),
       })),
     })),
   };
@@ -121,21 +126,36 @@ describe('middleware auth and role checks', () => {
   });
 
   test.each([
-    ['/admin', () => {
-      setTableResponse('uposlenici', { data: { id_uloge: 1 }, error: null });
-      setTableResponse('uloga', { data: { naziv: 'admin' }, error: null });
-    }],
-    ['/serviser', () => {
-      setTableResponse('uposlenici', { data: { id_uloge: 1 }, error: null });
-      setTableResponse('uloga', { data: { naziv: 'serviser' }, error: null });
-    }],
-    ['/dispecer', () => {
-      setTableResponse('uposlenici', { data: { id_uloge: 1 }, error: null });
-      setTableResponse('uloga', { data: { naziv: 'dispecer' }, error: null });
-    }],
-    ['/korisnik', () => {
-      setTableResponse('korisnik_usluge', { data: { id_korisnika_usluge: 'u1' }, error: null });
-    }],
+    [
+      '/admin',
+      () => {
+        setTableResponse('uposlenici', { data: { id_uloge: 1 }, error: null });
+        setTableResponse('uloga', { data: { naziv: 'admin' }, error: null });
+      },
+    ],
+    [
+      '/serviser',
+      () => {
+        setTableResponse('uposlenici', { data: { id_uloge: 1 }, error: null });
+        setTableResponse('uloga', { data: { naziv: 'serviser' }, error: null });
+      },
+    ],
+    [
+      '/dispecer',
+      () => {
+        setTableResponse('uposlenici', { data: { id_uloge: 1 }, error: null });
+        setTableResponse('uloga', { data: { naziv: 'dispecer' }, error: null });
+      },
+    ],
+    [
+      '/korisnik',
+      () => {
+        setTableResponse('korisnik_usluge', {
+          data: { id_korisnika_usluge: 'u1' },
+          error: null,
+        });
+      },
+    ],
   ])('allows pass-through for valid role at %s', async (prefix, arrange) => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'u1' } } });
     arrange();
@@ -147,7 +167,10 @@ describe('middleware auth and role checks', () => {
 
   test('allows korisnik route when korisnik_usluge exists even with serviser role', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'u1' } } });
-    setTableResponse('korisnik_usluge', { data: { id_korisnika_usluge: 'u1' }, error: null });
+    setTableResponse('korisnik_usluge', {
+      data: { id_korisnika_usluge: 'u1' },
+      error: null,
+    });
     setTableResponse('uposlenici', { data: { id_uloge: 2 }, error: null });
     setTableResponse('uloga', { data: { naziv: 'serviser' }, error: null });
 
@@ -169,7 +192,10 @@ describe('middleware auth and role checks', () => {
 
   test('allows korisnik route and denies serviser route for dispecer role with korisnik_usluge', async () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'u1' } } });
-    setTableResponse('korisnik_usluge', { data: { id_korisnika_usluge: 'u1' }, error: null });
+    setTableResponse('korisnik_usluge', {
+      data: { id_korisnika_usluge: 'u1' },
+      error: null,
+    });
     setTableResponse('uposlenici', { data: { id_uloge: 3 }, error: null });
     setTableResponse('uloga', { data: { naziv: 'dispecer' }, error: null });
 

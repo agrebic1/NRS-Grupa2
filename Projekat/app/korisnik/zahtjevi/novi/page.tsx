@@ -14,8 +14,12 @@ export default function NoviZahtjevWizardPage() {
           >
             Nova prijava zahtjeva
           </h1>
-          <p className="mt-1.5 text-sm" style={{ color: 'var(--first-nonary)' }}>
-            Popunite detalje u 6 koraka. Što detaljniji opis unesete, brže ćemo reagirati.
+          <p
+            className="mt-1.5 text-sm"
+            style={{ color: 'var(--first-nonary)' }}
+          >
+            Popunite detalje u 6 koraka. Što detaljniji opis unesete, brže ćemo
+            reagirati.
           </p>
         </div>
 
@@ -23,8 +27,8 @@ export default function NoviZahtjevWizardPage() {
           className="rounded-2xl p-6 shadow-card sm:p-8"
           style={{
             backgroundColor: 'rgb(var(--first-quinary-rgb) / 0.22)',
-            border:          '1px solid rgb(var(--first-quaternary-rgb) / 0.35)',
-            backdropFilter:  'blur(12px)',
+            border: '1px solid rgb(var(--first-quaternary-rgb) / 0.35)',
+            backdropFilter: 'blur(12px)',
           }}
         >
           <ServiceRequestWizard />

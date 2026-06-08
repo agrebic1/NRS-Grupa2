@@ -2,12 +2,26 @@
 
 import type { CSSProperties, ComponentType } from 'react';
 import {
-  Droplets, Zap, Flame, Wind, Key, Hammer, Refrigerator, Monitor, Plus,
+  Droplets,
+  Zap,
+  Flame,
+  Wind,
+  Key,
+  Hammer,
+  Refrigerator,
+  Monitor,
+  Plus,
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { KATEGORIJE_KVARA } from '@/lib/servisirane/kategorije';
 
-const IKONE_GLAVNIH: Record<string, { Ikona: ComponentType<{ className?: string; style?: CSSProperties }>; boja: string }> = {
+const IKONE_GLAVNIH: Record<
+  string,
+  {
+    Ikona: ComponentType<{ className?: string; style?: CSSProperties }>;
+    boja: string;
+  }
+> = {
   vodovod_kanalizacija: { Ikona: Droplets, boja: 'var(--first-secondary)' },
   elektro_rasvjeta: { Ikona: Zap, boja: 'var(--first-septenary)' },
   grijanje_topla_voda: { Ikona: Flame, boja: 'var(--first-senary)' },
@@ -22,10 +36,10 @@ const IKONE_GLAVNIH: Record<string, { Ikona: ComponentType<{ className?: string;
 // ─── Korak 1: Kategorija ──────────────────────────────────────────────────────
 
 export interface KorakKategorijaProps {
-  selectedCategory:    string | null;
+  selectedCategory: string | null;
   selectedSubcategory: string | null;
-  onUpdate:            (p: {
-    selectedCategory?:    string | null;
+  onUpdate: (p: {
+    selectedCategory?: string | null;
     selectedSubcategory?: string | null;
   }) => void;
 }
@@ -37,7 +51,7 @@ export function KorakKategorija({
 }: KorakKategorijaProps) {
   function odaberiGlavnu(id: string) {
     onUpdate({
-      selectedCategory:    id,
+      selectedCategory: id,
       selectedSubcategory: null,
     });
   }
@@ -51,11 +65,15 @@ export function KorakKategorija({
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h2 className="mb-1 text-xl font-bold" style={{ color: 'var(--first-octonary)' }}>
+        <h2
+          className="mb-1 text-xl font-bold"
+          style={{ color: 'var(--first-octonary)' }}
+        >
           Vrsta zahtjeva
         </h2>
         <p className="text-sm" style={{ color: 'var(--first-nonary)' }}>
-          Prvo odaberite glavnu kategoriju, zatim podkategoriju koja najbolje opisuje zahtjev.
+          Prvo odaberite glavnu kategoriju, zatim podkategoriju koja najbolje
+          opisuje zahtjev.
         </p>
       </div>
 
@@ -72,7 +90,9 @@ export function KorakKategorija({
               className="flex flex-col items-center gap-2.5 rounded-2xl border p-5 text-center
                 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-celestial-teal/40"
               style={{
-                borderColor:     odabrana ? cfg.boja : 'rgb(var(--first-quaternary-rgb) / 0.4)',
+                borderColor: odabrana
+                  ? cfg.boja
+                  : 'rgb(var(--first-quaternary-rgb) / 0.4)',
                 backgroundColor: odabrana
                   ? `color-mix(in srgb, ${cfg.boja} 8%, rgb(255 255 255 / 0.5))`
                   : 'rgb(255 255 255 / 0.45)',
@@ -88,13 +108,22 @@ export function KorakKategorija({
                     : 'rgb(var(--first-quinary-rgb) / 0.4)',
                 }}
               >
-                <Ikona className="h-7 w-7" style={{ color: odabrana ? cfg.boja : 'var(--first-nonary)' }} />
+                <Ikona
+                  className="h-7 w-7"
+                  style={{ color: odabrana ? cfg.boja : 'var(--first-nonary)' }}
+                />
               </div>
-              <span className="text-sm font-semibold leading-tight" style={{ color: 'var(--first-octonary)' }}>
+              <span
+                className="text-sm font-semibold leading-tight"
+                style={{ color: 'var(--first-octonary)' }}
+              >
                 {label}
               </span>
               {odabrana && (
-                <div className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: cfg.boja }} />
+                <div
+                  className="h-1.5 w-1.5 rounded-full"
+                  style={{ backgroundColor: cfg.boja }}
+                />
               )}
             </button>
           );
@@ -104,7 +133,10 @@ export function KorakKategorija({
       {aktivnaGlavna && (
         <div>
           <p className="mb-3 text-sm" style={{ color: 'var(--first-nonary)' }}>
-            Podkategorije za: <span style={{ color: 'var(--first-octonary)' }}>{aktivnaGlavna.label}</span>
+            Podkategorije za:{' '}
+            <span style={{ color: 'var(--first-octonary)' }}>
+              {aktivnaGlavna.label}
+            </span>
           </p>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {aktivnaGlavna.podkategorije.map((pod) => {
