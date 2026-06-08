@@ -1,7 +1,10 @@
 'use client';
 
 import { kategorizirajHitnost } from '@/lib/servisirane/urgency';
-import { KorisnickaHitnostOutlinedChip, NivoHitnostiOutlinedChip } from '@/components/servisirane/zahtjevBadgeovi';
+import {
+  KorisnickaHitnostOutlinedChip,
+  NivoHitnostiOutlinedChip,
+} from '@/components/servisirane/zahtjevBadgeovi';
 
 interface UrgencyBadgeProps {
   score: number;
@@ -28,7 +31,9 @@ export function UrgencyBadge({
     <span className={`inline-flex items-center gap-1.5 ${padding}`}>
       <NivoHitnostiOutlinedChip nivo={nivo} />
       {showScore && (
-        <span className="text-xs font-normal tabular-nums opacity-70">({score})</span>
+        <span className="text-xs font-normal tabular-nums opacity-70">
+          ({score})
+        </span>
       )}
     </span>
   );

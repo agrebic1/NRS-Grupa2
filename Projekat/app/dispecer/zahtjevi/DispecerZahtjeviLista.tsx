@@ -33,34 +33,83 @@ const ZAHTJEVA_PO_STRANICI = 12;
  * Izvršenje (dodijeljeno/u_radu/u_izvrsenju/zavrseno) prikazuje se isključivo na /dispecer/intervencije.
  */
 const STATUS_FILTRI = [
-  { value: 'svi',           label: 'Sve',            title: 'Svi zahtjevi u obradi — od prijave do dodjele servisera.' },
-  { value: 'novi',          label: 'Novi',            title: 'Zahtjevi koji čekaju dispečersku procjenu (nije postavljen operativni prioritet).' },
-  { value: 'u_obradi',      label: 'U obradi',        title: 'Zahtjevi s postavljenim prioritetom — u toku dogovora termina, izbora servisera ili potvrde.' },
-  { value: 'ceka_dodjelu',  label: 'Čeka dodjelu',    title: 'Wizard završen — čeka se dodjela servisera ili prihvat.' },
-  { value: 'odbijeni',      label: 'Odbijeni',        title: 'Serviser je odbio zahtjev — čeka ponovnu dodjelu.' },
-  { value: 'dugo_cekanje',  label: 'Dugo čekaju',     title: 'Zahtjevi koji predugo čekaju obradu, dodjelu ili prihvat servisera.' },
+  {
+    value: 'svi',
+    label: 'Sve',
+    title: 'Svi zahtjevi u obradi — od prijave do dodjele servisera.',
+  },
+  {
+    value: 'novi',
+    label: 'Novi',
+    title:
+      'Zahtjevi koji čekaju dispečersku procjenu (nije postavljen operativni prioritet).',
+  },
+  {
+    value: 'u_obradi',
+    label: 'U obradi',
+    title:
+      'Zahtjevi s postavljenim prioritetom — u toku dogovora termina, izbora servisera ili potvrde.',
+  },
+  {
+    value: 'ceka_dodjelu',
+    label: 'Čeka dodjelu',
+    title: 'Wizard završen — čeka se dodjela servisera ili prihvat.',
+  },
+  {
+    value: 'odbijeni',
+    label: 'Odbijeni',
+    title: 'Serviser je odbio zahtjev — čeka ponovnu dodjelu.',
+  },
+  {
+    value: 'dugo_cekanje',
+    label: 'Dugo čekaju',
+    title:
+      'Zahtjevi koji predugo čekaju obradu, dodjelu ili prihvat servisera.',
+  },
 ] as const;
 
-type StatusFilter = typeof STATUS_FILTRI[number]['value'];
+type StatusFilter = (typeof STATUS_FILTRI)[number]['value'];
 
 /**
  * Pod-faze obrade — prikazuju se samo za tab "U obradi".
  * "Procjena zahtjeva" (faza bez prioriteta) je sada zasebni tab "Novi".
  */
 const FAZA_FILTRI = [
-  { value: 'sve_faze',        label: 'Sve faze',        title: 'Prikaz svih zahtjeva u obradi bez obzira na pod-fazu.' },
-  { value: 'dogovor_termina', label: 'Dogovor termina', title: 'Prioritet je postavljen; treba dogovoriti termin s korisnikom.' },
-  { value: 'izbor_servisera', label: 'Izbor servisera', title: 'Termin je unesen; treba odabrati servisera.' },
-  { value: 'potvrda_termina', label: 'Potvrda termina', title: 'Serviser je odabran; čeka se završna potvrda u wizardu.' },
+  {
+    value: 'sve_faze',
+    label: 'Sve faze',
+    title: 'Prikaz svih zahtjeva u obradi bez obzira na pod-fazu.',
+  },
+  {
+    value: 'dogovor_termina',
+    label: 'Dogovor termina',
+    title: 'Prioritet je postavljen; treba dogovoriti termin s korisnikom.',
+  },
+  {
+    value: 'izbor_servisera',
+    label: 'Izbor servisera',
+    title: 'Termin je unesen; treba odabrati servisera.',
+  },
+  {
+    value: 'potvrda_termina',
+    label: 'Potvrda termina',
+    title: 'Serviser je odabran; čeka se završna potvrda u wizardu.',
+  },
 ] as const;
 
-type FazaFilter = typeof FAZA_FILTRI[number]['value'];
+type FazaFilter = (typeof FAZA_FILTRI)[number]['value'];
 
 const DOZVOLJENI_STATUS_FILTRI = STATUS_FILTRI.map((f) => f.value);
-const DOZVOLJENE_FAZE          = FAZA_FILTRI.map((f) => f.value);
+const DOZVOLJENE_FAZE = FAZA_FILTRI.map((f) => f.value);
 
 /** Filteri koji koriste urgency-based inbox-redoslijed za sortiranje. */
-const INBOX_REDOSLIJED_STATUSI = new Set<StatusFilter>(['svi', 'novi', 'u_obradi', 'odbijeni', 'dugo_cekanje']);
+const INBOX_REDOSLIJED_STATUSI = new Set<StatusFilter>([
+  'svi',
+  'novi',
+  'u_obradi',
+  'odbijeni',
+  'dugo_cekanje',
+]);
 
 // ─── Logika filtriranja ───────────────────────────────────────────────────────
 
@@ -78,13 +127,21 @@ function filterPoStatusu(
     case 'u_obradi':
       return zahtjevi.filter((z) => operativnaFazaZahtjeva(z) === 'u_obradi');
     case 'ceka_dodjelu':
-      return zahtjevi.filter((z) => operativnaFazaZahtjeva(z) === 'ceka_dodjelu');
+      return zahtjevi.filter(
+        (z) => operativnaFazaZahtjeva(z) === 'ceka_dodjelu',
+      );
     case 'odbijeni':
-      return zahtjevi.filter((z) => operativnaFazaZahtjeva(z) === 'odbijen_serviser');
+      return zahtjevi.filter(
+        (z) => operativnaFazaZahtjeva(z) === 'odbijen_serviser',
+      );
     case 'dugo_cekanje':
-      return zahtjevi.filter((z) => jeZahtjevIntakeFaza(operativnaFazaZahtjeva(z)) && jeDugoCeka(z));
+      return zahtjevi.filter(
+        (z) => jeZahtjevIntakeFaza(operativnaFazaZahtjeva(z)) && jeDugoCeka(z),
+      );
     default: // 'svi' — sve intake faze, bez izvršenja
-      return zahtjevi.filter((z) => jeZahtjevIntakeFaza(operativnaFazaZahtjeva(z)));
+      return zahtjevi.filter((z) =>
+        jeZahtjevIntakeFaza(operativnaFazaZahtjeva(z)),
+      );
   }
 }
 
@@ -93,10 +150,14 @@ function filterPoFazi(
   fazaFilter: string,
 ): ZahtjevZaDispecerskuKarticu[] {
   switch (fazaFilter) {
-    case 'dogovor_termina': return zahtjevi.filter(zahtjevUFaziDogovoraTerminaPregled);
-    case 'izbor_servisera': return zahtjevi.filter(zahtjevUFaziDodjeleServiseraPregled);
-    case 'potvrda_termina': return zahtjevi.filter(zahtjevUFaziKorakaPotvrdePregled);
-    default:                return zahtjevi; // 'sve_faze'
+    case 'dogovor_termina':
+      return zahtjevi.filter(zahtjevUFaziDogovoraTerminaPregled);
+    case 'izbor_servisera':
+      return zahtjevi.filter(zahtjevUFaziDodjeleServiseraPregled);
+    case 'potvrda_termina':
+      return zahtjevi.filter(zahtjevUFaziKorakaPotvrdePregled);
+    default:
+      return zahtjevi; // 'sve_faze'
   }
 }
 
@@ -135,42 +196,56 @@ function StatusFilterTraka({
       aria-label="Filter statusa zahtjeva"
     >
       {STATUS_FILTRI.map((opcija) => {
-        const br      = filterPoStatusu(zahtjevi, opcija.value).length;
-        const aktiv   = opcija.value === aktivan;
-        const jeOdbij       = opcija.value === 'odbijeni';
+        const br = filterPoStatusu(zahtjevi, opcija.value).length;
+        const aktiv = opcija.value === aktivan;
+        const jeOdbij = opcija.value === 'odbijeni';
         const jeCekaDodjelu = opcija.value === 'ceka_dodjelu';
-        const jeDugo        = opcija.value === 'dugo_cekanje';
+        const jeDugo = opcija.value === 'dugo_cekanje';
         // Crvena za Odbijeni, zelena za Čeka dodjelu, narandžasta za Dugo čekaju, plava za ostale
-        const boja =
-          jeOdbij       ? '#DC2626'
-          : jeCekaDodjelu ? '#16A34A'
-          : jeDugo        ? '#B45309'
-          : 'var(--first-secondary)';
-        const bojaPoz =
-          jeOdbij       ? 'rgba(220,38,38,0.12)'
-          : jeCekaDodjelu ? 'rgba(22,163,74,0.1)'
-          : jeDugo        ? 'rgba(180,83,9,0.1)'
-          : 'rgb(var(--first-secondary-rgb) / 0.12)';
-        const bojaBorder =
-          jeOdbij       ? '1px solid rgba(220,38,38,0.35)'
-          : jeCekaDodjelu ? '1px solid rgba(22,163,74,0.3)'
-          : jeDugo        ? '1px solid rgba(180,83,9,0.35)'
-          : '1px solid rgb(var(--first-secondary-rgb) / 0.35)';
-        const bojaBadge =
-          jeOdbij       ? 'rgba(220,38,38,0.15)'
-          : jeCekaDodjelu ? 'rgba(22,163,74,0.12)'
-          : jeDugo        ? 'rgba(180,83,9,0.15)'
-          : 'rgb(var(--first-secondary-rgb) / 0.15)';
+        const boja = jeOdbij
+          ? '#DC2626'
+          : jeCekaDodjelu
+            ? '#16A34A'
+            : jeDugo
+              ? '#B45309'
+              : 'var(--first-secondary)';
+        const bojaPoz = jeOdbij
+          ? 'rgba(220,38,38,0.12)'
+          : jeCekaDodjelu
+            ? 'rgba(22,163,74,0.1)'
+            : jeDugo
+              ? 'rgba(180,83,9,0.1)'
+              : 'rgb(var(--first-secondary-rgb) / 0.12)';
+        const bojaBorder = jeOdbij
+          ? '1px solid rgba(220,38,38,0.35)'
+          : jeCekaDodjelu
+            ? '1px solid rgba(22,163,74,0.3)'
+            : jeDugo
+              ? '1px solid rgba(180,83,9,0.35)'
+              : '1px solid rgb(var(--first-secondary-rgb) / 0.35)';
+        const bojaBadge = jeOdbij
+          ? 'rgba(220,38,38,0.15)'
+          : jeCekaDodjelu
+            ? 'rgba(22,163,74,0.12)'
+            : jeDugo
+              ? 'rgba(180,83,9,0.15)'
+              : 'rgb(var(--first-secondary-rgb) / 0.15)';
         const neaktivnaBoja =
-          jeOdbij && br > 0         ? '#DC2626'
-          : jeCekaDodjelu && br > 0   ? '#16A34A'
-          : jeDugo && br > 0          ? '#B45309'
-          : 'var(--first-nonary)';
+          jeOdbij && br > 0
+            ? '#DC2626'
+            : jeCekaDodjelu && br > 0
+              ? '#16A34A'
+              : jeDugo && br > 0
+                ? '#B45309'
+                : 'var(--first-nonary)';
         const neaktivnaBadgePoz =
-          jeOdbij && br > 0         ? 'rgba(220,38,38,0.1)'
-          : jeCekaDodjelu && br > 0   ? 'rgba(22,163,74,0.1)'
-          : jeDugo && br > 0          ? 'rgba(180,83,9,0.1)'
-          : 'rgb(var(--first-quaternary-rgb) / 0.35)';
+          jeOdbij && br > 0
+            ? 'rgba(220,38,38,0.1)'
+            : jeCekaDodjelu && br > 0
+              ? 'rgba(22,163,74,0.1)'
+              : jeDugo && br > 0
+                ? 'rgba(180,83,9,0.1)'
+                : 'rgb(var(--first-quaternary-rgb) / 0.35)';
 
         return (
           <button
@@ -183,8 +258,8 @@ function StatusFilterTraka({
             className="flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-2 text-xs font-semibold transition-colors sm:text-sm"
             style={{
               backgroundColor: aktiv ? bojaPoz : 'transparent',
-              color:           aktiv ? boja : neaktivnaBoja,
-              border:          aktiv ? bojaBorder : '1px solid transparent',
+              color: aktiv ? boja : neaktivnaBoja,
+              border: aktiv ? bojaBorder : '1px solid transparent',
             }}
           >
             {opcija.label}
@@ -193,7 +268,7 @@ function StatusFilterTraka({
                 className="rounded-full px-1.5 py-px text-[10px] font-bold tabular-nums"
                 style={{
                   backgroundColor: aktiv ? bojaBadge : neaktivnaBadgePoz,
-                  color:           aktiv ? boja : neaktivnaBoja,
+                  color: aktiv ? boja : neaktivnaBoja,
                 }}
               >
                 {br}
@@ -218,7 +293,10 @@ function FazaFilterTraka({
   return (
     <div className="mt-2">
       <div className="mb-1 flex items-center gap-2">
-        <span className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--first-nonary)' }}>
+        <span
+          className="text-xs font-semibold uppercase tracking-wide"
+          style={{ color: 'var(--first-nonary)' }}
+        >
           Faza obrade
         </span>
         <div
@@ -237,9 +315,10 @@ function FazaFilterTraka({
         aria-label="Filter faze obrade"
       >
         {FAZA_FILTRI.map((opcija) => {
-          const br    = opcija.value === 'sve_faze'
-            ? zahtjeviUObradi.length
-            : filterPoFazi(zahtjeviUObradi, opcija.value).length;
+          const br =
+            opcija.value === 'sve_faze'
+              ? zahtjeviUObradi.length
+              : filterPoFazi(zahtjeviUObradi, opcija.value).length;
           const aktiv = opcija.value === aktivan;
           return (
             <button
@@ -251,9 +330,13 @@ function FazaFilterTraka({
               onClick={() => onPromjena(opcija.value)}
               className="flex items-center gap-1.5 whitespace-nowrap rounded-lg px-3 py-1.5 text-[11px] font-semibold transition-colors sm:text-xs"
               style={{
-                backgroundColor: aktiv ? 'rgb(var(--first-primary-rgb) / 0.08)' : 'transparent',
+                backgroundColor: aktiv
+                  ? 'rgb(var(--first-primary-rgb) / 0.08)'
+                  : 'transparent',
                 color: aktiv ? 'var(--first-primary)' : 'var(--first-nonary)',
-                border: aktiv ? '1px solid rgb(var(--first-primary-rgb) / 0.28)' : '1px solid transparent',
+                border: aktiv
+                  ? '1px solid rgb(var(--first-primary-rgb) / 0.28)'
+                  : '1px solid transparent',
               }}
             >
               {opcija.label}
@@ -278,9 +361,16 @@ function FazaFilterTraka({
 
 // ─── Prazno stanje ────────────────────────────────────────────────────────────
 
-function PraznoStanje({ statusFilter, fazaFilter }: { statusFilter: string; fazaFilter: string }) {
-  const statusLabel = STATUS_FILTRI.find((f) => f.value === statusFilter)?.label ?? statusFilter;
-  const fazaLabel   = FAZA_FILTRI.find((f) => f.value === fazaFilter)?.label;
+function PraznoStanje({
+  statusFilter,
+  fazaFilter,
+}: {
+  statusFilter: string;
+  fazaFilter: string;
+}) {
+  const statusLabel =
+    STATUS_FILTRI.find((f) => f.value === statusFilter)?.label ?? statusFilter;
+  const fazaLabel = FAZA_FILTRI.find((f) => f.value === fazaFilter)?.label;
   const poruka =
     statusFilter === 'u_obradi' && fazaFilter !== 'sve_faze' && fazaLabel
       ? `Nema zahtjeva u statusu "${statusLabel}" s fazom "${fazaLabel}".`
@@ -294,7 +384,10 @@ function PraznoStanje({ statusFilter, fazaFilter }: { statusFilter: string; faza
         border: '1px solid rgb(var(--first-quaternary-rgb) / 0.35)',
       }}
     >
-      <p className="text-sm font-medium" style={{ color: 'var(--first-octonary)' }}>
+      <p
+        className="text-sm font-medium"
+        style={{ color: 'var(--first-octonary)' }}
+      >
         {poruka}
       </p>
       <p className="mt-1 text-sm" style={{ color: 'var(--first-nonary)' }}>
@@ -307,19 +400,22 @@ function PraznoStanje({ statusFilter, fazaFilter }: { statusFilter: string; faza
 // ─── Glavna komponenta ────────────────────────────────────────────────────────
 
 export function DispecerZahtjeviLista() {
-  const router       = useRouter();
+  const router = useRouter();
   const searchParams = useSearchParams();
 
   const filterIzUrl = searchParams.get('filter') ?? 'svi';
-  const fazaIzUrl   = searchParams.get('faza')   ?? 'sve_faze';
+  const fazaIzUrl = searchParams.get('faza') ?? 'sve_faze';
 
-  const [zahtjevi,     setZahtjevi]     = useState<ZahtjevZaDispecerskuKarticu[]>([]);
-  const [ucitava,      setUcitava]      = useState(true);
-  const [greska,       setGreska]       = useState<string | null>(null);
+  const [zahtjevi, setZahtjevi] = useState<ZahtjevZaDispecerskuKarticu[]>([]);
+  const [ucitava, setUcitava] = useState(true);
+  const [greska, setGreska] = useState<string | null>(null);
   const [imeKorisnika, setImeKorisnika] = useState('Dispečer');
 
-  const aktivniStatus = normalizujDispecerFilterIzParametra(filterIzUrl, DOZVOLJENI_STATUS_FILTRI);
-  const aktivnaFaza   = DOZVOLJENE_FAZE.includes(fazaIzUrl as FazaFilter)
+  const aktivniStatus = normalizujDispecerFilterIzParametra(
+    filterIzUrl,
+    DOZVOLJENI_STATUS_FILTRI,
+  );
+  const aktivnaFaza = DOZVOLJENE_FAZE.includes(fazaIzUrl as FazaFilter)
     ? (fazaIzUrl as FazaFilter)
     : 'sve_faze';
 
@@ -339,9 +435,12 @@ export function DispecerZahtjeviLista() {
     }
     // ceka_dodjelu: po operativnom prioritetu pa po starosti
     return [...prikazLista].sort((a, b) => {
-      const r = rangOperativnogPrioriteta(a.final_priority) - rangOperativnogPrioriteta(b.final_priority);
+      const r =
+        rangOperativnogPrioriteta(a.final_priority) -
+        rangOperativnogPrioriteta(b.final_priority);
       if (r !== 0) return r;
-      const t = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+      const t =
+        new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
       if (t !== 0) return t;
       return a.id - b.id;
     });
@@ -350,13 +449,17 @@ export function DispecerZahtjeviLista() {
   // ─── Paginacija ─────────────────────────────────────────────────────────────
 
   const ukupnoZahtjeva = sortirano.length;
-  const ukupnoStranica = Math.max(1, Math.ceil(ukupnoZahtjeva / ZAHTJEVA_PO_STRANICI));
+  const ukupnoStranica = Math.max(
+    1,
+    Math.ceil(ukupnoZahtjeva / ZAHTJEVA_PO_STRANICI),
+  );
 
-  const stranicaParam  = searchParams.get('page');
-  const stranicaBroj   = stranicaParam ? Number.parseInt(stranicaParam, 10) : 1;
-  const aktivnaStranica = Number.isFinite(stranicaBroj) && stranicaBroj >= 1
-    ? Math.min(stranicaBroj, ukupnoStranica)
-    : 1;
+  const stranicaParam = searchParams.get('page');
+  const stranicaBroj = stranicaParam ? Number.parseInt(stranicaParam, 10) : 1;
+  const aktivnaStranica =
+    Number.isFinite(stranicaBroj) && stranicaBroj >= 1
+      ? Math.min(stranicaBroj, ukupnoStranica)
+      : 1;
 
   const prikazZaOvuStranicu = useMemo(() => {
     const pocetak = (aktivnaStranica - 1) * ZAHTJEVA_PO_STRANICI;
@@ -366,7 +469,8 @@ export function DispecerZahtjeviLista() {
   const qsZaStranicu = useCallback(
     (stranica: number) => {
       const p = new URLSearchParams(searchParams.toString());
-      if (stranica <= 1) p.delete('page'); else p.set('page', String(stranica));
+      if (stranica <= 1) p.delete('page');
+      else p.set('page', String(stranica));
       const qs = p.toString();
       return qs ? `/dispecer/zahtjevi?${qs}` : '/dispecer/zahtjevi';
     },
@@ -378,25 +482,39 @@ export function DispecerZahtjeviLista() {
     if (stranicaBroj > ukupnoStranica) {
       router.replace(qsZaStranicu(aktivnaStranica), { scroll: false });
     }
-  }, [ucitava, ukupnoZahtjeva, ukupnoStranica, stranicaBroj, aktivnaStranica, qsZaStranicu, router]);
+  }, [
+    ucitava,
+    ukupnoZahtjeva,
+    ukupnoStranica,
+    stranicaBroj,
+    aktivnaStranica,
+    qsZaStranicu,
+    router,
+  ]);
 
   // ─── Učitavanje ─────────────────────────────────────────────────────────────
 
   const ucitajZahtjeve = useCallback(async (tiho = false) => {
-    if (!tiho) { setUcitava(true); setGreska(null); }
+    if (!tiho) {
+      setUcitava(true);
+      setGreska(null);
+    }
     try {
       const r = await fetch('/api/dispecer/zahtjevi', { cache: 'no-store' });
       const d = await r.json();
       if (!r.ok) throw new Error(d.error ?? 'Greška pri učitavanju podataka.');
       setZahtjevi(d.zahtjevi ?? []);
     } catch (err) {
-      if (!tiho) setGreska(err instanceof Error ? err.message : 'Došlo je do greške.');
+      if (!tiho)
+        setGreska(err instanceof Error ? err.message : 'Došlo je do greške.');
     } finally {
       if (!tiho) setUcitava(false);
     }
   }, []);
 
-  useEffect(() => { void ucitajZahtjeve(false); }, [ucitajZahtjeve]);
+  useEffect(() => {
+    void ucitajZahtjeve(false);
+  }, [ucitajZahtjeve]);
 
   useEffect(() => {
     const t = setInterval(() => void ucitajZahtjeve(true), 25_000);
@@ -405,24 +523,39 @@ export function DispecerZahtjeviLista() {
 
   useEffect(() => {
     const supabase = kreirajKlijenta();
-    let mounted    = true;
+    let mounted = true;
     const ucitajIme = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
       if (!mounted || !user) return;
-      const { data: profil } = await supabase.from('osoba').select('ime, prezime').eq('id_osobe', user.id).maybeSingle();
-      const imeIzProfila = [profil?.ime, profil?.prezime].filter(Boolean).join(' ').trim();
-      const imeIzMeta    = [user.user_metadata?.ime, user.user_metadata?.prezime].filter(Boolean).join(' ').trim();
+      const { data: profil } = await supabase
+        .from('osoba')
+        .select('ime, prezime')
+        .eq('id_osobe', user.id)
+        .maybeSingle();
+      const imeIzProfila = [profil?.ime, profil?.prezime]
+        .filter(Boolean)
+        .join(' ')
+        .trim();
+      const imeIzMeta = [user.user_metadata?.ime, user.user_metadata?.prezime]
+        .filter(Boolean)
+        .join(' ')
+        .trim();
       setImeKorisnika(imeIzProfila || imeIzMeta || user.email || 'Dispečer');
     };
     void ucitajIme();
-    return () => { mounted = false; };
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   // ─── Upravljanje filterima ───────────────────────────────────────────────────
 
   function promijeniStatus(noviStatus: string) {
     const p = new URLSearchParams(searchParams.toString());
-    if (!noviStatus || noviStatus === 'svi') p.delete('filter'); else p.set('filter', noviStatus);
+    if (!noviStatus || noviStatus === 'svi') p.delete('filter');
+    else p.set('filter', noviStatus);
     p.delete('faza');
     p.delete('page');
     const qs = p.toString();
@@ -431,7 +564,8 @@ export function DispecerZahtjeviLista() {
 
   function promijeniPAzu(novaFaza: string) {
     const p = new URLSearchParams(searchParams.toString());
-    if (!novaFaza || novaFaza === 'sve_faze') p.delete('faza'); else p.set('faza', novaFaza);
+    if (!novaFaza || novaFaza === 'sve_faze') p.delete('faza');
+    else p.set('faza', novaFaza);
     p.delete('page');
     const qs = p.toString();
     router.push(qs ? `/dispecer/zahtjevi?${qs}` : '/dispecer/zahtjevi');
@@ -454,10 +588,16 @@ export function DispecerZahtjeviLista() {
           </Link>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--first-octonary)' }}>
+              <h1
+                className="text-2xl font-bold tracking-tight"
+                style={{ color: 'var(--first-octonary)' }}
+              >
                 Pregled zahtjeva
               </h1>
-              <p className="mt-1 text-sm" style={{ color: 'var(--first-nonary)' }}>
+              <p
+                className="mt-1 text-sm"
+                style={{ color: 'var(--first-nonary)' }}
+              >
                 Prijem, obrada i planiranje — od prijave do dodjele servisera.
               </p>
             </div>
@@ -528,23 +668,36 @@ export function DispecerZahtjeviLista() {
             {ukupnoStranica > 1 && (
               <nav
                 className="mt-8 flex min-w-0 flex-col items-stretch justify-between gap-4 border-t pt-6 sm:flex-row sm:items-center"
-                style={{ borderColor: 'rgb(var(--first-quaternary-rgb) / 0.25)' }}
+                style={{
+                  borderColor: 'rgb(var(--first-quaternary-rgb) / 0.25)',
+                }}
                 aria-label="Paginacija liste zahtjeva"
               >
                 <p className="text-sm" style={{ color: 'var(--first-nonary)' }}>
                   Prikazano{' '}
-                  <span className="font-semibold tabular-nums" style={{ color: 'var(--first-octonary)' }}>
-                    {(aktivnaStranica - 1) * ZAHTJEVA_PO_STRANICI + 1}
-                    -
-                    {Math.min(aktivnaStranica * ZAHTJEVA_PO_STRANICI, ukupnoZahtjeva)}
+                  <span
+                    className="font-semibold tabular-nums"
+                    style={{ color: 'var(--first-octonary)' }}
+                  >
+                    {(aktivnaStranica - 1) * ZAHTJEVA_PO_STRANICI + 1}-
+                    {Math.min(
+                      aktivnaStranica * ZAHTJEVA_PO_STRANICI,
+                      ukupnoZahtjeva,
+                    )}
                   </span>{' '}
                   od{' '}
-                  <span className="font-semibold tabular-nums" style={{ color: 'var(--first-octonary)' }}>
+                  <span
+                    className="font-semibold tabular-nums"
+                    style={{ color: 'var(--first-octonary)' }}
+                  >
                     {ukupnoZahtjeva}
                   </span>
                   <span className="hidden sm:inline">
-                    {' '}· stranica{' '}
-                    <span className="tabular-nums">{aktivnaStranica}</span> /{' '}
+                    {' '}
+                    · stranica{' '}
+                    <span className="tabular-nums">
+                      {aktivnaStranica}
+                    </span> /{' '}
                     <span className="tabular-nums">{ukupnoStranica}</span>
                   </span>
                 </p>
@@ -555,7 +708,9 @@ export function DispecerZahtjeviLista() {
                     aria-disabled={aktivnaStranica <= 1}
                     className={[
                       'inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-sm font-semibold transition-colors',
-                      aktivnaStranica <= 1 ? 'pointer-events-none opacity-45' : 'hover:bg-black/[0.03]',
+                      aktivnaStranica <= 1
+                        ? 'pointer-events-none opacity-45'
+                        : 'hover:bg-black/[0.03]',
                     ].join(' ')}
                     style={{
                       borderColor: 'rgb(var(--first-quaternary-rgb) / 0.4)',
@@ -571,7 +726,9 @@ export function DispecerZahtjeviLista() {
                     aria-disabled={aktivnaStranica >= ukupnoStranica}
                     className={[
                       'inline-flex items-center gap-1 rounded-lg border px-3 py-2 text-sm font-semibold transition-colors',
-                      aktivnaStranica >= ukupnoStranica ? 'pointer-events-none opacity-45' : 'hover:bg-black/[0.03]',
+                      aktivnaStranica >= ukupnoStranica
+                        ? 'pointer-events-none opacity-45'
+                        : 'hover:bg-black/[0.03]',
                     ].join(' ')}
                     style={{
                       borderColor: 'rgb(var(--first-quaternary-rgb) / 0.4)',

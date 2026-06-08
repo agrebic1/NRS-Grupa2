@@ -13,12 +13,12 @@ const RAZLOZI = [
 ] as const;
 
 interface OtkaziModalProps {
-  zahtjevId:  number;
+  zahtjevId: number;
   /** Redni broj zahtjeva korisnika (prikaz); ako nije proslijeđen, ne prikazuje se. */
   korisnickiBrojZahtjeva?: number;
   kategorija: string;
   onZatvori: () => void;
-  onUspjeh:  () => void;
+  onUspjeh: () => void;
 }
 
 export function OtkaziModal({
@@ -29,12 +29,14 @@ export function OtkaziModal({
   onUspjeh,
 }: OtkaziModalProps) {
   const [odabranRazlog, setOdabranRazlog] = useState<string>('');
-  const [drugoTekst,    setDrugoTekst]    = useState('');
-  const [jeSlanje,      setJeSlanje]      = useState(false);
-  const [greska,        setGreska]        = useState<string | null>(null);
+  const [drugoTekst, setDrugoTekst] = useState('');
+  const [jeSlanje, setJeSlanje] = useState(false);
+  const [greska, setGreska] = useState<string | null>(null);
 
   const razlog = odabranRazlog === 'Drugo' ? drugoTekst.trim() : odabranRazlog;
-  const mozePoslati = razlog.length >= 1 && (odabranRazlog !== 'Drugo' || drugoTekst.trim().length >= 3);
+  const mozePoslati =
+    razlog.length >= 1 &&
+    (odabranRazlog !== 'Drugo' || drugoTekst.trim().length >= 3);
 
   async function potvrdiOtkazivanje() {
     if (!mozePoslati) {
@@ -45,9 +47,9 @@ export function OtkaziModal({
     setGreska(null);
     try {
       const r = await fetch(`/api/service-requests/${zahtjevId}`, {
-        method:  'PATCH',
+        method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ action: 'cancel', cancel_reason: razlog }),
+        body: JSON.stringify({ action: 'cancel', cancel_reason: razlog }),
       });
       const d = await r.json();
       if (!r.ok) throw new Error(d.error ?? 'Greška pri otkazivanju.');
@@ -64,13 +66,15 @@ export function OtkaziModal({
     <div
       className="fixed inset-0 z-50 flex items-center justify-center px-4 backdrop-blur-sm"
       style={{ backgroundColor: 'rgba(0,0,0,0.45)' }}
-      onClick={(e) => { if (e.target === e.currentTarget) onZatvori(); }}
+      onClick={(e) => {
+        if (e.target === e.currentTarget) onZatvori();
+      }}
     >
       <div
         className="w-full max-w-md overflow-hidden rounded-2xl shadow-2xl"
         style={{
           backgroundColor: 'var(--first-tertiary)',
-          border:          '1px solid rgb(var(--first-quaternary-rgb) / 0.4)',
+          border: '1px solid rgb(var(--first-quaternary-rgb) / 0.4)',
         }}
       >
         {/* Zaglavlje */}
@@ -86,7 +90,10 @@ export function OtkaziModal({
               <AlertTriangle className="h-5 w-5" style={{ color: '#DC2626' }} />
             </div>
             <div>
-              <h2 className="text-base font-bold" style={{ color: 'var(--first-octonary)' }}>
+              <h2
+                className="text-base font-bold"
+                style={{ color: 'var(--first-octonary)' }}
+              >
                 Otkazivanje zahtjeva
               </h2>
               <p className="text-xs" style={{ color: 'var(--first-nonary)' }}>
@@ -108,15 +115,23 @@ export function OtkaziModal({
 
         {/* Tijelo */}
         <div className="px-6 py-5">
-          <p className="mb-4 text-sm leading-relaxed" style={{ color: 'var(--first-nonary)' }}>
+          <p
+            className="mb-4 text-sm leading-relaxed"
+            style={{ color: 'var(--first-nonary)' }}
+          >
             Da li ste sigurni da želite otkazati ovaj zahtjev?{' '}
-            <strong style={{ color: 'var(--first-octonary)' }}>Ova akcija se ne može poništiti.</strong>
-            {' '}Zahtjev ostaje u vašoj historiji.
+            <strong style={{ color: 'var(--first-octonary)' }}>
+              Ova akcija se ne može poništiti.
+            </strong>{' '}
+            Zahtjev ostaje u vašoj historiji.
           </p>
 
           {/* Razlozi */}
           <div className="flex flex-col gap-2">
-            <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--first-nonary)' }}>
+            <p
+              className="text-xs font-semibold uppercase tracking-wide"
+              style={{ color: 'var(--first-nonary)' }}
+            >
               Razlog otkazivanja
             </p>
             {RAZLOZI.map((r) => (
@@ -125,8 +140,14 @@ export function OtkaziModal({
                 className="flex cursor-pointer items-center gap-3 rounded-xl border px-4 py-2.5
                   transition-all duration-150"
                 style={{
-                  borderColor:     odabranRazlog === r ? 'rgba(220,38,38,0.4)' : 'rgb(var(--first-quaternary-rgb) / 0.35)',
-                  backgroundColor: odabranRazlog === r ? 'rgba(220,38,38,0.04)' : 'transparent',
+                  borderColor:
+                    odabranRazlog === r
+                      ? 'rgba(220,38,38,0.4)'
+                      : 'rgb(var(--first-quaternary-rgb) / 0.35)',
+                  backgroundColor:
+                    odabranRazlog === r
+                      ? 'rgba(220,38,38,0.04)'
+                      : 'transparent',
                 }}
               >
                 <input
@@ -140,15 +161,22 @@ export function OtkaziModal({
                 <div
                   className="flex h-4 w-4 flex-shrink-0 items-center justify-center rounded-full border-2"
                   style={{
-                    borderColor:     odabranRazlog === r ? '#DC2626' : 'rgb(var(--first-quaternary-rgb) / 0.5)',
-                    backgroundColor: odabranRazlog === r ? '#DC2626' : 'transparent',
+                    borderColor:
+                      odabranRazlog === r
+                        ? '#DC2626'
+                        : 'rgb(var(--first-quaternary-rgb) / 0.5)',
+                    backgroundColor:
+                      odabranRazlog === r ? '#DC2626' : 'transparent',
                   }}
                 >
                   {odabranRazlog === r && (
                     <div className="h-1.5 w-1.5 rounded-full bg-white" />
                   )}
                 </div>
-                <span className="text-sm" style={{ color: 'var(--first-octonary)' }}>
+                <span
+                  className="text-sm"
+                  style={{ color: 'var(--first-octonary)' }}
+                >
                   {r}
                 </span>
               </label>
@@ -164,16 +192,19 @@ export function OtkaziModal({
                 className="mt-1 w-full resize-none rounded-xl border px-4 py-2.5 text-sm
                   focus:outline-none focus:ring-2"
                 style={{
-                  borderColor:     'rgb(var(--first-quaternary-rgb) / 0.4)',
+                  borderColor: 'rgb(var(--first-quaternary-rgb) / 0.4)',
                   backgroundColor: 'rgb(255 255 255 / 0.7)',
-                  color:           'var(--first-octonary)',
+                  color: 'var(--first-octonary)',
                 }}
               />
             )}
           </div>
 
           {greska && (
-            <p className="mt-3 text-xs font-medium" style={{ color: '#DC2626' }}>
+            <p
+              className="mt-3 text-xs font-medium"
+              style={{ color: '#DC2626' }}
+            >
               {greska}
             </p>
           )}

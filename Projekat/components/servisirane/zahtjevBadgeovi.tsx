@@ -13,7 +13,10 @@ import {
   XCircle,
 } from 'lucide-react';
 import type { StatusZahtjeva } from '@/domain/types/servisirane';
-import { kategorizirajHitnost, oznakaKorisnickeHitnostiTriRazine } from '@/lib/servisirane/urgency';
+import {
+  kategorizirajHitnost,
+  oznakaKorisnickeHitnostiTriRazine,
+} from '@/lib/servisirane/urgency';
 import type { NivoHitnosti } from '@/domain/types/servisirane';
 import {
   DISPECER_PALETA_HITNOST,
@@ -39,7 +42,14 @@ function statusBadgeCfg(
   title: string,
   Ikona: StatusCfg['Ikona'],
 ): StatusCfg {
-  return { oznaka, title, boja: slot.tekst, pozadina: slot.pozadina, border: slot.border, Ikona };
+  return {
+    oznaka,
+    title,
+    boja: slot.tekst,
+    pozadina: slot.pozadina,
+    border: slot.border,
+    Ikona,
+  };
 }
 
 const PS = DISPECER_PALETA_STATUS;
@@ -64,8 +74,18 @@ const DISPECER_STATUS_BADGE: Record<string, StatusCfg> = {
     'Dispečer radi u wizardu: Pregled, Prioritet, Termin i serviser, Pregled naloga, Potvrda.',
     Clock,
   ),
-  assigned: statusBadgeCfg(PS.dodijeljeno, 'Dodijeljeno serviseru', 'Serviser dodijeljen; prije odlaska na teren.', CheckCircle2),
-  dodijeljeno: statusBadgeCfg(PS.dodijeljeno, 'Dodijeljeno serviseru', 'Serviser dodijeljen; prije odlaska na teren.', CheckCircle2),
+  assigned: statusBadgeCfg(
+    PS.dodijeljeno,
+    'Dodijeljeno serviseru',
+    'Serviser dodijeljen; prije odlaska na teren.',
+    CheckCircle2,
+  ),
+  dodijeljeno: statusBadgeCfg(
+    PS.dodijeljeno,
+    'Dodijeljeno serviseru',
+    'Serviser dodijeljen; prije odlaska na teren.',
+    CheckCircle2,
+  ),
   scheduled: statusBadgeCfg(
     PS.terminPotvrden,
     'Potvrđeno',
@@ -78,16 +98,56 @@ const DISPECER_STATUS_BADGE: Record<string, StatusCfg> = {
     'Završena obrada u wizardu; naredno je intervencija (dodjela ili teren). Korisnik prati tijek na stranici intervencije.',
     CheckCircle2,
   ),
-  in_progress: statusBadgeCfg(PS.uToku, 'Na terenu', 'Izvršavanje na lokaciji korisnika.', Truck),
-  u_radu: statusBadgeCfg(PS.uToku, 'Na terenu', 'Izvršavanje na lokaciji korisnika.', Truck),
-  u_izvrsenju: statusBadgeCfg(PS.uToku, 'Na terenu', 'Izvršavanje na lokaciji korisnika.', Truck),
-  completed: statusBadgeCfg(PS.zavrseno, 'Završeno', 'Zahtjev je uspješno zatvoren.', CheckCircle2),
-  zavrseno: statusBadgeCfg(PS.zavrseno, 'Završeno', 'Zahtjev je uspješno zatvoren.', CheckCircle2),
+  in_progress: statusBadgeCfg(
+    PS.uToku,
+    'Na terenu',
+    'Izvršavanje na lokaciji korisnika.',
+    Truck,
+  ),
+  u_radu: statusBadgeCfg(
+    PS.uToku,
+    'Na terenu',
+    'Izvršavanje na lokaciji korisnika.',
+    Truck,
+  ),
+  u_izvrsenju: statusBadgeCfg(
+    PS.uToku,
+    'Na terenu',
+    'Izvršavanje na lokaciji korisnika.',
+    Truck,
+  ),
+  completed: statusBadgeCfg(
+    PS.zavrseno,
+    'Završeno',
+    'Zahtjev je uspješno zatvoren.',
+    CheckCircle2,
+  ),
+  zavrseno: statusBadgeCfg(
+    PS.zavrseno,
+    'Završeno',
+    'Zahtjev je uspješno zatvoren.',
+    CheckCircle2,
+  ),
   cancelled: statusBadgeCfg(PS.neutral, 'Otkazano', 'Zahtjev je otkazan.', Ban),
   otkazano: statusBadgeCfg(PS.neutral, 'Otkazano', 'Zahtjev je otkazan.', Ban),
-  closed:    statusBadgeCfg(PS.zatvoreno, 'Zatvoreno', 'Zahtjev je formalno zatvoren.', CheckCircle2),
-  zatvoreno: statusBadgeCfg(PS.zatvoreno, 'Zatvoreno', 'Zahtjev je formalno zatvoren.', CheckCircle2),
-  odbijeno:  statusBadgeCfg(PS.odbijeno,  'Odbijeno',  'Dispečer je odbio zahtjev.',    XCircle),
+  closed: statusBadgeCfg(
+    PS.zatvoreno,
+    'Zatvoreno',
+    'Zahtjev je formalno zatvoren.',
+    CheckCircle2,
+  ),
+  zatvoreno: statusBadgeCfg(
+    PS.zatvoreno,
+    'Zatvoreno',
+    'Zahtjev je formalno zatvoren.',
+    CheckCircle2,
+  ),
+  odbijeno: statusBadgeCfg(
+    PS.odbijeno,
+    'Odbijeno',
+    'Dispečer je odbio zahtjev.',
+    XCircle,
+  ),
 };
 
 const FALLBACK_DISPECER_STATUS: StatusCfg = {
@@ -110,7 +170,9 @@ export function DispecerStatusBadge({
   const cfg = DISPECER_STATUS_BADGE[status] ?? FALLBACK_DISPECER_STATUS;
   const Ikona = cfg.Ikona;
   const oznaka =
-    variant === 'korisnik' && status === 'in_review' ? 'Dispečer obrađuje' : cfg.oznaka;
+    variant === 'korisnik' && status === 'in_review'
+      ? 'Dispečer obrađuje'
+      : cfg.oznaka;
   const title =
     variant === 'korisnik' && status === 'in_review'
       ? 'Dispečer obrađuje zahtjev (prioritet, termin, serviser).'
@@ -141,7 +203,11 @@ export function PremiumHitnaBadge({ className = '' }: { className?: string }) {
         className="inline-flex w-fit max-w-full items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-bold text-white"
         style={{ backgroundColor: DISPECER_PALETA_PREMIUM.akcent }}
       >
-        <Crown className="h-3.5 w-3.5 shrink-0" strokeWidth={2.25} aria-hidden />
+        <Crown
+          className="h-3.5 w-3.5 shrink-0"
+          strokeWidth={2.25}
+          aria-hidden
+        />
         <span className="leading-tight">Hitna intervencija (premium)</span>
       </span>
       <span
@@ -264,7 +330,13 @@ export function OperativniPrioritetChip({
         border: `1px solid ${pal.border}`,
       }}
     >
-      <span className={pal.tamnaPozadina ? 'font-medium opacity-90' : 'font-medium opacity-[0.92]'}>
+      <span
+        className={
+          pal.tamnaPozadina
+            ? 'font-medium opacity-90'
+            : 'font-medium opacity-[0.92]'
+        }
+      >
         Operativni prioritet:
       </span>
       <span className={naglasiVrijednost ? 'font-bold' : ''}>{v}</span>
@@ -318,7 +390,9 @@ export function PreciznaLokacijaChip({
       }}
     >
       <MapPin
-        className={compact ? 'h-2.5 w-2.5 flex-shrink-0' : 'h-3 w-3 flex-shrink-0'}
+        className={
+          compact ? 'h-2.5 w-2.5 flex-shrink-0' : 'h-3 w-3 flex-shrink-0'
+        }
         style={{ color: 'var(--first-secondary)' }}
         aria-hidden
       />
@@ -346,17 +420,29 @@ export function ExpandEvidenceChip({
         color: chipBoja,
       }}
     >
-      <Ikona className="h-3 w-3 shrink-0" style={{ color: chipBoja }} aria-hidden strokeWidth={2} />
+      <Ikona
+        className="h-3 w-3 shrink-0"
+        style={{ color: chipBoja }}
+        aria-hidden
+        strokeWidth={2}
+      />
       {children}
     </span>
   );
 }
 
 export function ExpandPanelTerminNavedenChip() {
-  return <ExpandEvidenceChip Ikona={Calendar}>Preferirani termin naveden</ExpandEvidenceChip>;
+  return (
+    <ExpandEvidenceChip Ikona={Calendar}>
+      Preferirani termin naveden
+    </ExpandEvidenceChip>
+  );
 }
 
 export function ExpandPanelPreciznaLokacijaChip() {
-  return <ExpandEvidenceChip Ikona={MapPin}>Precizna lokacija dodana</ExpandEvidenceChip>;
+  return (
+    <ExpandEvidenceChip Ikona={MapPin}>
+      Precizna lokacija dodana
+    </ExpandEvidenceChip>
+  );
 }
-

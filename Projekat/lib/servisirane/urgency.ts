@@ -40,11 +40,11 @@ export function kategorizirajHitnost(score: number): NivoHitnosti {
 }
 
 const OZNAKA_HITNOSTI_ZA_KORISNIKA: Record<NivoHitnosti, string> = {
-  NISKO:    'Niska',
-  SREDNJE:  'Srednja',
-  VISOKO:   'Visoka',
+  NISKO: 'Niska',
+  SREDNJE: 'Srednja',
+  VISOKO: 'Visoka',
   KRITIČNO: 'Hitno',
-  HITNO:    'Hitno',
+  HITNO: 'Hitno',
 };
 
 /** Korisnički čitljiva hitnost (bez enum vrijednosti i broja bodova). */
@@ -54,7 +54,9 @@ export function oznakaHitnostiZaKorisnika(score: number): string {
 }
 
 /** Tri razine za vizualne chipove (Visoka uključuje VISOKO i KRITIČNO). */
-export function oznakaKorisnickeHitnostiTriRazine(score: number): 'Visoka' | 'Srednja' | 'Niska' {
+export function oznakaKorisnickeHitnostiTriRazine(
+  score: number,
+): 'Visoka' | 'Srednja' | 'Niska' {
   const nivo = kategorizirajHitnost(score);
   if (nivo === 'NISKO') return 'Niska';
   if (nivo === 'SREDNJE') return 'Srednja';
@@ -70,7 +72,9 @@ export function oznakaInboxHitnostiCekaObradu(zahtjev: {
   is_premium: boolean;
   urgency_score: number;
 }): string {
-  const tri = oznakaKorisnickeHitnostiTriRazine(efektivniKorisnickiUrgencyScore(zahtjev));
+  const tri = oznakaKorisnickeHitnostiTriRazine(
+    efektivniKorisnickiUrgencyScore(zahtjev),
+  );
   return `Vaša procjena: ${tri.toLowerCase()}`;
 }
 
@@ -81,7 +85,9 @@ export function inboxGrupaIzKorisnickeProcjene(zahtjev: {
   is_premium: boolean;
   urgency_score: number;
 }): DispecerskaInboxGrupaPoKorisniku {
-  const tri = oznakaKorisnickeHitnostiTriRazine(efektivniKorisnickiUrgencyScore(zahtjev));
+  const tri = oznakaKorisnickeHitnostiTriRazine(
+    efektivniKorisnickiUrgencyScore(zahtjev),
+  );
   if (tri === 'Visoka') return 'Hitno';
   if (tri === 'Srednja') return 'Srednja';
   return 'Niska';
@@ -94,28 +100,38 @@ type ZaDispecerskiInboxZajednicko = {
   urgency_score: number;
 };
 
-function poredajUnutarDispecerskeInboxGrupe<T extends ZaDispecerskiInboxZajednicko>(
-  redovi: T[],
-  grupa: DispecerskaInboxGrupaPoKorisniku,
-): T[] {
+function poredajUnutarDispecerskeInboxGrupe<
+  T extends ZaDispecerskiInboxZajednicko,
+>(redovi: T[], grupa: DispecerskaInboxGrupaPoKorisniku): T[] {
   return [...redovi].sort((a, b) => {
     if (grupa === 'Hitno' && a.is_premium !== b.is_premium) {
       return a.is_premium ? -1 : 1;
     }
-    const t = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+    const t =
+      new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
     if (t !== 0) return t;
     return a.id - b.id;
   });
 }
 
 /** Redoslijed inboxa: Hitno → Srednja → Niska; unutar Hitno prvo premium, zatim starije prijave prvo. */
-export function sastaviDispecerskiInboxRedoslijed<T extends ZaDispecerskiInboxZajednicko>(zahtjevi: T[]): {
+export function sastaviDispecerskiInboxRedoslijed<
+  T extends ZaDispecerskiInboxZajednicko,
+>(
+  zahtjevi: T[],
+): {
   uredjeni: T[];
   grupisani: Record<DispecerskaInboxGrupaPoKorisniku, T[]>;
 } {
-  const hitno = zahtjevi.filter((z) => inboxGrupaIzKorisnickeProcjene(z) === 'Hitno');
-  const srednja = zahtjevi.filter((z) => inboxGrupaIzKorisnickeProcjene(z) === 'Srednja');
-  const niska = zahtjevi.filter((z) => inboxGrupaIzKorisnickeProcjene(z) === 'Niska');
+  const hitno = zahtjevi.filter(
+    (z) => inboxGrupaIzKorisnickeProcjene(z) === 'Hitno',
+  );
+  const srednja = zahtjevi.filter(
+    (z) => inboxGrupaIzKorisnickeProcjene(z) === 'Srednja',
+  );
+  const niska = zahtjevi.filter(
+    (z) => inboxGrupaIzKorisnickeProcjene(z) === 'Niska',
+  );
   const hitnoS = poredajUnutarDispecerskeInboxGrupe(hitno, 'Hitno');
   const srednjaS = poredajUnutarDispecerskeInboxGrupe(srednja, 'Srednja');
   const niskaS = poredajUnutarDispecerskeInboxGrupe(niska, 'Niska');

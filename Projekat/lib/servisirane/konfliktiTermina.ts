@@ -6,21 +6,21 @@
 type AnyDB = any;
 
 interface KonfliktTermina {
-  serviser_id:  string;
+  serviser_id: string;
   serviser_ime: string;
-  zahtjev_id:   number;
-  pocetak:      string;
-  kraj:         string;
+  zahtjev_id: number;
+  pocetak: string;
+  kraj: string;
 }
 
 const AKTIVNI_STATUSI_ZA_KONFLIKT = ['dodijeljeno', 'u_radu', 'u_izvrsenju'];
 
 export async function provjeriKonfliktServiseraNaTerminu(
   db: AnyDB,
-  serviser_id:         string,
-  novi_pocetak:        string,
-  novi_kraj:           string,
-  izuzmi_zahtjev_id:   number
+  serviser_id: string,
+  novi_pocetak: string,
+  novi_kraj: string,
+  izuzmi_zahtjev_id: number,
 ): Promise<KonfliktTermina | null> {
   // Provjeri kao glavni serviser
   const { data: konflikti } = await db
@@ -39,16 +39,18 @@ export async function provjeriKonfliktServiseraNaTerminu(
     return {
       serviser_id,
       serviser_ime: 'Odabrani serviser',
-      zahtjev_id:   k.id,
-      pocetak:      k.termin_planirani_pocetak,
-      kraj:         k.termin_planirani_kraj,
+      zahtjev_id: k.id,
+      pocetak: k.termin_planirani_pocetak,
+      kraj: k.termin_planirani_kraj,
     };
   }
 
   // Provjeri kao pomoćni serviser
   const { data: timKonflikti } = await db
     .from('tim_intervencije')
-    .select('zahtjev_id, service_requests!inner(termin_planirani_pocetak, termin_planirani_kraj, status)')
+    .select(
+      'zahtjev_id, service_requests!inner(termin_planirani_pocetak, termin_planirani_kraj, status)',
+    )
     .eq('serviser_id', serviser_id)
     .neq('zahtjev_id', izuzmi_zahtjev_id);
 
@@ -67,9 +69,9 @@ export async function provjeriKonfliktServiseraNaTerminu(
     return {
       serviser_id,
       serviser_ime: 'Odabrani serviser',
-      zahtjev_id:   k.zahtjev_id,
-      pocetak:      k.service_requests.termin_planirani_pocetak,
-      kraj:         k.service_requests.termin_planirani_kraj,
+      zahtjev_id: k.zahtjev_id,
+      pocetak: k.service_requests.termin_planirani_pocetak,
+      kraj: k.service_requests.termin_planirani_kraj,
     };
   }
 

@@ -1,11 +1,20 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createClient } from '@/lib/supabase/server';
-import { izracunajIstek, safeInsertPremiumEvent } from '@/lib/premium/lifecycle';
+import {
+  izracunajIstek,
+  safeInsertPremiumEvent,
+} from '@/lib/premium/lifecycle';
 
 export const dynamic = 'force-dynamic';
 
-function procitajNazivUloge(uloga: { naziv?: string | null } | { naziv?: string | null }[] | null | undefined) {
+function procitajNazivUloge(
+  uloga:
+    | { naziv?: string | null }
+    | { naziv?: string | null }[]
+    | null
+    | undefined,
+) {
   const zapis = Array.isArray(uloga) ? uloga[0] : uloga;
   return zapis?.naziv ?? '';
 }
@@ -26,7 +35,13 @@ const legacyBodySchema = z.object({
 });
 
 const actionBodySchema = z.object({
-  action: z.enum(['set_active', 'set_inactive', 'set_pending_payment', 'set_cancelled', 'set_expired']),
+  action: z.enum([
+    'set_active',
+    'set_inactive',
+    'set_pending_payment',
+    'set_cancelled',
+    'set_expired',
+  ]),
   reason: z.string().max(500).optional().nullable(),
 });
 
@@ -35,12 +50,22 @@ type RouteParams = { id: string } | Promise<{ id: string }>;
 async function upsertKorisnikUsluge(
   db: any,
   ciljId: string,
-  patch: Record<string, unknown>
+  patch: Record<string, unknown>,
 ): Promise<{ ok: true } | { ok: false; message: string; status: number }> {
-  const { error } = await db.from('korisnik_usluge').update(patch).eq('id_korisnika_usluge', ciljId);
+  const { error } = await db
+    .from('korisnik_usluge')
+    .update(patch)
+    .eq('id_korisnika_usluge', ciljId);
   if (error?.message?.includes('premium_cancelled_at')) {
-    const { premium_cancelled_at: _a, premium_cancel_reason: _b, ...rest } = patch;
-    const { error: fb } = await db.from('korisnik_usluge').update(rest).eq('id_korisnika_usluge', ciljId);
+    const {
+      premium_cancelled_at: _a,
+      premium_cancel_reason: _b,
+      ...rest
+    } = patch;
+    const { error: fb } = await db
+      .from('korisnik_usluge')
+      .update(rest)
+      .eq('id_korisnika_usluge', ciljId);
     if (fb) return { ok: false, message: fb.message, status: 500 };
     return { ok: true };
   }
@@ -48,7 +73,10 @@ async function upsertKorisnikUsluge(
   return { ok: true };
 }
 
-export async function PATCH(request: Request, { params }: { params: RouteParams }) {
+export async function PATCH(
+  request: Request,
+  { params }: { params: RouteParams },
+) {
   try {
     const resolved = await params;
     const ciljId = resolved.id;
@@ -58,13 +86,19 @@ export async function PATCH(request: Request, { params }: { params: RouteParams 
       data: { user },
     } = await supabase.auth.getUser();
     if (!user) {
-      return NextResponse.json({ error: 'Niste prijavljeni.' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Niste prijavljeni.' },
+        { status: 401 },
+      );
     }
 
     const db = supabase as any;
     const jeAdmin = await jeAdminKorisnik(db, user.id);
     if (!jeAdmin) {
-      return NextResponse.json({ error: 'Nemate dozvolu za ovu akciju.' }, { status: 403 });
+      return NextResponse.json(
+        { error: 'Nemate dozvolu za ovu akciju.' },
+        { status: 403 },
+      );
     }
 
     const raw = await request.json();
@@ -78,7 +112,10 @@ export async function PATCH(request: Request, { params }: { params: RouteParams 
       return NextResponse.json({ error: checkErr.message }, { status: 500 });
     }
     if (!postojeci) {
-      return NextResponse.json({ error: 'Premium status je dostupan samo korisnicima usluge.' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Premium status je dostupan samo korisnicima usluge.' },
+        { status: 400 },
+      );
     }
 
     const actionParsed = actionBodySchema.safeParse(raw);
@@ -193,11 +230,15 @@ export async function PATCH(request: Request, { params }: { params: RouteParams 
           break;
         }
         default:
-          return NextResponse.json({ error: 'Nepoznata akcija.' }, { status: 400 });
+          return NextResponse.json(
+            { error: 'Nepoznata akcija.' },
+            { status: 400 },
+          );
       }
 
       const up = await upsertKorisnikUsluge(db, ciljId, patch);
-      if (!up.ok) return NextResponse.json({ error: up.message }, { status: up.status });
+      if (!up.ok)
+        return NextResponse.json({ error: up.message }, { status: up.status });
 
       const ev = await safeInsertPremiumEvent(db, {
         user_id: ciljId,
@@ -205,14 +246,18 @@ export async function PATCH(request: Request, { params }: { params: RouteParams 
         event_type: eventType,
         payload_json: payload,
       });
-      if (!ev.ok) return NextResponse.json({ error: ev.message }, { status: 500 });
+      if (!ev.ok)
+        return NextResponse.json({ error: ev.message }, { status: 500 });
 
       return NextResponse.json({ success: true });
     }
 
     const legacyParsed = legacyBodySchema.safeParse(raw);
     if (!legacyParsed.success) {
-      return NextResponse.json({ error: 'Neispravan payload. Koristite isPremium ili action.' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Neispravan payload. Koristite isPremium ili action.' },
+        { status: 400 },
+      );
     }
 
     const { isPremium } = legacyParsed.data;
@@ -235,8 +280,11 @@ export async function PATCH(request: Request, { params }: { params: RouteParams 
     if (up.ok === false) {
       if (up.message?.includes("'is_premium' column")) {
         return NextResponse.json(
-          { error: 'Kolona is_premium ne postoji. Primijenite premium migracije.' },
-          { status: 400 }
+          {
+            error:
+              'Kolona is_premium ne postoji. Primijenite premium migracije.',
+          },
+          { status: 400 },
         );
       }
       return NextResponse.json({ error: up.message }, { status: up.status });
@@ -245,7 +293,9 @@ export async function PATCH(request: Request, { params }: { params: RouteParams 
     const ev = await safeInsertPremiumEvent(db, {
       user_id: ciljId,
       actor_user_id: user.id,
-      event_type: isPremium ? 'premium_activated_admin' : 'premium_deactivated_admin',
+      event_type: isPremium
+        ? 'premium_activated_admin'
+        : 'premium_deactivated_admin',
       payload_json: {
         premium_status,
         premium_started_at,
@@ -255,7 +305,8 @@ export async function PATCH(request: Request, { params }: { params: RouteParams 
       },
     });
 
-    if (!ev.ok) return NextResponse.json({ error: ev.message }, { status: 500 });
+    if (!ev.ok)
+      return NextResponse.json({ error: ev.message }, { status: 500 });
 
     return NextResponse.json({ success: true });
   } catch (error) {

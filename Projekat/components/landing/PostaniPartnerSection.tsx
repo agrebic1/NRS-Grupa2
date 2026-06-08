@@ -30,15 +30,13 @@ export function PostaniPartnerSection() {
               className="w-fit rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-wide"
               style={{
                 backgroundColor: 'rgb(var(--first-septenary-rgb) / 0.2)',
-                color:           'var(--first-septenary)',
-                border:          '1px solid rgb(var(--first-septenary-rgb) / 0.35)',
+                color: 'var(--first-septenary)',
+                border: '1px solid rgb(var(--first-septenary-rgb) / 0.35)',
               }}
             >
               Postanite partner
             </div>
-            <h2
-              className="text-3xl font-bold leading-tight text-white sm:text-4xl"
-            >
+            <h2 className="text-3xl font-bold leading-tight text-white sm:text-4xl">
               Serviseri i dispečeri - proširite posao s nama
             </h2>
             <p
@@ -54,7 +52,9 @@ export function PostaniPartnerSection() {
                 <li key={tekst} className="flex items-center gap-3">
                   <div
                     className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg"
-                    style={{ backgroundColor: 'rgb(var(--first-septenary-rgb) / 0.18)' }}
+                    style={{
+                      backgroundColor: 'rgb(var(--first-septenary-rgb) / 0.18)',
+                    }}
                   >
                     <Ikona
                       className="h-4 w-4"
@@ -77,8 +77,8 @@ export function PostaniPartnerSection() {
             className="w-full max-w-sm flex-shrink-0 rounded-2xl p-8"
             style={{
               backgroundColor: 'rgb(255 255 255 / 0.07)',
-              border:          '1px solid rgb(255 255 255 / 0.15)',
-              backdropFilter:  'blur(12px)',
+              border: '1px solid rgb(255 255 255 / 0.15)',
+              backdropFilter: 'blur(12px)',
             }}
           >
             <p
@@ -102,7 +102,7 @@ export function PostaniPartnerSection() {
               className="inline-flex w-full items-center justify-center gap-2 rounded-xl py-3.5 text-base font-semibold transition-colors duration-200"
               style={{
                 backgroundColor: 'var(--first-septenary)',
-                color:           'var(--first-octonary)',
+                color: 'var(--first-octonary)',
               }}
             >
               Aplicirajte sada

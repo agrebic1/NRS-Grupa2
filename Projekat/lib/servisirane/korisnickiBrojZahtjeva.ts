@@ -5,16 +5,19 @@ import { inicijaliPodnosiocaKratko } from '@/lib/servisirane/zahtjevPrikaz';
  * Isto kao zbroj zahtjeva nakon novog unosa (POST count).
  */
 
-export function dodijeliKorisnickeBrojeveZahtjeva<T extends { id: number; created_at: string }>(
-  rows: T[]
-): (T & { korisnicki_broj_zahtjeva: number })[] {
+export function dodijeliKorisnickeBrojeveZahtjeva<
+  T extends { id: number; created_at: string },
+>(rows: T[]): (T & { korisnicki_broj_zahtjeva: number })[] {
   if (rows.length === 0) return [];
   const sortedAsc = [...rows].sort((a, b) => {
-    const t = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+    const t =
+      new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
     if (t !== 0) return t;
     return a.id - b.id;
   });
-  const idToBroj = new Map<number, number>(sortedAsc.map((r, i) => [r.id, i + 1]));
+  const idToBroj = new Map<number, number>(
+    sortedAsc.map((r, i) => [r.id, i + 1]),
+  );
   return rows.map((r) => ({
     ...r,
     korisnicki_broj_zahtjeva: idToBroj.get(r.id)!,
@@ -24,7 +27,7 @@ export function dodijeliKorisnickeBrojeveZahtjeva<T extends { id: number; create
 /** Niz mora biti sortiran kao kod dodjele (created_at ASC, id ASC). */
 export function korisnickiBrojZahtjevaZaId(
   redoviAsc: { id: number }[],
-  requestId: number
+  requestId: number,
 ): number | null {
   const idx = redoviAsc.findIndex((r) => r.id === requestId);
   return idx >= 0 ? idx + 1 : null;
@@ -33,7 +36,9 @@ export function korisnickiBrojZahtjevaZaId(
 type RedZaBrojPoKorisniku = { id: number; user_id: string; created_at: string };
 
 /** Svi zahtjevi (bilo koji status) grupisani po `user_id`: najstariji = 1. */
-export function korisnickiBrojeviMapPoKorisniku(rows: RedZaBrojPoKorisniku[]): Map<number, number> {
+export function korisnickiBrojeviMapPoKorisniku(
+  rows: RedZaBrojPoKorisniku[],
+): Map<number, number> {
   const byUser = new Map<string, RedZaBrojPoKorisniku[]>();
   for (const r of rows) {
     const arr = byUser.get(r.user_id);
@@ -43,7 +48,8 @@ export function korisnickiBrojeviMapPoKorisniku(rows: RedZaBrojPoKorisniku[]): M
   const idToBroj = new Map<number, number>();
   for (const grupa of byUser.values()) {
     const sortedAsc = [...grupa].sort((a, b) => {
-      const t = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+      const t =
+        new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
       if (t !== 0) return t;
       return a.id - b.id;
     });

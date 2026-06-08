@@ -61,7 +61,7 @@ const Select = forwardRef<HTMLSelectElement, SelectProps>(
         {error && <ErrorMessage message={error} />}
       </div>
     );
-  }
+  },
 );
 
 Select.displayName = 'Select';

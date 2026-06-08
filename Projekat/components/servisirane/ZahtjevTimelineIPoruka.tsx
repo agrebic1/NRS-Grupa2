@@ -1,13 +1,22 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { Calendar, CalendarClock, ChevronRight, Info, User } from 'lucide-react';
+import {
+  Calendar,
+  CalendarClock,
+  ChevronRight,
+  Info,
+  User,
+} from 'lucide-react';
 import { DISPECER_PALETA_HITNOST } from '@/lib/servisirane/dispecerPaleta';
 
 /** Amber iz hitnosne palete - usklađeno s dispečerskim inboxom (srednji sloj). */
-const TIMELINE_IKONA_BOJA = { color: DISPECER_PALETA_HITNOST.Srednja.tekst } as const;
+const TIMELINE_IKONA_BOJA = {
+  color: DISPECER_PALETA_HITNOST.Srednja.tekst,
+} as const;
 const TIMELINE_IKONA_KLASA = 'h-4 w-4 shrink-0';
-const TIMELINE_DATUM_KLASA = 'm-0 text-[14px] font-bold tabular-nums leading-tight';
+const TIMELINE_DATUM_KLASA =
+  'm-0 text-[14px] font-bold tabular-nums leading-tight';
 const TIMELINE_OZNAKA_KLASA = 'm-0 text-[11px] font-normal leading-tight';
 const TIMELINE_OZNAKA_BOJA = { color: 'var(--text-secondary)' } as const;
 const TIMELINE_OZNAKA_UVLAČENJE_KLASA = 'pl-6';
@@ -40,8 +49,15 @@ export function ZahtjevMiniTimeline({
       >
         <div className="flex flex-col gap-1 md:contents">
           <div className="flex min-w-0 gap-2 md:col-start-1 md:row-start-1">
-            <Calendar className={TIMELINE_IKONA_KLASA} style={TIMELINE_IKONA_BOJA} aria-hidden />
-            <p className={`${TIMELINE_DATUM_KLASA} min-w-0`} style={{ color: 'var(--text-primary)' }}>
+            <Calendar
+              className={TIMELINE_IKONA_KLASA}
+              style={TIMELINE_IKONA_BOJA}
+              aria-hidden
+            />
+            <p
+              className={`${TIMELINE_DATUM_KLASA} min-w-0`}
+              style={{ color: 'var(--text-primary)' }}
+            >
               {prijavljenoTekst}
             </p>
           </div>
@@ -83,9 +99,16 @@ export function ZahtjevMiniTimeline({
 
         <div className="flex flex-col gap-1 md:contents">
           <div className="flex min-w-0 gap-2 md:col-start-3 md:row-start-1">
-            <CalendarClock className={TIMELINE_IKONA_KLASA} style={TIMELINE_IKONA_BOJA} aria-hidden />
+            <CalendarClock
+              className={TIMELINE_IKONA_KLASA}
+              style={TIMELINE_IKONA_BOJA}
+              aria-hidden
+            />
             <div className="flex min-w-0 flex-wrap items-center gap-x-1.5 gap-y-0.5">
-              <span className={TIMELINE_DATUM_KLASA} style={{ color: 'var(--text-primary)' }}>
+              <span
+                className={TIMELINE_DATUM_KLASA}
+                style={{ color: 'var(--text-primary)' }}
+              >
                 {terminTekst}
               </span>
             </div>
@@ -99,7 +122,10 @@ export function ZahtjevMiniTimeline({
         </div>
       </div>
       {napomenaIspod ? (
-        <div className="mt-2 text-xs leading-snug" style={{ color: 'var(--text-secondary)' }}>
+        <div
+          className="mt-2 text-xs leading-snug"
+          style={{ color: 'var(--text-secondary)' }}
+        >
           {napomenaIspod}
         </div>
       ) : null}
@@ -115,9 +141,11 @@ export function ZahtjevTerminDetaljBlokovi({
   prijavljenoTekst: string;
   terminTekst: string;
 }) {
-  const labelCls = 'mb-0.5 text-[10px] font-semibold uppercase tracking-[0.12em]';
+  const labelCls =
+    'mb-0.5 text-[10px] font-semibold uppercase tracking-[0.12em]';
   const labelStyle = { color: 'rgb(var(--first-nonary-rgb) / 0.84)' } as const;
-  const valCls = 'text-[15px] font-semibold tabular-nums leading-snug tracking-tight';
+  const valCls =
+    'text-[15px] font-semibold tabular-nums leading-snug tracking-tight';
 
   return (
     <div className="min-w-0">
@@ -143,7 +171,10 @@ export function ZahtjevTerminDetaljBlokovi({
           <p className={`${labelCls} sm:text-right`} style={labelStyle}>
             Preferirani termin
           </p>
-          <p className={`${valCls} break-words sm:text-right`} style={{ color: 'var(--first-octonary)' }}>
+          <p
+            className={`${valCls} break-words sm:text-right`}
+            style={{ color: 'var(--first-octonary)' }}
+          >
             {terminTekst}
           </p>
         </div>
@@ -174,7 +205,11 @@ export function ZahtjevKorisnickaPorukaBubble({
   if (!t) return null;
 
   return (
-    <div className={['flex w-full flex-nowrap items-start gap-2', className].filter(Boolean).join(' ')}>
+    <div
+      className={['flex w-full flex-nowrap items-start gap-2', className]
+        .filter(Boolean)
+        .join(' ')}
+    >
       <div
         className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full"
         style={{
@@ -182,7 +217,11 @@ export function ZahtjevKorisnickaPorukaBubble({
           border: '1px solid rgb(var(--first-secondary-rgb) / 0.32)',
         }}
       >
-        <User className="h-3.5 w-3.5" style={{ color: 'var(--text-secondary)' }} aria-hidden />
+        <User
+          className="h-3.5 w-3.5"
+          style={{ color: 'var(--text-secondary)' }}
+          aria-hidden
+        />
       </div>
       <div
         className="box-border min-w-0 shrink break-words py-2.5 px-[14px]"
@@ -200,7 +239,10 @@ export function ZahtjevKorisnickaPorukaBubble({
           Poruka korisnika
         </p>
         <p
-          className={['m-0 text-[14px] font-normal leading-[1.6]', lineClamp ? 'line-clamp-2' : '']
+          className={[
+            'm-0 text-[14px] font-normal leading-[1.6]',
+            lineClamp ? 'line-clamp-2' : '',
+          ]
             .filter(Boolean)
             .join(' ')}
           style={{ color: 'var(--text-secondary)' }}

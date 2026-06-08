@@ -1,7 +1,10 @@
 'use client';
 
 import { Search, X } from 'lucide-react';
-import type { StatusFilterKorisnika, UlogaFilterKorisnika } from '@/lib/admin/korisniciFilter';
+import type {
+  StatusFilterKorisnika,
+  UlogaFilterKorisnika,
+} from '@/lib/admin/korisniciFilter';
 import type { StatusKorisnika } from '@/lib/admin/statusKorisnika';
 
 const STATUS_OPCIJE: { value: StatusFilterKorisnika; label: string }[] = [
@@ -39,7 +42,9 @@ export function AdminKorisniciPretragaFilter({
   brojRezultata,
 }: AdminKorisniciPretragaFilterProps) {
   const imaAktivneFiltere =
-    pretraga.trim().length > 0 || statusFilter !== 'svi' || ulogaFilter !== 'svi';
+    pretraga.trim().length > 0 ||
+    statusFilter !== 'svi' ||
+    ulogaFilter !== 'svi';
 
   function resetujFiltere() {
     onPretragaChange('');
@@ -72,7 +77,11 @@ export function AdminKorisniciPretragaFilter({
               backgroundColor: 'rgb(255 255 255 / 0.92)',
             }}
           >
-            <Search className="h-4 w-4 flex-shrink-0" aria-hidden style={{ color: 'var(--first-nonary)' }} />
+            <Search
+              className="h-4 w-4 flex-shrink-0"
+              aria-hidden
+              style={{ color: 'var(--first-nonary)' }}
+            />
             <input
               id="admin-korisnici-pretraga"
               type="search"
@@ -90,17 +99,30 @@ export function AdminKorisniciPretragaFilter({
                 className="flex h-7 w-7 items-center justify-center rounded-lg transition hover:bg-black/[0.05]"
                 aria-label="Obriši pretragu"
               >
-                <X className="h-3.5 w-3.5" style={{ color: 'var(--first-nonary)' }} />
+                <X
+                  className="h-3.5 w-3.5"
+                  style={{ color: 'var(--first-nonary)' }}
+                />
               </button>
             )}
           </div>
-          <p id="admin-korisnici-pretraga-hint" className="mt-1 text-xs" style={{ color: 'var(--first-nonary)' }}>
+          <p
+            id="admin-korisnici-pretraga-hint"
+            className="mt-1 text-xs"
+            style={{ color: 'var(--first-nonary)' }}
+          >
             Filtrira listu po imenu, prezimenu, emailu ili nazivu uloge.
           </p>
         </div>
         {typeof brojRezultata === 'number' && (
-          <p className="shrink-0 text-sm tabular-nums" style={{ color: 'var(--first-nonary)' }}>
-            <span className="font-semibold" style={{ color: 'var(--first-octonary)' }}>
+          <p
+            className="shrink-0 text-sm tabular-nums"
+            style={{ color: 'var(--first-nonary)' }}
+          >
+            <span
+              className="font-semibold"
+              style={{ color: 'var(--first-octonary)' }}
+            >
               {brojRezultata}
             </span>{' '}
             {brojRezultata === 1 ? 'rezultat' : 'rezultata'}
@@ -110,13 +132,18 @@ export function AdminKorisniciPretragaFilter({
 
       <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
         <div className="flex min-w-0 flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
-          <span className="text-xs font-semibold shrink-0" style={{ color: 'var(--first-nonary)' }}>
+          <span
+            className="text-xs font-semibold shrink-0"
+            style={{ color: 'var(--first-nonary)' }}
+          >
             Status:
           </span>
           <select
             id="admin-korisnici-status-filter"
             value={statusFilter}
-            onChange={(e) => onStatusFilterChange(e.target.value as StatusKorisnika | 'svi')}
+            onChange={(e) =>
+              onStatusFilterChange(e.target.value as StatusKorisnika | 'svi')
+            }
             className="rounded-xl border px-3 py-2 text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-celestial-teal/30"
             style={{
               borderColor: 'rgb(var(--first-quaternary-rgb) / 0.45)',
@@ -134,13 +161,18 @@ export function AdminKorisniciPretragaFilter({
         </div>
 
         <div className="flex min-w-0 flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
-          <span className="text-xs font-semibold shrink-0" style={{ color: 'var(--first-nonary)' }}>
+          <span
+            className="text-xs font-semibold shrink-0"
+            style={{ color: 'var(--first-nonary)' }}
+          >
             Uloga:
           </span>
           <select
             id="admin-korisnici-uloga-filter"
             value={ulogaFilter}
-            onChange={(e) => onUlogaFilterChange(e.target.value as UlogaFilterKorisnika)}
+            onChange={(e) =>
+              onUlogaFilterChange(e.target.value as UlogaFilterKorisnika)
+            }
             className="rounded-xl border px-3 py-2 text-sm font-medium focus:outline-none focus-visible:ring-2 focus-visible:ring-celestial-teal/30"
             style={{
               borderColor: 'rgb(var(--first-quaternary-rgb) / 0.45)',

@@ -21,23 +21,25 @@ jest.mock('@/lib/servisirane/dispecerPristup', () => ({
 }));
 
 jest.mock('@/lib/servisirane/notifikacijeHelper', () => ({
-  notifPromjenaIzvrsioca:    jest.fn().mockResolvedValue(undefined),
-  notifUklanjanjeServisera:  jest.fn().mockResolvedValue(undefined),
-  notifDodjelaIntervencije:  jest.fn().mockResolvedValue(undefined),
+  notifPromjenaIzvrsioca: jest.fn().mockResolvedValue(undefined),
+  notifUklanjanjeServisera: jest.fn().mockResolvedValue(undefined),
+  notifDodjelaIntervencije: jest.fn().mockResolvedValue(undefined),
 }));
 
 const { PATCH } = require('@/app/api/dispecer/zahtjevi/[id]/route');
 
 function flexChain() {
   return {
-    select:      jest.fn().mockReturnThis(),
-    eq:          jest.fn().mockReturnThis(),
-    order:       jest.fn().mockReturnThis(),
-    limit:       jest.fn().mockReturnThis(),
-    single:      jest.fn().mockResolvedValue({ data: null, error: null }),
+    select: jest.fn().mockReturnThis(),
+    eq: jest.fn().mockReturnThis(),
+    order: jest.fn().mockReturnThis(),
+    limit: jest.fn().mockReturnThis(),
+    single: jest.fn().mockResolvedValue({ data: null, error: null }),
     maybeSingle: jest.fn().mockResolvedValue({ data: null, error: null }),
-    insert:      jest.fn().mockResolvedValue({ data: null, error: null }),
-    update:      jest.fn(() => ({ eq: jest.fn().mockResolvedValue({ error: null }) })),
+    insert: jest.fn().mockResolvedValue({ data: null, error: null }),
+    update: jest.fn(() => ({
+      eq: jest.fn().mockResolvedValue({ error: null }),
+    })),
   };
 }
 
@@ -192,7 +194,9 @@ describe('/api/dispecer/zahtjevi/[id] - Sprint 9 (US-28)', () => {
     mockAssertDispatcherAccess.mockResolvedValue(true);
 
     const onUpdate = jest.fn();
-    const onActivityInsert = jest.fn().mockResolvedValue({ data: null, error: null });
+    const onActivityInsert = jest
+      .fn()
+      .mockResolvedValue({ data: null, error: null });
     let srCalls = 0;
 
     mockFrom.mockImplementation((table) => {
@@ -249,7 +253,9 @@ describe('/api/dispecer/zahtjevi/[id] - Sprint 9 (US-28)', () => {
     expect(response.status).toBe(200);
     expect(body.success).toBe(true);
     expect(body.novi_serviser_id).toBe(SERVISER_B);
-    expect(onUpdate).toHaveBeenCalledWith({ serviser_dodijeljen_id: SERVISER_B });
+    expect(onUpdate).toHaveBeenCalledWith({
+      serviser_dodijeljen_id: SERVISER_B,
+    });
     expect(onActivityInsert).toHaveBeenCalledWith(
       expect.objectContaining({
         tip: 'promjena_izvrsioca',

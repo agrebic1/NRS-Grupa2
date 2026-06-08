@@ -3,7 +3,7 @@ import { Providers } from './providers';
 import '../styles/globals.css';
 
 export const metadata: Metadata = {
-  title: 'Servisni sistem',
+  title: 'InterServ',
   description: 'Sistem za upravljanje servisnim intervencijama',
 };
 

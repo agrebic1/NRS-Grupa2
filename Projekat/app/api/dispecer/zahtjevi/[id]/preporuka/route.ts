@@ -11,13 +11,21 @@ export const dynamic = 'force-dynamic';
  * adresu (OpenStreetMap/Nominatim) da bi geo-preporuka radila i bez GPS-a.
  * Best-effort: kratak timeout, tihi povratak na null pri grešci.
  */
-async function geokodirajAdresu(adresa: string): Promise<{ lat: number; lon: number } | null> {
+async function geokodirajAdresu(
+  adresa: string,
+): Promise<{ lat: number; lon: number } | null> {
   try {
     const ctrl = new AbortController();
     const t = setTimeout(() => ctrl.abort(), 3500);
     const r = await fetch(
       `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(adresa)}&format=json&limit=1&countrycodes=ba,hr,rs,si`,
-      { headers: { 'User-Agent': 'NRS-Servisirane/1.0', Accept: 'application/json' }, signal: ctrl.signal },
+      {
+        headers: {
+          'User-Agent': 'NRS-Servisirane/1.0',
+          Accept: 'application/json',
+        },
+        signal: ctrl.signal,
+      },
     );
     clearTimeout(t);
     if (!r.ok) return null;
@@ -34,16 +42,23 @@ async function geokodirajAdresu(adresa: string): Promise<{ lat: number; lon: num
 }
 
 export async function GET(
-  req:    NextRequest,
-  { params }: { params: { id: string } }
+  req: NextRequest,
+  { params }: { params: { id: string } },
 ) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return NextResponse.json({ error: 'Niste prijavljeni.' }, { status: 401 });
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user)
+      return NextResponse.json(
+        { error: 'Niste prijavljeni.' },
+        { status: 401 },
+      );
 
     const imaPriv = await assertDispatcherAccess(supabase, user.id);
-    if (!imaPriv) return NextResponse.json({ error: 'Pristup odbijen.' }, { status: 403 });
+    if (!imaPriv)
+      return NextResponse.json({ error: 'Pristup odbijen.' }, { status: 403 });
 
     const db = supabase as any;
 
@@ -65,11 +80,16 @@ export async function GET(
       .single();
 
     // US-48: koordinate zahtjeva — iz GPS-a ako postoje, inače geokodiraj adresu (fallback).
-    let zahtjevLat: number | null = typeof zahtjev?.latitude  === 'number' ? zahtjev.latitude  : null;
-    let zahtjevLng: number | null = typeof zahtjev?.longitude === 'number' ? zahtjev.longitude : null;
+    let zahtjevLat: number | null =
+      typeof zahtjev?.latitude === 'number' ? zahtjev.latitude : null;
+    let zahtjevLng: number | null =
+      typeof zahtjev?.longitude === 'number' ? zahtjev.longitude : null;
     if ((zahtjevLat == null || zahtjevLng == null) && zahtjev?.address) {
       const geo = await geokodirajAdresu(zahtjev.address);
-      if (geo) { zahtjevLat = geo.lat; zahtjevLng = geo.lon; }
+      if (geo) {
+        zahtjevLat = geo.lat;
+        zahtjevLng = geo.lon;
+      }
     }
 
     // Parse excluded IDs: ?izuzeti=uuid1,uuid2
@@ -85,31 +105,40 @@ export async function GET(
       .ilike('naziv', 'Serviser')
       .maybeSingle();
 
-    if (ulogaError) return NextResponse.json({ error: ulogaError.message }, { status: 500 });
+    if (ulogaError)
+      return NextResponse.json({ error: ulogaError.message }, { status: 500 });
     if (!ulogaPodaci) return NextResponse.json({ preporuke: [] });
 
     const { data: uposlenici, error } = await dbEmp
       .from('uposlenici')
-      .select(`
+      .select(
+        `
         id_uposlenika,
         is_verified,
         osoba!id_uposlenika(ime, prezime, bazna_latitude, bazna_longitude)
-      `)
+      `,
+      )
       .eq('id_uloge', ulogaPodaci.id_uloge);
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error)
+      return NextResponse.json({ error: error.message }, { status: 500 });
 
     // Filtriraj suspendirane korisnike (banned_until > sada u auth.users).
     let aktivniUposlenici = uposlenici ?? [];
     if (adminClient && aktivniUposlenici.length > 0) {
-      const { data: authData } = await adminClient.auth.admin.listUsers({ perPage: 1000, page: 1 });
+      const { data: authData } = await adminClient.auth.admin.listUsers({
+        perPage: 1000,
+        page: 1,
+      });
       const sada = new Date();
       const suspendovaniIds = new Set(
         (authData?.users ?? [])
-          .filter(u => u.banned_until && new Date(u.banned_until) > sada)
-          .map(u => u.id)
+          .filter((u) => u.banned_until && new Date(u.banned_until) > sada)
+          .map((u) => u.id),
       );
-      aktivniUposlenici = aktivniUposlenici.filter((u: any) => !suspendovaniIds.has(u.id_uposlenika));
+      aktivniUposlenici = aktivniUposlenici.filter(
+        (u: any) => !suspendovaniIds.has(u.id_uposlenika),
+      );
     }
 
     const serviseriIds = aktivniUposlenici.map((u: any) => u.id_uposlenika);
@@ -124,26 +153,30 @@ export async function GET(
         .not('status', 'in', '("zavrseno","otkazano","odbijeno","zatvoreno")');
 
       if (zadaci) {
-        aktivniMap = (zadaci as any[]).reduce<Record<string, number>>((acc, z) => {
-          if (z.serviser_dodijeljen_id) {
-            acc[z.serviser_dodijeljen_id] = (acc[z.serviser_dodijeljen_id] ?? 0) + 1;
-          }
-          return acc;
-        }, {});
+        aktivniMap = (zadaci as any[]).reduce<Record<string, number>>(
+          (acc, z) => {
+            if (z.serviser_dodijeljen_id) {
+              acc[z.serviser_dodijeljen_id] =
+                (acc[z.serviser_dodijeljen_id] ?? 0) + 1;
+            }
+            return acc;
+          },
+          {},
+        );
       }
     }
 
     const serviseri = aktivniUposlenici.map((u: any) => {
       const osoba = Array.isArray(u.osoba) ? u.osoba[0] : u.osoba;
       return {
-        id:                u.id_uposlenika as string,
-        ime:               (osoba as any)?.ime  ?? '',
-        prezime:           (osoba as any)?.prezime ?? '',
-        is_verified:       Boolean(u.is_verified),
+        id: u.id_uposlenika as string,
+        ime: (osoba as any)?.ime ?? '',
+        prezime: (osoba as any)?.prezime ?? '',
+        is_verified: Boolean(u.is_verified),
         aktivnih_zadataka: aktivniMap[u.id_uposlenika] ?? 0,
-        specialnosti:      [] as string[],
-        latitude:          (osoba as any)?.bazna_latitude  ?? null,
-        longitude:         (osoba as any)?.bazna_longitude ?? null,
+        specialnosti: [] as string[],
+        latitude: (osoba as any)?.bazna_latitude ?? null,
+        longitude: (osoba as any)?.bazna_longitude ?? null,
       };
     });
 
@@ -161,7 +194,11 @@ export async function GET(
       .eq('zahtjev_id', params.id)
       .eq('tip', 'odbijanje');
     const odbijeniServiserIds: string[] = Array.from(
-      new Set((odbijanjeAktivnosti ?? []).map((a: any) => a.autor_id as string).filter(Boolean))
+      new Set(
+        (odbijanjeAktivnosti ?? [])
+          .map((a: any) => a.autor_id as string)
+          .filter(Boolean),
+      ),
     );
 
     return NextResponse.json({ preporuke, odbijeniServiserIds });

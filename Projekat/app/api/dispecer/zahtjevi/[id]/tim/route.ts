@@ -19,20 +19,25 @@ const dodajSchema = z.object({
 });
 
 /** GET /api/dispecer/zahtjevi/[id]/tim - lista pomoćnih servisera */
-export async function GET(
-  _req: Request,
-  { params }: { params: RouteParams }
-) {
+export async function GET(_req: Request, { params }: { params: RouteParams }) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return NextResponse.json({ error: 'Niste prijavljeni.' }, { status: 401 });
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user)
+      return NextResponse.json(
+        { error: 'Niste prijavljeni.' },
+        { status: 401 },
+      );
 
     const zahtjevId = await resolveId(params);
-    if (!zahtjevId) return NextResponse.json({ error: 'Neispravan ID.' }, { status: 400 });
+    if (!zahtjevId)
+      return NextResponse.json({ error: 'Neispravan ID.' }, { status: 400 });
 
     const imaPriv = await assertDispatcherAccess(supabase, user.id);
-    if (!imaPriv) return NextResponse.json({ error: 'Pristup odbijen.' }, { status: 403 });
+    if (!imaPriv)
+      return NextResponse.json({ error: 'Pristup odbijen.' }, { status: 403 });
 
     const db = supabase as any;
     const { data: tim, error } = await db
@@ -41,7 +46,8 @@ export async function GET(
       .eq('zahtjev_id', zahtjevId)
       .order('dodijeljeno_at', { ascending: true });
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error)
+      return NextResponse.json({ error: error.message }, { status: 500 });
 
     return NextResponse.json({
       tim: (tim ?? []).map((t: Record<string, unknown>) => ({
@@ -52,7 +58,7 @@ export async function GET(
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : 'Greška servera.' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -60,23 +66,34 @@ export async function GET(
 /** POST /api/dispecer/zahtjevi/[id]/tim - dodaj pomoćnog servisera */
 export async function POST(
   request: Request,
-  { params }: { params: RouteParams }
+  { params }: { params: RouteParams },
 ) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return NextResponse.json({ error: 'Niste prijavljeni.' }, { status: 401 });
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user)
+      return NextResponse.json(
+        { error: 'Niste prijavljeni.' },
+        { status: 401 },
+      );
 
     const zahtjevId = await resolveId(params);
-    if (!zahtjevId) return NextResponse.json({ error: 'Neispravan ID.' }, { status: 400 });
+    if (!zahtjevId)
+      return NextResponse.json({ error: 'Neispravan ID.' }, { status: 400 });
 
     const imaPriv = await assertDispatcherAccess(supabase, user.id);
-    if (!imaPriv) return NextResponse.json({ error: 'Pristup odbijen.' }, { status: 403 });
+    if (!imaPriv)
+      return NextResponse.json({ error: 'Pristup odbijen.' }, { status: 403 });
 
-    const body    = await request.json();
+    const body = await request.json();
     const rezultat = dodajSchema.safeParse(body);
     if (!rezultat.success) {
-      return NextResponse.json({ error: rezultat.error.errors[0].message }, { status: 400 });
+      return NextResponse.json(
+        { error: rezultat.error.errors[0].message },
+        { status: 400 },
+      );
     }
 
     const { serviser_id } = rezultat.data;
@@ -91,7 +108,10 @@ export async function POST(
       .maybeSingle();
 
     if (postoji) {
-      return NextResponse.json({ error: 'Serviser je već u timu ove intervencije.' }, { status: 409 });
+      return NextResponse.json(
+        { error: 'Serviser je već u timu ove intervencije.' },
+        { status: 409 },
+      );
     }
 
     // Provjeri da serviser nije glavni serviser na ovoj intervenciji
@@ -103,8 +123,11 @@ export async function POST(
 
     if (zahtjev?.serviser_dodijeljen_id === serviser_id) {
       return NextResponse.json(
-        { error: 'Serviser je već dodijeljen kao glavni serviser ove intervencije.' },
-        { status: 409 }
+        {
+          error:
+            'Serviser je već dodijeljen kao glavni serviser ove intervencije.',
+        },
+        { status: 409 },
       );
     }
 
@@ -112,10 +135,10 @@ export async function POST(
     const { data: noviClan, error: insertError } = await db
       .from('tim_intervencije')
       .insert({
-        zahtjev_id:    zahtjevId,
+        zahtjev_id: zahtjevId,
         serviser_id,
-        uloga:         'pomocni',
-        dodijelio_id:  user.id,
+        uloga: 'pomocni',
+        dodijelio_id: user.id,
       })
       .select('*, serviser:osoba!serviser_id(ime, prezime, broj_telefona)')
       .single();
@@ -125,15 +148,17 @@ export async function POST(
     }
 
     // Audit log
-    const clan = Array.isArray(noviClan.serviser) ? noviClan.serviser[0] : noviClan.serviser;
+    const clan = Array.isArray(noviClan.serviser)
+      ? noviClan.serviser[0]
+      : noviClan.serviser;
     const imeServisera = clan ? `${clan.ime} ${clan.prezime}` : serviser_id;
 
     await db.from('intervention_activities').insert({
       zahtjev_id: zahtjevId,
-      autor_id:   user.id,
-      tip:        'tim_dodjela',
-      sadrzaj:    `Dodan pomoćni serviser: ${imeServisera}`,
-      metadata:   { serviser_id, uloga: 'pomocni' },
+      autor_id: user.id,
+      tip: 'tim_dodjela',
+      sadrzaj: `Dodan pomoćni serviser: ${imeServisera}`,
+      metadata: { serviser_id, uloga: 'pomocni' },
     });
 
     // Notifikacija serviseru
@@ -146,7 +171,7 @@ export async function POST(
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : 'Greška servera.' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -154,23 +179,34 @@ export async function POST(
 /** DELETE /api/dispecer/zahtjevi/[id]/tim?serviser_id=UUID - ukloni pomoćnog servisera */
 export async function DELETE(
   request: Request,
-  { params }: { params: RouteParams }
+  { params }: { params: RouteParams },
 ) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return NextResponse.json({ error: 'Niste prijavljeni.' }, { status: 401 });
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user)
+      return NextResponse.json(
+        { error: 'Niste prijavljeni.' },
+        { status: 401 },
+      );
 
     const zahtjevId = await resolveId(params);
-    if (!zahtjevId) return NextResponse.json({ error: 'Neispravan ID.' }, { status: 400 });
+    if (!zahtjevId)
+      return NextResponse.json({ error: 'Neispravan ID.' }, { status: 400 });
 
     const imaPriv = await assertDispatcherAccess(supabase, user.id);
-    if (!imaPriv) return NextResponse.json({ error: 'Pristup odbijen.' }, { status: 403 });
+    if (!imaPriv)
+      return NextResponse.json({ error: 'Pristup odbijen.' }, { status: 403 });
 
-    const url         = new URL(request.url);
+    const url = new URL(request.url);
     const serviser_id = url.searchParams.get('serviser_id');
     if (!serviser_id) {
-      return NextResponse.json({ error: 'Parametar serviser_id je obavezan.' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Parametar serviser_id je obavezan.' },
+        { status: 400 },
+      );
     }
 
     const db = supabase as any;
@@ -184,7 +220,10 @@ export async function DELETE(
       .maybeSingle();
 
     if (!clan) {
-      return NextResponse.json({ error: 'Serviser nije pronađen u timu.' }, { status: 404 });
+      return NextResponse.json(
+        { error: 'Serviser nije pronađen u timu.' },
+        { status: 404 },
+      );
     }
 
     await db
@@ -193,22 +232,24 @@ export async function DELETE(
       .eq('zahtjev_id', zahtjevId)
       .eq('serviser_id', serviser_id);
 
-    const serv = Array.isArray(clan.serviser) ? clan.serviser[0] : clan.serviser;
+    const serv = Array.isArray(clan.serviser)
+      ? clan.serviser[0]
+      : clan.serviser;
     const imeServisera = serv ? `${serv.ime} ${serv.prezime}` : serviser_id;
 
     await db.from('intervention_activities').insert({
       zahtjev_id: zahtjevId,
-      autor_id:   user.id,
-      tip:        'tim_uklanjanje',
-      sadrzaj:    `Uklonjen pomoćni serviser: ${imeServisera}`,
-      metadata:   { serviser_id },
+      autor_id: user.id,
+      tip: 'tim_uklanjanje',
+      sadrzaj: `Uklonjen pomoćni serviser: ${imeServisera}`,
+      metadata: { serviser_id },
     });
 
     return NextResponse.json({ success: true });
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : 'Greška servera.' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

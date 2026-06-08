@@ -42,18 +42,17 @@ export const TERMINALNI_STATUSI_ZAHTJEVA = new Set<string>([
 export const PRAG_KORISNICKE_HITNOSTI_HITNO = 80;
 
 /** Statusi u kojima korisnik smije mijenjati ili otkazati zahtjev (service-requests PATCH). */
-export const STATUSI_ZA_KORISNICKU_IZMJENU: ReadonlySet<StatusZahtjeva> = new Set([
-  'na_cekanju',
-  'pending_review',
-]);
+export const STATUSI_ZA_KORISNICKU_IZMJENU: ReadonlySet<StatusZahtjeva> =
+  new Set(['na_cekanju', 'pending_review']);
 
 /** Aktivni zahtjevi u kojima dispečer smije mijenjati `final_priority` bez promjene statusa. */
-export const STATUSI_ZA_DISPECERSKU_IZMJENU_PRIORITETA: ReadonlySet<StatusZahtjeva> = new Set([
-  'pending_review',
-  'na_cekanju',
-  'in_review',
-  'potvrdeno',
-  'dodijeljeno',
-  'u_radu',
-  'u_izvrsenju',
-]);
+export const STATUSI_ZA_DISPECERSKU_IZMJENU_PRIORITETA: ReadonlySet<StatusZahtjeva> =
+  new Set([
+    'pending_review',
+    'na_cekanju',
+    'in_review',
+    'potvrdeno',
+    'dodijeljeno',
+    'u_radu',
+    'u_izvrsenju',
+  ]);

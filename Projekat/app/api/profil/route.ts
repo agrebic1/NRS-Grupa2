@@ -4,7 +4,12 @@ import { profilUpdateSchema } from '@/lib/validations/servisirane';
 
 export const dynamic = 'force-dynamic';
 
-type PremiumStatus = 'inactive' | 'pending_payment' | 'active' | 'expired' | 'cancelled';
+type PremiumStatus =
+  | 'inactive'
+  | 'pending_payment'
+  | 'active'
+  | 'expired'
+  | 'cancelled';
 
 export async function GET() {
   try {
@@ -14,14 +19,19 @@ export async function GET() {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json({ error: 'Niste prijavljeni.' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Niste prijavljeni.' },
+        { status: 401 },
+      );
     }
 
     const db = supabase as any;
 
     const { data: osoba, error: greskaOsoba } = await db
       .from('osoba')
-      .select('ime, prezime, broj_telefona, adresa, email, bazna_latitude, bazna_longitude')
+      .select(
+        'ime, prezime, broj_telefona, adresa, email, bazna_latitude, bazna_longitude',
+      )
       .eq('id_osobe', user.id)
       .maybeSingle();
 
@@ -35,7 +45,7 @@ export async function GET() {
     let { data: korisnikUsluge, error: korisnikUslugeErr } = await db
       .from('korisnik_usluge')
       .select(
-        'id_korisnika_usluge, is_premium, premium_status, premium_started_at, premium_expires_at, premium_plan, premium_cancelled_at, premium_cancel_reason'
+        'id_korisnika_usluge, is_premium, premium_status, premium_started_at, premium_expires_at, premium_plan, premium_cancelled_at, premium_cancel_reason',
       )
       .eq('id_korisnika_usluge', user.id)
       .maybeSingle();
@@ -46,7 +56,7 @@ export async function GET() {
       const fallback = await db
         .from('korisnik_usluge')
         .select(
-          'id_korisnika_usluge, is_premium, premium_status, premium_started_at, premium_expires_at, premium_plan'
+          'id_korisnika_usluge, is_premium, premium_status, premium_started_at, premium_expires_at, premium_plan',
         )
         .eq('id_korisnika_usluge', user.id)
         .maybeSingle();
@@ -72,12 +82,18 @@ export async function GET() {
       korisnikUslugeErr = fallback.error;
     }
     if (korisnikUslugeErr) {
-      return NextResponse.json({ error: korisnikUslugeErr.message }, { status: 500 });
+      return NextResponse.json(
+        { error: korisnikUslugeErr.message },
+        { status: 500 },
+      );
     }
 
-    const premiumStatus = (korisnikUsluge?.premium_status as PremiumStatus | null | undefined) ?? 'inactive';
+    const premiumStatus =
+      (korisnikUsluge?.premium_status as PremiumStatus | null | undefined) ??
+      'inactive';
     const isPremium =
-      premiumStatus === 'active' || (korisnikUsluge?.is_premium === true && !korisnikUsluge?.premium_status);
+      premiumStatus === 'active' ||
+      (korisnikUsluge?.is_premium === true && !korisnikUsluge?.premium_status);
 
     if (korisnikUsluge) uloge.push('korisnik');
 
@@ -92,8 +108,8 @@ export async function GET() {
       const nazivi = Array.isArray(uposlenik.uloga)
         ? (uposlenik.uloga as { naziv: string }[]).map((u) => u.naziv)
         : uposlenik.uloga
-        ? [(uposlenik.uloga as { naziv: string }).naziv]
-        : [];
+          ? [(uposlenik.uloga as { naziv: string }).naziv]
+          : [];
 
       for (const naziv of nazivi) {
         const n = naziv?.toLowerCase();
@@ -105,25 +121,35 @@ export async function GET() {
 
     return NextResponse.json({
       profil: {
-        id:            user.id,
-        ime:           osoba?.ime ?? '',
-        prezime:       osoba?.prezime ?? '',
-        email:         osoba?.email ?? user.email ?? '',
+        id: user.id,
+        ime: osoba?.ime ?? '',
+        prezime: osoba?.prezime ?? '',
+        email: osoba?.email ?? user.email ?? '',
         broj_telefona: osoba?.broj_telefona ?? null,
-        adresa:        osoba?.adresa ?? null,
-        bazna_latitude:  osoba?.bazna_latitude  ?? null,
+        adresa: osoba?.adresa ?? null,
+        bazna_latitude: osoba?.bazna_latitude ?? null,
         bazna_longitude: osoba?.bazna_longitude ?? null,
         uloge,
-        is_verified:   isVerified,
-        is_premium:    isPremium,
+        is_verified: isVerified,
+        is_premium: isPremium,
         premium_status: premiumStatus,
         premium_started_at: korisnikUsluge?.premium_started_at ?? null,
         premium_expires_at: korisnikUsluge?.premium_expires_at ?? null,
         premium_plan: korisnikUsluge?.premium_plan ?? null,
         premium_cancelled_at:
-          (korisnikUsluge as { premium_cancelled_at?: string | null } | null | undefined)?.premium_cancelled_at ?? null,
+          (
+            korisnikUsluge as
+              | { premium_cancelled_at?: string | null }
+              | null
+              | undefined
+          )?.premium_cancelled_at ?? null,
         premium_cancel_reason:
-          (korisnikUsluge as { premium_cancel_reason?: string | null } | null | undefined)?.premium_cancel_reason ?? null,
+          (
+            korisnikUsluge as
+              | { premium_cancel_reason?: string | null }
+              | null
+              | undefined
+          )?.premium_cancel_reason ?? null,
       },
     });
   } catch (err) {
@@ -140,7 +166,10 @@ export async function PATCH(request: Request) {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json({ error: 'Niste prijavljeni.' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Niste prijavljeni.' },
+        { status: 401 },
+      );
     }
 
     const body = await request.json();
@@ -149,7 +178,7 @@ export async function PATCH(request: Request) {
     if (!rezultat.success) {
       return NextResponse.json(
         { error: rezultat.error.errors[0].message },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -178,24 +207,27 @@ export async function PATCH(request: Request) {
       .update(rezultat.data)
       .eq('id_osobe', user.id);
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error)
+      return NextResponse.json({ error: error.message }, { status: 500 });
 
     // Audit log za promjenu bazne lokacije (US-51) — fire-and-forget, ne blokira odgovor
     if (mijenjaLokaciju) {
       const novaLat = rezultat.data.bazna_latitude ?? null;
       const novaLng = rezultat.data.bazna_longitude ?? null;
-      const lokacijaPromijenjena =
-        staraLat !== novaLat || staraLng !== novaLng;
+      const lokacijaPromijenjena = staraLat !== novaLat || staraLng !== novaLng;
 
       if (lokacijaPromijenjena) {
-        db.from('profil_log').insert({
-          user_id:   user.id,
-          tip:       'bazna_lokacija',
-          staro_lat: staraLat,
-          staro_lng: staraLng,
-          novo_lat:  novaLat,
-          novo_lng:  novaLng,
-        }).then(() => {}).catch(() => {}); // ne blokira odgovor
+        db.from('profil_log')
+          .insert({
+            user_id: user.id,
+            tip: 'bazna_lokacija',
+            staro_lat: staraLat,
+            staro_lng: staraLng,
+            novo_lat: novaLat,
+            novo_lng: novaLng,
+          })
+          .then(() => {})
+          .catch(() => {}); // ne blokira odgovor
       }
     }
 

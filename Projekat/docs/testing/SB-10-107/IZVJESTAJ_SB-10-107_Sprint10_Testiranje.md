@@ -23,12 +23,12 @@ Napomena S10-T1: `rbac.cross-access.spec.ts` prolazi nakon usklađivanja middlew
 
 Regresija MVP (US-01–US-47) i fokus Sprint 10 (US-48–US-50, S10-T1):
 
-| Grupa | Originalni ID | TC-S10 opseg | Broj | Tester |
-|-------|---------------|--------------|-----:|--------|
-| Korisnik | T1-01 – T1-28 | TC-S10-001 – TC-S10-028 | 28 | Suada Peci |
-| Dispečer | T2-01 – T2-28 | TC-S10-029 – TC-S10-056 | 28 | Kerim Gazić |
-| Serviser | T3-01 – T3-25 | TC-S10-057 – TC-S10-081 | 25 | Eldin Begić |
-| Admin / RBAC | T4-01 – T4-26 | TC-S10-082 – TC-S10-107 | 26 | Hamza Bunar |
+| Grupa        | Originalni ID | TC-S10 opseg            | Broj | Tester      |
+| ------------ | ------------- | ----------------------- | ---: | ----------- |
+| Korisnik     | T1-01 – T1-28 | TC-S10-001 – TC-S10-028 |   28 | Suada Peci  |
+| Dispečer     | T2-01 – T2-28 | TC-S10-029 – TC-S10-056 |   28 | Kerim Gazić |
+| Serviser     | T3-01 – T3-25 | TC-S10-057 – TC-S10-081 |   25 | Eldin Begić |
+| Admin / RBAC | T4-01 – T4-26 | TC-S10-082 – TC-S10-107 |   26 | Hamza Bunar |
 
 ## Manualni testovi
 

@@ -25,10 +25,18 @@ function jeEmailValidan(email: string) {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
-function mapirajAuthGresku(greska: { message: string; status?: number; code?: string }) {
+function mapirajAuthGresku(greska: {
+  message: string;
+  status?: number;
+  code?: string;
+}) {
   const poruka = greska.message?.toLowerCase() ?? '';
 
-  if (greska.status === 429 || poruka.includes('too many requests') || poruka.includes('rate limit')) {
+  if (
+    greska.status === 429 ||
+    poruka.includes('too many requests') ||
+    poruka.includes('rate limit')
+  ) {
     return 'Previše pokušaja registracije. Sačekajte 1-2 minute i pokušajte ponovo.';
   }
 
@@ -47,7 +55,11 @@ function mapirajAuthGresku(greska: { message: string; status?: number; code?: st
 function mapirajResendGresku(greska: { message: string; status?: number }) {
   const poruka = greska.message?.toLowerCase() ?? '';
 
-  if (greska.status === 429 || poruka.includes('too many') || poruka.includes('rate limit')) {
+  if (
+    greska.status === 429 ||
+    poruka.includes('too many') ||
+    poruka.includes('rate limit')
+  ) {
     return 'Previše zahtjeva za novi link. Sačekajte nekoliko minuta i pokušajte ponovo.';
   }
 
@@ -66,9 +78,12 @@ function mapirajResendGresku(greska: { message: string; status?: number }) {
   return 'Slanje verifikacijskog emaila nije uspjelo. Pokušajte ponovo.';
 }
 
-// Prijava 
+// Prijava
 
-export async function prijaviSeEmailom(podaci: { email: string; lozinka: string }) {
+export async function prijaviSeEmailom(podaci: {
+  email: string;
+  lozinka: string;
+}) {
   const supabase = kreirajKlijenta();
   const email = normalizujEmail(podaci.email);
 
@@ -82,7 +97,8 @@ export async function prijaviSeEmailom(podaci: { email: string; lozinka: string 
   });
 
   if (error) {
-    const { poruka, evidentirajNeuspjesanPokusaj } = mapirajGreskuPrijaveSupabase(error);
+    const { poruka, evidentirajNeuspjesanPokusaj } =
+      mapirajGreskuPrijaveSupabase(error);
     if (evidentirajNeuspjesanPokusaj) recordFailedLoginAttempt(email);
     throw new Error(poruka);
   }
@@ -101,7 +117,9 @@ export async function posaljiPonovoVerifikacijskiEmail(emailAdresa: string) {
 
   const emailRedirectTo = getAuthEmailRedirectUrl();
   if (!emailRedirectTo) {
-    throw new Error('Potvrda emaila nije konfigurisana (NEXT_PUBLIC_SITE_URL).');
+    throw new Error(
+      'Potvrda emaila nije konfigurisana (NEXT_PUBLIC_SITE_URL).',
+    );
   }
 
   const { error } = await supabase.auth.resend({
@@ -123,7 +141,7 @@ export class PotrebnaPotvrdaEmailaError extends Error {
 
   constructor(email: string) {
     super(
-      'Na vašu adresu poslan je link za potvrdu naloga. Otvorite inbox, potvrdite nalog, pa se prijavite.'
+      'Na vašu adresu poslan je link za potvrdu naloga. Otvorite inbox, potvrdite nalog, pa se prijavite.',
     );
     this.name = 'PotrebnaPotvrdaEmailaError';
     this.email = email;
@@ -170,24 +188,28 @@ export async function registrujKorisnika(podaci: {
 
   // Supabase za postojeći email može vratiti "uspjeh" bez error-a (anti-enumeration).
   if (jeMaskiraniDuplikat) {
-    throw new Error('Nalog sa ovom email adresom već postoji. Koristite prijavu ili reset lozinke.');
+    throw new Error(
+      'Nalog sa ovom email adresom već postoji. Koristite prijavu ili reset lozinke.',
+    );
   }
 
   let sesija = authPodaci.session;
   let korisnik = authPodaci.user;
 
   if (!sesija) {
-    const { data: prijavaPodaci, error: greskaPrijava } = await supabase.auth.signInWithPassword({
-      email,
-      password: podaci.lozinka,
-    });
+    const { data: prijavaPodaci, error: greskaPrijava } =
+      await supabase.auth.signInWithPassword({
+        email,
+        password: podaci.lozinka,
+      });
 
     if (greskaPrijava) {
       const sy = greskaPrijava.message?.toLowerCase() ?? '';
       if (sy.includes('email not confirmed') || sy.includes('not confirmed')) {
         throw new PotrebnaPotvrdaEmailaError(email);
       }
-      const { poruka, evidentirajNeuspjesanPokusaj } = mapirajGreskuPrijaveSupabase(greskaPrijava);
+      const { poruka, evidentirajNeuspjesanPokusaj } =
+        mapirajGreskuPrijaveSupabase(greskaPrijava);
       if (evidentirajNeuspjesanPokusaj) recordFailedLoginAttempt(email);
       throw new Error(poruka);
     }
@@ -207,7 +229,7 @@ export async function registrujKorisnika(podaci: {
   return { user: korisnik, session: sesija };
 }
 
-// Detekcija uloga 
+// Detekcija uloga
 
 function mapirajNazivUloge(naziv: string | null | undefined): UserRole | null {
   const normalizovanNaziv = naziv?.toLowerCase();
@@ -230,7 +252,9 @@ function mapirajNazivUloge(naziv: string | null | undefined): UserRole | null {
   }
 }
 
-export async function getUlogeKorisnika(idKorisnika: string): Promise<UserRole[]> {
+export async function getUlogeKorisnika(
+  idKorisnika: string,
+): Promise<UserRole[]> {
   const supabase = kreirajKlijenta();
   const pronadjeneUloge: UserRole[] = [];
 
@@ -281,9 +305,11 @@ export async function getUlogeKorisnika(idKorisnika: string): Promise<UserRole[]
   return pronadjeneUloge;
 }
 
-// Određivanje redirect-a nakon prijave 
+// Određivanje redirect-a nakon prijave
 
-export async function odrediRedirectNakonPrijave(idKorisnika: string): Promise<string> {
+export async function odrediRedirectNakonPrijave(
+  idKorisnika: string,
+): Promise<string> {
   const uloge = await getUlogeKorisnika(idKorisnika);
 
   // Jedna uloga → direktno na odgovarajući dashboard
@@ -293,7 +319,7 @@ export async function odrediRedirectNakonPrijave(idKorisnika: string): Promise<s
   return '/odabir-uloge';
 }
 
-// Session helpers 
+// Session helpers
 
 export async function odjaviSe() {
   const supabase = kreirajKlijenta();
@@ -303,6 +329,8 @@ export async function odjaviSe() {
 
 export async function getTrenutnogKorisnika() {
   const supabase = kreirajKlijenta();
-  const { data: { user } } = await supabase.auth.getUser();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   return user;
 }

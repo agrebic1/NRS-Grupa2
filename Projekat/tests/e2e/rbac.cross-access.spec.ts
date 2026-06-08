@@ -28,9 +28,14 @@ test.describe('RBAC cross-access', () => {
   const serviser = ucitajKredencijale('serviser');
   const dispecer = ucitajKredencijale('dispecer');
 
-  test.skip(!serviser || !dispecer, 'Missing E2E role credentials in environment variables.');
+  test.skip(
+    !serviser || !dispecer,
+    'Missing E2E role credentials in environment variables.',
+  );
 
-  test('serviser moze korisnik, ali ne moze dispecer rutu', async ({ page }) => {
+  test('serviser moze korisnik, ali ne moze dispecer rutu', async ({
+    page,
+  }) => {
     await prijaviSe(page, serviser as RoleCreds);
 
     await page.goto('/korisnik');
@@ -40,7 +45,9 @@ test.describe('RBAC cross-access', () => {
     await expect(page).toHaveURL('/');
   });
 
-  test('dispecer moze korisnik, ali ne moze serviser rutu', async ({ page }) => {
+  test('dispecer moze korisnik, ali ne moze serviser rutu', async ({
+    page,
+  }) => {
     await prijaviSe(page, dispecer as RoleCreds);
 
     await page.goto('/korisnik');
@@ -50,7 +57,9 @@ test.describe('RBAC cross-access', () => {
     await expect(page).toHaveURL('/');
   });
 
-  test('serviser dobija 403 na GET /api/dispecer/zahtjevi', async ({ page }) => {
+  test('serviser dobija 403 na GET /api/dispecer/zahtjevi', async ({
+    page,
+  }) => {
     await prijaviSe(page, serviser as RoleCreds);
     await page.goto('/korisnik');
     const status = await page.evaluate(async () => {
@@ -60,7 +69,9 @@ test.describe('RBAC cross-access', () => {
     expect(status).toBe(403);
   });
 
-  test('dispecer dobija 200 na GET /api/dispecer/zahtjevi', async ({ page }) => {
+  test('dispecer dobija 200 na GET /api/dispecer/zahtjevi', async ({
+    page,
+  }) => {
     await prijaviSe(page, dispecer as RoleCreds);
     await page.goto('/dispecer');
     const status = await page.evaluate(async () => {

@@ -45,7 +45,7 @@ describe('authValidation', () => {
 
   test('password requirement helpers evaluate each rule', () => {
     const checks = Object.fromEntries(
-      ZAHTJEVI_LOZINKE.map((rule) => [rule.id, rule.provjeri('Abcd123!')])
+      ZAHTJEVI_LOZINKE.map((rule) => [rule.id, rule.provjeri('Abcd123!')]),
     );
     expect(checks).toEqual({
       duzina: true,

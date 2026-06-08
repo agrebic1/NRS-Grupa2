@@ -27,7 +27,11 @@ import { PrilogGalerija } from '@/components/servisirane/PrilogGalerija';
 import { stilTekstaOperativnogPrioriteta } from '@/lib/servisirane/dispecerPaleta';
 
 type ZahtjevZaKarticu = ServisniZahtjev & {
-  podnosilac: { ime: string; prezime: string; broj_telefona: string | null } | null;
+  podnosilac: {
+    ime: string;
+    prezime: string;
+    broj_telefona: string | null;
+  } | null;
 };
 
 const POLJE_OZNAKA_KLASA =
@@ -38,29 +42,40 @@ const GALERIJA_LABEL_KLASA =
   'mb-1.5 text-[10px] font-semibold uppercase tracking-[0.1em]';
 const SEKCIJA_GRUPE_LABEL_KLASA =
   'mb-3 text-[10px] font-semibold uppercase tracking-[0.12em]';
-const SEKCIJA_GRUPE_BOJA = { color: 'rgb(var(--first-nonary-rgb) / 0.72)' } as const;
+const SEKCIJA_GRUPE_BOJA = {
+  color: 'rgb(var(--first-nonary-rgb) / 0.72)',
+} as const;
 const SEKCIJA_GRUPE_RAZDJELNIK_BOJA = 'rgb(var(--first-quaternary-rgb) / 0.22)';
 
 const UNUTARNJI_PANEL_KLASA = 'min-w-0 rounded-xl border p-4 sm:p-5';
 
 /** Lijeva kartica „Detalji zahtjeva” na stranici detalja dispečera. */
-export function DispecerDetaljiZahtjevaKartica({ zahtjev }: { zahtjev: ZahtjevZaKarticu }) {
+export function DispecerDetaljiZahtjevaKartica({
+  zahtjev,
+}: {
+  zahtjev: ZahtjevZaKarticu;
+}) {
   const podnosilac = zahtjev.podnosilac;
 
   const { glavna, podkategorija } = labelKategorije(zahtjev);
   const { tekstCijeli: terminTekst } = preferiraniTerminZaDispecera(zahtjev, {
     dispecerskiPregled: true,
   });
-  const slike = urlsPrilozenihSlika(zahtjev as ZahtjevZaKarticu & Record<string, unknown>);
+  const slike = urlsPrilozenihSlika(
+    zahtjev as ZahtjevZaKarticu & Record<string, unknown>,
+  );
   const opisSirovo = (zahtjev.description ?? '').trim();
   const opis = uRecenicu(opisSirovo);
-  const telefonSirovo = podnosilac?.broj_telefona?.trim() || zahtjev.contact_phone?.trim() || '';
+  const telefonSirovo =
+    podnosilac?.broj_telefona?.trim() || zahtjev.contact_phone?.trim() || '';
   const telefon = telefonSirovo || '-';
   const telefonHref = telefonSirovo ? hrefZaTelefon(telefonSirovo) : null;
   const imePrezime = imePrezimePodnosioca(podnosilac);
   const imaOperativni = Boolean(zahtjev.final_priority?.trim());
   const fp = zahtjev.final_priority?.trim() ?? '';
-  const operativniStil = imaOperativni ? stilTekstaOperativnogPrioriteta(fp) : null;
+  const operativniStil = imaOperativni
+    ? stilTekstaOperativnogPrioriteta(fp)
+    : null;
 
   const naslovZahtjeva = podkategorija || glavna;
   const podnaslovKategorije = podkategorija ? glavna : null;
@@ -79,18 +94,29 @@ export function DispecerDetaljiZahtjevaKartica({ zahtjev }: { zahtjev: ZahtjevZa
           </p>
           <div className="flex min-w-0 flex-col gap-3">
             <div className="flex gap-2">
-              <User className={POLJE_IKONA_KLASA} style={POLJE_OZNAKA_BOJA} aria-hidden />
+              <User
+                className={POLJE_IKONA_KLASA}
+                style={POLJE_OZNAKA_BOJA}
+                aria-hidden
+              />
               <div className="min-w-0">
                 <p className={POLJE_OZNAKA_KLASA} style={POLJE_OZNAKA_BOJA}>
                   Ime i prezime
                 </p>
-                <p className="text-base font-semibold leading-snug" style={{ color: 'var(--first-octonary)' }}>
+                <p
+                  className="text-base font-semibold leading-snug"
+                  style={{ color: 'var(--first-octonary)' }}
+                >
                   {imePrezime}
                 </p>
               </div>
             </div>
             <div className="flex gap-2">
-              <Phone className={POLJE_IKONA_KLASA} style={POLJE_OZNAKA_BOJA} aria-hidden />
+              <Phone
+                className={POLJE_IKONA_KLASA}
+                style={POLJE_OZNAKA_BOJA}
+                aria-hidden
+              />
               <div className="min-w-0 text-sm">
                 <p className={POLJE_OZNAKA_KLASA} style={POLJE_OZNAKA_BOJA}>
                   Kontakt
@@ -104,19 +130,29 @@ export function DispecerDetaljiZahtjevaKartica({ zahtjev }: { zahtjev: ZahtjevZa
                     {telefon}
                   </a>
                 ) : (
-                  <p className="font-medium leading-snug" style={{ color: 'var(--first-octonary)' }}>
+                  <p
+                    className="font-medium leading-snug"
+                    style={{ color: 'var(--first-octonary)' }}
+                  >
                     {telefon}
                   </p>
                 )}
               </div>
             </div>
             <div className="flex gap-2">
-              <MapPin className={POLJE_IKONA_KLASA} style={POLJE_OZNAKA_BOJA} aria-hidden />
+              <MapPin
+                className={POLJE_IKONA_KLASA}
+                style={POLJE_OZNAKA_BOJA}
+                aria-hidden
+              />
               <div className="min-w-0 text-sm">
                 <p className={POLJE_OZNAKA_KLASA} style={POLJE_OZNAKA_BOJA}>
                   Adresa
                 </p>
-                <p className="break-words font-medium leading-snug" style={{ color: 'var(--first-octonary)' }}>
+                <p
+                  className="break-words font-medium leading-snug"
+                  style={{ color: 'var(--first-octonary)' }}
+                >
                   {(zahtjev.address ?? '').trim() || '-'}
                 </p>
               </div>
@@ -139,7 +175,10 @@ export function DispecerDetaljiZahtjevaKartica({ zahtjev }: { zahtjev: ZahtjevZa
             {naslovZahtjeva}
           </h3>
           {podnaslovKategorije && (
-            <p className="mt-1.5 text-sm font-medium leading-snug" style={{ color: 'var(--first-nonary)' }}>
+            <p
+              className="mt-1.5 text-sm font-medium leading-snug"
+              style={{ color: 'var(--first-nonary)' }}
+            >
               {podnaslovKategorije}
             </p>
           )}
@@ -149,7 +188,9 @@ export function DispecerDetaljiZahtjevaKartica({ zahtjev }: { zahtjev: ZahtjevZa
                 {DISPECER_HITNOST_KORISNIK_NASLOV}
               </p>
               <div className="mt-1.5">
-                <KorisnickaHitnostOutlinedChip score={korisnickiUrgencyZaPrikaz} />
+                <KorisnickaHitnostOutlinedChip
+                  score={korisnickiUrgencyZaPrikaz}
+                />
               </div>
             </div>
             <div className="min-w-0">
@@ -157,11 +198,17 @@ export function DispecerDetaljiZahtjevaKartica({ zahtjev }: { zahtjev: ZahtjevZa
                 {DISPECER_OPERATIVNI_NASLOV}
               </p>
               {imaOperativni && operativniStil ? (
-                <p className={`mt-1.5 ${operativniStil.className}`} style={operativniStil.style}>
+                <p
+                  className={`mt-1.5 ${operativniStil.className}`}
+                  style={operativniStil.style}
+                >
                   {fp}
                 </p>
               ) : (
-                <p className="mt-1.5 text-sm leading-snug" style={{ color: 'rgb(var(--first-nonary-rgb) / 0.88)' }}>
+                <p
+                  className="mt-1.5 text-sm leading-snug"
+                  style={{ color: 'rgb(var(--first-nonary-rgb) / 0.88)' }}
+                >
                   {DISPECER_OPERATIVNI_OPIS_NEDOSTAJE}
                 </p>
               )}
@@ -188,14 +235,20 @@ export function DispecerDetaljiZahtjevaKartica({ zahtjev }: { zahtjev: ZahtjevZa
       </section>
 
       <section className="min-w-0">
-        <p className={GALERIJA_LABEL_KLASA} style={{ color: 'rgb(var(--first-nonary-rgb) / 0.78)' }}>
+        <p
+          className={GALERIJA_LABEL_KLASA}
+          style={{ color: 'rgb(var(--first-nonary-rgb) / 0.78)' }}
+        >
           Poruka korisnika
         </p>
         <ZahtjevKorisnickaPorukaBubble tekst={opis} className="mt-2 mb-0" />
       </section>
 
       <section id="dispecer-prilog-galerija" className="min-w-0 scroll-mt-28">
-        <p className={GALERIJA_LABEL_KLASA} style={{ color: 'rgb(var(--first-nonary-rgb) / 0.78)' }}>
+        <p
+          className={GALERIJA_LABEL_KLASA}
+          style={{ color: 'rgb(var(--first-nonary-rgb) / 0.78)' }}
+        >
           Priložene slike
         </p>
         {slike.length > 0 ? (
@@ -203,7 +256,10 @@ export function DispecerDetaljiZahtjevaKartica({ zahtjev }: { zahtjev: ZahtjevZa
             <PrilogGalerija urls={slike} className="max-w-2xl" />
           </div>
         ) : (
-          <p className="mt-2 text-[11px] leading-snug" style={{ color: 'rgb(var(--first-nonary-rgb) / 0.72)' }}>
+          <p
+            className="mt-2 text-[11px] leading-snug"
+            style={{ color: 'rgb(var(--first-nonary-rgb) / 0.72)' }}
+          >
             Nema priloženih slika
           </p>
         )}

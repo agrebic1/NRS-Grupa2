@@ -171,7 +171,9 @@ describe('/api/dispecer/zahtjevi/[id]/preporuka - Sprint 10 (US-48)', () => {
           select: jest.fn().mockReturnThis(),
           eq: jest.fn().mockReturnThis(),
         };
-        c.eq.mockReturnValueOnce(c).mockResolvedValueOnce({ data: [], error: null });
+        c.eq
+          .mockReturnValueOnce(c)
+          .mockResolvedValueOnce({ data: [], error: null });
         return c;
       }
       return zahtjevChain(null);
@@ -182,7 +184,12 @@ describe('/api/dispecer/zahtjevi/[id]/preporuka - Sprint 10 (US-48)', () => {
         return {
           select: jest.fn().mockReturnThis(),
           ilike: jest.fn().mockReturnThis(),
-          maybeSingle: jest.fn().mockResolvedValue({ data: { id_uloge: 'role-serviser' }, error: null }),
+          maybeSingle: jest
+            .fn()
+            .mockResolvedValue({
+              data: { id_uloge: 'role-serviser' },
+              error: null,
+            }),
         };
       }
       if (table === 'uposlenici') {

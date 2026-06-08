@@ -14,16 +14,16 @@ import { getDugoChekanje } from '@/lib/servisirane/dugoChekanje';
 const INTAKE_STATUSI = new Set(['pending_review', 'na_cekanju', 'in_review']);
 
 export type OperativnaFaza =
-  | 'novi'             // intake, nema final_priority
-  | 'u_obradi'         // intake, ima final_priority (wizard: termin → serviser → potvrda)
-  | 'ceka_dodjelu'     // status=potvrdeno, nema odbijanja
+  | 'novi' // intake, nema final_priority
+  | 'u_obradi' // intake, ima final_priority (wizard: termin → serviser → potvrda)
+  | 'ceka_dodjelu' // status=potvrdeno, nema odbijanja
   | 'odbijen_serviser' // status=potvrdeno + serviser_odbio_razlog
-  | 'dodijeljeno'      // serviser dodijeljen, čeka prihvat
-  | 'u_putu'           // u_radu — serviser na putu
-  | 'na_terenu'        // u_izvrsenju — servis u toku
-  | 'ceka_zatvaranje'  // zavrseno, nije zatvoreno
-  | 'zatvoreno'        // zatvoreno (arhiva)
-  | 'otkazano';        // otkazano | odbijeno (terminal)
+  | 'dodijeljeno' // serviser dodijeljen, čeka prihvat
+  | 'u_putu' // u_radu — serviser na putu
+  | 'na_terenu' // u_izvrsenju — servis u toku
+  | 'ceka_zatvaranje' // zavrseno, nije zatvoreno
+  | 'zatvoreno' // zatvoreno (arhiva)
+  | 'otkazano'; // otkazano | odbijeno (terminal)
 
 /**
  * Klasificira zahtjev u tačno jednu operativnu fazu.
@@ -37,7 +37,9 @@ export function operativnaFazaZahtjeva(z: {
   const s = z.status.toLowerCase();
 
   if (INTAKE_STATUSI.has(s)) {
-    return zahtjevImaOperativniPrioritet({ final_priority: z.final_priority ?? null })
+    return zahtjevImaOperativniPrioritet({
+      final_priority: z.final_priority ?? null,
+    })
       ? 'u_obradi'
       : 'novi';
   }
@@ -46,11 +48,11 @@ export function operativnaFazaZahtjeva(z: {
     return z.serviser_odbio_razlog ? 'odbijen_serviser' : 'ceka_dodjelu';
   }
 
-  if (s === 'dodijeljeno')  return 'dodijeljeno';
-  if (s === 'u_radu')       return 'u_putu';
-  if (s === 'u_izvrsenju')  return 'na_terenu';
-  if (s === 'zavrseno')     return 'ceka_zatvaranje';
-  if (s === 'zatvoreno')    return 'zatvoreno';
+  if (s === 'dodijeljeno') return 'dodijeljeno';
+  if (s === 'u_radu') return 'u_putu';
+  if (s === 'u_izvrsenju') return 'na_terenu';
+  if (s === 'zavrseno') return 'ceka_zatvaranje';
+  if (s === 'zatvoreno') return 'zatvoreno';
 
   return 'otkazano'; // otkazano | odbijeno | nepoznato
 }
@@ -91,7 +93,10 @@ export function jeSlaPrekoracen(z: {
   final_priority?: string | null;
   status: string;
 }): boolean {
-  return getSlaStatus(z.created_at, z.final_priority ?? null, z.status) === 'prekoraceno';
+  return (
+    getSlaStatus(z.created_at, z.final_priority ?? null, z.status) ===
+    'prekoraceno'
+  );
 }
 
 /** Zahtjev predugo čeka u datom statusu (klijentski računato). */
@@ -105,21 +110,22 @@ export function jeKasni(z: {
   status: string;
 }): boolean {
   if (!z.termin_planirani_pocetak) return false;
-  if (['zavrseno', 'zatvoreno', 'otkazano', 'odbijeno'].includes(z.status)) return false;
+  if (['zavrseno', 'zatvoreno', 'otkazano', 'odbijeno'].includes(z.status))
+    return false;
   return new Date(z.termin_planirani_pocetak) < new Date();
 }
 
 // ─── Labeli za prikaz ─────────────────────────────────────────────────────────
 
 export const FAZA_LABEL: Record<OperativnaFaza, string> = {
-  novi:             'Novi',
-  u_obradi:         'U obradi',
-  ceka_dodjelu:     'Čeka dodjelu',
+  novi: 'Novi',
+  u_obradi: 'U obradi',
+  ceka_dodjelu: 'Čeka dodjelu',
   odbijen_serviser: 'Serviser odbio',
-  dodijeljeno:      'Dodijeljeno',
-  u_putu:           'Na putu',
-  na_terenu:        'Na terenu',
-  ceka_zatvaranje:  'Čeka zatvaranje',
-  zatvoreno:        'Zatvoreno',
-  otkazano:         'Otkazano',
+  dodijeljeno: 'Dodijeljeno',
+  u_putu: 'Na putu',
+  na_terenu: 'Na terenu',
+  ceka_zatvaranje: 'Čeka zatvaranje',
+  zatvoreno: 'Zatvoreno',
+  otkazano: 'Otkazano',
 };

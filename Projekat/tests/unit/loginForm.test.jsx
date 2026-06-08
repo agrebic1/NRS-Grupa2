@@ -47,12 +47,14 @@ describe('LoginForm', () => {
         lozinka: 'Abcd123!',
       });
     });
-    expect(await screen.findByText('Uspješno ste prijavljeni.')).toBeInTheDocument();
+    expect(
+      await screen.findByText('Uspješno ste prijavljeni.'),
+    ).toBeInTheDocument();
     await waitFor(
       () => {
         expect(mockPush).toHaveBeenCalledWith('/korisnik');
       },
-      { timeout: 3000 }
+      { timeout: 3000 },
     );
   });
 
@@ -65,6 +67,8 @@ describe('LoginForm', () => {
     await user.type(screen.getByLabelText('Lozinka'), 'Abcd123!');
     await user.click(screen.getByRole('button', { name: 'Prijavi se' }));
 
-    expect(await screen.findByText('Neispravni podaci za prijavu.')).toBeInTheDocument();
+    expect(
+      await screen.findByText('Neispravni podaci za prijavu.'),
+    ).toBeInTheDocument();
   });
 });

@@ -32,7 +32,10 @@ export async function GET() {
     } = await supabase.auth.getUser();
 
     if (greskaKorisnika || !user) {
-      return NextResponse.json({ error: 'Niste prijavljeni.' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Niste prijavljeni.' },
+        { status: 401 },
+      );
     }
 
     const db = supabase as any;
@@ -40,17 +43,31 @@ export async function GET() {
 
     const [
       { data: korisnikUsluge, error: greskaKorisnikaUsluge },
-      { data: uposlenik,      error: greskaUposlenika },
+      { data: uposlenik, error: greskaUposlenika },
     ] = await Promise.all([
-      db.from('korisnik_usluge').select('id_korisnika_usluge').eq('id_korisnika_usluge', user.id).maybeSingle(),
-      db.from('uposlenici').select('id_uloge').eq('id_uposlenika', user.id).maybeSingle(),
+      db
+        .from('korisnik_usluge')
+        .select('id_korisnika_usluge')
+        .eq('id_korisnika_usluge', user.id)
+        .maybeSingle(),
+      db
+        .from('uposlenici')
+        .select('id_uloge')
+        .eq('id_uposlenika', user.id)
+        .maybeSingle(),
     ]);
 
     if (greskaKorisnikaUsluge) {
-      return NextResponse.json({ error: greskaKorisnikaUsluge.message }, { status: 500 });
+      return NextResponse.json(
+        { error: greskaKorisnikaUsluge.message },
+        { status: 500 },
+      );
     }
     if (greskaUposlenika) {
-      return NextResponse.json({ error: greskaUposlenika.message }, { status: 500 });
+      return NextResponse.json(
+        { error: greskaUposlenika.message },
+        { status: 500 },
+      );
     }
 
     // Zaposleni uvijek imaju opciju korištenja sistema kao korisnik usluge.
@@ -67,7 +84,10 @@ export async function GET() {
         .maybeSingle();
 
       if (greskaUloge) {
-        return NextResponse.json({ error: greskaUloge.message }, { status: 500 });
+        return NextResponse.json(
+          { error: greskaUloge.message },
+          { status: 500 },
+        );
       }
 
       const uloga = mapirajNazivUloge(ulogaPodaci?.naziv);
@@ -79,7 +99,8 @@ export async function GET() {
 
     return NextResponse.json({ uloge });
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'Nije moguce ucitati uloge.';
+    const message =
+      error instanceof Error ? error.message : 'Nije moguce ucitati uloge.';
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

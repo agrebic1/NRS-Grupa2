@@ -50,7 +50,7 @@ export function RoleSelectForm({
   isLoading = false,
 }: RoleSelectFormProps) {
   const visibleRoleOptions = ROLE_OPTIONS.filter((option) =>
-    availableRoles.includes(option.role)
+    availableRoles.includes(option.role),
   );
 
   return (

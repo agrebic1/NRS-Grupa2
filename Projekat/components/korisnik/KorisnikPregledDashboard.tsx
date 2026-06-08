@@ -57,14 +57,14 @@ interface KorisnikPregledDashboardProps {
 }
 
 const BADGE_OZNAKE: Record<KorisnickiDashboardStatus, string> = {
-  novi:      'Novi',
-  u_obradi:  'Dispečer obrađuje',
+  novi: 'Novi',
+  u_obradi: 'Dispečer obrađuje',
   potvrdeno: 'Serviser dodijeljen',
-  u_toku:    'Servis u toku',
-  zavrseno:  'Završeno',
+  u_toku: 'Servis u toku',
+  zavrseno: 'Završeno',
   zatvoreno: 'Zatvoreno',
-  otkazano:  'Otkazano',
-  odbijeno:  'Odbijeno',
+  otkazano: 'Otkazano',
+  odbijeno: 'Odbijeno',
 };
 
 function tekstOznakeBedzaDashboard(z: KorisnikDashboardZahtjev): string {
@@ -78,11 +78,17 @@ function tekstOznakeBedzaDashboard(z: KorisnikDashboardZahtjev): string {
 }
 
 /** Bedž statusa - za `novi` hitnosna paleta po urgency_score-u korisnika. */
-function stilStatusBedzaZaDashboard(z: KorisnikDashboardZahtjev): CSSProperties {
+function stilStatusBedzaZaDashboard(
+  z: KorisnikDashboardZahtjev,
+): CSSProperties {
   if (z.status === 'novi') {
     const score = efektivniKorisnickiUrgencyScore(z);
     const { boja, pozadina, border } = korisnickaHitnostStil(score);
-    return { backgroundColor: pozadina, color: boja, border: `1px solid ${border}` };
+    return {
+      backgroundColor: pozadina,
+      color: boja,
+      border: `1px solid ${border}`,
+    };
   }
   type NonNoviStatus = Exclude<KorisnickiDashboardStatus, 'novi'>;
   const slot = KORISNIK_PALETA_DASHBOARD_STATUS[z.status as NonNoviStatus];
@@ -101,12 +107,24 @@ function jeZavrsenKaoIntervencija(status: KorisnickiDashboardStatus) {
 }
 
 function jeTerminalniKorisnicki(status: KorisnickiDashboardStatus) {
-  return status === 'zavrseno' || status === 'zatvoreno' || status === 'otkazano' || status === 'odbijeno';
+  return (
+    status === 'zavrseno' ||
+    status === 'zatvoreno' ||
+    status === 'otkazano' ||
+    status === 'odbijeno'
+  );
 }
 
 /** Kartice u „Moji zahtjevi” - sve aktivne (čeka obradu, potvrđeno, na terenu); bez završenih i terminalnih. */
-function jeZahtjevCekaObraduZaPregled(status: KorisnickiDashboardStatus): boolean {
-  return status === 'novi' || status === 'u_obradi' || status === 'potvrdeno' || status === 'u_toku';
+function jeZahtjevCekaObraduZaPregled(
+  status: KorisnickiDashboardStatus,
+): boolean {
+  return (
+    status === 'novi' ||
+    status === 'u_obradi' ||
+    status === 'potvrdeno' ||
+    status === 'u_toku'
+  );
 }
 
 function brojAktivnih(zahtjevi: KorisnikDashboardZahtjev[]) {
@@ -118,7 +136,9 @@ function brojHitnih(zahtjevi: KorisnikDashboardZahtjev[]) {
   return zahtjevi.filter((z) => z.urgency_score >= 80).length;
 }
 
-function sljedeciZahtjev(zahtjevi: KorisnikDashboardZahtjev[]): KorisnikDashboardZahtjev | null {
+function sljedeciZahtjev(
+  zahtjevi: KorisnikDashboardZahtjev[],
+): KorisnikDashboardZahtjev | null {
   const uToku = zahtjevi.find((z) => z.status === 'u_toku');
   if (uToku) return uToku;
   const potvrdeno = zahtjevi.find((z) => z.status === 'potvrdeno');
@@ -132,7 +152,10 @@ function SljedeciDolazakAdresa({ lokacija }: { lokacija: string }) {
   const puna = (lokacija ?? '').trim();
   if (!puna || puna === 'Lokacija nije unesena') {
     return (
-      <p className="text-xs" style={{ color: 'rgb(var(--first-nonary-rgb) / 0.85)' }}>
+      <p
+        className="text-xs"
+        style={{ color: 'rgb(var(--first-nonary-rgb) / 0.85)' }}
+      >
         Lokacija nije unesena
       </p>
     );
@@ -140,7 +163,10 @@ function SljedeciDolazakAdresa({ lokacija }: { lokacija: string }) {
 
   return (
     <div className="mt-2">
-      <p className="break-words text-sm font-semibold leading-snug" style={{ color: 'var(--first-octonary)' }}>
+      <p
+        className="break-words text-sm font-semibold leading-snug"
+        style={{ color: 'var(--first-octonary)' }}
+      >
         {puna}
       </p>
     </div>
@@ -149,34 +175,43 @@ function SljedeciDolazakAdresa({ lokacija }: { lokacija: string }) {
 
 function sortirajZahtjeve(zahtjevi: KorisnikDashboardZahtjev[]) {
   const prioritet: Record<KorisnickiDashboardStatus, number> = {
-    u_toku:    0,
+    u_toku: 0,
     potvrdeno: 1,
-    u_obradi:  2,
-    novi:      3,
-    zavrseno:  4,
+    u_obradi: 2,
+    novi: 3,
+    zavrseno: 4,
     zatvoreno: 5,
-    otkazano:  6,
-    odbijeno:  7,
+    otkazano: 6,
+    odbijeno: 7,
   };
-  return [...zahtjevi].sort((a, b) => prioritet[a.status] - prioritet[b.status]);
+  return [...zahtjevi].sort(
+    (a, b) => prioritet[a.status] - prioritet[b.status],
+  );
 }
 
 /** Kartica za pregled dashboarda - layout kao {@link ZahtjevKartica} na stranici „Moji zahtjevi“. */
-function ZahtjevPregledKartica({ zahtjev }: { zahtjev: KorisnikDashboardZahtjev }) {
+function ZahtjevPregledKartica({
+  zahtjev,
+}: {
+  zahtjev: KorisnikDashboardZahtjev;
+}) {
   const oznakaStatusa = tekstOznakeBedzaDashboard(zahtjev);
   const rubLijevo = lijeviRubKorisnickaKartica(zahtjev);
 
   return (
-    <Link href={`/korisnik/zahtjevi/${zahtjev.id}`} className="group block h-full min-w-0">
+    <Link
+      href={`/korisnik/zahtjevi/${zahtjev.id}`}
+      className="group block h-full min-w-0"
+    >
       <article
         className="flex h-full min-w-0 flex-col overflow-hidden rounded-2xl shadow-sm transition-[box-shadow,border-color] duration-200 ease-out group-hover:shadow-md"
         style={{
           backgroundColor: 'rgb(255 255 255 / 0.72)',
-          borderStyle:       'solid',
-          borderColor:       'rgb(var(--first-quaternary-rgb) / 0.35)',
-          borderWidth:       1,
-          borderLeftWidth:   4,
-          borderLeftColor:   rubLijevo,
+          borderStyle: 'solid',
+          borderColor: 'rgb(var(--first-quaternary-rgb) / 0.35)',
+          borderWidth: 1,
+          borderLeftWidth: 4,
+          borderLeftColor: rubLijevo,
         }}
       >
         <div className="flex min-w-0 flex-1 flex-col px-3 py-3 sm:px-4">
@@ -186,13 +221,15 @@ function ZahtjevPregledKartica({ zahtjev }: { zahtjev: KorisnikDashboardZahtjev 
                 className="inline-flex w-fit items-center rounded-md px-2 py-0.5 text-[11px] font-bold tabular-nums"
                 style={{
                   backgroundColor: 'rgb(var(--first-quaternary-rgb) / 0.2)',
-                  color:           'var(--first-octonary)',
-                  border:          '1px solid rgb(var(--first-quaternary-rgb) / 0.35)',
+                  color: 'var(--first-octonary)',
+                  border: '1px solid rgb(var(--first-quaternary-rgb) / 0.35)',
                 }}
               >
                 #{zahtjev.korisnickiBroj}
               </span>
-              {zahtjev.is_premium ? <DispecerPremiumKruna className="translate-y-px" /> : null}
+              {zahtjev.is_premium ? (
+                <DispecerPremiumKruna className="translate-y-px" />
+              ) : null}
             </span>
             <span
               className="inline-flex max-w-[min(100%,11rem)] shrink-0 rounded-full px-2.5 py-0.5 text-[11px] font-semibold leading-tight sm:max-w-none"
@@ -202,31 +239,52 @@ function ZahtjevPregledKartica({ zahtjev }: { zahtjev: KorisnikDashboardZahtjev 
             </span>
           </div>
 
-          <p className="mt-3 break-words text-sm font-semibold leading-snug" style={{ color: 'var(--first-octonary)' }}>
+          <p
+            className="mt-3 break-words text-sm font-semibold leading-snug"
+            style={{ color: 'var(--first-octonary)' }}
+          >
             {zahtjev.naslov}
           </p>
 
           {zahtjev.status === 'u_obradi' ? (
-            <p className="mt-2 text-[11px] leading-snug" style={{ color: 'rgb(var(--first-nonary-rgb) / 0.88)' }}>
-              Dispečer određuje prioritet i termin. Izmjena i otkazivanje nisu mogući.
+            <p
+              className="mt-2 text-[11px] leading-snug"
+              style={{ color: 'rgb(var(--first-nonary-rgb) / 0.88)' }}
+            >
+              Dispečer određuje prioritet i termin. Izmjena i otkazivanje nisu
+              mogući.
             </p>
-          ) : zahtjev.status === 'potvrdeno' && (zahtjev.broj_ponovnih_ciklusa ?? 0) > 0 ? (
-            <p className="mt-2 text-[11px] leading-snug" style={{ color: '#B45309' }}>
-              Prethodni serviser nije riješio zahtjev - dispečer traži novog servisera.
+          ) : zahtjev.status === 'potvrdeno' &&
+            (zahtjev.broj_ponovnih_ciklusa ?? 0) > 0 ? (
+            <p
+              className="mt-2 text-[11px] leading-snug"
+              style={{ color: '#B45309' }}
+            >
+              Prethodni serviser nije riješio zahtjev - dispečer traži novog
+              servisera.
             </p>
           ) : zahtjev.status === 'potvrdeno' ? (
-            <p className="mt-2 text-[11px] leading-snug" style={{ color: 'rgb(0,100,160 / 0.85)' }}>
+            <p
+              className="mt-2 text-[11px] leading-snug"
+              style={{ color: 'rgb(0,100,160 / 0.85)' }}
+            >
               Serviser je dodijeljen - uskoro ćete dobiti potvrdu termina.
             </p>
           ) : null}
 
           <div className="mt-2 min-w-0">
-            <p className="break-words text-sm font-medium leading-snug" style={{ color: 'var(--first-nonary)' }}>
+            <p
+              className="break-words text-sm font-medium leading-snug"
+              style={{ color: 'var(--first-nonary)' }}
+            >
               {(zahtjev.lokacija ?? '').trim() || '-'}
             </p>
           </div>
 
-          <div className="mt-3 flex min-w-0 items-center gap-1.5 text-xs" style={{ color: 'var(--first-nonary)' }}>
+          <div
+            className="mt-3 flex min-w-0 items-center gap-1.5 text-xs"
+            style={{ color: 'var(--first-nonary)' }}
+          >
             <Clock className="h-3.5 w-3.5 shrink-0 opacity-80" aria-hidden />
             <span>
               Prijavljeno{' '}
@@ -234,9 +292,7 @@ function ZahtjevPregledKartica({ zahtjev }: { zahtjev: KorisnikDashboardZahtjev 
             </span>
           </div>
 
-          <div
-            className="mt-auto pt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-deep-teal px-4 py-2 text-sm font-semibold text-white transition-colors duration-200 group-hover:bg-celestial-teal"
-          >
+          <div className="mt-auto pt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-deep-teal px-4 py-2 text-sm font-semibold text-white transition-colors duration-200 group-hover:bg-celestial-teal">
             Detalji
             <ChevronRight className="h-4 w-4" aria-hidden />
           </div>
@@ -260,12 +316,16 @@ export function KorisnikPregledDashboard({
   zahtjevi = [],
 }: Partial<KorisnikPregledDashboardProps>) {
   const aktivnih = brojAktivnih(zahtjevi);
-  const hitnih   = brojHitnih(zahtjevi);
+  const hitnih = brojHitnih(zahtjevi);
   const sljedeci = sljedeciZahtjev(zahtjevi);
-  const zahtjeviZaPregledMoji = zahtjevi.filter((z) => jeZahtjevCekaObraduZaPregled(z.status));
+  const zahtjeviZaPregledMoji = zahtjevi.filter((z) =>
+    jeZahtjevCekaObraduZaPregled(z.status),
+  );
   const cekaObraduBroj = zahtjeviZaPregledMoji.length;
   const lista = sortirajZahtjeve(zahtjeviZaPregledMoji);
-  const zavrsenih = zahtjevi.filter((z) => jeZavrsenKaoIntervencija(z.status)).length;
+  const zavrsenih = zahtjevi.filter((z) =>
+    jeZavrsenKaoIntervencija(z.status),
+  ).length;
 
   const ukupnoStranicaMojiZahtjevi = Math.max(
     1,
@@ -280,7 +340,9 @@ export function KorisnikPregledDashboard({
   );
 
   useEffect(() => {
-    setStranicaMojiZahtjevi((prev) => Math.min(prev, ukupnoStranicaMojiZahtjevi));
+    setStranicaMojiZahtjevi((prev) =>
+      Math.min(prev, ukupnoStranicaMojiZahtjevi),
+    );
   }, [ukupnoStranicaMojiZahtjevi]);
 
   const listaMojiZahtjeviZaPrikaz =
@@ -291,7 +353,8 @@ export function KorisnikPregledDashboard({
           aktivnaStranicaMojiZahtjevi * ZAHTJEVI_PO_STRANICI_PREGLED,
         );
 
-  const prikaziPaginacijuMojiZahtjevi = lista.length > ZAHTJEVI_PO_STRANICI_PREGLED;
+  const prikaziPaginacijuMojiZahtjevi =
+    lista.length > ZAHTJEVI_PO_STRANICI_PREGLED;
 
   const KPI = [
     {
@@ -337,11 +400,18 @@ export function KorisnikPregledDashboard({
       <div className="relative z-10">
         <div className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight md:text-3xl" style={{ color: 'var(--first-octonary)' }}>
+            <h1
+              className="text-2xl font-bold tracking-tight md:text-3xl"
+              style={{ color: 'var(--first-octonary)' }}
+            >
               Dobrodošli, {imeKorisnika}!
             </h1>
-            <p className="mt-1.5 max-w-xl text-sm leading-relaxed" style={{ color: 'var(--first-nonary)' }}>
-              Ovdje pratite svoje zahtjeve, hitne slučajeve i zakazane dolaske servisera - bez poziva i ručnih tablica.
+            <p
+              className="mt-1.5 max-w-xl text-sm leading-relaxed"
+              style={{ color: 'var(--first-nonary)' }}
+            >
+              Ovdje pratite svoje zahtjeve, hitne slučajeve i zakazane dolaske
+              servisera - bez poziva i ručnih tablica.
             </p>
           </div>
           <Link href="/korisnik/zahtjevi/novi" className="shrink-0">
@@ -370,10 +440,16 @@ export function KorisnikPregledDashboard({
                 <Ikona className="h-5 w-5" style={{ color: boja }} />
               </div>
               <div className="min-w-0">
-                <p className="text-2xl font-bold tabular-nums" style={{ color: boja }}>
+                <p
+                  className="text-2xl font-bold tabular-nums"
+                  style={{ color: boja }}
+                >
                   {vrijednost}
                 </p>
-                <p className="text-xs leading-snug" style={{ color: 'var(--first-nonary)' }}>
+                <p
+                  className="text-xs leading-snug"
+                  style={{ color: 'var(--first-nonary)' }}
+                >
                   {oznaka}
                 </p>
               </div>
@@ -389,19 +465,29 @@ export function KorisnikPregledDashboard({
               className="scroll-mt-24 rounded-2xl shadow-card"
               style={{
                 backgroundColor: 'rgb(var(--first-quinary-rgb) / 0.22)',
-                border:          '1px solid rgb(var(--first-quaternary-rgb) / 0.35)',
+                border: '1px solid rgb(var(--first-quaternary-rgb) / 0.35)',
               }}
             >
               <div
                 className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-center sm:justify-between"
-                style={{ borderBottom: '1px solid rgb(var(--first-quaternary-rgb) / 0.3)' }}
+                style={{
+                  borderBottom:
+                    '1px solid rgb(var(--first-quaternary-rgb) / 0.3)',
+                }}
               >
                 <div>
-                  <h2 className="font-semibold" style={{ color: 'var(--first-octonary)' }}>
+                  <h2
+                    className="font-semibold"
+                    style={{ color: 'var(--first-octonary)' }}
+                  >
                     Moji zahtjevi
                   </h2>
-                  <p className="mt-0.5 text-xs" style={{ color: 'var(--first-nonary)' }}>
-                    Samo zahtjevi koji čekaju obradu (red čekanja i dispečer). Na terenu i završeni - u „Svi zahtjevi“.
+                  <p
+                    className="mt-0.5 text-xs"
+                    style={{ color: 'var(--first-nonary)' }}
+                  >
+                    Samo zahtjevi koji čekaju obradu (red čekanja i dispečer).
+                    Na terenu i završeni - u „Svi zahtjevi“.
                   </p>
                 </div>
                 <Link
@@ -415,8 +501,14 @@ export function KorisnikPregledDashboard({
 
               {zahtjevi.length === 0 ? (
                 <div className="flex flex-col items-center gap-3 px-5 py-12 text-center">
-                  <FileText className="h-10 w-10" style={{ color: 'var(--first-quinary)' }} />
-                  <p className="text-sm" style={{ color: 'var(--first-nonary)' }}>
+                  <FileText
+                    className="h-10 w-10"
+                    style={{ color: 'var(--first-quinary)' }}
+                  />
+                  <p
+                    className="text-sm"
+                    style={{ color: 'var(--first-nonary)' }}
+                  >
                     Nemate još nijednog zahtjeva.
                   </p>
                   <Link href="/korisnik/zahtjevi/novi">
@@ -427,10 +519,17 @@ export function KorisnikPregledDashboard({
                 </div>
               ) : lista.length === 0 ? (
                 <div className="flex flex-col items-center gap-3 px-5 py-12 text-center">
-                  <FileText className="h-10 w-10" style={{ color: 'var(--first-quinary)' }} />
-                  <p className="max-w-md text-sm leading-relaxed" style={{ color: 'var(--first-nonary)' }}>
-                    Trenutno nemate zahtjeva koji čekaju obradu - svi su na terenu ili završeni. Pogledajte cjelokupnu
-                    historiju na listi zahtjeva.
+                  <FileText
+                    className="h-10 w-10"
+                    style={{ color: 'var(--first-quinary)' }}
+                  />
+                  <p
+                    className="max-w-md text-sm leading-relaxed"
+                    style={{ color: 'var(--first-nonary)' }}
+                  >
+                    Trenutno nemate zahtjeva koji čekaju obradu - svi su na
+                    terenu ili završeni. Pogledajte cjelokupnu historiju na
+                    listi zahtjeva.
                   </p>
                   <Link href="/korisnik/zahtjevi">
                     <Button size="sm" variant="secondary">
@@ -442,7 +541,10 @@ export function KorisnikPregledDashboard({
                 <>
                   <div className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 sm:p-5">
                     {listaMojiZahtjeviZaPrikaz.map((zahtjev) => (
-                      <ZahtjevPregledKartica key={zahtjev.id} zahtjev={zahtjev} />
+                      <ZahtjevPregledKartica
+                        key={zahtjev.id}
+                        zahtjev={zahtjev}
+                      />
                     ))}
                   </div>
 
@@ -450,18 +552,28 @@ export function KorisnikPregledDashboard({
                     <nav
                       className="flex flex-col gap-3 border-t px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5"
                       style={{
-                        borderColor:      'rgb(var(--first-quaternary-rgb) / 0.35)',
-                        backgroundColor: 'rgb(var(--first-quaternary-rgb) / 0.18)',
+                        borderColor: 'rgb(var(--first-quaternary-rgb) / 0.35)',
+                        backgroundColor:
+                          'rgb(var(--first-quaternary-rgb) / 0.18)',
                       }}
                       aria-label="Stranice liste zahtjeva na pregledu"
                     >
-                      <p className="text-center text-xs tabular-nums sm:text-left" style={{ color: 'var(--first-nonary)' }}>
+                      <p
+                        className="text-center text-xs tabular-nums sm:text-left"
+                        style={{ color: 'var(--first-nonary)' }}
+                      >
                         Stranica{' '}
-                        <span className="font-semibold" style={{ color: 'var(--first-octonary)' }}>
+                        <span
+                          className="font-semibold"
+                          style={{ color: 'var(--first-octonary)' }}
+                        >
                           {aktivnaStranicaMojiZahtjevi}
                         </span>{' '}
                         od{' '}
-                        <span className="font-semibold" style={{ color: 'var(--first-octonary)' }}>
+                        <span
+                          className="font-semibold"
+                          style={{ color: 'var(--first-octonary)' }}
+                        >
                           {ukupnoStranicaMojiZahtjevi}
                         </span>
                         <span className="hidden sm:inline">
@@ -474,8 +586,9 @@ export function KorisnikPregledDashboard({
                           type="button"
                           className="inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-40"
                           style={{
-                            borderColor: 'rgb(var(--first-quaternary-rgb) / 0.4)',
-                            color:         'var(--first-octonary)',
+                            borderColor:
+                              'rgb(var(--first-quaternary-rgb) / 0.4)',
+                            color: 'var(--first-octonary)',
                             backgroundColor: 'rgb(255 255 255 / 0.6)',
                           }}
                           disabled={aktivnaStranicaMojiZahtjevi <= 1}
@@ -496,18 +609,25 @@ export function KorisnikPregledDashboard({
                           type="button"
                           className="inline-flex items-center gap-1 rounded-lg border px-3 py-1.5 text-xs font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-40"
                           style={{
-                            borderColor: 'rgb(var(--first-quaternary-rgb) / 0.4)',
-                            color:         'var(--first-octonary)',
+                            borderColor:
+                              'rgb(var(--first-quaternary-rgb) / 0.4)',
+                            color: 'var(--first-octonary)',
                             backgroundColor: 'rgb(255 255 255 / 0.6)',
                           }}
-                          disabled={aktivnaStranicaMojiZahtjevi >= ukupnoStranicaMojiZahtjevi}
+                          disabled={
+                            aktivnaStranicaMojiZahtjevi >=
+                            ukupnoStranicaMojiZahtjevi
+                          }
                           onClick={() =>
                             setStranicaMojiZahtjevi((prev) => {
                               const trenutno = Math.min(
                                 Math.max(1, prev),
                                 ukupnoStranicaMojiZahtjevi,
                               );
-                              return Math.min(ukupnoStranicaMojiZahtjevi, trenutno + 1);
+                              return Math.min(
+                                ukupnoStranicaMojiZahtjevi,
+                                trenutno + 1,
+                              );
                             })
                           }
                         >
@@ -526,22 +646,37 @@ export function KorisnikPregledDashboard({
           <aside className="flex w-full flex-col gap-4 lg:col-span-4">
             <div className="rounded-3xl p-5" style={cardShell}>
               <div className="mb-3 flex items-center gap-2">
-                <CalendarClock className="h-5 w-5" style={{ color: 'var(--first-septenary)' }} />
-                <h3 className="font-semibold" style={{ color: 'var(--first-octonary)' }}>
+                <CalendarClock
+                  className="h-5 w-5"
+                  style={{ color: 'var(--first-septenary)' }}
+                />
+                <h3
+                  className="font-semibold"
+                  style={{ color: 'var(--first-octonary)' }}
+                >
                   Sljedeći dolazak
                 </h3>
               </div>
               {sljedeci ? (
                 <>
-                  <p className="text-[11px] font-semibold tabular-nums uppercase tracking-wide" style={{ color: 'rgb(var(--first-nonary-rgb) / 0.82)' }}>
+                  <p
+                    className="text-[11px] font-semibold tabular-nums uppercase tracking-wide"
+                    style={{ color: 'rgb(var(--first-nonary-rgb) / 0.82)' }}
+                  >
                     Zahtjev #{sljedeci.korisnickiBroj}
                   </p>
-                  <p className="mt-2 text-sm font-semibold leading-snug" style={{ color: 'var(--first-octonary)' }}>
+                  <p
+                    className="mt-2 text-sm font-semibold leading-snug"
+                    style={{ color: 'var(--first-octonary)' }}
+                  >
                     {sljedeci.naslov}
                   </p>
 
                   <div className="mt-3">
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'rgb(var(--first-nonary-rgb) / 0.78)' }}>
+                    <p
+                      className="text-[10px] font-semibold uppercase tracking-[0.12em]"
+                      style={{ color: 'rgb(var(--first-nonary-rgb) / 0.78)' }}
+                    >
                       Status
                     </p>
                     <div className="mt-1">
@@ -555,7 +690,10 @@ export function KorisnikPregledDashboard({
                   </div>
 
                   <div className="mt-4">
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'rgb(var(--first-nonary-rgb) / 0.78)' }}>
+                    <p
+                      className="text-[10px] font-semibold uppercase tracking-[0.12em]"
+                      style={{ color: 'rgb(var(--first-nonary-rgb) / 0.78)' }}
+                    >
                       Datum dolaska
                     </p>
                     <p
@@ -564,13 +702,19 @@ export function KorisnikPregledDashboard({
                     >
                       {formatirajDatumPrikaz(sljedeci.dolazakDatumIso, '-')}
                     </p>
-                    <p className="mt-1.5 text-sm font-medium" style={{ color: 'rgb(var(--first-nonary-rgb) / 0.9)' }}>
+                    <p
+                      className="mt-1.5 text-sm font-medium"
+                      style={{ color: 'rgb(var(--first-nonary-rgb) / 0.9)' }}
+                    >
                       {sljedeci.dolazakVrijemeOpis ?? 'Vrijeme nije potvrđeno'}
                     </p>
                   </div>
 
                   <div>
-                    <p className="mt-4 text-[10px] font-semibold uppercase tracking-[0.12em]" style={{ color: 'rgb(var(--first-nonary-rgb) / 0.78)' }}>
+                    <p
+                      className="mt-4 text-[10px] font-semibold uppercase tracking-[0.12em]"
+                      style={{ color: 'rgb(var(--first-nonary-rgb) / 0.78)' }}
+                    >
                       Lokacija
                     </p>
                     <SljedeciDolazakAdresa lokacija={sljedeci.lokacija} />
@@ -585,7 +729,10 @@ export function KorisnikPregledDashboard({
                   </Link>
                 </>
               ) : (
-                <p className="text-sm leading-relaxed" style={{ color: 'rgb(var(--first-nonary-rgb) / 0.85)' }}>
+                <p
+                  className="text-sm leading-relaxed"
+                  style={{ color: 'rgb(var(--first-nonary-rgb) / 0.85)' }}
+                >
                   Nema zakazanih dolazaka.
                 </p>
               )}

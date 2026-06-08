@@ -9,7 +9,8 @@ import {
 } from '@/lib/servisirane/dispecerskeFaze';
 import { zahtjevCekaObraduUInboxuDispecera } from '@/lib/servisirane/statusZahtjeva';
 
-type DispecerPaletaStatus = (typeof DISPECER_PALETA_STATUS)[keyof typeof DISPECER_PALETA_STATUS];
+type DispecerPaletaStatus =
+  (typeof DISPECER_PALETA_STATUS)[keyof typeof DISPECER_PALETA_STATUS];
 
 function stilBedza(pal: DispecerPaletaStatus) {
   return {
@@ -39,7 +40,11 @@ function FazaBedz({ naziv, title }: { naziv: string; title?: string }) {
  * - potvrdeno (čeka dodjelu): zeleni "Čeka dodjelu"
  * - Izvršenje (dodijeljeno/u_radu/u_izvrsenju): DispecerStatusBadge + faza
  */
-export function DispecerPregledTokaBadzevi({ zahtjev }: { zahtjev: ServisniZahtjev }) {
+export function DispecerPregledTokaBadzevi({
+  zahtjev,
+}: {
+  zahtjev: ServisniZahtjev;
+}) {
   const uInboxu = zahtjevCekaObraduUInboxuDispecera(zahtjev.status);
 
   // potvrdeno je tehnički "u inboxu" (dozvolama), ali vizualno je zasebna faza
@@ -49,7 +54,11 @@ export function DispecerPregledTokaBadzevi({ zahtjev }: { zahtjev: ServisniZahtj
         <span className="flex flex-wrap items-center gap-1">
           <span
             className="inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-[11px] font-semibold"
-            style={{ color: '#DC2626', backgroundColor: 'rgba(220,38,38,0.1)', border: '1px solid rgba(220,38,38,0.28)' }}
+            style={{
+              color: '#DC2626',
+              backgroundColor: 'rgba(220,38,38,0.1)',
+              border: '1px solid rgba(220,38,38,0.28)',
+            }}
           >
             Serviser odbio
           </span>
@@ -81,8 +90,10 @@ export function DispecerPregledTokaBadzevi({ zahtjev }: { zahtjev: ServisniZahtj
   }
 
   // Inbox: Novi ili U obradi (pending_review / na_cekanju / in_review)
-  const jeNovi    = zahtjevJeNoviUPregleduDispecera(zahtjev);
-  const glavnaPal = jeNovi ? DISPECER_PALETA_STATUS.inbox : DISPECER_PALETA_STATUS.uObradi;
+  const jeNovi = zahtjevJeNoviUPregleduDispecera(zahtjev);
+  const glavnaPal = jeNovi
+    ? DISPECER_PALETA_STATUS.inbox
+    : DISPECER_PALETA_STATUS.uObradi;
   const fazaNaziv = fazaObradeNazivZaKarticu(zahtjev);
 
   return (

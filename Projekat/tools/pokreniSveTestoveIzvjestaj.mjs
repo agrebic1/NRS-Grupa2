@@ -40,11 +40,14 @@ function parseJestCountForMarker(output, marker) {
     if (testsMatch) {
       lastTestsCount = {
         passed: Number(testsMatch[1]),
-        total:  Number(testsMatch[2]),
+        total: Number(testsMatch[2]),
       };
     }
 
-    if (line.includes('Ran all test suites matching') && line.includes(marker)) {
+    if (
+      line.includes('Ran all test suites matching') &&
+      line.includes(marker)
+    ) {
       return lastTestsCount;
     }
   }
@@ -53,19 +56,23 @@ function parseJestCountForMarker(output, marker) {
 }
 
 function parseLastJestCount(output) {
-  const matches = [...output.matchAll(/Tests:\s+(\d+)\s+passed,\s+(\d+)\s+total/g)];
+  const matches = [
+    ...output.matchAll(/Tests:\s+(\d+)\s+passed,\s+(\d+)\s+total/g),
+  ];
   const last = matches.at(-1);
   if (!last) return null;
 
   return {
     passed: Number(last[1]),
-    total:  Number(last[2]),
+    total: Number(last[2]),
   };
 }
 
 function parsePlaywrightCount(output) {
   const counts = { passed: 0, failed: 0, skipped: 0 };
-  for (const match of output.matchAll(/^\s*(\d+)\s+(passed|failed|skipped)\b/gm)) {
+  for (const match of output.matchAll(
+    /^\s*(\d+)\s+(passed|failed|skipped)\b/gm,
+  )) {
     counts[match[2]] += Number(match[1]);
   }
 
@@ -91,8 +98,18 @@ const runDir = path.join(reportsRootDir, runId);
 ensureDir(runDir);
 
 const steps = [
-  { id: 'unit_integration', label: 'Unit + Integration', command: 'npm', args: ['run', 'test'] },
-  { id: 'coverage', label: 'Coverage', command: 'npm', args: ['run', 'test:coverage'] },
+  {
+    id: 'unit_integration',
+    label: 'Unit + Integration',
+    command: 'npm',
+    args: ['run', 'test'],
+  },
+  {
+    id: 'coverage',
+    label: 'Coverage',
+    command: 'npm',
+    args: ['run', 'test:coverage'],
+  },
   { id: 'e2e', label: 'E2E', command: 'npm', args: ['run', 'test:e2e'] },
 ];
 
@@ -106,21 +123,21 @@ const sprintBreakdown = [
 
 const sprint7AddedTests = {
   automatic: 42,
-  manual:    26,
-  note:      'Automatski zbir je porastao sa 69 u Sprintu 6 na 111 u Sprintu 7.',
+  manual: 26,
+  note: 'Automatski zbir je porastao sa 69 u Sprintu 6 na 111 u Sprintu 7.',
 };
 
 const sprint8AddedTests = {
   automatic: 63,
-  manual:    20,
-  note:      'Automatski zbir je porastao sa 111 u Sprintu 7 na 174 u Sprintu 8 (3 unit + 3 integration + 2 E2E fajla).',
+  manual: 20,
+  note: 'Automatski zbir je porastao sa 111 u Sprintu 7 na 174 u Sprintu 8 (3 unit + 3 integration + 2 E2E fajla).',
 };
 
 const sprint9AddedTests = {
   automatic: 61,
-  manual:    80,
-  manualId:  'SB-09-36',
-  note:      'Jest zbir 286 (225→286). E2E 23/23. Manuelno 80 TC (TC-S9-01–80) iz QA-Sprint9NRS.xlsx.',
+  manual: 80,
+  manualId: 'SB-09-36',
+  note: 'Jest zbir 286 (225→286). E2E 23/23. Manuelno 80 TC (TC-S9-01–80) iz QA-Sprint9NRS.xlsx.',
 };
 
 const results = [];
@@ -137,24 +154,36 @@ for (const step of steps) {
   }
 }
 
-const coverageSummaryPath = path.join(rootDir, 'coverage', 'coverage-summary.json');
+const coverageSummaryPath = path.join(
+  rootDir,
+  'coverage',
+  'coverage-summary.json',
+);
 let coverage = null;
 
 if (fs.existsSync(coverageSummaryPath)) {
   const raw = fs.readFileSync(coverageSummaryPath, 'utf8');
   coverage = JSON.parse(raw)?.total ?? null;
-  fs.copyFileSync(coverageSummaryPath, path.join(runDir, 'coverage-summary.json'));
+  fs.copyFileSync(
+    coverageSummaryPath,
+    path.join(runDir, 'coverage-summary.json'),
+  );
 }
 
-const unitIntegrationResult = results.find((result) => result.id === 'unit_integration');
+const unitIntegrationResult = results.find(
+  (result) => result.id === 'unit_integration',
+);
 const coverageResult = results.find((result) => result.id === 'coverage');
 const e2eResult = results.find((result) => result.id === 'e2e');
 
 const testCounts = {
-  unit:       parseJestCountForMarker(unitIntegrationResult?.output ?? '', 'unit'),
-  integration: parseJestCountForMarker(unitIntegrationResult?.output ?? '', 'integration'),
-  coverage:  parseLastJestCount(coverageResult?.output ?? ''),
-  e2e:       parsePlaywrightCount(e2eResult?.output ?? ''),
+  unit: parseJestCountForMarker(unitIntegrationResult?.output ?? '', 'unit'),
+  integration: parseJestCountForMarker(
+    unitIntegrationResult?.output ?? '',
+    'integration',
+  ),
+  coverage: parseLastJestCount(coverageResult?.output ?? ''),
+  e2e: parsePlaywrightCount(e2eResult?.output ?? ''),
 };
 
 const finishedAt = new Date();
@@ -173,7 +202,7 @@ const summaryLines = [
 
 for (const result of results) {
   summaryLines.push(
-    `- ${result.label}: ${result.exitCode === 0 ? 'PASS' : 'FAIL'} (exit code ${result.exitCode})`
+    `- ${result.label}: ${result.exitCode === 0 ? 'PASS' : 'FAIL'} (exit code ${result.exitCode})`,
   );
 }
 
@@ -203,7 +232,7 @@ summaryLines.push(
   `- Unit testovi: ${formatCount(testCounts.unit)}`,
   `- Integration testovi: ${formatCount(testCounts.integration)}`,
   `- Coverage run: ${formatCount(testCounts.coverage)}`,
-  `- E2E testovi: ${formatCount(testCounts.e2e)}`
+  `- E2E testovi: ${formatCount(testCounts.e2e)}`,
 );
 
 summaryLines.push('', '## Pokrivenost');
@@ -214,7 +243,7 @@ if (coverage) {
     `- Statements: ${coverage.statements?.pct ?? 0}%`,
     `- Branches: ${coverage.branches?.pct ?? 0}%`,
     `- Functions: ${coverage.functions?.pct ?? 0}%`,
-    `- Lines: ${coverage.lines?.pct ?? 0}%`
+    `- Lines: ${coverage.lines?.pct ?? 0}%`,
   );
 } else {
   summaryLines.push('', '- Coverage summary nije dostupan.');
@@ -229,10 +258,14 @@ summaryLines.push(
   '- `e2e.log`',
   '- `coverage-summary.json` (ako postoji)',
   '',
-  'Napomena: ovaj folder sadrzi sve sto je testirano u ovom pokretanju.'
+  'Napomena: ovaj folder sadrzi sve sto je testirano u ovom pokretanju.',
 );
 
-fs.writeFileSync(path.join(runDir, 'IZVJESTAJ.md'), `${summaryLines.join('\n')}\n`, 'utf8');
+fs.writeFileSync(
+  path.join(runDir, 'IZVJESTAJ.md'),
+  `${summaryLines.join('\n')}\n`,
+  'utf8',
+);
 
 const latestPointerPath = path.join(reportsRootDir, 'ZADNJI_RUN.txt');
 fs.writeFileSync(
@@ -255,10 +288,12 @@ fs.writeFileSync(
     `E2E testovi: ${formatCount(testCounts.e2e)}`,
     '',
   ].join('\n'),
-  'utf8'
+  'utf8',
 );
 
-console.log(`Izvjestaj generisan u: ${path.join('docs', 'testing', 'Izvjestaji', runId)}`);
+console.log(
+  `Izvjestaj generisan u: ${path.join('docs', 'testing', 'Izvjestaji', runId)}`,
+);
 
 if (!overallSuccess) {
   process.exit(1);

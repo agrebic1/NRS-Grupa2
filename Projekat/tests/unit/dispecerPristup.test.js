@@ -35,12 +35,19 @@ describe('dispecerski pristup', () => {
     },
   );
 
-  test.each(['serviser', 'korisnik', '', 'manager'])('odbija neovlastenu ulogu: %s', (uloga) => {
-    expect(jeDispecerIliAdmin(uloga)).toBe(false);
-  });
+  test.each(['serviser', 'korisnik', '', 'manager'])(
+    'odbija neovlastenu ulogu: %s',
+    (uloga) => {
+      expect(jeDispecerIliAdmin(uloga)).toBe(false);
+    },
+  );
 
   test('assertDispatcherAccess provjerava ulogu preko uposlenici relacije', async () => {
-    await expect(assertDispatcherAccess(supabaseSaUlogom('Dispecer'), 'u1')).resolves.toBe(true);
-    await expect(assertDispatcherAccess(supabaseSaUlogom('Serviser'), 'u1')).resolves.toBe(false);
+    await expect(
+      assertDispatcherAccess(supabaseSaUlogom('Dispecer'), 'u1'),
+    ).resolves.toBe(true);
+    await expect(
+      assertDispatcherAccess(supabaseSaUlogom('Serviser'), 'u1'),
+    ).resolves.toBe(false);
   });
 });

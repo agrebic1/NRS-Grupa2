@@ -22,10 +22,11 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
       currentLength = 0,
       ...props
     },
-    ref
+    ref,
   ) => {
     const textareaId = id ?? label.toLowerCase().replace(/\s+/g, '-');
-    const isOverLimit = maxCharacters !== undefined && currentLength > maxCharacters;
+    const isOverLimit =
+      maxCharacters !== undefined && currentLength > maxCharacters;
 
     return (
       <div className="flex flex-col gap-1.5">
@@ -58,7 +59,11 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
           {showCharacterCount && maxCharacters !== undefined && (
             <span
               className="text-xs font-medium"
-              style={{ color: isOverLimit ? 'var(--first-senary)' : 'var(--first-nonary)' }}
+              style={{
+                color: isOverLimit
+                  ? 'var(--first-senary)'
+                  : 'var(--first-nonary)',
+              }}
             >
               {currentLength}/{maxCharacters}
             </span>
@@ -66,7 +71,7 @@ const Textarea = forwardRef<HTMLTextAreaElement, TextareaProps>(
         </div>
       </div>
     );
-  }
+  },
 );
 
 Textarea.displayName = 'Textarea';

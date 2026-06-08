@@ -4,8 +4,8 @@ import { MiniMapa } from '@/components/shared/MiniMapa';
 
 interface MapPreviewProps {
   adresa: string;
-  lat?:   number | null;
-  lng?:   number | null;
+  lat?: number | null;
+  lng?: number | null;
 }
 
 export function MapPreview({ adresa, lat, lng }: MapPreviewProps) {

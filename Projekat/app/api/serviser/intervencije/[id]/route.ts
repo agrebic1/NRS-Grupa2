@@ -8,7 +8,10 @@ import {
   provjeriServiserPristupDetalju,
   serviserSmijeMijenjatiStatus,
 } from '@/lib/servisirane/serviserPristup';
-import { odbijZadatakSchema, razlogOperativniSchema } from '@/lib/validations/servisirane';
+import {
+  odbijZadatakSchema,
+  razlogOperativniSchema,
+} from '@/lib/validations/servisirane';
 import {
   notifPrihvatanjeZadatka,
   notifOdbijanjeZadatka,
@@ -22,7 +25,10 @@ import {
   notifServiserNaTerenu,
   notifEvidencijaRada,
 } from '@/lib/servisirane/notifikacijeHelper';
-import { mapAktivnostiResponse, ucitajAktivnostiSaAutorom } from '@/lib/servisirane/aktivnostiQuery';
+import {
+  mapAktivnostiResponse,
+  ucitajAktivnostiSaAutorom,
+} from '@/lib/servisirane/aktivnostiQuery';
 import { inkrementirajPonovniCiklus } from '@/lib/servisirane/ponovniCiklus';
 
 export const dynamic = 'force-dynamic';
@@ -35,20 +41,25 @@ async function resolveId(params: RouteParams): Promise<number | null> {
   return Number.isFinite(n) && n > 0 ? n : null;
 }
 
-export async function GET(
-  _req: Request,
-  { params }: { params: RouteParams }
-) {
+export async function GET(_req: Request, { params }: { params: RouteParams }) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return NextResponse.json({ error: 'Niste prijavljeni.' }, { status: 401 });
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user)
+      return NextResponse.json(
+        { error: 'Niste prijavljeni.' },
+        { status: 401 },
+      );
 
     const imaPriv = await assertServiserAccess(supabase, user.id);
-    if (!imaPriv) return NextResponse.json({ error: 'Pristup odbijen.' }, { status: 403 });
+    if (!imaPriv)
+      return NextResponse.json({ error: 'Pristup odbijen.' }, { status: 403 });
 
     const zahtjevId = await resolveId(params);
-    if (!zahtjevId) return NextResponse.json({ error: 'Neispravan ID.' }, { status: 400 });
+    if (!zahtjevId)
+      return NextResponse.json({ error: 'Neispravan ID.' }, { status: 400 });
 
     // Admin klijent zaobilazi RLS - serviseri moraju čitati redove gdje su
     // dodjeljeni (serviser_dodijeljen_id), što session klijent ne može vidjeti.
@@ -59,8 +70,13 @@ export async function GET(
       db = supabase as any;
     }
 
-    const provjera = await provjeriServiserPristupDetalju(db, zahtjevId, user.id);
-    if (!provjera.ok) return NextResponse.json({ error: provjera.greska }, { status: 403 });
+    const provjera = await provjeriServiserPristupDetalju(
+      db,
+      zahtjevId,
+      user.id,
+    );
+    if (!provjera.ok)
+      return NextResponse.json({ error: provjera.greska }, { status: 403 });
 
     const { data: zahtjev, error } = await db
       .from('service_requests')
@@ -68,7 +84,11 @@ export async function GET(
       .eq('id', zahtjevId)
       .single();
 
-    if (error || !zahtjev) return NextResponse.json({ error: 'Zahtjev nije pronađen.' }, { status: 404 });
+    if (error || !zahtjev)
+      return NextResponse.json(
+        { error: 'Zahtjev nije pronađen.' },
+        { status: 404 },
+      );
 
     const { data: osoba } = await db
       .from('osoba')
@@ -85,7 +105,7 @@ export async function GET(
     const aktivnosti = await ucitajAktivnostiSaAutorom(db, zahtjevId);
 
     return NextResponse.json({
-      zahtjev:    { ...zahtjev, podnosilac: osoba ?? null },
+      zahtjev: { ...zahtjev, podnosilac: osoba ?? null },
       evidencije: evidencije ?? [],
       aktivnosti: mapAktivnostiResponse(aktivnosti),
       pristup: {
@@ -103,26 +123,46 @@ const akcijaPatchSchema = z.discriminatedUnion('action', [
   z.object({ action: z.literal('prihvati') }),
   z.object({ action: z.literal('pocni') }),
   z.object({ action: z.literal('zavrsi') }),
-  z.object({ action: z.literal('odbij'), razlog: odbijZadatakSchema.shape.razlog }),
-  z.object({ action: z.literal('napomena'), sadrzaj: z.string().min(1).max(2000) }),
-  z.object({ action: z.literal('vrati_na_ponovnu_dodjelu'), razlog: razlogOperativniSchema }),
-  z.object({ action: z.literal('oznaci_nije_rijesen'), razlog: razlogOperativniSchema }),
+  z.object({
+    action: z.literal('odbij'),
+    razlog: odbijZadatakSchema.shape.razlog,
+  }),
+  z.object({
+    action: z.literal('napomena'),
+    sadrzaj: z.string().min(1).max(2000),
+  }),
+  z.object({
+    action: z.literal('vrati_na_ponovnu_dodjelu'),
+    razlog: razlogOperativniSchema,
+  }),
+  z.object({
+    action: z.literal('oznaci_nije_rijesen'),
+    razlog: razlogOperativniSchema,
+  }),
 ]);
 
 export async function PATCH(
   request: Request,
-  { params }: { params: RouteParams }
+  { params }: { params: RouteParams },
 ) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return NextResponse.json({ error: 'Niste prijavljeni.' }, { status: 401 });
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user)
+      return NextResponse.json(
+        { error: 'Niste prijavljeni.' },
+        { status: 401 },
+      );
 
     const imaPriv = await assertServiserAccess(supabase, user.id);
-    if (!imaPriv) return NextResponse.json({ error: 'Pristup odbijen.' }, { status: 403 });
+    if (!imaPriv)
+      return NextResponse.json({ error: 'Pristup odbijen.' }, { status: 403 });
 
     const zahtjevId = await resolveId(params);
-    if (!zahtjevId) return NextResponse.json({ error: 'Neispravan ID.' }, { status: 400 });
+    if (!zahtjevId)
+      return NextResponse.json({ error: 'Neispravan ID.' }, { status: 400 });
 
     let db: any;
     try {
@@ -132,26 +172,36 @@ export async function PATCH(
     }
 
     const provjera = await assertServiserVlasnistvo(db, zahtjevId, user.id);
-    if (!provjera.ok) return NextResponse.json({ error: provjera.greska }, { status: 403 });
+    if (!provjera.ok)
+      return NextResponse.json({ error: provjera.greska }, { status: 403 });
 
-    const body     = await request.json();
+    const body = await request.json();
     const rezultat = akcijaPatchSchema.safeParse(body);
     if (!rezultat.success) {
-      return NextResponse.json({ error: rezultat.error.errors[0].message }, { status: 400 });
+      return NextResponse.json(
+        { error: rezultat.error.errors[0].message },
+        { status: 400 },
+      );
     }
 
-    const podaci         = rezultat.data;
+    const podaci = rezultat.data;
     const trenutniStatus = provjera.status;
 
     if (podaci.action === 'prihvati') {
       if (!serviserSmijeMijenjatiStatus(trenutniStatus, 'u_radu')) {
         return NextResponse.json(
-          { error: `Nije moguće prihvatiti zadatak u statusu "${trenutniStatus}".` },
-          { status: 400 }
+          {
+            error: `Nije moguće prihvatiti zadatak u statusu "${trenutniStatus}".`,
+          },
+          { status: 400 },
         );
       }
-      const { error } = await db.from('service_requests').update({ status: 'u_radu' }).eq('id', zahtjevId);
-      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      const { error } = await db
+        .from('service_requests')
+        .update({ status: 'u_radu' })
+        .eq('id', zahtjevId);
+      if (error)
+        return NextResponse.json({ error: error.message }, { status: 500 });
 
       await db.from('intervention_activities').insert({
         zahtjev_id: zahtjevId,
@@ -188,7 +238,12 @@ export async function PATCH(
         .maybeSingle();
 
       if (dodjelaActivity?.autor_id) {
-        await notifPrihvatanjeZadatka(db, dodjelaActivity.autor_id, zahtjevId, imeServisera);
+        await notifPrihvatanjeZadatka(
+          db,
+          dodjelaActivity.autor_id,
+          zahtjevId,
+          imeServisera,
+        );
       }
 
       // Notify korisnik that serviser is on the way
@@ -198,7 +253,12 @@ export async function PATCH(
         .eq('id', zahtjevId)
         .maybeSingle();
       if (zahtjevRow?.user_id) {
-        await notifKorisnikusServiserNaPutu(db, zahtjevRow.user_id, zahtjevId, imeServisera);
+        await notifKorisnikusServiserNaPutu(
+          db,
+          zahtjevRow.user_id,
+          zahtjevId,
+          imeServisera,
+        );
       }
 
       void zah; // suppress unused variable
@@ -208,12 +268,18 @@ export async function PATCH(
     if (podaci.action === 'pocni') {
       if (!serviserSmijeMijenjatiStatus(trenutniStatus, 'u_izvrsenju')) {
         return NextResponse.json(
-          { error: `Nije moguće pokrenuti intervenciju u statusu "${trenutniStatus}".` },
-          { status: 400 }
+          {
+            error: `Nije moguće pokrenuti intervenciju u statusu "${trenutniStatus}".`,
+          },
+          { status: 400 },
         );
       }
-      const { error } = await db.from('service_requests').update({ status: 'u_izvrsenju' }).eq('id', zahtjevId);
-      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      const { error } = await db
+        .from('service_requests')
+        .update({ status: 'u_izvrsenju' })
+        .eq('id', zahtjevId);
+      if (error)
+        return NextResponse.json({ error: error.message }, { status: 500 });
 
       await db.from('intervention_activities').insert({
         zahtjev_id: zahtjevId,
@@ -240,7 +306,12 @@ export async function PATCH(
         .eq('id', zahtjevId)
         .maybeSingle();
       if (zahtjevRow2?.user_id) {
-        await notifKorisnikusServiserNaTerenu(db, zahtjevRow2.user_id, zahtjevId, imeServ2);
+        await notifKorisnikusServiserNaTerenu(
+          db,
+          zahtjevRow2.user_id,
+          zahtjevId,
+          imeServ2,
+        );
       }
       const { data: dodjelaAkt2 } = await db
         .from('intervention_activities')
@@ -251,7 +322,12 @@ export async function PATCH(
         .limit(1)
         .maybeSingle();
       if (dodjelaAkt2?.autor_id) {
-        await notifServiserNaTerenu(db, dodjelaAkt2.autor_id, zahtjevId, imeServ2);
+        await notifServiserNaTerenu(
+          db,
+          dodjelaAkt2.autor_id,
+          zahtjevId,
+          imeServ2,
+        );
       }
 
       return NextResponse.json({ success: true, novi_status: 'u_izvrsenju' });
@@ -261,8 +337,10 @@ export async function PATCH(
     if (podaci.action === 'zavrsi') {
       if (trenutniStatus !== 'u_izvrsenju') {
         return NextResponse.json(
-          { error: `Nije moguće završiti intervenciju u statusu "${trenutniStatus}".` },
-          { status: 400 }
+          {
+            error: `Nije moguće završiti intervenciju u statusu "${trenutniStatus}".`,
+          },
+          { status: 400 },
         );
       }
 
@@ -274,34 +352,53 @@ export async function PATCH(
       if (!evidCount || evidCount === 0) {
         return NextResponse.json(
           { error: 'Intervencija se ne može završiti bez evidencije rada.' },
-          { status: 400 }
+          { status: 400 },
         );
       }
 
-      const { error } = await db.from('service_requests').update({ status: 'zavrseno' }).eq('id', zahtjevId);
-      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      const { error } = await db
+        .from('service_requests')
+        .update({ status: 'zavrseno' })
+        .eq('id', zahtjevId);
+      if (error)
+        return NextResponse.json({ error: error.message }, { status: 500 });
 
       await db.from('intervention_activities').insert({
         zahtjev_id: zahtjevId,
-        autor_id:   user.id,
-        tip:        'status_promjena',
-        sadrzaj:    'Serviser završio intervenciju — čeka formalno zatvaranje dispečera.',
-        old_value:  trenutniStatus,
-        new_value:  'zavrseno',
+        autor_id: user.id,
+        tip: 'status_promjena',
+        sadrzaj:
+          'Serviser završio intervenciju — čeka formalno zatvaranje dispečera.',
+        old_value: trenutniStatus,
+        new_value: 'zavrseno',
         actor_role: 'serviser',
-        metadata:   { iz: trenutniStatus, u: 'zavrseno' },
+        metadata: { iz: trenutniStatus, u: 'zavrseno' },
       });
 
       // Notifikacija dispečeru
       const { data: osobaZav } = await db
-        .from('osoba').select('ime, prezime').eq('id_osobe', user.id).maybeSingle();
-      const imeZav = osobaZav ? `${osobaZav.ime} ${osobaZav.prezime}` : 'Serviser';
+        .from('osoba')
+        .select('ime, prezime')
+        .eq('id_osobe', user.id)
+        .maybeSingle();
+      const imeZav = osobaZav
+        ? `${osobaZav.ime} ${osobaZav.prezime}`
+        : 'Serviser';
       const { data: dodjelaAktZav } = await db
         .from('intervention_activities')
-        .select('autor_id').eq('zahtjev_id', zahtjevId).eq('tip', 'dodjela')
-        .order('created_at', { ascending: false }).limit(1).maybeSingle();
+        .select('autor_id')
+        .eq('zahtjev_id', zahtjevId)
+        .eq('tip', 'dodjela')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
       if (dodjelaAktZav?.autor_id) {
-        await notifEvidencijaRada(db, dodjelaAktZav.autor_id, zahtjevId, `${imeZav} (završena intervencija)`);
+        await notifEvidencijaRada(
+          db,
+          dodjelaAktZav.autor_id,
+          zahtjevId,
+          `${imeZav} (završena intervencija)`,
+        );
       }
 
       return NextResponse.json({ success: true, novi_status: 'zavrseno' });
@@ -309,25 +406,40 @@ export async function PATCH(
 
     // ── US-30: Napomena servisera ─────────────────────────────────────────────
     if (podaci.action === 'napomena') {
-      const { error: insErr } = await db.from('intervention_activities').insert({
-        zahtjev_id: zahtjevId,
-        autor_id:   user.id,
-        tip:        'napomena',
-        sadrzaj:    podaci.sadrzaj.trim(),
-        metadata:   null,
-      });
-      if (insErr) return NextResponse.json({ error: insErr.message }, { status: 500 });
+      const { error: insErr } = await db
+        .from('intervention_activities')
+        .insert({
+          zahtjev_id: zahtjevId,
+          autor_id: user.id,
+          tip: 'napomena',
+          sadrzaj: podaci.sadrzaj.trim(),
+          metadata: null,
+        });
+      if (insErr)
+        return NextResponse.json({ error: insErr.message }, { status: 500 });
 
       // Notify dispecer about serviser note
       const { data: osobaN } = await db
-        .from('osoba').select('ime, prezime').eq('id_osobe', user.id).maybeSingle();
+        .from('osoba')
+        .select('ime, prezime')
+        .eq('id_osobe', user.id)
+        .maybeSingle();
       const imeNap = osobaN ? `${osobaN.ime} ${osobaN.prezime}` : 'Serviser';
       const { data: dodjelaAktN } = await db
         .from('intervention_activities')
-        .select('autor_id').eq('zahtjev_id', zahtjevId).eq('tip', 'dodjela')
-        .order('created_at', { ascending: false }).limit(1).maybeSingle();
+        .select('autor_id')
+        .eq('zahtjev_id', zahtjevId)
+        .eq('tip', 'dodjela')
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
       if (dodjelaAktN?.autor_id) {
-        await notifNovaNapomenaDispecer(db, dodjelaAktN.autor_id, zahtjevId, imeNap);
+        await notifNovaNapomenaDispecer(
+          db,
+          dodjelaAktN.autor_id,
+          zahtjevId,
+          imeNap,
+        );
       }
 
       return NextResponse.json({ success: true });
@@ -338,8 +450,11 @@ export async function PATCH(
       const DOZVOLJENI = new Set(['dodijeljeno', 'u_radu']);
       if (!DOZVOLJENI.has(trenutniStatus)) {
         return NextResponse.json(
-          { error: 'Vraćanje na ponovnu dodjelu moguće je samo u statusu "dodijeljeno" ili "u_radu".' },
-          { status: 422 }
+          {
+            error:
+              'Vraćanje na ponovnu dodjelu moguće je samo u statusu "dodijeljeno" ili "u_radu".',
+          },
+          { status: 422 },
         );
       }
 
@@ -347,44 +462,69 @@ export async function PATCH(
         .from('service_requests')
         .update({ status: 'potvrdeno', serviser_dodijeljen_id: null })
         .eq('id', zahtjevId);
-      if (updErr) return NextResponse.json({ error: updErr.message }, { status: 500 });
+      if (updErr)
+        return NextResponse.json({ error: updErr.message }, { status: 500 });
 
       await db.from('intervention_activities').insert({
         zahtjev_id: zahtjevId,
-        autor_id:   user.id,
-        tip:        'vracanje_na_dodjelu',
-        sadrzaj:    `Serviser vratio zadatak na ponovnu dodjelu. Razlog: ${podaci.razlog}`,
-        old_value:  trenutniStatus,
-        new_value:  'potvrdeno',
+        autor_id: user.id,
+        tip: 'vracanje_na_dodjelu',
+        sadrzaj: `Serviser vratio zadatak na ponovnu dodjelu. Razlog: ${podaci.razlog}`,
+        old_value: trenutniStatus,
+        new_value: 'potvrdeno',
         actor_role: 'serviser',
-        razlog:     podaci.razlog,
-        metadata:   { iz: trenutniStatus, u: 'potvrdeno' },
+        razlog: podaci.razlog,
+        metadata: { iz: trenutniStatus, u: 'potvrdeno' },
       });
 
       // Notifikacija dispečeru
       const { data: osobaVN } = await db
-        .from('osoba').select('ime, prezime').eq('id_osobe', user.id).maybeSingle();
+        .from('osoba')
+        .select('ime, prezime')
+        .eq('id_osobe', user.id)
+        .maybeSingle();
       const imeVN = osobaVN ? `${osobaVN.ime} ${osobaVN.prezime}` : 'Serviser';
 
       const { data: dodjelaAktVN } = await db
         .from('intervention_activities')
-        .select('autor_id').eq('zahtjev_id', zahtjevId)
+        .select('autor_id')
+        .eq('zahtjev_id', zahtjevId)
         .in('tip', ['dodjela', 'promjena_izvrsioca'])
-        .order('created_at', { ascending: false }).limit(1).maybeSingle();
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
       if (dodjelaAktVN?.autor_id) {
-        await notifVratanjaNaPonovnuDodjelu(db, dodjelaAktVN.autor_id, zahtjevId, imeVN, podaci.razlog);
+        await notifVratanjaNaPonovnuDodjelu(
+          db,
+          dodjelaAktVN.autor_id,
+          zahtjevId,
+          imeVN,
+          podaci.razlog,
+        );
       } else {
-        const { data: sviDispVN } = await db.from('uposlenici').select('id_uposlenika, uloga:uloga(naziv)');
+        const { data: sviDispVN } = await db
+          .from('uposlenici')
+          .select('id_uposlenika, uloga:uloga(naziv)');
         const idsVN: string[] = (sviDispVN ?? [])
-          .filter((u: any) => { const n = Array.isArray(u.uloga) ? u.uloga[0]?.naziv : u.uloga?.naziv; return n === 'Dispečer'; })
+          .filter((u: any) => {
+            const n = Array.isArray(u.uloga)
+              ? u.uloga[0]?.naziv
+              : u.uloga?.naziv;
+            return n === 'Dispečer';
+          })
           .map((u: any) => u.id_uposlenika as string);
         if (idsVN.length > 0) {
-          await kreirajViseNotifikacija(db, idsVN.map((id) => ({
-            korisnik_id: id, uloga_korisnika: 'Dispečer', tip: 'odbijanje_zadatka',
-            naslov: 'Serviser vratio zadatak na ponovnu dodjelu',
-            poruka: `${imeVN} je vratio intervenciju #${zahtjevId} na ponovnu dodjelu. Razlog: ${podaci.razlog}`,
-            zahtjev_id: zahtjevId,
-          })));
+          await kreirajViseNotifikacija(
+            db,
+            idsVN.map((id) => ({
+              korisnik_id: id,
+              uloga_korisnika: 'Dispečer',
+              tip: 'odbijanje_zadatka',
+              naslov: 'Serviser vratio zadatak na ponovnu dodjelu',
+              poruka: `${imeVN} je vratio intervenciju #${zahtjevId} na ponovnu dodjelu. Razlog: ${podaci.razlog}`,
+              zahtjev_id: zahtjevId,
+            })),
+          );
         }
       }
 
@@ -392,18 +532,28 @@ export async function PATCH(
       try {
         brojCiklusa = await inkrementirajPonovniCiklus(db, zahtjevId);
       } catch (e) {
-        const msg = e instanceof Error ? e.message : 'Brojač ponovnih ciklusa nije ažuriran.';
+        const msg =
+          e instanceof Error
+            ? e.message
+            : 'Brojač ponovnih ciklusa nije ažuriran.';
         return NextResponse.json({ error: msg }, { status: 500 });
       }
-      return NextResponse.json({ success: true, novi_status: 'potvrdeno', broj_ponovnih_ciklusa: brojCiklusa });
+      return NextResponse.json({
+        success: true,
+        novi_status: 'potvrdeno',
+        broj_ponovnih_ciklusa: brojCiklusa,
+      });
     }
 
     // ── US-40: Označi nije riješeno ──────────────────────────────────────────
     if (podaci.action === 'oznaci_nije_rijesen') {
       if (trenutniStatus !== 'u_izvrsenju') {
         return NextResponse.json(
-          { error: 'Označavanje "nije riješeno" moguće je samo u statusu "u_izvrsenju".' },
-          { status: 422 }
+          {
+            error:
+              'Označavanje "nije riješeno" moguće je samo u statusu "u_izvrsenju".',
+          },
+          { status: 422 },
         );
       }
 
@@ -411,43 +561,68 @@ export async function PATCH(
         .from('service_requests')
         .update({ status: 'potvrdeno', serviser_dodijeljen_id: null })
         .eq('id', zahtjevId);
-      if (updErr) return NextResponse.json({ error: updErr.message }, { status: 500 });
+      if (updErr)
+        return NextResponse.json({ error: updErr.message }, { status: 500 });
 
       await db.from('intervention_activities').insert({
         zahtjev_id: zahtjevId,
-        autor_id:   user.id,
-        tip:        'nije_rijeseno',
-        sadrzaj:    `Serviser označio intervenciju kao nerješenu. Razlog: ${podaci.razlog}`,
-        old_value:  'u_izvrsenju',
-        new_value:  'potvrdeno',
+        autor_id: user.id,
+        tip: 'nije_rijeseno',
+        sadrzaj: `Serviser označio intervenciju kao nerješenu. Razlog: ${podaci.razlog}`,
+        old_value: 'u_izvrsenju',
+        new_value: 'potvrdeno',
         actor_role: 'serviser',
-        razlog:     podaci.razlog,
-        metadata:   { iz: 'u_izvrsenju', u: 'potvrdeno' },
+        razlog: podaci.razlog,
+        metadata: { iz: 'u_izvrsenju', u: 'potvrdeno' },
       });
 
       const { data: osobaNR } = await db
-        .from('osoba').select('ime, prezime').eq('id_osobe', user.id).maybeSingle();
+        .from('osoba')
+        .select('ime, prezime')
+        .eq('id_osobe', user.id)
+        .maybeSingle();
       const imeNR = osobaNR ? `${osobaNR.ime} ${osobaNR.prezime}` : 'Serviser';
 
       const { data: dodjelaAktNR } = await db
         .from('intervention_activities')
-        .select('autor_id').eq('zahtjev_id', zahtjevId)
+        .select('autor_id')
+        .eq('zahtjev_id', zahtjevId)
         .in('tip', ['dodjela', 'promjena_izvrsioca'])
-        .order('created_at', { ascending: false }).limit(1).maybeSingle();
+        .order('created_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
       if (dodjelaAktNR?.autor_id) {
-        await notifNijeRijesen(db, dodjelaAktNR.autor_id, zahtjevId, imeNR, podaci.razlog);
+        await notifNijeRijesen(
+          db,
+          dodjelaAktNR.autor_id,
+          zahtjevId,
+          imeNR,
+          podaci.razlog,
+        );
       } else {
-        const { data: sviDispNR } = await db.from('uposlenici').select('id_uposlenika, uloga:uloga(naziv)');
+        const { data: sviDispNR } = await db
+          .from('uposlenici')
+          .select('id_uposlenika, uloga:uloga(naziv)');
         const idsNR: string[] = (sviDispNR ?? [])
-          .filter((u: any) => { const n = Array.isArray(u.uloga) ? u.uloga[0]?.naziv : u.uloga?.naziv; return n === 'Dispečer'; })
+          .filter((u: any) => {
+            const n = Array.isArray(u.uloga)
+              ? u.uloga[0]?.naziv
+              : u.uloga?.naziv;
+            return n === 'Dispečer';
+          })
           .map((u: any) => u.id_uposlenika as string);
         if (idsNR.length > 0) {
-          await kreirajViseNotifikacija(db, idsNR.map((id) => ({
-            korisnik_id: id, uloga_korisnika: 'Dispečer', tip: 'odbijanje_zadatka',
-            naslov: 'Intervencija označena kao nije riješena',
-            poruka: `${imeNR} je označio intervenciju #${zahtjevId} kao nije riješenu. Razlog: ${podaci.razlog}`,
-            zahtjev_id: zahtjevId,
-          })));
+          await kreirajViseNotifikacija(
+            db,
+            idsNR.map((id) => ({
+              korisnik_id: id,
+              uloga_korisnika: 'Dispečer',
+              tip: 'odbijanje_zadatka',
+              naslov: 'Intervencija označena kao nije riješena',
+              poruka: `${imeNR} je označio intervenciju #${zahtjevId} kao nije riješenu. Razlog: ${podaci.razlog}`,
+              zahtjev_id: zahtjevId,
+            })),
+          );
         }
       }
 
@@ -455,7 +630,10 @@ export async function PATCH(
       try {
         brojCiklusaNR = await inkrementirajPonovniCiklus(db, zahtjevId);
       } catch (e) {
-        const msg = e instanceof Error ? e.message : 'Brojač ponovnih ciklusa nije ažuriran.';
+        const msg =
+          e instanceof Error
+            ? e.message
+            : 'Brojač ponovnih ciklusa nije ažuriran.';
         return NextResponse.json({ error: msg }, { status: 500 });
       }
       return NextResponse.json({
@@ -469,13 +647,19 @@ export async function PATCH(
       if (trenutniStatus !== 'dodijeljeno') {
         return NextResponse.json(
           { error: 'Zadatak se može odbiti samo u statusu "Dodijeljeno".' },
-          { status: 400 }
+          { status: 400 },
         );
       }
-      const { error } = await db.from('service_requests').update({
-        status: 'potvrdeno', serviser_dodijeljen_id: null, serviser_odbio_razlog: podaci.razlog,
-      }).eq('id', zahtjevId);
-      if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+      const { error } = await db
+        .from('service_requests')
+        .update({
+          status: 'potvrdeno',
+          serviser_dodijeljen_id: null,
+          serviser_odbio_razlog: podaci.razlog,
+        })
+        .eq('id', zahtjevId);
+      if (error)
+        return NextResponse.json({ error: error.message }, { status: 500 });
 
       await db.from('intervention_activities').insert({
         zahtjev_id: zahtjevId,
@@ -495,7 +679,9 @@ export async function PATCH(
         .select('ime, prezime')
         .eq('id_osobe', user.id)
         .maybeSingle();
-      const imeOdb = osobaOdb ? `${osobaOdb.ime} ${osobaOdb.prezime}` : 'Serviser';
+      const imeOdb = osobaOdb
+        ? `${osobaOdb.ime} ${osobaOdb.prezime}`
+        : 'Serviser';
 
       // Pokušaj naći dispečera koji je dodijelio zadatak
       const { data: dodjelaAkt } = await db
@@ -509,20 +695,33 @@ export async function PATCH(
 
       if (dodjelaAkt?.autor_id) {
         // Pošalji specifičnom dispečeru koji je napravio posljednju dodjelu
-        await notifOdbijanjeZadatka(db, dodjelaAkt.autor_id, zahtjevId, imeOdb, podaci.razlog);
+        await notifOdbijanjeZadatka(
+          db,
+          dodjelaAkt.autor_id,
+          zahtjevId,
+          imeOdb,
+          podaci.razlog,
+        );
       } else {
         // Fallback: nema zapisa dodjele — obavijesti sve dispečere
-        const dispIds = await dohvatiUposlenikIdsPoUlogama(db, ['Dispečer', 'dispečer', 'dispecer']);
+        const dispIds = await dohvatiUposlenikIdsPoUlogama(db, [
+          'Dispečer',
+          'dispečer',
+          'dispecer',
+        ]);
 
         if (dispIds.length > 0) {
-          await kreirajViseNotifikacija(db, dispIds.map((id) => ({
-            korisnik_id:     id,
-            uloga_korisnika: 'Dispečer',
-            tip:             'odbijanje_zadatka',
-            naslov:          'Serviser odbio zadatak',
-            poruka:          `${imeOdb} je odbio intervenciju #${zahtjevId}. Razlog: ${podaci.razlog}`,
-            zahtjev_id:      zahtjevId,
-          })));
+          await kreirajViseNotifikacija(
+            db,
+            dispIds.map((id) => ({
+              korisnik_id: id,
+              uloga_korisnika: 'Dispečer',
+              tip: 'odbijanje_zadatka',
+              naslov: 'Serviser odbio zadatak',
+              poruka: `${imeOdb} je odbio intervenciju #${zahtjevId}. Razlog: ${podaci.razlog}`,
+              zahtjev_id: zahtjevId,
+            })),
+          );
         }
       }
 

@@ -33,7 +33,9 @@ export function AdresaProsiriva({
   if (variant === 'lista') {
     return (
       <span
-        className={['min-w-0 max-w-[min(100%,32rem)] truncate', className].filter(Boolean).join(' ')}
+        className={['min-w-0 max-w-[min(100%,32rem)] truncate', className]
+          .filter(Boolean)
+          .join(' ')}
         title={r.cjelovita || undefined}
       >
         {r.skraceniPrikaz}
@@ -51,10 +53,16 @@ export function AdresaProsiriva({
 
       {r.administrativniNastavak ? (
         <details className="mt-1.5">
-          <summary className={SUMMARY_KLASA} style={{ color: 'var(--first-secondary)' }}>
+          <summary
+            className={SUMMARY_KLASA}
+            style={{ color: 'var(--first-secondary)' }}
+          >
             Općina, kanton, država…
           </summary>
-          <p className="mt-2 break-words text-sm leading-relaxed" style={bojaTeksta}>
+          <p
+            className="mt-2 break-words text-sm leading-relaxed"
+            style={bojaTeksta}
+          >
             {r.administrativniNastavak}
           </p>
         </details>
@@ -62,10 +70,16 @@ export function AdresaProsiriva({
 
       {r.imaSkriveno && !r.administrativniNastavak ? (
         <details className="mt-1.5">
-          <summary className={SUMMARY_KLASA} style={{ color: 'var(--first-secondary)' }}>
+          <summary
+            className={SUMMARY_KLASA}
+            style={{ color: 'var(--first-secondary)' }}
+          >
             Puna adresa
           </summary>
-          <p className="mt-2 break-words text-sm leading-relaxed" style={bojaTeksta}>
+          <p
+            className="mt-2 break-words text-sm leading-relaxed"
+            style={bojaTeksta}
+          >
             {r.cjelovita}
           </p>
         </details>

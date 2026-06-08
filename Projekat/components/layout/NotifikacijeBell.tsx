@@ -3,9 +3,23 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
-  Bell, CheckCheck, Clock, ClipboardList, CheckCircle2, XCircle,
-  RefreshCw, Wrench, Lock, Calendar, UserMinus, Users, MessageSquare,
-  Plus, Shield, ShieldCheck, AlertCircle,
+  Bell,
+  CheckCheck,
+  Clock,
+  ClipboardList,
+  CheckCircle2,
+  XCircle,
+  RefreshCw,
+  Wrench,
+  Lock,
+  Calendar,
+  UserMinus,
+  Users,
+  MessageSquare,
+  Plus,
+  Shield,
+  ShieldCheck,
+  AlertCircle,
 } from 'lucide-react';
 import type { Notifikacija, TipNotifikacije } from '@/domain/types/servisirane';
 import type { LucideIcon } from 'lucide-react';
@@ -17,26 +31,29 @@ const POLL_MS = 30_000;
 
 interface TipConfig {
   Ikona: LucideIcon;
-  boja:  string;
+  boja: string;
 }
 
 const TIP_CFG: Record<TipNotifikacije | string, TipConfig> = {
-  dodjela_intervencije:   { Ikona: ClipboardList,  boja: 'var(--first-primary)'   },
-  tim_dodjela:            { Ikona: Users,           boja: 'var(--first-secondary)' },
-  uklanjanje_servisera:   { Ikona: UserMinus,       boja: '#DC2626'                },
-  promjena_termina:       { Ikona: Calendar,        boja: '#D97706'                },
-  nova_napomena:          { Ikona: MessageSquare,   boja: 'var(--first-secondary)' },
-  prihvatanje_zadatka:    { Ikona: CheckCircle2,    boja: '#16A34A'                },
-  odbijanje_zadatka:      { Ikona: XCircle,         boja: '#DC2626'                },
-  evidencija_rada:        { Ikona: Wrench,          boja: 'var(--first-secondary)' },
-  novi_zahtjev:           { Ikona: Plus,            boja: 'var(--first-senary)'    },
-  promjena_statusa:       { Ikona: RefreshCw,       boja: 'var(--first-secondary)' },
-  zavrsetak_intervencije: { Ikona: CheckCircle2,    boja: '#16A34A'                },
-  zatvaranje_intervencije:{ Ikona: Lock,            boja: 'var(--first-nonary)'    },
-  promjena_uloge:         { Ikona: Shield,          boja: '#7C3AED'                },
-  promjena_statusa_naloga:{ Ikona: ShieldCheck,     boja: 'var(--first-secondary)' },
-  sistemska_obavijest:    { Ikona: AlertCircle,     boja: '#D97706'                },
-  sla_eskalacija:         { Ikona: AlertCircle,     boja: '#DC2626'                },
+  dodjela_intervencije: { Ikona: ClipboardList, boja: 'var(--first-primary)' },
+  tim_dodjela: { Ikona: Users, boja: 'var(--first-secondary)' },
+  uklanjanje_servisera: { Ikona: UserMinus, boja: '#DC2626' },
+  promjena_termina: { Ikona: Calendar, boja: '#D97706' },
+  nova_napomena: { Ikona: MessageSquare, boja: 'var(--first-secondary)' },
+  prihvatanje_zadatka: { Ikona: CheckCircle2, boja: '#16A34A' },
+  odbijanje_zadatka: { Ikona: XCircle, boja: '#DC2626' },
+  evidencija_rada: { Ikona: Wrench, boja: 'var(--first-secondary)' },
+  novi_zahtjev: { Ikona: Plus, boja: 'var(--first-senary)' },
+  promjena_statusa: { Ikona: RefreshCw, boja: 'var(--first-secondary)' },
+  zavrsetak_intervencije: { Ikona: CheckCircle2, boja: '#16A34A' },
+  zatvaranje_intervencije: { Ikona: Lock, boja: 'var(--first-nonary)' },
+  promjena_uloge: { Ikona: Shield, boja: '#7C3AED' },
+  promjena_statusa_naloga: {
+    Ikona: ShieldCheck,
+    boja: 'var(--first-secondary)',
+  },
+  sistemska_obavijest: { Ikona: AlertCircle, boja: '#D97706' },
+  sla_eskalacija: { Ikona: AlertCircle, boja: '#DC2626' },
 };
 
 const FALLBACK_CFG: TipConfig = { Ikona: Bell, boja: 'var(--first-nonary)' };
@@ -53,9 +70,9 @@ function getHref(n: Notifikacija, uloga: UserRole): string | null {
     return null;
   }
   if (!n.zahtjev_id) return null;
-  if (uloga === 'serviser')  return `/serviser/intervencije/${n.zahtjev_id}`;
-  if (uloga === 'dispecer')  return `/dispecer/intervencije/${n.zahtjev_id}`;
-  if (uloga === 'korisnik')  return `/korisnik/zahtjevi/${n.zahtjev_id}`;
+  if (uloga === 'serviser') return `/serviser/intervencije/${n.zahtjev_id}`;
+  if (uloga === 'dispecer') return `/dispecer/intervencije/${n.zahtjev_id}`;
+  if (uloga === 'korisnik') return `/korisnik/zahtjevi/${n.zahtjev_id}`;
   return null;
 }
 
@@ -64,7 +81,7 @@ function getHref(n: Notifikacija, uloga: UserRole): string | null {
 type Grupa = 'danas' | 'jucer' | 'ranije';
 
 function getGrupa(iso: string): Grupa {
-  const d     = new Date(iso);
+  const d = new Date(iso);
   const danas = new Date();
   const jucer = new Date(danas);
   jucer.setDate(jucer.getDate() - 1);
@@ -74,15 +91,15 @@ function getGrupa(iso: string): Grupa {
 }
 
 const GRUPA_LABEL: Record<Grupa, string> = {
-  danas:  'Danas',
-  jucer:  'Jučer',
+  danas: 'Danas',
+  jucer: 'Jučer',
   ranije: 'Ranije',
 };
 
 function fmtVrijeme(iso: string): string {
-  const d       = new Date(iso);
+  const d = new Date(iso);
   const razlika = Math.floor((Date.now() - d.getTime()) / 60_000);
-  if (razlika < 1)  return 'Upravo sada';
+  if (razlika < 1) return 'Upravo sada';
   if (razlika < 60) return `Prije ${razlika} min`;
   const h = Math.floor(razlika / 60);
   if (h < 24) return `Prije ${h}h`;
@@ -95,24 +112,28 @@ export function NotifikacijeBell({
   boja,
   uloga = 'korisnik',
 }: {
-  boja?:  string;
+  boja?: string;
   uloga?: UserRole;
 }) {
-  const [otvoren,      setOtvoren]      = useState(false);
+  const [otvoren, setOtvoren] = useState(false);
   const [notifikacije, setNotifikacije] = useState<Notifikacija[]>([]);
-  const [neprocitane,  setNeprocitane]  = useState(0);
-  const [ucitava,      setUcitava]      = useState(false);
+  const [neprocitane, setNeprocitane] = useState(0);
+  const [ucitava, setUcitava] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
-  const router   = useRouter();
+  const router = useRouter();
 
   const fetchNotifikacije = useCallback(async () => {
     try {
-      const r = await fetch('/api/notifikacije?limit=30', { cache: 'no-store' });
+      const r = await fetch('/api/notifikacije?limit=30', {
+        cache: 'no-store',
+      });
       if (!r.ok) return;
       const d = await r.json();
       setNotifikacije(d.notifikacije ?? []);
       setNeprocitane(d.neprocitane ?? 0);
-    } catch { /* silent */ }
+    } catch {
+      /* silent */
+    }
   }, []);
 
   useEffect(() => {
@@ -140,7 +161,9 @@ export function NotifikacijeBell({
       if (!r.ok) return;
       setNotifikacije((prev) => prev.map((n) => ({ ...n, procitano: true })));
       setNeprocitane(0);
-    } finally { setUcitava(false); }
+    } finally {
+      setUcitava(false);
+    }
   }
 
   async function otvoriPanel() {
@@ -149,11 +172,13 @@ export function NotifikacijeBell({
     if (!otvori) return;
 
     try {
-      const r = await fetch('/api/notifikacije?limit=30', { cache: 'no-store' });
+      const r = await fetch('/api/notifikacije?limit=30', {
+        cache: 'no-store',
+      });
       if (!r.ok) return;
       const d = await r.json();
       const lista = (d.notifikacije ?? []) as Notifikacija[];
-      const cnt   = d.neprocitane ?? 0;
+      const cnt = d.neprocitane ?? 0;
       setNotifikacije(lista);
       setNeprocitane(cnt);
 
@@ -165,14 +190,16 @@ export function NotifikacijeBell({
           setNeprocitane(0);
         }
       }
-    } catch { /* silent */ }
+    } catch {
+      /* silent */
+    }
   }
 
   async function klikNaNotifikaciju(n: Notifikacija) {
     if (!n.procitano) {
       await fetch(`/api/notifikacije/${n.id}`, { method: 'PATCH' });
       setNotifikacije((prev) =>
-        prev.map((x) => (x.id === n.id ? { ...x, procitano: true } : x))
+        prev.map((x) => (x.id === n.id ? { ...x, procitano: true } : x)),
       );
       setNeprocitane((prev) => Math.max(0, prev - 1));
     }
@@ -188,7 +215,7 @@ export function NotifikacijeBell({
       acc[g].push(n);
       return acc;
     },
-    { danas: [], jucer: [], ranije: [] }
+    { danas: [], jucer: [], ranije: [] },
   );
   const grupeRedoslijed: Grupa[] = ['danas', 'jucer', 'ranije'];
 
@@ -196,7 +223,6 @@ export function NotifikacijeBell({
 
   return (
     <div ref={panelRef} className="relative">
-
       {/* ── Bell button ───────────────────────────────────────────────── */}
       <button
         type="button"
@@ -222,7 +248,7 @@ export function NotifikacijeBell({
           className="absolute right-0 top-full z-50 mt-2 w-[22rem] overflow-hidden rounded-2xl shadow-xl"
           style={{
             backgroundColor: 'var(--first-tertiary)',
-            border:          '1px solid rgb(var(--first-quaternary-rgb)/0.35)',
+            border: '1px solid rgb(var(--first-quaternary-rgb)/0.35)',
           }}
         >
           {/* Header */}
@@ -232,12 +258,20 @@ export function NotifikacijeBell({
           >
             <div className="flex items-center gap-2">
               <Bell className="h-3.5 w-3.5" style={{ color: akcentBoja }} />
-              <p className="text-xs font-bold uppercase tracking-wide" style={{ color: 'var(--first-nonary)' }}>
+              <p
+                className="text-xs font-bold uppercase tracking-wide"
+                style={{ color: 'var(--first-nonary)' }}
+              >
                 Obavještenja
               </p>
               {neprocitane > 0 && (
-                <span className="rounded-full px-1.5 py-0.5 text-[10px] font-bold"
-                  style={{ backgroundColor: 'rgba(220,38,38,0.10)', color: '#DC2626' }}>
+                <span
+                  className="rounded-full px-1.5 py-0.5 text-[10px] font-bold"
+                  style={{
+                    backgroundColor: 'rgba(220,38,38,0.10)',
+                    color: '#DC2626',
+                  }}
+                >
                   {neprocitane} novo
                 </span>
               )}
@@ -259,23 +293,30 @@ export function NotifikacijeBell({
           {/* List */}
           <div className="max-h-[28rem] overflow-y-auto">
             {notifikacije.length === 0 ? (
-
               /* Empty state */
               <div className="flex flex-col items-center gap-2 py-10 text-center">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl"
-                  style={{ backgroundColor: 'rgb(var(--first-secondary-rgb)/0.08)' }}>
-                  <Bell className="h-5 w-5" style={{ color: 'var(--first-secondary)', opacity: 0.35 }} />
+                <div
+                  className="flex h-10 w-10 items-center justify-center rounded-xl"
+                  style={{
+                    backgroundColor: 'rgb(var(--first-secondary-rgb)/0.08)',
+                  }}
+                >
+                  <Bell
+                    className="h-5 w-5"
+                    style={{ color: 'var(--first-secondary)', opacity: 0.35 }}
+                  />
                 </div>
-                <p className="text-sm font-semibold" style={{ color: 'var(--first-octonary)' }}>
+                <p
+                  className="text-sm font-semibold"
+                  style={{ color: 'var(--first-octonary)' }}
+                >
                   Nema obavještenja
                 </p>
                 <p className="text-xs" style={{ color: 'var(--first-nonary)' }}>
                   Novi događaji će se prikazati ovdje
                 </p>
               </div>
-
             ) : (
-
               /* Grouped list */
               grupeRedoslijed.map((g) => {
                 const lista = grupe[g];
@@ -283,18 +324,26 @@ export function NotifikacijeBell({
                 return (
                   <div key={g}>
                     {/* Group header */}
-                    <div className="sticky top-0 px-4 py-1.5"
-                      style={{ backgroundColor: 'var(--first-tertiary)', borderBottom: '1px solid rgb(var(--first-quaternary-rgb)/0.15)' }}>
-                      <p className="text-[10px] font-bold uppercase tracking-widest"
-                        style={{ color: 'rgb(var(--first-nonary-rgb) / 0.55)' }}>
+                    <div
+                      className="sticky top-0 px-4 py-1.5"
+                      style={{
+                        backgroundColor: 'var(--first-tertiary)',
+                        borderBottom:
+                          '1px solid rgb(var(--first-quaternary-rgb)/0.15)',
+                      }}
+                    >
+                      <p
+                        className="text-[10px] font-bold uppercase tracking-widest"
+                        style={{ color: 'rgb(var(--first-nonary-rgb) / 0.55)' }}
+                      >
                         {GRUPA_LABEL[g]}
                       </p>
                     </div>
 
                     {lista.map((n) => {
-                      const cfg    = TIP_CFG[n.tip] ?? FALLBACK_CFG;
-                      const Ikona  = cfg.Ikona;
-                      const href   = getHref(n, uloga);
+                      const cfg = TIP_CFG[n.tip] ?? FALLBACK_CFG;
+                      const Ikona = cfg.Ikona;
+                      const href = getHref(n, uloga);
                       const procitano = n.procitano;
                       const bojaNaslova = procitano
                         ? 'rgb(var(--first-nonary-rgb) / 0.72)'
@@ -316,39 +365,59 @@ export function NotifikacijeBell({
                             backgroundColor: !procitano
                               ? `color-mix(in srgb, ${cfg.boja} 8%, var(--first-tertiary))`
                               : 'rgb(var(--first-quaternary-rgb) / 0.06)',
-                            borderBottom: '1px solid rgb(var(--first-quaternary-rgb)/0.12)',
+                            borderBottom:
+                              '1px solid rgb(var(--first-quaternary-rgb)/0.12)',
                           }}
                         >
                           {/* Type icon */}
-                          <div className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg"
+                          <div
+                            className="mt-0.5 flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg"
                             style={{
                               backgroundColor: procitano
                                 ? 'rgb(var(--first-quaternary-rgb) / 0.12)'
                                 : `color-mix(in srgb, ${cfg.boja} 14%, transparent)`,
                               opacity: procitano ? 0.85 : 1,
-                            }}>
-                            <Ikona className="h-3.5 w-3.5" style={{ color: cfg.boja }} />
+                            }}
+                          >
+                            <Ikona
+                              className="h-3.5 w-3.5"
+                              style={{ color: cfg.boja }}
+                            />
                           </div>
 
                           {/* Content */}
                           <div className="min-w-0 flex-1">
                             <div className="flex items-start justify-between gap-2">
-                              <p className="text-xs font-bold leading-snug"
-                                style={{ color: bojaNaslova }}>
+                              <p
+                                className="text-xs font-bold leading-snug"
+                                style={{ color: bojaNaslova }}
+                              >
                                 {n.naslov}
                               </p>
                               {!procitano && (
-                                <div className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full"
-                                  style={{ backgroundColor: akcentBoja }} />
+                                <div
+                                  className="mt-1.5 h-1.5 w-1.5 flex-shrink-0 rounded-full"
+                                  style={{ backgroundColor: akcentBoja }}
+                                />
                               )}
                             </div>
-                            <p className="mt-0.5 line-clamp-2 text-[11px] leading-relaxed"
-                              style={{ color: bojaTeksta }}>
+                            <p
+                              className="mt-0.5 line-clamp-2 text-[11px] leading-relaxed"
+                              style={{ color: bojaTeksta }}
+                            >
                               {n.poruka}
                             </p>
-                            <div className="mt-1 flex items-center gap-1" style={{ color: bojaVremena }}>
-                              <Clock className="h-2.5 w-2.5 shrink-0" style={{ color: 'inherit' }} />
-                              <span className="text-[10px] tabular-nums">{fmtVrijeme(n.created_at)}</span>
+                            <div
+                              className="mt-1 flex items-center gap-1"
+                              style={{ color: bojaVremena }}
+                            >
+                              <Clock
+                                className="h-2.5 w-2.5 shrink-0"
+                                style={{ color: 'inherit' }}
+                              />
+                              <span className="text-[10px] tabular-nums">
+                                {fmtVrijeme(n.created_at)}
+                              </span>
                             </div>
                           </div>
                         </button>

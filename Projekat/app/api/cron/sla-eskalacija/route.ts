@@ -10,9 +10,9 @@ export const dynamic = 'force-dynamic';
 /**
  * US-45 — SLA eskalacije
  *
- * Pokreće se svaki sat putem Vercel Cron.
+ * Pokreće se dnevno (06:00 UTC) putem Vercel Cron.
  * Za svaku prekoračenu aktivnu intervenciju kreira notifikacije svim dispečerima —
- * ali samo jedanput po intervenciji svaka 2 sata (anti-spam).
+ * ali samo jednom po intervenciji u zadnja 2 sata (anti-spam preko notifikacija).
  */
 
 // DB statusi aktivnih intervencija. `in_review` je stvarni DB status dispečerske obrade;

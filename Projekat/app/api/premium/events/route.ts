@@ -11,7 +11,10 @@ export async function GET() {
     } = await supabase.auth.getUser();
 
     if (!user) {
-      return NextResponse.json({ error: 'Niste prijavljeni.' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Niste prijavljeni.' },
+        { status: 401 },
+      );
     }
 
     const db = supabase as any;

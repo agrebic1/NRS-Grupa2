@@ -30,12 +30,16 @@ npm run dev          # http://localhost:3000
 
 ### Varijable okruženja (`.env.local`)
 
+Kopirajte `.env.example` u `.env.local` i popunite vrijednosti:
+
 ```env
 NEXT_PUBLIC_SUPABASE_URL=...
 NEXT_PUBLIC_SUPABASE_ANON_KEY=...
-NEXT_PUBLIC_SITE_URL=http://localhost:3000   # baza za email linkove (registracija / resend)
+NEXT_PUBLIC_SITE_URL=http://localhost:3000   # auth redirect + linkovi u email predlošcima
 SUPABASE_SERVICE_ROLE_KEY=...          # server-side (API rute, cron)
 CRON_SECRET=...                        # zaštita cron ruta u produkciji
+RESEND_API_KEY=...                     # opcionalno — slanje email poruka
+EMAIL_FROM=
 ```
 
 U Supabase dashboardu (Authentication → URL Configuration) dodajte istu vrijednost kao **Site URL** i u **Redirect URLs** putanju `{SITE_URL}/auth/callback` (npr. `https://nrs-grupa2.vercel.app/auth/callback`). Bez toga ponovno slanje linka za potvrdu emaila može pasti.

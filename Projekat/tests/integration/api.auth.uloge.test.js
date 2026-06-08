@@ -35,25 +35,38 @@ describe('/api/auth/uloge route', () => {
   });
 
   test('returns role list for logged in user', async () => {
-    mockSessionGetUser.mockResolvedValue({ data: { user: { id: 'u1' } }, error: null });
+    mockSessionGetUser.mockResolvedValue({
+      data: { user: { id: 'u1' } },
+      error: null,
+    });
     mockFrom.mockImplementation((table) => {
-      if (table === 'korisnik_usluge') return qb({ data: { id_korisnika_usluge: 'u1' }, error: null });
-      if (table === 'uposlenici') return qb({ data: { id_uloge: 7 }, error: null });
-      if (table === 'uloga') return qb({ data: { naziv: 'Dispecer' }, error: null });
+      if (table === 'korisnik_usluge')
+        return qb({ data: { id_korisnika_usluge: 'u1' }, error: null });
+      if (table === 'uposlenici')
+        return qb({ data: { id_uloge: 7 }, error: null });
+      if (table === 'uloga')
+        return qb({ data: { naziv: 'Dispecer' }, error: null });
       return qb({ data: null, error: null });
     });
     const response = await GET();
     const body = await response.json();
     expect(response.status).toBe(200);
-    expect(body.uloge).toEqual(expect.arrayContaining(['korisnik', 'dispecer']));
+    expect(body.uloge).toEqual(
+      expect.arrayContaining(['korisnik', 'dispecer']),
+    );
   });
 
   test('maps serviser and admin role names', async () => {
-    mockSessionGetUser.mockResolvedValue({ data: { user: { id: 'u1' } }, error: null });
+    mockSessionGetUser.mockResolvedValue({
+      data: { user: { id: 'u1' } },
+      error: null,
+    });
     mockFrom.mockImplementation((table) => {
       if (table === 'korisnik_usluge') return qb({ data: null, error: null });
-      if (table === 'uposlenici') return qb({ data: { id_uloge: 7 }, error: null });
-      if (table === 'uloga') return qb({ data: { naziv: 'Serviser' }, error: null });
+      if (table === 'uposlenici')
+        return qb({ data: { id_uloge: 7 }, error: null });
+      if (table === 'uloga')
+        return qb({ data: { naziv: 'Serviser' }, error: null });
       return qb({ data: null, error: null });
     });
     const serviserResp = await GET();
@@ -62,8 +75,10 @@ describe('/api/auth/uloge route', () => {
 
     mockFrom.mockImplementation((table) => {
       if (table === 'korisnik_usluge') return qb({ data: null, error: null });
-      if (table === 'uposlenici') return qb({ data: { id_uloge: 1 }, error: null });
-      if (table === 'uloga') return qb({ data: { naziv: 'Administrator' }, error: null });
+      if (table === 'uposlenici')
+        return qb({ data: { id_uloge: 1 }, error: null });
+      if (table === 'uloga')
+        return qb({ data: { naziv: 'Administrator' }, error: null });
       return qb({ data: null, error: null });
     });
     const adminResp = await GET();
@@ -72,8 +87,10 @@ describe('/api/auth/uloge route', () => {
 
     mockFrom.mockImplementation((table) => {
       if (table === 'korisnik_usluge') return qb({ data: null, error: null });
-      if (table === 'uposlenici') return qb({ data: { id_uloge: 1 }, error: null });
-      if (table === 'uloga') return qb({ data: { naziv: 'korisnik' }, error: null });
+      if (table === 'uposlenici')
+        return qb({ data: { id_uloge: 1 }, error: null });
+      if (table === 'uloga')
+        return qb({ data: { naziv: 'korisnik' }, error: null });
       return qb({ data: null, error: null });
     });
     const korisnikResp = await GET();
@@ -82,11 +99,16 @@ describe('/api/auth/uloge route', () => {
   });
 
   test('ignores unknown role names but keeps korisnik for zaposleni', async () => {
-    mockSessionGetUser.mockResolvedValue({ data: { user: { id: 'u1' } }, error: null });
+    mockSessionGetUser.mockResolvedValue({
+      data: { user: { id: 'u1' } },
+      error: null,
+    });
     mockFrom.mockImplementation((table) => {
       if (table === 'korisnik_usluge') return qb({ data: null, error: null });
-      if (table === 'uposlenici') return qb({ data: { id_uloge: 7 }, error: null });
-      if (table === 'uloga') return qb({ data: { naziv: 'nepoznata' }, error: null });
+      if (table === 'uposlenici')
+        return qb({ data: { id_uloge: 7 }, error: null });
+      if (table === 'uloga')
+        return qb({ data: { naziv: 'nepoznata' }, error: null });
       return qb({ data: null, error: null });
     });
     const response = await GET();
@@ -95,9 +117,13 @@ describe('/api/auth/uloge route', () => {
   });
 
   test('returns 500 when db lookup fails', async () => {
-    mockSessionGetUser.mockResolvedValue({ data: { user: { id: 'u1' } }, error: null });
+    mockSessionGetUser.mockResolvedValue({
+      data: { user: { id: 'u1' } },
+      error: null,
+    });
     mockFrom.mockImplementation((table) => {
-      if (table === 'korisnik_usluge') return qb({ data: null, error: { message: 'db fail' } });
+      if (table === 'korisnik_usluge')
+        return qb({ data: null, error: { message: 'db fail' } });
       return qb({ data: null, error: null });
     });
     const response = await GET();
@@ -105,16 +131,23 @@ describe('/api/auth/uloge route', () => {
   });
 
   test('returns 401 when getUser returns auth error', async () => {
-    mockSessionGetUser.mockResolvedValue({ data: { user: null }, error: { message: 'session error' } });
+    mockSessionGetUser.mockResolvedValue({
+      data: { user: null },
+      error: { message: 'session error' },
+    });
     const response = await GET();
     expect(response.status).toBe(401);
   });
 
   test('returns 500 for uposlenici/uloga query failures', async () => {
-    mockSessionGetUser.mockResolvedValue({ data: { user: { id: 'u1' } }, error: null });
+    mockSessionGetUser.mockResolvedValue({
+      data: { user: { id: 'u1' } },
+      error: null,
+    });
     mockFrom.mockImplementation((table) => {
       if (table === 'korisnik_usluge') return qb({ data: null, error: null });
-      if (table === 'uposlenici') return qb({ data: null, error: { message: 'uposlenici fail' } });
+      if (table === 'uposlenici')
+        return qb({ data: null, error: { message: 'uposlenici fail' } });
       return qb({ data: null, error: null });
     });
     const responseUposlenici = await GET();
@@ -122,8 +155,10 @@ describe('/api/auth/uloge route', () => {
 
     mockFrom.mockImplementation((table) => {
       if (table === 'korisnik_usluge') return qb({ data: null, error: null });
-      if (table === 'uposlenici') return qb({ data: { id_uloge: 1 }, error: null });
-      if (table === 'uloga') return qb({ data: null, error: { message: 'uloga fail' } });
+      if (table === 'uposlenici')
+        return qb({ data: { id_uloge: 1 }, error: null });
+      if (table === 'uloga')
+        return qb({ data: null, error: { message: 'uloga fail' } });
       return qb({ data: null, error: null });
     });
     const responseUloga = await GET();

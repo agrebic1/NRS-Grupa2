@@ -1,17 +1,22 @@
-import { haversineKm, izracunajPreporuke } from '@/lib/servisirane/preporukaServisera';
+import {
+  haversineKm,
+  izracunajPreporuke,
+} from '@/lib/servisirane/preporukaServisera';
 import type { ServiserZaDodjelu } from '@/domain/types/servisirane';
 
 // ─── Pomoćni tvorac servisera ──────────────────────────────────────────────────
 
-function serviser(over: Partial<ServiserZaDodjelu> & { id: string }): ServiserZaDodjelu {
+function serviser(
+  over: Partial<ServiserZaDodjelu> & { id: string },
+): ServiserZaDodjelu {
   return {
-    ime:               'Test',
-    prezime:           'Serviser',
-    is_verified:       true,
+    ime: 'Test',
+    prezime: 'Serviser',
+    is_verified: true,
     aktivnih_zadataka: 0,
-    specialnosti:      [],
-    latitude:          null,
-    longitude:         null,
+    specialnosti: [],
+    latitude: null,
+    longitude: null,
     ...over,
   };
 }
@@ -57,7 +62,13 @@ describe('izracunajPreporuke — bez koordinata (graceful fallback)', () => {
 
   test('specijalista za kategoriju + verificiran + slobodan = 100', () => {
     const [p] = izracunajPreporuke(
-      [serviser({ id: 'a', specialnosti: ['Vodoinstalacije'], is_verified: true })],
+      [
+        serviser({
+          id: 'a',
+          specialnosti: ['Vodoinstalacije'],
+          is_verified: true,
+        }),
+      ],
       { kategorija: 'vodoinstalacije' },
     );
     expect(p.score).toBe(100);
@@ -91,12 +102,12 @@ describe('izracunajPreporuke — geo-preporuka (US-48)', () => {
   test('bliži serviser dobija veći score od daljeg (uz inače jednake faktore)', () => {
     const res = izracunajPreporuke(
       [
-        serviser({ id: 'blizu', latitude: 0, longitude: 0 }),       // 0 km
-        serviser({ id: 'daleko', latitude: 0, longitude: 5 }),      // ~556 km
+        serviser({ id: 'blizu', latitude: 0, longitude: 0 }), // 0 km
+        serviser({ id: 'daleko', latitude: 0, longitude: 5 }), // ~556 km
       ],
       opcije,
     );
-    const blizu  = res.find((r) => r.serviser.id === 'blizu')!;
+    const blizu = res.find((r) => r.serviser.id === 'blizu')!;
     const daleko = res.find((r) => r.serviser.id === 'daleko')!;
 
     expect(blizu.udaljenost_km).toBe(0);
@@ -138,7 +149,7 @@ describe('izracunajPreporuke — geo-preporuka (US-48)', () => {
       ],
       opcije,
     );
-    const sa  = res.find((r) => r.serviser.id === 'sa')!;
+    const sa = res.find((r) => r.serviser.id === 'sa')!;
     const bez = res.find((r) => r.serviser.id === 'bez')!;
     expect(sa.udaljenost_km).toBe(0);
     expect(bez.udaljenost_km).toBeNull();

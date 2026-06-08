@@ -605,7 +605,9 @@ export default function UrediKorisnikaPage() {
       adresa: adresa.trim() || null,
     };
 
-    const jeServiser = (korisnik?.uloga ?? '').toLowerCase().includes('serviser');
+    const jeServiser = (korisnik?.uloga ?? '')
+      .toLowerCase()
+      .includes('serviser');
     if (jeServiser) {
       const latOk = typeof baznaLat === 'number' && Number.isFinite(baznaLat);
       const lngOk = typeof baznaLng === 'number' && Number.isFinite(baznaLng);
@@ -1032,8 +1034,12 @@ export default function UrediKorisnikaPage() {
                     setBaznaLng(longitude);
                   }}
                 />
-                <p className="mt-2 text-[11px]" style={{ color: 'var(--first-nonary)' }}>
-                  Opcionalno. Koristi se da dispečer serviseru dodjeljuje bliže intervencije.
+                <p
+                  className="mt-2 text-[11px]"
+                  style={{ color: 'var(--first-nonary)' }}
+                >
+                  Opcionalno. Koristi se da dispečer serviseru dodjeljuje bliže
+                  intervencije.
                 </p>
               </div>
             )}

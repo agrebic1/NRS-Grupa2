@@ -43,9 +43,9 @@ export function checkRateLimit(
   entry.count += 1;
   const remaining = Math.max(0, max - entry.count);
   return {
-    allowed:   entry.count <= max,
+    allowed: entry.count <= max,
     remaining,
-    resetAt:   entry.resetAt,
+    resetAt: entry.resetAt,
   };
 }
 

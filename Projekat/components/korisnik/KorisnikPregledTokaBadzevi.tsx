@@ -2,7 +2,10 @@
 
 import type { ServisniZahtjev } from '@/domain/types/servisirane';
 import { DispecerStatusBadge } from '@/components/servisirane/zahtjevBadgeovi';
-import { DISPECER_PALETA_HITNOST, DISPECER_PALETA_STATUS } from '@/lib/servisirane/dispecerPaleta';
+import {
+  DISPECER_PALETA_HITNOST,
+  DISPECER_PALETA_STATUS,
+} from '@/lib/servisirane/dispecerPaleta';
 import {
   nazivDispecerskeFazePregleda,
   uzmiDispecerskuFazuZaPregled,
@@ -10,7 +13,10 @@ import {
   type DispecerskaFazaPregleda,
 } from '@/lib/servisirane/dispecerskeFaze';
 import { zahtjevCekaObraduUInboxuDispecera } from '@/lib/servisirane/statusZahtjeva';
-import { inboxGrupaIzKorisnickeProcjene, oznakaInboxHitnostiCekaObradu } from '@/lib/servisirane/urgency';
+import {
+  inboxGrupaIzKorisnickeProcjene,
+  oznakaInboxHitnostiCekaObradu,
+} from '@/lib/servisirane/urgency';
 
 type SlotSaRubom = { tekst: string; pozadina: string; border: string };
 
@@ -32,7 +38,11 @@ function nazivFazeZaKorisnika(faza: DispecerskaFazaPregleda): string {
  * Ista logika kao `DispecerPregledTokaBadzevi` (inbox + pod-faze prema `final_priority`, terminu, serviseru),
  * s korisničkim nazivima - usklađeno s dispečerskim pregledom zahtjeva.
  */
-export function KorisnikPregledTokaBadzevi({ zahtjev }: { zahtjev: ServisniZahtjev }) {
+export function KorisnikPregledTokaBadzevi({
+  zahtjev,
+}: {
+  zahtjev: ServisniZahtjev;
+}) {
   if (!zahtjevCekaObraduUInboxuDispecera(zahtjev.status)) {
     return <DispecerStatusBadge status={zahtjev.status} variant="korisnik" />;
   }

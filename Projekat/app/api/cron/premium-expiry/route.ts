@@ -19,14 +19,21 @@ function autorizovanCronPoziv(request: Request): boolean {
 async function obradiIstekPremiuma(request: Request) {
   try {
     if (!autorizovanCronPoziv(request)) {
-      return NextResponse.json({ error: 'Nedozvoljen cron poziv.' }, { status: 401 });
+      return NextResponse.json(
+        { error: 'Nedozvoljen cron poziv.' },
+        { status: 401 },
+      );
     }
 
     let supabase: ReturnType<typeof createAdminClient>;
     try {
       supabase = createAdminClient();
     } catch {
-      return NextResponse.json({ success: true, expiredCount: 0, skipped: 'service_role_key_not_configured' });
+      return NextResponse.json({
+        success: true,
+        expiredCount: 0,
+        skipped: 'service_role_key_not_configured',
+      });
     }
 
     const sadaIso = new Date().toISOString();
@@ -41,8 +48,11 @@ async function obradiIstekPremiuma(request: Request) {
 
     if (selectErr?.message?.includes("'premium_status' column")) {
       return NextResponse.json(
-        { error: 'Premium lifecycle kolone ne postoje. Primijenite premium lifecycle migraciju.' },
-        { status: 400 }
+        {
+          error:
+            'Premium lifecycle kolone ne postoje. Primijenite premium lifecycle migraciju.',
+        },
+        { status: 400 },
       );
     }
     if (selectErr) {
@@ -76,7 +86,7 @@ async function obradiIstekPremiuma(request: Request) {
           source: 'cron_premium_expiry',
           expired_at: sadaIso,
         },
-      }))
+      })),
     );
 
     if (eventsErr && !eventsErr.message.includes("'premium_events'")) {

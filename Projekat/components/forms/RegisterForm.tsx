@@ -5,8 +5,18 @@ import Link from 'next/link';
 import { useForm, type FieldPath } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Eye, EyeOff, ChevronRight, ChevronLeft, Check, Mail } from 'lucide-react';
-import { registracijskaShema, type RegistracijskiPodaci } from '@/lib/validations/authValidation';
+import {
+  Eye,
+  EyeOff,
+  ChevronRight,
+  ChevronLeft,
+  Check,
+  Mail,
+} from 'lucide-react';
+import {
+  registracijskaShema,
+  type RegistracijskiPodaci,
+} from '@/lib/validations/authValidation';
 import {
   odrediRedirectNakonPrijave,
   posaljiPonovoVerifikacijskiEmail,
@@ -19,7 +29,7 @@ import { AlertMessage } from '@/components/ui/AlertMessage';
 import { PasswordStrengthIndicator } from '@/components/ui/PasswordStrengthIndicator';
 import { LoadingOverlay } from '@/components/ui/LoadingOverlay';
 
-// Konfiguracija koraka 
+// Konfiguracija koraka
 
 const UKUPNO_KORAKA = 2;
 
@@ -33,16 +43,16 @@ const POLJA_PO_KORAKU: Record<number, FieldPath<RegistracijskiPodaci>[]> = {
 /** Pauza prije ponovnog slanja emaila s linkom (ograničenje na klijentu). */
 const SEKUNDE_DO_PONOVNOG_SLANJA = 60;
 
-// Komponenta za progres bar 
+// Komponenta za progres bar
 
 function TrakaNapretka({ trenutniKorak }: { trenutniKorak: number }) {
   return (
     <div className="mb-7">
       <div className="mb-3 flex items-center">
         {OZNAKE_KORAKA.map((oznaka, i) => {
-          const brojKoraka  = i + 1;
-          const jeZavrsen   = brojKoraka < trenutniKorak;
-          const jeTrenutni  = brojKoraka === trenutniKorak;
+          const brojKoraka = i + 1;
+          const jeZavrsen = brojKoraka < trenutniKorak;
+          const jeTrenutni = brojKoraka === trenutniKorak;
 
           return (
             <div key={oznaka} className="flex flex-1 items-center">
@@ -53,51 +63,80 @@ function TrakaNapretka({ trenutniKorak }: { trenutniKorak: number }) {
                     backgroundColor: jeZavrsen
                       ? 'var(--first-primary)'
                       : jeTrenutni
-                      ? 'var(--first-septenary)'
-                      : 'rgb(var(--first-quinary-rgb) / 0.5)',
-                    color: jeZavrsen ? 'var(--first-white)' : jeTrenutni ? 'var(--first-octonary)' : 'var(--first-nonary)',
+                        ? 'var(--first-septenary)'
+                        : 'rgb(var(--first-quinary-rgb) / 0.5)',
+                    color: jeZavrsen
+                      ? 'var(--first-white)'
+                      : jeTrenutni
+                        ? 'var(--first-octonary)'
+                        : 'var(--first-nonary)',
                   }}
                 >
                   {jeZavrsen ? <Check className="h-3.5 w-3.5" /> : brojKoraka}
                 </div>
-                <span className="text-xs font-medium" style={{ color: jeTrenutni ? 'var(--first-octonary)' : 'var(--first-nonary)' }}>
+                <span
+                  className="text-xs font-medium"
+                  style={{
+                    color: jeTrenutni
+                      ? 'var(--first-octonary)'
+                      : 'var(--first-nonary)',
+                  }}
+                >
                   {oznaka}
                 </span>
               </div>
               {i < OZNAKE_KORAKA.length - 1 && (
                 <div
                   className="mx-2 mb-4 h-px flex-1 transition-all duration-500"
-                  style={{ backgroundColor: trenutniKorak > i + 1 ? 'var(--first-primary)' : 'var(--first-quaternary)', opacity: 0.5 }}
+                  style={{
+                    backgroundColor:
+                      trenutniKorak > i + 1
+                        ? 'var(--first-primary)'
+                        : 'var(--first-quaternary)',
+                    opacity: 0.5,
+                  }}
                 />
               )}
             </div>
           );
         })}
       </div>
-      <div className="h-1 overflow-hidden rounded-full" style={{ backgroundColor: 'rgb(var(--first-quaternary-rgb) / 0.35)' }}>
+      <div
+        className="h-1 overflow-hidden rounded-full"
+        style={{ backgroundColor: 'rgb(var(--first-quaternary-rgb) / 0.35)' }}
+      >
         <div
           className="h-full rounded-full transition-all duration-500"
-          style={{ width: `${((trenutniKorak - 1) / (UKUPNO_KORAKA - 1)) * 100}%`, backgroundColor: 'var(--first-septenary)' }}
+          style={{
+            width: `${((trenutniKorak - 1) / (UKUPNO_KORAKA - 1)) * 100}%`,
+            backgroundColor: 'var(--first-septenary)',
+          }}
         />
       </div>
     </div>
   );
 }
 
-// Glavna komponenta 
+// Glavna komponenta
 
 export function RegisterForm() {
   const router = useRouter();
 
-  const [trenutniKorak,      setTrenutniKorak]      = useState(1);
-  const [jeLozinkaVidljiva,  setJeLozinkaVidljiva]  = useState(false);
-  const [jePotvrdaVidljiva,  setJePotvrdaVidljiva]  = useState(false);
-  const [greskaRegistracije, setGreskaRegistracije] = useState<string | null>(null);
-  const [jeKreiranjeNaloga,  setJeKreiranjeNaloga]  = useState(false);
+  const [trenutniKorak, setTrenutniKorak] = useState(1);
+  const [jeLozinkaVidljiva, setJeLozinkaVidljiva] = useState(false);
+  const [jePotvrdaVidljiva, setJePotvrdaVidljiva] = useState(false);
+  const [greskaRegistracije, setGreskaRegistracije] = useState<string | null>(
+    null,
+  );
+  const [jeKreiranjeNaloga, setJeKreiranjeNaloga] = useState(false);
   const [emailCekaPotvrdu, setEmailCekaPotvrdu] = useState<string | null>(null);
   const [preostaleSekundePonovo, setPreostaleSekundePonovo] = useState(0);
-  const [porukaNakonPonovnogSlanja, setPorukaNakonPonovnogSlanja] = useState<string | null>(null);
-  const [greskaPonovnogSlanja, setGreskaPonovnogSlanja] = useState<string | null>(null);
+  const [porukaNakonPonovnogSlanja, setPorukaNakonPonovnogSlanja] = useState<
+    string | null
+  >(null);
+  const [greskaPonovnogSlanja, setGreskaPonovnogSlanja] = useState<
+    string | null
+  >(null);
   const [jeSlanjePonovo, setJeSlanjePonovo] = useState(false);
 
   const {
@@ -147,7 +186,9 @@ export function RegisterForm() {
         setGreskaRegistracije(null);
       } else {
         setGreskaRegistracije(
-          greska instanceof Error ? greska.message : 'Kreiranje naloga nije uspjelo. Pokušajte ponovo.'
+          greska instanceof Error
+            ? greska.message
+            : 'Kreiranje naloga nije uspjelo. Pokušajte ponovo.',
         );
       }
       setJeKreiranjeNaloga(false);
@@ -156,7 +197,8 @@ export function RegisterForm() {
   }
 
   async function ponovoPosaljiVerifikaciju() {
-    if (!emailCekaPotvrdu || preostaleSekundePonovo > 0 || jeSlanjePonovo) return;
+    if (!emailCekaPotvrdu || preostaleSekundePonovo > 0 || jeSlanjePonovo)
+      return;
     setGreskaPonovnogSlanja(null);
     setPorukaNakonPonovnogSlanja(null);
     setJeSlanjePonovo(true);
@@ -168,7 +210,7 @@ export function RegisterForm() {
       setGreskaPonovnogSlanja(
         greska instanceof Error
           ? greska.message
-          : 'Nije moguće poslati novi link. Pokušajte ponovo.'
+          : 'Nije moguće poslati novi link. Pokušajte ponovo.',
       );
     } finally {
       setJeSlanjePonovo(false);
@@ -197,28 +239,50 @@ export function RegisterForm() {
           <div className="flex items-start gap-3">
             <div
               className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full"
-              style={{ backgroundColor: 'rgb(var(--first-septenary-rgb) / 0.2)', color: 'var(--first-octonary)' }}
+              style={{
+                backgroundColor: 'rgb(var(--first-septenary-rgb) / 0.2)',
+                color: 'var(--first-octonary)',
+              }}
             >
               <Mail className="h-5 w-5" aria-hidden />
             </div>
             <div className="min-w-0 flex-1 space-y-3">
-              <h2 className="text-base font-semibold" style={{ color: 'var(--first-primary)' }}>
+              <h2
+                className="text-base font-semibold"
+                style={{ color: 'var(--first-primary)' }}
+              >
                 Provjerite email
               </h2>
-              <p className="text-sm leading-relaxed" style={{ color: 'var(--first-octonary)' }}>
+              <p
+                className="text-sm leading-relaxed"
+                style={{ color: 'var(--first-octonary)' }}
+              >
                 Poslali smo link za potvrdu naloga na adresu{' '}
-                <strong className="break-all font-semibold" style={{ color: 'var(--first-primary)' }}>
+                <strong
+                  className="break-all font-semibold"
+                  style={{ color: 'var(--first-primary)' }}
+                >
                   {emailCekaPotvrdu}
                 </strong>
                 . Otvorite inbox i kliknite na link kako biste potvrdili nalog.
               </p>
-              <p className="text-sm leading-relaxed" style={{ color: 'var(--first-nonary)' }}>
-                Ako email ne vidite odmah, provjerite spam folder ili mapu &quot;Neželjena pošta&quot;.
+              <p
+                className="text-sm leading-relaxed"
+                style={{ color: 'var(--first-nonary)' }}
+              >
+                Ako email ne vidite odmah, provjerite spam folder ili mapu
+                &quot;Neželjena pošta&quot;.
               </p>
               {preostaleSekundePonovo > 0 ? (
-                <p className="text-sm tabular-nums" style={{ color: 'var(--first-nonary)' }}>
+                <p
+                  className="text-sm tabular-nums"
+                  style={{ color: 'var(--first-nonary)' }}
+                >
                   Novi link možete zatražiti za{' '}
-                  <span className="font-semibold" style={{ color: 'var(--first-octonary)' }}>
+                  <span
+                    className="font-semibold"
+                    style={{ color: 'var(--first-octonary)' }}
+                  >
                     {preostaleSekundePonovo}
                   </span>{' '}
                   s.
@@ -232,7 +296,10 @@ export function RegisterForm() {
           </div>
 
           {porukaNakonPonovnogSlanja && (
-            <AlertMessage variant="success" message={porukaNakonPonovnogSlanja} />
+            <AlertMessage
+              variant="success"
+              message={porukaNakonPonovnogSlanja}
+            />
           )}
           {greskaPonovnogSlanja && (
             <AlertMessage variant="error" message={greskaPonovnogSlanja} />
@@ -256,7 +323,12 @@ export function RegisterForm() {
             >
               Već ste potvrdili nalog? Prijavite se
             </Link>
-            <Button type="button" variant="ghost" size="md" onClick={zatvoriEkranPotvrde}>
+            <Button
+              type="button"
+              variant="ghost"
+              size="md"
+              onClick={zatvoriEkranPotvrde}
+            >
               Počni ispočetka
             </Button>
           </div>
@@ -267,7 +339,10 @@ export function RegisterForm() {
 
   return (
     <>
-      <LoadingOverlay isVisible={jeKreiranjeNaloga} message="Kreiranje naloga..." />
+      <LoadingOverlay
+        isVisible={jeKreiranjeNaloga}
+        message="Kreiranje naloga..."
+      />
 
       <TrakaNapretka trenutniKorak={trenutniKorak} />
 
@@ -332,9 +407,15 @@ export function RegisterForm() {
                     onClick={() => setJeLozinkaVidljiva((v) => !v)}
                     className="transition-opacity hover:opacity-70"
                     style={{ color: 'var(--first-nonary)' }}
-                    aria-label={jeLozinkaVidljiva ? 'Sakrij lozinku' : 'Prikaži lozinku'}
+                    aria-label={
+                      jeLozinkaVidljiva ? 'Sakrij lozinku' : 'Prikaži lozinku'
+                    }
                   >
-                    {jeLozinkaVidljiva ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {jeLozinkaVidljiva ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </button>
                 }
                 error={errors.lozinka?.message}
@@ -352,9 +433,15 @@ export function RegisterForm() {
                   onClick={() => setJePotvrdaVidljiva((v) => !v)}
                   className="transition-opacity hover:opacity-70"
                   style={{ color: 'var(--first-nonary)' }}
-                  aria-label={jePotvrdaVidljiva ? 'Sakrij lozinku' : 'Prikaži lozinku'}
+                  aria-label={
+                    jePotvrdaVidljiva ? 'Sakrij lozinku' : 'Prikaži lozinku'
+                  }
                 >
-                  {jePotvrdaVidljiva ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {jePotvrdaVidljiva ? (
+                    <EyeOff className="h-4 w-4" />
+                  ) : (
+                    <Eye className="h-4 w-4" />
+                  )}
                 </button>
               }
               error={errors.potvrdaLozinke?.message}
@@ -366,7 +453,12 @@ export function RegisterForm() {
         {/* Navigacija između koraka */}
         <div className="mt-8 flex items-center justify-between">
           {trenutniKorak > 1 ? (
-            <Button type="button" variant="ghost" size="md" onClick={idiNaPrethodniKorak}>
+            <Button
+              type="button"
+              variant="ghost"
+              size="md"
+              onClick={idiNaPrethodniKorak}
+            >
               <ChevronLeft className="h-4 w-4" />
               Nazad
             </Button>

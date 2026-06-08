@@ -6,17 +6,30 @@ import { assertDispatcherAccess } from '@/lib/servisirane/dispecerPristup';
 
 export const dynamic = 'force-dynamic';
 
-const BUCKET           = 'intervencije-slike';
-const MAX_SIZE_BYTES   = 10 * 1024 * 1024; // 10 MB
+const BUCKET = 'intervencije-slike';
+const MAX_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
 const DOZVOLJENI_TIPOVI = ['image/jpeg', 'image/png', 'image/webp'];
 
 /** SEC-T-3: Magic bytes provjera - sprječava upload preimenovanih non-image fajlova. */
-function provjeriMagicBytes(buffer: Buffer): 'image/jpeg' | 'image/png' | 'image/webp' | null {
-  if (buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[2] === 0xFF) return 'image/jpeg';
-  if (buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47) return 'image/png';
+function provjeriMagicBytes(
+  buffer: Buffer,
+): 'image/jpeg' | 'image/png' | 'image/webp' | null {
+  if (buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff)
+    return 'image/jpeg';
   if (
-    buffer[8] === 0x57 && buffer[9] === 0x45 && buffer[10] === 0x42 && buffer[11] === 0x50
-  ) return 'image/webp';
+    buffer[0] === 0x89 &&
+    buffer[1] === 0x50 &&
+    buffer[2] === 0x4e &&
+    buffer[3] === 0x47
+  )
+    return 'image/png';
+  if (
+    buffer[8] === 0x57 &&
+    buffer[9] === 0x45 &&
+    buffer[10] === 0x42 &&
+    buffer[11] === 0x50
+  )
+    return 'image/webp';
   return null;
 }
 
@@ -24,12 +37,21 @@ function provjeriMagicBytes(buffer: Buffer): 'image/jpeg' | 'image/png' | 'image
 export async function GET(request: NextRequest) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return NextResponse.json({ error: 'Niste prijavljeni.' }, { status: 401 });
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user)
+      return NextResponse.json(
+        { error: 'Niste prijavljeni.' },
+        { status: 401 },
+      );
 
     const zahtjev_id = Number(request.nextUrl.searchParams.get('zahtjev_id'));
     if (!Number.isFinite(zahtjev_id) || zahtjev_id <= 0) {
-      return NextResponse.json({ error: 'Neispravan zahtjev_id.' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Neispravan zahtjev_id.' },
+        { status: 400 },
+      );
     }
 
     const db = supabase as any;
@@ -39,12 +61,13 @@ export async function GET(request: NextRequest) {
       .eq('zahtjev_id', zahtjev_id)
       .order('created_at', { ascending: true });
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error)
+      return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ slike: data ?? [] });
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : 'Greška servera.' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -53,27 +76,46 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return NextResponse.json({ error: 'Niste prijavljeni.' }, { status: 401 });
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user)
+      return NextResponse.json(
+        { error: 'Niste prijavljeni.' },
+        { status: 401 },
+      );
 
-    const formData    = await request.formData();
-    const file        = formData.get('file') as File | null;
-    const zahtjev_id  = Number(formData.get('zahtjev_id'));
+    const formData = await request.formData();
+    const file = formData.get('file') as File | null;
+    const zahtjev_id = Number(formData.get('zahtjev_id'));
     const evidencija_id = formData.get('evidencija_id')
       ? Number(formData.get('evidencija_id'))
       : null;
     const naziv = (formData.get('naziv') as string | null)?.trim() || null;
-    const opis  = (formData.get('opis')  as string | null)?.trim() || null;
+    const opis = (formData.get('opis') as string | null)?.trim() || null;
 
-    if (!file) return NextResponse.json({ error: 'Fajl nije priložen.' }, { status: 400 });
+    if (!file)
+      return NextResponse.json(
+        { error: 'Fajl nije priložen.' },
+        { status: 400 },
+      );
     if (!Number.isFinite(zahtjev_id) || zahtjev_id <= 0) {
-      return NextResponse.json({ error: 'Neispravan zahtjev_id.' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Neispravan zahtjev_id.' },
+        { status: 400 },
+      );
     }
     if (!DOZVOLJENI_TIPOVI.includes(file.type)) {
-      return NextResponse.json({ error: 'Tip fajla nije podržan. Dozvoljeno: JPEG, PNG, WebP.' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Tip fajla nije podržan. Dozvoljeno: JPEG, PNG, WebP.' },
+        { status: 400 },
+      );
     }
     if (file.size > MAX_SIZE_BYTES) {
-      return NextResponse.json({ error: 'Fajl je prevelik. Maksimalna veličina je 10 MB.' }, { status: 400 });
+      return NextResponse.json(
+        { error: 'Fajl je prevelik. Maksimalna veličina je 10 MB.' },
+        { status: 400 },
+      );
     }
 
     // Provjera vlasništva: mora biti dodijeljeni serviser ili dispečer
@@ -85,26 +127,37 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (!zahtjev) {
-      return NextResponse.json({ error: 'Servisni zahtjev nije pronađen.' }, { status: 404 });
+      return NextResponse.json(
+        { error: 'Servisni zahtjev nije pronađen.' },
+        { status: 404 },
+      );
     }
 
     const jeServiser = zahtjev.serviser_dodijeljen_id === user.id;
-    const jeDispecer = await assertDispatcherAccess(supabase, user.id).catch(() => false);
+    const jeDispecer = await assertDispatcherAccess(supabase, user.id).catch(
+      () => false,
+    );
 
     if (!jeServiser && !jeDispecer) {
-      return NextResponse.json({ error: 'Nemate ovlaštenje za upload slika na ovoj intervenciji.' }, { status: 403 });
+      return NextResponse.json(
+        { error: 'Nemate ovlaštenje za upload slika na ovoj intervenciji.' },
+        { status: 403 },
+      );
     }
 
     // SEC-T-3: pročitaj sadržaj i provjeri magic bytes (sprječava lažni Content-Type)
-    const adminClient  = createAdminClient();
-    const arrayBuffer  = await file.arrayBuffer();
-    const buffer       = Buffer.from(arrayBuffer);
+    const adminClient = createAdminClient();
+    const arrayBuffer = await file.arrayBuffer();
+    const buffer = Buffer.from(arrayBuffer);
 
     const stvarniTip = provjeriMagicBytes(buffer);
     if (!stvarniTip) {
       return NextResponse.json(
-        { error: 'Sadržaj fajla ne odgovara slici. Dozvoljeno: JPEG, PNG, WebP.' },
-        { status: 400 }
+        {
+          error:
+            'Sadržaj fajla ne odgovara slici. Dozvoljeno: JPEG, PNG, WebP.',
+        },
+        { status: 400 },
       );
     }
 
@@ -117,10 +170,15 @@ export async function POST(request: NextRequest) {
       .upload(storagePath, buffer, { contentType: stvarniTip, upsert: false });
 
     if (uploadError) {
-      return NextResponse.json({ error: `Storage greška: ${uploadError.message}` }, { status: 500 });
+      return NextResponse.json(
+        { error: `Storage greška: ${uploadError.message}` },
+        { status: 500 },
+      );
     }
 
-    const { data: urlData } = adminClient.storage.from(BUCKET).getPublicUrl(storagePath);
+    const { data: urlData } = adminClient.storage
+      .from(BUCKET)
+      .getPublicUrl(storagePath);
     const image_url = urlData.publicUrl;
 
     // Sačuvaj u bazu
@@ -129,7 +187,7 @@ export async function POST(request: NextRequest) {
       .insert({
         zahtjev_id,
         evidencija_id: evidencija_id || null,
-        uploaded_by:   user.id,
+        uploaded_by: user.id,
         image_url,
         naziv,
         opis,
@@ -146,17 +204,17 @@ export async function POST(request: NextRequest) {
     // Aktivnost u audit logu
     await db.from('intervention_activities').insert({
       zahtjev_id,
-      autor_id:   user.id,
-      tip:        'slika',
-      sadrzaj:    `Uploadovana slika: ${naziv ?? storagePath}`,
-      metadata:   { slika_id: slika.id, image_url },
+      autor_id: user.id,
+      tip: 'slika',
+      sadrzaj: `Uploadovana slika: ${naziv ?? storagePath}`,
+      metadata: { slika_id: slika.id, image_url },
     });
 
     return NextResponse.json({ success: true, slika });
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : 'Greška servera.' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -165,8 +223,14 @@ export async function POST(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return NextResponse.json({ error: 'Niste prijavljeni.' }, { status: 401 });
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user)
+      return NextResponse.json(
+        { error: 'Niste prijavljeni.' },
+        { status: 401 },
+      );
 
     const id = Number(request.nextUrl.searchParams.get('id'));
     if (!Number.isFinite(id) || id <= 0) {
@@ -180,15 +244,22 @@ export async function DELETE(request: NextRequest) {
       .eq('id', id)
       .single();
 
-    if (!slika) return NextResponse.json({ error: 'Slika nije pronađena.' }, { status: 404 });
+    if (!slika)
+      return NextResponse.json(
+        { error: 'Slika nije pronađena.' },
+        { status: 404 },
+      );
     if (slika.uploaded_by !== user.id) {
-      return NextResponse.json({ error: 'Nemate ovlaštenje za brisanje ove slike.' }, { status: 403 });
+      return NextResponse.json(
+        { error: 'Nemate ovlaštenje za brisanje ove slike.' },
+        { status: 403 },
+      );
     }
 
     // Brisanje iz Storage-a
     const adminClient = createAdminClient();
-    const url         = new URL(slika.image_url);
-    const pathParts   = url.pathname.split(`/${BUCKET}/`);
+    const url = new URL(slika.image_url);
+    const pathParts = url.pathname.split(`/${BUCKET}/`);
     const storagePath = pathParts[1] ?? '';
     if (storagePath) {
       await adminClient.storage.from(BUCKET).remove([storagePath]);
@@ -200,7 +271,7 @@ export async function DELETE(request: NextRequest) {
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : 'Greška servera.' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

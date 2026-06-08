@@ -9,7 +9,10 @@ interface PonovniCiklusBadgeProps {
 }
 
 /** US-47: vizuelna oznaka ponovnog operativnog ciklusa. */
-export function PonovniCiklusBadge({ broj, className = '' }: PonovniCiklusBadgeProps) {
+export function PonovniCiklusBadge({
+  broj,
+  className = '',
+}: PonovniCiklusBadgeProps) {
   const label = labelPonovnogCiklusa(broj);
   if (!label) return null;
 

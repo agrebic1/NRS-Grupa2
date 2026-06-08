@@ -10,10 +10,10 @@ interface FormCardProps {
 }
 
 const MAX_WIDTH_CLASSES: Record<CardMaxWidth, string> = {
-  sm:  'max-w-sm',
-  md:  'max-w-md',
-  lg:  'max-w-lg',
-  xl:  'max-w-xl',
+  sm: 'max-w-sm',
+  md: 'max-w-md',
+  lg: 'max-w-lg',
+  xl: 'max-w-xl',
   '2xl': 'max-w-2xl',
 };
 
@@ -33,11 +33,17 @@ export function FormCard({
       }}
     >
       <div className="mb-7">
-        <h1 className="text-2xl font-bold tracking-tight" style={{ color: 'var(--first-octonary)' }}>
+        <h1
+          className="text-2xl font-bold tracking-tight"
+          style={{ color: 'var(--first-octonary)' }}
+        >
           {title}
         </h1>
         {subtitle && (
-          <p className="mt-1.5 text-sm" style={{ color: 'var(--first-nonary)' }}>
+          <p
+            className="mt-1.5 text-sm"
+            style={{ color: 'var(--first-nonary)' }}
+          >
             {subtitle}
           </p>
         )}

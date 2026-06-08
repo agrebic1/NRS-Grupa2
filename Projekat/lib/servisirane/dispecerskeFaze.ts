@@ -1,16 +1,28 @@
-import type { PreferredSchedule, ServisniZahtjev } from '@/domain/types/servisirane';
-import { zahtjevCekaObraduUInboxuDispecera, zahtjevJeUToku } from '@/lib/servisirane/statusZahtjeva';
+import type {
+  PreferredSchedule,
+  ServisniZahtjev,
+} from '@/domain/types/servisirane';
+import {
+  zahtjevCekaObraduUInboxuDispecera,
+  zahtjevJeUToku,
+} from '@/lib/servisirane/statusZahtjeva';
 
-export function normalizovanOperativniPrioritet(finalPriority: string | null | undefined): string | null {
+export function normalizovanOperativniPrioritet(
+  finalPriority: string | null | undefined,
+): string | null {
   const t = finalPriority?.trim();
   return t ? t : null;
 }
 
-export function zahtjevImaOperativniPrioritet(zahtjev: { final_priority: string | null }): boolean {
+export function zahtjevImaOperativniPrioritet(zahtjev: {
+  final_priority: string | null;
+}): boolean {
   return normalizovanOperativniPrioritet(zahtjev.final_priority) != null;
 }
 
-function imaDogovoreniTerminIzRasporeda(s: PreferredSchedule | null | undefined): boolean {
+function imaDogovoreniTerminIzRasporeda(
+  s: PreferredSchedule | null | undefined,
+): boolean {
   const termini = s?.termini;
   return Array.isArray(termini) && termini.length > 0;
 }
@@ -19,7 +31,9 @@ function imaDogovoreniTerminIzRasporeda(s: PreferredSchedule | null | undefined)
 export function zahtjevImaDogovoreniTerminDispecera(zahtjev: {
   dispecer_agreed_schedule?: PreferredSchedule | null;
 }): boolean {
-  return imaDogovoreniTerminIzRasporeda(zahtjev.dispecer_agreed_schedule ?? null);
+  return imaDogovoreniTerminIzRasporeda(
+    zahtjev.dispecer_agreed_schedule ?? null,
+  );
 }
 
 /** U čarobnjaku je odabran serviser (prije završne potvrde koja prebacuje u `potvrdeno`). */
@@ -40,35 +54,57 @@ export function serviserJePotvrdioDogovoreniTermin(zahtjev: {
 /**
  * Pregled zahtjeva: **Novi** dok dispečer nije potvrdio operativni prioritet (`final_priority`).
  */
-export function zahtjevJeNoviUPregleduDispecera(zahtjev: ServisniZahtjev): boolean {
-  return zahtjevCekaObraduUInboxuDispecera(zahtjev.status) && !zahtjevImaOperativniPrioritet(zahtjev);
+export function zahtjevJeNoviUPregleduDispecera(
+  zahtjev: ServisniZahtjev,
+): boolean {
+  return (
+    zahtjevCekaObraduUInboxuDispecera(zahtjev.status) &&
+    !zahtjevImaOperativniPrioritet(zahtjev)
+  );
 }
 
 /**
  * Pregled zahtjeva: **U obradi** - prioritet je postavljen; još u inboxu (prije statusa `potvrdeno`).
  */
-export function zahtjevJeUObradiUPregleduDispecera(zahtjev: ServisniZahtjev): boolean {
-  return zahtjevCekaObraduUInboxuDispecera(zahtjev.status) && zahtjevImaOperativniPrioritet(zahtjev);
+export function zahtjevJeUObradiUPregleduDispecera(
+  zahtjev: ServisniZahtjev,
+): boolean {
+  return (
+    zahtjevCekaObraduUInboxuDispecera(zahtjev.status) &&
+    zahtjevImaOperativniPrioritet(zahtjev)
+  );
 }
 
 /** 1. U čarobnjaku - još nema operativnog prioriteta (korak Prioritet). */
-export function zahtjevCekaOperativniPrioritetDispecera(zahtjev: ServisniZahtjev): boolean {
-  return zahtjevCekaObraduUInboxuDispecera(zahtjev.status) && !zahtjevImaOperativniPrioritet(zahtjev);
+export function zahtjevCekaOperativniPrioritetDispecera(
+  zahtjev: ServisniZahtjev,
+): boolean {
+  return (
+    zahtjevCekaObraduUInboxuDispecera(zahtjev.status) &&
+    !zahtjevImaOperativniPrioritet(zahtjev)
+  );
 }
 
 /**
  * 2. Operativni prioritet postavljen, čeka se dogovor termina.
  * Ako `dispecer_agreed_schedule` još nije u bazi (stari redovi), svi s prioritetom padaju ovdje dok se ne popune novi podaci.
  */
-export function zahtjevCekaDogovorTerminaDispecera(zahtjev: ServisniZahtjev): boolean {
-  if (!zahtjevCekaObraduUInboxuDispecera(zahtjev.status) || !zahtjevImaOperativniPrioritet(zahtjev)) {
+export function zahtjevCekaDogovorTerminaDispecera(
+  zahtjev: ServisniZahtjev,
+): boolean {
+  if (
+    !zahtjevCekaObraduUInboxuDispecera(zahtjev.status) ||
+    !zahtjevImaOperativniPrioritet(zahtjev)
+  ) {
     return false;
   }
   return !zahtjevImaDogovoreniTerminDispecera(zahtjev);
 }
 
 /** 3. Termin dogovoren, čeka se dodjela servisera. */
-export function zahtjevCekaDodjeluServiseraDispecera(zahtjev: ServisniZahtjev): boolean {
+export function zahtjevCekaDodjeluServiseraDispecera(
+  zahtjev: ServisniZahtjev,
+): boolean {
   if (
     !zahtjevCekaObraduUInboxuDispecera(zahtjev.status) ||
     !zahtjevImaOperativniPrioritet(zahtjev) ||
@@ -80,7 +116,9 @@ export function zahtjevCekaDodjeluServiseraDispecera(zahtjev: ServisniZahtjev): 
 }
 
 /** 4. Serviser odabran, čeka završnu potvrdu čarobnjaka (korak Potvrda) prije `potvrdeno`. */
-export function zahtjevCekaZavrsnuPotvrduCarobnjaka(zahtjev: ServisniZahtjev): boolean {
+export function zahtjevCekaZavrsnuPotvrduCarobnjaka(
+  zahtjev: ServisniZahtjev,
+): boolean {
   if (
     !zahtjevCekaObraduUInboxuDispecera(zahtjev.status) ||
     !zahtjevImaOperativniPrioritet(zahtjev) ||
@@ -93,7 +131,9 @@ export function zahtjevCekaZavrsnuPotvrduCarobnjaka(zahtjev: ServisniZahtjev): b
 }
 
 /** Cijeli inbox dispečera (faze 1-4 prije `potvrdeno`). */
-export function zahtjevJeUReduObradeDispecera(zahtjev: ServisniZahtjev): boolean {
+export function zahtjevJeUReduObradeDispecera(
+  zahtjev: ServisniZahtjev,
+): boolean {
   return zahtjevCekaObraduUInboxuDispecera(zahtjev.status);
 }
 
@@ -101,8 +141,13 @@ export function zahtjevJeUReduObradeDispecera(zahtjev: ServisniZahtjev): boolean
  * U inboxu je i operativni prioritet je snimljen (`final_priority`).
  * Isto što i `zahtjevJeUObradiUPregleduDispecera` za inbox.
  */
-export function zahtjevJeUObradiUCarobnjakuDispecera(zahtjev: ServisniZahtjev): boolean {
-  return zahtjevJeUReduObradeDispecera(zahtjev) && zahtjevImaOperativniPrioritet(zahtjev);
+export function zahtjevJeUObradiUCarobnjakuDispecera(
+  zahtjev: ServisniZahtjev,
+): boolean {
+  return (
+    zahtjevJeUReduObradeDispecera(zahtjev) &&
+    zahtjevImaOperativniPrioritet(zahtjev)
+  );
 }
 
 /**
@@ -117,17 +162,21 @@ export type DispecerskaFazaPregleda =
 
 const NAZIV_FAZE_PREGLEDA: Record<DispecerskaFazaPregleda, string> = {
   ceka_operativni_prioritet: 'Procjena zahtjeva',
-  dogovor_termina:           'Dogovor termina',
-  dodjela_servisera:         'Izbor servisera',
-  konačna_potvrda:           'Potvrda termina',
+  dogovor_termina: 'Dogovor termina',
+  dodjela_servisera: 'Izbor servisera',
+  konačna_potvrda: 'Potvrda termina',
 };
 
-export function nazivDispecerskeFazePregleda(faza: DispecerskaFazaPregleda): string {
+export function nazivDispecerskeFazePregleda(
+  faza: DispecerskaFazaPregleda,
+): string {
   return NAZIV_FAZE_PREGLEDA[faza];
 }
 
 /** Faza za sporedni bedž; dok nema prioriteta vraća `ceka_operativni_prioritet` (ne prikazuje se uz „Novi“ ako je skriveno u UI-ju). */
-export function uzmiDispecerskuFazuZaPregled(zahtjev: ServisniZahtjev): DispecerskaFazaPregleda {
+export function uzmiDispecerskuFazuZaPregled(
+  zahtjev: ServisniZahtjev,
+): DispecerskaFazaPregleda {
   if (!zahtjevCekaObraduUInboxuDispecera(zahtjev.status)) {
     return 'konačna_potvrda';
   }
@@ -135,30 +184,41 @@ export function uzmiDispecerskuFazuZaPregled(zahtjev: ServisniZahtjev): Dispecer
     return 'ceka_operativni_prioritet';
   }
   if (!zahtjevImaDogovoreniTerminDispecera(zahtjev)) return 'dogovor_termina';
-  if (!zahtjevImaDodijeljenogServiseraUCarobnjaku(zahtjev)) return 'dodjela_servisera';
+  if (!zahtjevImaDodijeljenogServiseraUCarobnjaku(zahtjev))
+    return 'dodjela_servisera';
   return 'konačna_potvrda';
 }
 
-export function zahtjevUFaziDogovoraTerminaPregled(zahtjev: ServisniZahtjev): boolean {
+export function zahtjevUFaziDogovoraTerminaPregled(
+  zahtjev: ServisniZahtjev,
+): boolean {
   return zahtjevCekaDogovorTerminaDispecera(zahtjev);
 }
 
-export function zahtjevUFaziDodjeleServiseraPregled(zahtjev: ServisniZahtjev): boolean {
+export function zahtjevUFaziDodjeleServiseraPregled(
+  zahtjev: ServisniZahtjev,
+): boolean {
   return zahtjevCekaDodjeluServiseraDispecera(zahtjev);
 }
 
 /** Zadnji korak čarobnjaka u inboxu prije službenog statusa `potvrdeno`. */
-export function zahtjevUFaziKorakaPotvrdePregled(zahtjev: ServisniZahtjev): boolean {
+export function zahtjevUFaziKorakaPotvrdePregled(
+  zahtjev: ServisniZahtjev,
+): boolean {
   return zahtjevCekaZavrsnuPotvrduCarobnjaka(zahtjev);
 }
 
 /** Nakon završne potvrde u čarobnjaku. */
-export function zahtjevJePotvrdenPrijeIntervencije(zahtjev: { status: string }): boolean {
+export function zahtjevJePotvrdenPrijeIntervencije(zahtjev: {
+  status: string;
+}): boolean {
   return zahtjev.status === 'potvrdeno';
 }
 
 /** Praćenje intervencije (npr. stranica /korisnik/intervencija/[id]): dodjela i teren. */
-export function zahtjevJeUFaziIntervencije(zahtjev: { status: string }): boolean {
+export function zahtjevJeUFaziIntervencije(zahtjev: {
+  status: string;
+}): boolean {
   return zahtjevJeUToku(zahtjev.status);
 }
 
@@ -166,7 +226,9 @@ export function zahtjevJeUFaziIntervencije(zahtjev: { status: string }): boolean
  * Svi zahtjevi koji su u inboxu dispečera - i oni bez prioriteta (Novi) i oni s prioritetom (U obradi).
  * Koristi se za novi glavni status filter "U obradi" koji obuhvata cijeli inbox.
  */
-export function zahtjevJeUObradiSirokoGledano(zahtjev: ServisniZahtjev): boolean {
+export function zahtjevJeUObradiSirokoGledano(
+  zahtjev: ServisniZahtjev,
+): boolean {
   return zahtjevCekaObraduUInboxuDispecera(zahtjev.status);
 }
 
@@ -174,11 +236,13 @@ export function zahtjevJeUObradiSirokoGledano(zahtjev: ServisniZahtjev): boolean
  * Naziv faze obrade za prikaz na kartici - radi za sve statuse.
  * Vraća `null` za terminal statuse (zavrseno, otkazano, odbijeno).
  */
-export function fazaObradeNazivZaKarticu(zahtjev: ServisniZahtjev): string | null {
+export function fazaObradeNazivZaKarticu(
+  zahtjev: ServisniZahtjev,
+): string | null {
   const s = zahtjev.status;
-  if (s === 'potvrdeno')   return 'Čeka dodjelu';
+  if (s === 'potvrdeno') return 'Čeka dodjelu';
   if (s === 'dodijeljeno') return 'Servis dodijeljen';
-  if (s === 'u_radu')      return 'Servis u toku';
+  if (s === 'u_radu') return 'Servis u toku';
   if (s === 'u_izvrsenju') return 'Servis na terenu';
   if (!zahtjevCekaObraduUInboxuDispecera(s)) return null;
   return nazivDispecerskeFazePregleda(uzmiDispecerskuFazuZaPregled(zahtjev));
@@ -190,35 +254,38 @@ export function fazaObradeNazivZaKarticu(zahtjev: ServisniZahtjev): string | nul
  * Izvršenje (dodijeljeno/u_radu/u_izvrsenju/zavrseno) je isključivo na /dispecer/intervencije.
  */
 const SYNONIMI_DISPECER_FILTRA: Record<string, string> = {
-  red_obrade:           'svi',
-  inbox:                'svi',
-  bez_prioriteta:       'novi',
-  carobnjak:            'svi',
-  ceka_prioritet:       'novi',
+  red_obrade: 'svi',
+  inbox: 'svi',
+  bez_prioriteta: 'novi',
+  carobnjak: 'svi',
+  ceka_prioritet: 'novi',
   // Stari alias → stari kanon (hop1); stari kanon → novi kanon (hop2)
-  ceka_termin:          'zakazivanje_termina',
-  ceka_servisera:       'dodjela_servisera',
+  ceka_termin: 'zakazivanje_termina',
+  ceka_servisera: 'dodjela_servisera',
   ceka_zavrsnu_potvrdu: 'korak_potvrde',
-  konacna_potvrda:      'korak_potvrde',
+  konacna_potvrda: 'korak_potvrde',
   // Stari kanon → novi kanon
-  zakazivanje_termina:  'u_obradi',
-  dodjela_servisera:    'u_obradi',
-  korak_potvrde:        'u_obradi',
+  zakazivanje_termina: 'u_obradi',
+  dodjela_servisera: 'u_obradi',
+  korak_potvrde: 'u_obradi',
   // Stari nazivi za potvrdeni/potvrdeno → novi kanon ceka_dodjelu
-  potvrdeni:            'ceka_dodjelu',
-  potvrdeno:            'ceka_dodjelu',
+  potvrdeni: 'ceka_dodjelu',
+  potvrdeno: 'ceka_dodjelu',
   // Stari izvršenje tabovi → svi (ne postoji na zahtjevi stranici; trebaju ići na /intervencije)
-  na_terenu:            'svi',
-  u_toku:               'svi',
-  intervencija:         'svi',
-  teren:                'svi',
-  dodijeljeno:          'svi',
-  zavrseni:             'svi',
-  ponovni_ciklus:       'svi',
+  na_terenu: 'svi',
+  u_toku: 'svi',
+  intervencija: 'svi',
+  teren: 'svi',
+  dodijeljeno: 'svi',
+  zavrseni: 'svi',
+  ponovni_ciklus: 'svi',
 };
 
-export function normalizujDispecerFilterIzParametra(raw: string | null | undefined, dozvoljene: string[]): string {
-  const v    = raw?.trim() || 'svi';
+export function normalizujDispecerFilterIzParametra(
+  raw: string | null | undefined,
+  dozvoljene: string[],
+): string {
+  const v = raw?.trim() || 'svi';
   const hop1 = SYNONIMI_DISPECER_FILTRA[v] ?? v;
   // Support two-hop: old-alias → old-canonical → new-canonical
   const hop2 = SYNONIMI_DISPECER_FILTRA[hop1] ?? hop1;

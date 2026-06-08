@@ -48,13 +48,18 @@ const POLJE_IKONA_KLASA = 'mt-0.5 h-3.5 w-3.5 flex-shrink-0';
 
 const SEKCIJA_GRUPE_LABEL_KLASA =
   'mb-3 text-[10px] font-semibold uppercase tracking-[0.12em]';
-const SEKCIJA_GRUPE_BOJA = { color: 'rgb(var(--first-nonary-rgb) / 0.72)' } as const;
+const SEKCIJA_GRUPE_BOJA = {
+  color: 'rgb(var(--first-nonary-rgb) / 0.72)',
+} as const;
 const SEKCIJA_RAZDJELNIK_BOJA = 'rgb(var(--first-quaternary-rgb) / 0.22)';
 
 const UNUTARNJI_PANEL_KLASA = 'min-w-0 rounded-xl border p-4 sm:p-5';
 
-const POPRATNA_LABEL_KLASA = 'mb-1.5 text-[10px] font-semibold uppercase tracking-[0.1em]';
-const POPRATNA_LABEL_BOJA = { color: 'rgb(var(--first-nonary-rgb) / 0.78)' } as const;
+const POPRATNA_LABEL_KLASA =
+  'mb-1.5 text-[10px] font-semibold uppercase tracking-[0.1em]';
+const POPRATNA_LABEL_BOJA = {
+  color: 'rgb(var(--first-nonary-rgb) / 0.78)',
+} as const;
 
 // ─── Inline notice (jedan border-only kalup za sve dno-poruke) ────────────────
 
@@ -93,7 +98,11 @@ export function InlineNotice({
 }
 
 /** Donja napomena (ostavljena radi backward kompatibilnosti - sada je samo `InlineNotice` info ton). */
-export function KorisnikZahtjevDonjaNapomena({ children }: { children: ReactNode }) {
+export function KorisnikZahtjevDonjaNapomena({
+  children,
+}: {
+  children: ReactNode;
+}) {
   return <InlineNotice ton="info">{children}</InlineNotice>;
 }
 
@@ -118,7 +127,9 @@ export function KorisnikZahtjevDetaljPanel({
 }: KorisnikZahtjevDetaljPanelProps) {
   const kategorija = labelKategorije(zahtjev);
   const naslovZahtjeva = kategorija.podkategorija || kategorija.glavna;
-  const podnaslovKategorije = kategorija.podkategorija ? kategorija.glavna : null;
+  const podnaslovKategorije = kategorija.podkategorija
+    ? kategorija.glavna
+    : null;
 
   const { tekstCijeli: terminTekst } = preferiraniTerminZaDispecera(zahtjev);
 
@@ -138,9 +149,14 @@ export function KorisnikZahtjevDetaljPanel({
   );
 
   const score = efektivniKorisnickiUrgencyScore(zahtjev);
-  const hero = korisnikHeroTekst(zahtjev, mozeBitMijenjan, uAktivnojDispecerskojObradi);
+  const hero = korisnikHeroTekst(
+    zahtjev,
+    mozeBitMijenjan,
+    uAktivnojDispecerskojObradi,
+  );
   const statusTekst = korisnikStatusDetaljTekst(zahtjev);
-  const operativniTekst = (zahtjev.final_priority ?? '').trim() || 'Nije dodijeljen';
+  const operativniTekst =
+    (zahtjev.final_priority ?? '').trim() || 'Nije dodijeljen';
   const imaPreciznuLokaciju =
     zahtjev.latitude !== null && zahtjev.longitude !== null;
 
@@ -225,7 +241,10 @@ export function KorisnikZahtjevDetaljPanel({
                 <p className={POLJE_OZNAKA_KLASA} style={POLJE_OZNAKA_BOJA}>
                   Adresa
                 </p>
-                <p className="break-words font-medium leading-snug" style={{ color: 'var(--first-octonary)' }}>
+                <p
+                  className="break-words font-medium leading-snug"
+                  style={{ color: 'var(--first-octonary)' }}
+                >
                   {(zahtjev.address ?? '').trim() || '-'}
                 </p>
                 {imaPreciznuLokaciju ? (
@@ -323,7 +342,10 @@ export function KorisnikZahtjevDetaljPanel({
         </p>
         {opisSirovo ? (
           <>
-            <ZahtjevKorisnickaPorukaBubble tekst={opisZaPrikaz} className="mt-2" />
+            <ZahtjevKorisnickaPorukaBubble
+              tekst={opisZaPrikaz}
+              className="mt-2"
+            />
             {porukaTrebaSkracivanje ? (
               <button
                 type="button"

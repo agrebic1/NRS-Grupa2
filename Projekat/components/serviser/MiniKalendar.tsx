@@ -22,8 +22,18 @@ interface MiniKalendarProps {
 const DANI_KRATKO = ['Pon', 'Uto', 'Sri', 'Čet', 'Pet', 'Sub', 'Ned'];
 
 const MJESECI = [
-  'Januar', 'Februar', 'Mart', 'April', 'Maj', 'Juni',
-  'Juli', 'August', 'Septembar', 'Oktobar', 'Novembar', 'Decembar',
+  'Januar',
+  'Februar',
+  'Mart',
+  'April',
+  'Maj',
+  'Juni',
+  'Juli',
+  'August',
+  'Septembar',
+  'Oktobar',
+  'Novembar',
+  'Decembar',
 ];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -42,7 +52,11 @@ function isoToDayStr(iso: string): string {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function MiniKalendar({ intervencije, selectedDate, onSelectDate }: MiniKalendarProps) {
+export function MiniKalendar({
+  intervencije,
+  selectedDate,
+  onSelectDate,
+}: MiniKalendarProps) {
   const danas = todayStr();
 
   const [godinaM, setGodinaM] = useState(() => {
@@ -66,7 +80,7 @@ export function MiniKalendar({ intervencije, selectedDate, onSelectDate }: MiniK
   // Build 7-column calendar grid starting on Monday
   const daniGrid = useMemo(() => {
     const { godina, mjesec } = godinaM;
-    const prvog   = new Date(godina, mjesec, 1);
+    const prvog = new Date(godina, mjesec, 1);
     const zadnjeg = new Date(godina, mjesec + 1, 0);
     // ISO week: Monday=1…Sunday=7, map to 0-based Mon=0
     const pocetakOffset = (prvog.getDay() + 6) % 7;
@@ -91,13 +105,17 @@ export function MiniKalendar({ intervencije, selectedDate, onSelectDate }: MiniK
 
   function prevMjesec() {
     setGodinaM(({ godina, mjesec }) =>
-      mjesec === 0 ? { godina: godina - 1, mjesec: 11 } : { godina, mjesec: mjesec - 1 }
+      mjesec === 0
+        ? { godina: godina - 1, mjesec: 11 }
+        : { godina, mjesec: mjesec - 1 },
     );
   }
 
   function nextMjesec() {
     setGodinaM(({ godina, mjesec }) =>
-      mjesec === 11 ? { godina: godina + 1, mjesec: 0 } : { godina, mjesec: mjesec + 1 }
+      mjesec === 11
+        ? { godina: godina + 1, mjesec: 0 }
+        : { godina, mjesec: mjesec + 1 },
     );
   }
 
@@ -108,7 +126,8 @@ export function MiniKalendar({ intervencije, selectedDate, onSelectDate }: MiniK
   }
 
   const jeCurrentMonth =
-    godinaM.godina === new Date().getFullYear() && godinaM.mjesec === new Date().getMonth();
+    godinaM.godina === new Date().getFullYear() &&
+    godinaM.mjesec === new Date().getMonth();
 
   return (
     <div
@@ -121,11 +140,19 @@ export function MiniKalendar({ intervencije, selectedDate, onSelectDate }: MiniK
       {/* ─── Header ──────────────────────────────────────────────────────── */}
       <div
         className="flex items-center justify-between px-4 py-3"
-        style={{ borderBottom: '1px solid rgb(var(--first-quaternary-rgb)/0.25)' }}
+        style={{
+          borderBottom: '1px solid rgb(var(--first-quaternary-rgb)/0.25)',
+        }}
       >
         <div className="flex items-center gap-2">
-          <Calendar className="h-4 w-4" style={{ color: 'var(--first-secondary)' }} />
-          <span className="text-sm font-bold" style={{ color: 'var(--first-octonary)' }}>
+          <Calendar
+            className="h-4 w-4"
+            style={{ color: 'var(--first-secondary)' }}
+          />
+          <span
+            className="text-sm font-bold"
+            style={{ color: 'var(--first-octonary)' }}
+          >
             {MJESECI[godinaM.mjesec]} {godinaM.godina}
           </span>
         </div>
@@ -135,7 +162,10 @@ export function MiniKalendar({ intervencije, selectedDate, onSelectDate }: MiniK
               type="button"
               onClick={goToToday}
               className="mr-1 rounded-lg px-2 py-0.5 text-[10px] font-bold transition-all hover:opacity-80"
-              style={{ backgroundColor: 'rgb(var(--first-primary-rgb)/0.08)', color: 'var(--first-primary)' }}
+              style={{
+                backgroundColor: 'rgb(var(--first-primary-rgb)/0.08)',
+                color: 'var(--first-primary)',
+              }}
             >
               Danas
             </button>
@@ -175,10 +205,10 @@ export function MiniKalendar({ intervencije, selectedDate, onSelectDate }: MiniK
       {/* ─── Day grid ────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-7 gap-px px-3 pb-3">
         {daniGrid.map(({ date, dayNum, uMjesecu }) => {
-          const jeSelected   = selectedDate === date;
-          const jeDanas      = date === danas;
-          const info         = daniInfo[date];
-          const imaAktivnih  = (info?.aktivne ?? 0) > 0;
+          const jeSelected = selectedDate === date;
+          const jeDanas = date === danas;
+          const info = daniInfo[date];
+          const imaAktivnih = (info?.aktivne ?? 0) > 0;
           const imaZavrsenih = (info?.zavrsene ?? 0) > 0;
 
           return (
@@ -192,13 +222,13 @@ export function MiniKalendar({ intervencije, selectedDate, onSelectDate }: MiniK
                 backgroundColor: jeSelected
                   ? 'var(--first-primary)'
                   : jeDanas && !jeSelected
-                  ? 'rgb(var(--first-primary-rgb)/0.09)'
-                  : undefined,
+                    ? 'rgb(var(--first-primary-rgb)/0.09)'
+                    : undefined,
                 color: jeSelected
                   ? '#fff'
                   : jeDanas
-                  ? 'var(--first-primary)'
-                  : 'var(--first-octonary)',
+                    ? 'var(--first-primary)'
+                    : 'var(--first-octonary)',
                 fontWeight: jeDanas || jeSelected ? 700 : 400,
               }}
             >
@@ -209,7 +239,9 @@ export function MiniKalendar({ intervencije, selectedDate, onSelectDate }: MiniK
                     <span
                       className="h-1 w-1 rounded-full"
                       style={{
-                        backgroundColor: jeSelected ? '#fff' : 'var(--first-secondary)',
+                        backgroundColor: jeSelected
+                          ? '#fff'
+                          : 'var(--first-secondary)',
                       }}
                     />
                   )}
@@ -263,7 +295,10 @@ export function MiniKalendar({ intervencije, selectedDate, onSelectDate }: MiniK
           >
             Odabrani datum
           </p>
-          <p className="text-sm font-semibold" style={{ color: 'var(--first-octonary)' }}>
+          <p
+            className="text-sm font-semibold"
+            style={{ color: 'var(--first-octonary)' }}
+          >
             {new Date(`${selectedDate}T12:00:00`).toLocaleDateString('bs-BA', {
               weekday: 'long',
               day: '2-digit',
@@ -271,10 +306,13 @@ export function MiniKalendar({ intervencije, selectedDate, onSelectDate }: MiniK
             })}
           </p>
           {(() => {
-            const info  = daniInfo[selectedDate];
+            const info = daniInfo[selectedDate];
             const total = (info?.aktivne ?? 0) + (info?.zavrsene ?? 0);
             return (
-              <p className="mt-0.5 text-xs" style={{ color: 'var(--first-nonary)' }}>
+              <p
+                className="mt-0.5 text-xs"
+                style={{ color: 'var(--first-nonary)' }}
+              >
                 {total === 0
                   ? 'Nema planiranih intervencija'
                   : `${total} ${total === 1 ? 'intervencija' : 'intervencija'}`}

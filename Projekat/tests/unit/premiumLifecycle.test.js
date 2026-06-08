@@ -47,7 +47,8 @@ describe('safeInsertPremiumEvent', () => {
   test('returns error on RLS failure (must be fixed via DB policy)', async () => {
     const supabase = mockSupabase({
       error: {
-        message: 'new row violates row-level security policy for table "premium_events"',
+        message:
+          'new row violates row-level security policy for table "premium_events"',
       },
     });
     const rez = await safeInsertPremiumEvent(supabase, {

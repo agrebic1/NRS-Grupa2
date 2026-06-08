@@ -1,4 +1,7 @@
-import type { InterventionActivity, TipAktivnosti } from '@/domain/types/servisirane';
+import type {
+  InterventionActivity,
+  TipAktivnosti,
+} from '@/domain/types/servisirane';
 
 const STATUS_LABELE: Record<string, string> = {
   na_cekanju: 'Na čekanju',
@@ -20,19 +23,24 @@ const PRIORITET_LABELE: Record<string, string> = {
   SREDNJE: 'Srednje',
   VISOKO: 'Visoko',
   HITNO: 'Hitno',
-  'KRITIČNO': 'Kritično',
+  KRITIČNO: 'Kritično',
   KRITICNO: 'Kritično',
 };
 
 const UUID_RE =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
-export function formatirajImeOsobe(ime?: string | null, prezime?: string | null): string {
+export function formatirajImeOsobe(
+  ime?: string | null,
+  prezime?: string | null,
+): string {
   return `${ime ?? ''} ${prezime ?? ''}`.trim();
 }
 
 /** Čitljiv operativni prioritet za audit (US-39). */
-export function labelOperativnogPrioriteta(v: string | null | undefined): string {
+export function labelOperativnogPrioriteta(
+  v: string | null | undefined,
+): string {
   if (!v?.trim()) return 'Nije postavljen';
   const k = v.trim().toUpperCase();
   return PRIORITET_LABELE[k] ?? v.trim();
@@ -83,12 +91,16 @@ export function nazivPoljaAktivnosti(a: InterventionActivity): string {
 }
 
 /** Čitljiv prikaz vrijednosti u historiji (statusi, prioriteti, imena). */
-export function prikazVrijednostiAktivnosti(v: string | null | undefined): string | null {
+export function prikazVrijednostiAktivnosti(
+  v: string | null | undefined,
+): string | null {
   if (!v) return null;
   const trimmed = v.trim();
   if (!trimmed) return null;
   if (jeUuid(trimmed)) return null;
-  return STATUS_LABELE[trimmed] ?? PRIORITET_LABELE[trimmed.toUpperCase()] ?? trimmed;
+  return (
+    STATUS_LABELE[trimmed] ?? PRIORITET_LABELE[trimmed.toUpperCase()] ?? trimmed
+  );
 }
 
 /** Stara/nova vrijednost za audit prikaz (tabela i timeline). */
@@ -128,10 +140,16 @@ export function prikazStareNoveVrijednostiAktivnosti(a: InterventionActivity): {
   if (a.tip === 'dodjela') {
     const serviser =
       metaString(meta, 'serviser_ime') ??
-      (a.new_value && !jeUuid(a.new_value) && !STATUS_LABELE[a.new_value] ? a.new_value : null);
+      (a.new_value && !jeUuid(a.new_value) && !STATUS_LABELE[a.new_value]
+        ? a.new_value
+        : null);
     return {
-      stara: prikazVrijednostiAktivnosti(a.old_value) ?? prikazVrijednostiAktivnosti(metaString(meta, 'iz')),
-      nova: serviser ? `Dodijeljeno — ${serviser}` : prikazVrijednostiAktivnosti(a.new_value) ?? 'Dodijeljeno',
+      stara:
+        prikazVrijednostiAktivnosti(a.old_value) ??
+        prikazVrijednostiAktivnosti(metaString(meta, 'iz')),
+      nova: serviser
+        ? `Dodijeljeno — ${serviser}`
+        : (prikazVrijednostiAktivnosti(a.new_value) ?? 'Dodijeljeno'),
     };
   }
 
@@ -162,7 +180,8 @@ export function prikazOpisaAktivnosti(a: InterventionActivity): string {
   const meta = (a.metadata ?? {}) as Record<string, unknown>;
 
   if (a.tip === 'promjena_prioriteta') {
-    const razlog = a.razlog?.trim() || metaString(meta, 'premium_downgrade_reason');
+    const razlog =
+      a.razlog?.trim() || metaString(meta, 'premium_downgrade_reason');
     const osnova = a.sadrzaj?.trim() || 'Promjena operativnog prioriteta';
     return razlog ? `${osnova}. Obrazloženje: ${razlog}` : osnova;
   }

@@ -1,20 +1,47 @@
 type AnyDB = {
-  rpc: (fn: string, params?: Record<string, unknown>) => Promise<{ data: unknown; error: { message: string } | null }>;
+  rpc: (
+    fn: string,
+    params?: Record<string, unknown>,
+  ) => Promise<{ data: unknown; error: { message: string } | null }>;
   from: (table: string) => {
     select: (cols: string) => {
-      eq: (col: string, val: unknown) => {
-        eq?: (col: string, val: unknown) => {
-          maybeSingle: () => Promise<{ data: { broj_ponovnih_ciklusa?: number | null } | null; error: { message: string } | null }>;
-          single: () => Promise<{ data: { broj_ponovnih_ciklusa?: number | null } | null; error: { message: string } | null }>;
+      eq: (
+        col: string,
+        val: unknown,
+      ) => {
+        eq?: (
+          col: string,
+          val: unknown,
+        ) => {
+          maybeSingle: () => Promise<{
+            data: { broj_ponovnih_ciklusa?: number | null } | null;
+            error: { message: string } | null;
+          }>;
+          single: () => Promise<{
+            data: { broj_ponovnih_ciklusa?: number | null } | null;
+            error: { message: string } | null;
+          }>;
         };
-        maybeSingle: () => Promise<{ data: { broj_ponovnih_ciklusa?: number | null } | null; error: { message: string } | null }>;
-        single: () => Promise<{ data: { broj_ponovnih_ciklusa?: number | null } | null; error: { message: string } | null }>;
+        maybeSingle: () => Promise<{
+          data: { broj_ponovnih_ciklusa?: number | null } | null;
+          error: { message: string } | null;
+        }>;
+        single: () => Promise<{
+          data: { broj_ponovnih_ciklusa?: number | null } | null;
+          error: { message: string } | null;
+        }>;
       };
     };
     update: (vals: Record<string, unknown>) => {
-      eq: (col: string, val: unknown) => {
+      eq: (
+        col: string,
+        val: unknown,
+      ) => {
         select: (cols: string) => {
-          single: () => Promise<{ data: { broj_ponovnih_ciklusa?: number | null } | null; error: { message: string } | null }>;
+          single: () => Promise<{
+            data: { broj_ponovnih_ciklusa?: number | null } | null;
+            error: { message: string } | null;
+          }>;
         };
       };
     };
@@ -29,7 +56,9 @@ export async function inkrementirajPonovniCiklus(
   db: AnyDB,
   zahtjevId: number,
 ): Promise<number> {
-  const { data, error } = await db.rpc('fn_inkrementiraj_ponovni_ciklus', { p_zahtjev_id: zahtjevId });
+  const { data, error } = await db.rpc('fn_inkrementiraj_ponovni_ciklus', {
+    p_zahtjev_id: zahtjevId,
+  });
 
   if (!error && typeof data === 'number' && Number.isFinite(data)) {
     return data;
@@ -46,7 +75,8 @@ export async function inkrementirajPonovniCiklus(
     throw new Error(
       rpcMsg
         ? `Brojač ponovnih ciklusa nije ažuriran (RPC): ${rpcMsg}`
-        : readErr?.message ?? 'Zahtjev nije pronađen pri ažuriranju brojača ponovnih ciklusa.',
+        : (readErr?.message ??
+            'Zahtjev nije pronađen pri ažuriranju brojača ponovnih ciklusa.'),
     );
   }
 
@@ -59,7 +89,9 @@ export async function inkrementirajPonovniCiklus(
     .single();
 
   if (updErr || updated?.broj_ponovnih_ciklusa == null) {
-    throw new Error(updErr?.message ?? 'Ažuriranje brojača ponovnih ciklusa nije uspjelo.');
+    throw new Error(
+      updErr?.message ?? 'Ažuriranje brojača ponovnih ciklusa nije uspjelo.',
+    );
   }
 
   return updated.broj_ponovnih_ciklusa;

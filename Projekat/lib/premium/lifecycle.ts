@@ -3,7 +3,12 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 export const PREMIUM_TRAJANJE_DANA = 30;
 export const PREMIUM_TRAJANJE_GODINA_DANA = 365;
 
-export type PremiumStatus = 'inactive' | 'pending_payment' | 'active' | 'expired' | 'cancelled';
+export type PremiumStatus =
+  | 'inactive'
+  | 'pending_payment'
+  | 'active'
+  | 'expired'
+  | 'cancelled';
 export type PremiumPlan = 'monthly' | 'yearly';
 
 export function izracunajIstek(datumPocetka: Date): string {
@@ -12,9 +17,17 @@ export function izracunajIstek(datumPocetka: Date): string {
   return d.toISOString();
 }
 
-export function izracunajIstekPoPlanu(datumPocetka: Date, plan: PremiumPlan): string {
+export function izracunajIstekPoPlanu(
+  datumPocetka: Date,
+  plan: PremiumPlan,
+): string {
   const d = new Date(datumPocetka);
-  d.setDate(d.getDate() + (plan === 'yearly' ? PREMIUM_TRAJANJE_GODINA_DANA : PREMIUM_TRAJANJE_DANA));
+  d.setDate(
+    d.getDate() +
+      (plan === 'yearly'
+        ? PREMIUM_TRAJANJE_GODINA_DANA
+        : PREMIUM_TRAJANJE_DANA),
+  );
   return d.toISOString();
 }
 
@@ -36,13 +49,14 @@ export async function safeInsertPremiumEvent(
     actor_user_id: string | null;
     event_type: string;
     payload_json: Record<string, unknown>;
-  }
+  },
 ): Promise<{ ok: true } | { ok: false; message: string }> {
   const { error } = await supabase.from('premium_events').insert(row);
   if (error) {
     const msg = error.message ?? '';
     const tabelaNePostoji =
-      (msg.includes('does not exist') || msg.includes('Could not find the table')) &&
+      (msg.includes('does not exist') ||
+        msg.includes('Could not find the table')) &&
       msg.includes('premium_events');
     if (tabelaNePostoji) return { ok: true };
     return { ok: false, message: error.message };
@@ -59,27 +73,38 @@ export async function premiumStartCheckout(
   supabase: SupabaseClient,
   userId: string,
   actorUserId: string,
-  plan: PremiumPlan
+  plan: PremiumPlan,
 ): Promise<{ ok: true } | { ok: false; message: string; status: number }> {
   const { data: row, error: selErr } = await supabase
     .from('korisnik_usluge')
     .select(
-      'id_korisnika_usluge, is_premium, premium_status, premium_started_at, premium_expires_at, premium_plan, premium_cancelled_at, premium_cancel_reason'
+      'id_korisnika_usluge, is_premium, premium_status, premium_started_at, premium_expires_at, premium_plan, premium_cancelled_at, premium_cancel_reason',
     )
     .eq('id_korisnika_usluge', userId)
     .maybeSingle();
 
   if (selErr?.message?.includes("'premium_status' column")) {
-    return { ok: false, message: 'Premium lifecycle kolone ne postoje. Primijenite premium lifecycle migraciju.', status: 400 };
+    return {
+      ok: false,
+      message:
+        'Premium lifecycle kolone ne postoje. Primijenite premium lifecycle migraciju.',
+      status: 400,
+    };
   }
   if (selErr) return { ok: false, message: selErr.message, status: 500 };
-  if (!row) return { ok: false, message: 'Premium je dostupan samo korisnicima usluge.', status: 403 };
+  if (!row)
+    return {
+      ok: false,
+      message: 'Premium je dostupan samo korisnicima usluge.',
+      status: 403,
+    };
 
   const st = statusFromRow(row as KorisnikUslugePremiumRow);
   if (st !== 'inactive' && st !== 'expired' && st !== 'cancelled') {
     return {
       ok: false,
-      message: 'Simulacija uplate može započeti samo iz statusa „Neaktivan”, „Istekao” ili „Otkazan”.',
+      message:
+        'Simulacija uplate može započeti samo iz statusa „Neaktivan”, „Istekao” ili „Otkazan”.',
       status: 400,
     };
   }
@@ -108,7 +133,8 @@ export async function premiumStartCheckout(
         premium_plan: plan,
       })
       .eq('id_korisnika_usluge', userId);
-    if (fallbackErr) return { ok: false, message: fallbackErr.message, status: 500 };
+    if (fallbackErr)
+      return { ok: false, message: fallbackErr.message, status: 500 };
   } else if (updErr) {
     return { ok: false, message: updErr.message, status: 500 };
   }
@@ -134,38 +160,63 @@ export async function premiumConfirmSimulatedPayment(
   supabase: SupabaseClient,
   userId: string,
   actorUserId: string,
-  plan: PremiumPlan
+  plan: PremiumPlan,
 ): Promise<
-  | { ok: true; premium_started_at: string; premium_expires_at: string; premium_plan: string }
+  | {
+      ok: true;
+      premium_started_at: string;
+      premium_expires_at: string;
+      premium_plan: string;
+    }
   | { ok: false; message: string; status: number }
 > {
   const { data: row, error: selErr } = await supabase
     .from('korisnik_usluge')
     .select(
-      'id_korisnika_usluge, is_premium, premium_status, premium_started_at, premium_expires_at, premium_plan, premium_cancelled_at, premium_cancel_reason'
+      'id_korisnika_usluge, is_premium, premium_status, premium_started_at, premium_expires_at, premium_plan, premium_cancelled_at, premium_cancel_reason',
     )
     .eq('id_korisnika_usluge', userId)
     .maybeSingle();
 
   if (selErr?.message?.includes("'premium_status' column")) {
-    return { ok: false, message: 'Premium lifecycle kolone ne postoje. Primijenite premium lifecycle migraciju.', status: 400 };
+    return {
+      ok: false,
+      message:
+        'Premium lifecycle kolone ne postoje. Primijenite premium lifecycle migraciju.',
+      status: 400,
+    };
   }
   if (selErr) return { ok: false, message: selErr.message, status: 500 };
-  if (!row) return { ok: false, message: 'Premium je dostupan samo korisnicima usluge.', status: 403 };
+  if (!row)
+    return {
+      ok: false,
+      message: 'Premium je dostupan samo korisnicima usluge.',
+      status: 403,
+    };
 
   const st = statusFromRow(row as KorisnikUslugePremiumRow);
   if (st !== 'pending_payment') {
-    return { ok: false, message: 'Potvrda uplate je moguća samo kada status je „Čeka uplatu”.', status: 400 };
+    return {
+      ok: false,
+      message: 'Potvrda uplate je moguća samo kada status je „Čeka uplatu”.',
+      status: 400,
+    };
   }
 
   const planIzStatusa = (row as KorisnikUslugePremiumRow).premium_plan;
   if (planIzStatusa && planIzStatusa !== plan) {
-    return { ok: false, message: 'Potvrđujete drugačiji plan od onog koji je pokrenut za naplatu.', status: 400 };
+    return {
+      ok: false,
+      message:
+        'Potvrđujete drugačiji plan od onog koji je pokrenut za naplatu.',
+      status: 400,
+    };
   }
 
   const sada = new Date();
   const premium_started_at = sada.toISOString();
-  const premium_plan: PremiumPlan = planIzStatusa === 'yearly' ? 'yearly' : plan;
+  const premium_plan: PremiumPlan =
+    planIzStatusa === 'yearly' ? 'yearly' : plan;
   const premium_expires_at = izracunajIstekPoPlanu(sada, premium_plan);
 
   const { error: updErr } = await supabase
@@ -219,28 +270,47 @@ export async function premiumCancelSelfService(
   supabase: SupabaseClient,
   userId: string,
   actorUserId: string,
-  reason: string | null | undefined
+  reason: string | null | undefined,
 ): Promise<
-  | { ok: true; premium_status: 'active' | 'cancelled'; cancel_at_period_end: boolean }
+  | {
+      ok: true;
+      premium_status: 'active' | 'cancelled';
+      cancel_at_period_end: boolean;
+    }
   | { ok: false; message: string; status: number }
 > {
   const { data: row, error: selErr } = await supabase
     .from('korisnik_usluge')
     .select(
-      'id_korisnika_usluge, is_premium, premium_status, premium_started_at, premium_expires_at, premium_plan, premium_cancelled_at, premium_cancel_reason'
+      'id_korisnika_usluge, is_premium, premium_status, premium_started_at, premium_expires_at, premium_plan, premium_cancelled_at, premium_cancel_reason',
     )
     .eq('id_korisnika_usluge', userId)
     .maybeSingle();
 
   if (selErr?.message?.includes("'premium_status' column")) {
-    return { ok: false, message: 'Premium lifecycle kolone ne postoje. Primijenite premium lifecycle migraciju.', status: 400 };
+    return {
+      ok: false,
+      message:
+        'Premium lifecycle kolone ne postoje. Primijenite premium lifecycle migraciju.',
+      status: 400,
+    };
   }
   if (selErr) return { ok: false, message: selErr.message, status: 500 };
-  if (!row) return { ok: false, message: 'Premium je dostupan samo korisnicima usluge.', status: 403 };
+  if (!row)
+    return {
+      ok: false,
+      message: 'Premium je dostupan samo korisnicima usluge.',
+      status: 403,
+    };
 
   const st = statusFromRow(row as KorisnikUslugePremiumRow);
   if (st !== 'pending_payment' && st !== 'active') {
-    return { ok: false, message: 'Otkazivanje je moguće samo za status „Čeka uplatu” ili „Aktivan”.', status: 400 };
+    return {
+      ok: false,
+      message:
+        'Otkazivanje je moguće samo za status „Čeka uplatu” ili „Aktivan”.',
+      status: 400,
+    };
   }
 
   const sada = new Date().toISOString();
@@ -265,7 +335,10 @@ export async function premiumCancelSelfService(
         premium_cancel_reason: trimmed,
       };
 
-  const { error: updErr } = await supabase.from('korisnik_usluge').update(patch).eq('id_korisnika_usluge', userId);
+  const { error: updErr } = await supabase
+    .from('korisnik_usluge')
+    .update(patch)
+    .eq('id_korisnika_usluge', userId);
 
   if (updErr?.message?.includes('premium_cancelled_at')) {
     const { error: fb } = await supabase
@@ -303,35 +376,58 @@ export async function premiumCancelSelfService(
   });
   if (!ev.ok) return { ok: false, message: ev.message, status: 500 };
 
-  return { ok: true, premium_status: isAktivan ? 'active' : 'cancelled', cancel_at_period_end: isAktivan };
+  return {
+    ok: true,
+    premium_status: isAktivan ? 'active' : 'cancelled',
+    cancel_at_period_end: isAktivan,
+  };
 }
 
 /** expired | cancelled → active (novi period) */
 export async function premiumRenewSimulated(
   supabase: SupabaseClient,
   userId: string,
-  actorUserId: string
+  actorUserId: string,
 ): Promise<
-  | { ok: true; premium_started_at: string; premium_expires_at: string; premium_plan: string }
+  | {
+      ok: true;
+      premium_started_at: string;
+      premium_expires_at: string;
+      premium_plan: string;
+    }
   | { ok: false; message: string; status: number }
 > {
   const { data: row, error: selErr } = await supabase
     .from('korisnik_usluge')
     .select(
-      'id_korisnika_usluge, is_premium, premium_status, premium_started_at, premium_expires_at, premium_plan, premium_cancelled_at, premium_cancel_reason'
+      'id_korisnika_usluge, is_premium, premium_status, premium_started_at, premium_expires_at, premium_plan, premium_cancelled_at, premium_cancel_reason',
     )
     .eq('id_korisnika_usluge', userId)
     .maybeSingle();
 
   if (selErr?.message?.includes("'premium_status' column")) {
-    return { ok: false, message: 'Premium lifecycle kolone ne postoje. Primijenite premium lifecycle migraciju.', status: 400 };
+    return {
+      ok: false,
+      message:
+        'Premium lifecycle kolone ne postoje. Primijenite premium lifecycle migraciju.',
+      status: 400,
+    };
   }
   if (selErr) return { ok: false, message: selErr.message, status: 500 };
-  if (!row) return { ok: false, message: 'Premium je dostupan samo korisnicima usluge.', status: 403 };
+  if (!row)
+    return {
+      ok: false,
+      message: 'Premium je dostupan samo korisnicima usluge.',
+      status: 403,
+    };
 
   const st = statusFromRow(row as KorisnikUslugePremiumRow);
   if (st !== 'expired' && st !== 'cancelled') {
-    return { ok: false, message: 'Obnova je moguća samo iz statusa „Istekao” ili „Otkazan”.', status: 400 };
+    return {
+      ok: false,
+      message: 'Obnova je moguća samo iz statusa „Istekao” ili „Otkazan”.',
+      status: 400,
+    };
   }
 
   const sada = new Date();

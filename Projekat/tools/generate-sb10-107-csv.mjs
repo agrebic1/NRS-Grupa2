@@ -7,7 +7,9 @@ const lines = raw.split(/\r?\n/).filter(Boolean);
 const header = lines[0].split('\t');
 
 function esc(v) {
-  const s = String(v ?? '').replace(/\r?\n/g, ' ').trim();
+  const s = String(v ?? '')
+    .replace(/\r?\n/g, ' ')
+    .trim();
   if (s.includes(',') || s.includes('"') || s.includes('\n')) {
     return `"${s.replace(/"/g, '""')}"`;
   }
@@ -32,10 +34,23 @@ function parseRow(line) {
 
 function tipTesta(naziv, koraci) {
   const n = naziv.toLowerCase();
-  if (n.includes('ne smije') || n.includes('ne može') || n.includes('blokir') || n.includes('odbija') || n.includes('403') || n.includes('rate-limit')) {
+  if (
+    n.includes('ne smije') ||
+    n.includes('ne može') ||
+    n.includes('blokir') ||
+    n.includes('odbija') ||
+    n.includes('403') ||
+    n.includes('rate-limit')
+  ) {
     return 'Negativan';
   }
-  if (n.includes('pogrešn') || n.includes('prazn') || n.includes('neisprav') || n.includes('slab') || n.includes('duplikat')) {
+  if (
+    n.includes('pogrešn') ||
+    n.includes('prazn') ||
+    n.includes('neisprav') ||
+    n.includes('slab') ||
+    n.includes('duplikat')
+  ) {
     return 'Negativan';
   }
   return 'Pozitivan';
@@ -89,7 +104,9 @@ for (const line of lines.slice(1)) {
   const tcId = `TC-S10-${String(seq).padStart(3, '0')}`;
   const story = r.pokriva === '—' || r.pokriva === '/' ? '' : r.pokriva;
   const pred = `• ${r.preduslovi.replace(/\|/g, ' | • ')}`;
-  const koraci = r.koraci.replace(/\s+(\d+)\.\s+/g, ' | $1. ').replace(/^\s*/, '');
+  const koraci = r.koraci
+    .replace(/\s+(\d+)\.\s+/g, ' | $1. ')
+    .replace(/^\s*/, '');
 
   tcRows.push(
     [
@@ -103,7 +120,9 @@ for (const line of lines.slice(1)) {
       'DA',
       story,
       'Spremno',
-    ].map(esc).join(','),
+    ]
+      .map(esc)
+      .join(','),
   );
 
   const stvarni = r.napomena || 'Sistem radi prema specifikaciji.';
@@ -117,12 +136,22 @@ for (const line of lines.slice(1)) {
       stvarni,
       'PASSED',
       '',
-    ].map(esc).join(','),
+    ]
+      .map(esc)
+      .join(','),
   );
 }
 
-fs.writeFileSync(path.join(dir, 'TC_SB-10-107_Sprint10_ManualFlows.csv'), tcRows.join('\n'), 'utf8');
-fs.writeFileSync(path.join(dir, 'EXEC_SB-10-107_Sprint10_ManualFlows.csv'), execRows.join('\n'), 'utf8');
+fs.writeFileSync(
+  path.join(dir, 'TC_SB-10-107_Sprint10_ManualFlows.csv'),
+  tcRows.join('\n'),
+  'utf8',
+);
+fs.writeFileSync(
+  path.join(dir, 'EXEC_SB-10-107_Sprint10_ManualFlows.csv'),
+  execRows.join('\n'),
+  'utf8',
+);
 fs.writeFileSync(
   path.join(dir, 'BUG_SB-10-107_Sprint10_ManualFlows.csv'),
   'ID_greske,ID_testa,Naziv_modula,Opis_greske,Severity,Status,Sprint,Napomena\n',

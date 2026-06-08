@@ -21,7 +21,8 @@ jest.mock('@/lib/supabase/admin', () => ({
 
 jest.mock('@/lib/email/sendEmail', () => ({
   sendEmail: (...args) => mockSendEmail(...args),
-  kreirajEmailInternogNaloga: (...args) => mockKreirajEmailInternogNaloga(...args),
+  kreirajEmailInternogNaloga: (...args) =>
+    mockKreirajEmailInternogNaloga(...args),
 }));
 
 const { GET, POST } = require('@/app/api/admin/users/route');
@@ -73,7 +74,8 @@ describe('/api/admin/users route', () => {
   test('returns 403 when user is not admin', async () => {
     mockSessionGetUser.mockResolvedValue({ data: { user: { id: 'u1' } } });
     mockFrom.mockImplementation((table) => {
-      if (table === 'uposlenici') return maybeSingle({ data: null, error: null });
+      if (table === 'uposlenici')
+        return maybeSingle({ data: null, error: null });
       return maybeSingle({ data: null, error: null });
     });
     const response = await GET();
@@ -88,11 +90,19 @@ describe('/api/admin/users route', () => {
         if (query === 'naziv') {
           return {
             eq: jest.fn().mockReturnValue({
-              maybeSingle: jest.fn().mockResolvedValue({ data: { naziv: 'Administrator' }, error: null }),
+              maybeSingle: jest
+                .fn()
+                .mockResolvedValue({
+                  data: { naziv: 'Administrator' },
+                  error: null,
+                }),
             }),
           };
         }
-        return Promise.resolve({ data: [{ id_uloge: 2, naziv: 'Serviser' }], error: null });
+        return Promise.resolve({
+          data: [{ id_uloge: 2, naziv: 'Serviser' }],
+          error: null,
+        });
       }),
       eq: jest.fn().mockReturnThis(),
       maybeSingle: jest.fn(),
@@ -107,13 +117,28 @@ describe('/api/admin/users route', () => {
       }
       if (table === 'v_korisnik_usluge') {
         return selectOnly({
-          data: [{ id_korisnika_usluge: 'k1', ime: 'K', prezime: 'U', email: 'k@example.com' }],
+          data: [
+            {
+              id_korisnika_usluge: 'k1',
+              ime: 'K',
+              prezime: 'U',
+              email: 'k@example.com',
+            },
+          ],
           error: null,
         });
       }
       if (table === 'v_uposlenici') {
         return selectOnly({
-          data: [{ id_uposlenika: 'u2', id_uloge: 2, ime: 'A', prezime: 'B', email: 'a@example.com' }],
+          data: [
+            {
+              id_uposlenika: 'u2',
+              id_uloge: 2,
+              ime: 'A',
+              prezime: 'B',
+              email: 'a@example.com',
+            },
+          ],
           error: null,
         });
       }
@@ -164,19 +189,25 @@ describe('/api/admin/users route', () => {
   test('returns 500 when listUsers fails', async () => {
     mockSessionGetUser.mockResolvedValue({ data: { user: { id: 'u1' } } });
     mockFrom.mockImplementation((table) => {
-      if (table === 'uposlenici') return maybeSingle({ data: { id_uloge: 1 }, error: null });
+      if (table === 'uposlenici')
+        return maybeSingle({ data: { id_uloge: 1 }, error: null });
       if (table === 'uloga') {
         return {
           select: jest.fn().mockReturnValue({
             eq: jest.fn().mockReturnValue({
-              maybeSingle: jest.fn().mockResolvedValue({ data: { naziv: 'admin' }, error: null }),
+              maybeSingle: jest
+                .fn()
+                .mockResolvedValue({ data: { naziv: 'admin' }, error: null }),
             }),
           }),
         };
       }
       return selectOnly({ data: [], error: null });
     });
-    mockListUsers.mockResolvedValue({ data: null, error: { message: 'auth failed' } });
+    mockListUsers.mockResolvedValue({
+      data: null,
+      error: { message: 'auth failed' },
+    });
     const response = await GET();
     expect(response.status).toBe(500);
   });
@@ -184,25 +215,34 @@ describe('/api/admin/users route', () => {
   test('returns 500 for table read failures and catch fallback', async () => {
     mockSessionGetUser.mockResolvedValue({ data: { user: { id: 'u1' } } });
     mockFrom.mockImplementation((table) => {
-      if (table === 'uposlenici') return maybeSingle({ data: null, error: { message: 'db uposlenici' } });
+      if (table === 'uposlenici')
+        return maybeSingle({ data: null, error: { message: 'db uposlenici' } });
       return maybeSingle({ data: null, error: null });
     });
     const r1 = await GET();
     expect(r1.status).toBe(403);
 
     mockFrom.mockImplementation((table) => {
-      if (table === 'uposlenici') return maybeSingle({ data: { id_uloge: 1 }, error: null });
+      if (table === 'uposlenici')
+        return maybeSingle({ data: { id_uloge: 1 }, error: null });
       if (table === 'uloga') {
         return {
           select: jest.fn().mockReturnValue({
             eq: jest.fn().mockReturnValue({
-              maybeSingle: jest.fn().mockResolvedValue({ data: { naziv: 'Administrator' }, error: null }),
+              maybeSingle: jest
+                .fn()
+                .mockResolvedValue({
+                  data: { naziv: 'Administrator' },
+                  error: null,
+                }),
             }),
           }),
         };
       }
-      if (table === 'v_korisnik_usluge') return selectOnly({ data: null, error: { message: 'korisnici err' } });
-      if (table === 'v_uposlenici') return selectOnly({ data: [], error: null });
+      if (table === 'v_korisnik_usluge')
+        return selectOnly({ data: null, error: { message: 'korisnici err' } });
+      if (table === 'v_uposlenici')
+        return selectOnly({ data: [], error: null });
       return selectOnly({ data: [], error: null });
     });
     mockListUsers.mockResolvedValue({ data: { users: [] }, error: null });
@@ -217,23 +257,37 @@ describe('/api/admin/users route', () => {
   test('returns 500 for uposlenici/uloge errors after admin check', async () => {
     mockSessionGetUser.mockResolvedValue({ data: { user: { id: 'u1' } } });
     mockFrom.mockImplementation((table) => {
-      if (table === 'uposlenici') return maybeSingle({ data: { id_uloge: 1 }, error: null });
+      if (table === 'uposlenici')
+        return maybeSingle({ data: { id_uloge: 1 }, error: null });
       if (table === 'uloga') {
         return {
           select: jest.fn().mockImplementation((query) => {
             if (query === 'naziv') {
               return {
                 eq: jest.fn().mockReturnValue({
-                  maybeSingle: jest.fn().mockResolvedValue({ data: { naziv: 'Administrator' }, error: null }),
+                  maybeSingle: jest
+                    .fn()
+                    .mockResolvedValue({
+                      data: { naziv: 'Administrator' },
+                      error: null,
+                    }),
                 }),
               };
             }
-            return Promise.resolve({ data: null, error: { message: 'uloge table fail' } });
+            return Promise.resolve({
+              data: null,
+              error: { message: 'uloge table fail' },
+            });
           }),
         };
       }
-      if (table === 'v_korisnik_usluge') return selectOnly({ data: [], error: null });
-      if (table === 'v_uposlenici') return selectOnly({ data: null, error: { message: 'uposlenici table fail' } });
+      if (table === 'v_korisnik_usluge')
+        return selectOnly({ data: [], error: null });
+      if (table === 'v_uposlenici')
+        return selectOnly({
+          data: null,
+          error: { message: 'uposlenici table fail' },
+        });
       return selectOnly({ data: [], error: null });
     });
     mockListUsers.mockResolvedValue({ data: { users: [] }, error: null });
@@ -244,23 +298,34 @@ describe('/api/admin/users route', () => {
   test('returns 500 when uloge query in Promise.all fails', async () => {
     mockSessionGetUser.mockResolvedValue({ data: { user: { id: 'u1' } } });
     mockFrom.mockImplementation((table) => {
-      if (table === 'uposlenici') return maybeSingle({ data: { id_uloge: 1 }, error: null });
+      if (table === 'uposlenici')
+        return maybeSingle({ data: { id_uloge: 1 }, error: null });
       if (table === 'uloga') {
         return {
           select: jest.fn().mockImplementation((query) => {
             if (query === 'naziv') {
               return {
                 eq: jest.fn().mockReturnValue({
-                  maybeSingle: jest.fn().mockResolvedValue({ data: { naziv: 'Administrator' }, error: null }),
+                  maybeSingle: jest
+                    .fn()
+                    .mockResolvedValue({
+                      data: { naziv: 'Administrator' },
+                      error: null,
+                    }),
                 }),
               };
             }
-            return Promise.resolve({ data: null, error: { message: 'uloge fail' } });
+            return Promise.resolve({
+              data: null,
+              error: { message: 'uloge fail' },
+            });
           }),
         };
       }
-      if (table === 'v_korisnik_usluge') return selectOnly({ data: [], error: null });
-      if (table === 'v_uposlenici') return selectOnly({ data: [], error: null });
+      if (table === 'v_korisnik_usluge')
+        return selectOnly({ data: [], error: null });
+      if (table === 'v_uposlenici')
+        return selectOnly({ data: [], error: null });
       return selectOnly({ data: [], error: null });
     });
     mockListUsers.mockResolvedValue({ data: { users: [] }, error: null });
@@ -276,11 +341,19 @@ describe('/api/admin/users route', () => {
         if (query === 'naziv') {
           return {
             eq: jest.fn().mockReturnValue({
-              maybeSingle: jest.fn().mockResolvedValue({ data: { naziv: 'Administrator' }, error: null }),
+              maybeSingle: jest
+                .fn()
+                .mockResolvedValue({
+                  data: { naziv: 'Administrator' },
+                  error: null,
+                }),
             }),
           };
         }
-        return Promise.resolve({ data: [{ id_uloge: 1, naziv: 'Administrator' }], error: null });
+        return Promise.resolve({
+          data: [{ id_uloge: 1, naziv: 'Administrator' }],
+          error: null,
+        });
       }),
       eq: jest.fn().mockReturnThis(),
       maybeSingle: jest.fn(),
@@ -288,22 +361,40 @@ describe('/api/admin/users route', () => {
 
     const premiumSelect = jest
       .fn()
-      .mockResolvedValueOnce({ data: null, error: { message: 'missing premium columns' } })
       .mockResolvedValueOnce({
-        data: [{ id_korisnika_usluge: 'k1', is_premium: true, premium_status: 'active' }],
+        data: null,
+        error: { message: 'missing premium columns' },
+      })
+      .mockResolvedValueOnce({
+        data: [
+          {
+            id_korisnika_usluge: 'k1',
+            is_premium: true,
+            premium_status: 'active',
+          },
+        ],
         error: null,
       });
 
     mockFrom.mockImplementation((table) => {
-      if (table === 'uposlenici') return maybeSingle({ data: { id_uloge: 1 }, error: null });
+      if (table === 'uposlenici')
+        return maybeSingle({ data: { id_uloge: 1 }, error: null });
       if (table === 'uloga') return ulogaLookup;
       if (table === 'v_korisnik_usluge') {
         return selectOnly({
-          data: [{ id_korisnika_usluge: 'k1', ime: 'K', prezime: 'U', email: 'k@example.com' }],
+          data: [
+            {
+              id_korisnika_usluge: 'k1',
+              ime: 'K',
+              prezime: 'U',
+              email: 'k@example.com',
+            },
+          ],
           error: null,
         });
       }
-      if (table === 'v_uposlenici') return selectOnly({ data: [], error: null });
+      if (table === 'v_uposlenici')
+        return selectOnly({ data: [], error: null });
       if (table === 'korisnik_usluge') {
         return {
           select: premiumSelect,
@@ -343,11 +434,19 @@ describe('/api/admin/users route', () => {
         if (query === 'naziv') {
           return {
             eq: jest.fn().mockReturnValue({
-              maybeSingle: jest.fn().mockResolvedValue({ data: { naziv: 'Administrator' }, error: null }),
+              maybeSingle: jest
+                .fn()
+                .mockResolvedValue({
+                  data: { naziv: 'Administrator' },
+                  error: null,
+                }),
             }),
           };
         }
-        return Promise.resolve({ data: [{ id_uloge: 1, naziv: 'Administrator' }], error: null });
+        return Promise.resolve({
+          data: [{ id_uloge: 1, naziv: 'Administrator' }],
+          error: null,
+        });
       }),
       eq: jest.fn().mockReturnThis(),
       maybeSingle: jest.fn(),
@@ -355,15 +454,27 @@ describe('/api/admin/users route', () => {
 
     const premiumSelect = jest
       .fn()
-      .mockResolvedValueOnce({ data: null, error: { message: 'missing premium columns' } })
-      .mockResolvedValueOnce({ data: null, error: { message: 'fallback 2 fail' } })
-      .mockResolvedValueOnce({ data: null, error: { message: 'fallback 3 fail' } });
+      .mockResolvedValueOnce({
+        data: null,
+        error: { message: 'missing premium columns' },
+      })
+      .mockResolvedValueOnce({
+        data: null,
+        error: { message: 'fallback 2 fail' },
+      })
+      .mockResolvedValueOnce({
+        data: null,
+        error: { message: 'fallback 3 fail' },
+      });
 
     mockFrom.mockImplementation((table) => {
-      if (table === 'uposlenici') return maybeSingle({ data: { id_uloge: 1 }, error: null });
+      if (table === 'uposlenici')
+        return maybeSingle({ data: { id_uloge: 1 }, error: null });
       if (table === 'uloga') return ulogaLookup;
-      if (table === 'v_korisnik_usluge') return selectOnly({ data: [], error: null });
-      if (table === 'v_uposlenici') return selectOnly({ data: [], error: null });
+      if (table === 'v_korisnik_usluge')
+        return selectOnly({ data: [], error: null });
+      if (table === 'v_uposlenici')
+        return selectOnly({ data: [], error: null });
       if (table === 'korisnik_usluge') {
         return {
           select: premiumSelect,
@@ -385,11 +496,19 @@ describe('/api/admin/users route', () => {
         if (query === 'naziv') {
           return {
             eq: jest.fn().mockReturnValue({
-              maybeSingle: jest.fn().mockResolvedValue({ data: { naziv: 'Administrator' }, error: null }),
+              maybeSingle: jest
+                .fn()
+                .mockResolvedValue({
+                  data: { naziv: 'Administrator' },
+                  error: null,
+                }),
             }),
           };
         }
-        return Promise.resolve({ data: [{ id_uloge: 1, naziv: 'Administrator' }], error: null });
+        return Promise.resolve({
+          data: [{ id_uloge: 1, naziv: 'Administrator' }],
+          error: null,
+        });
       }),
       eq: jest.fn().mockReturnThis(),
       maybeSingle: jest.fn(),
@@ -397,23 +516,38 @@ describe('/api/admin/users route', () => {
 
     const premiumSelect = jest
       .fn()
-      .mockResolvedValueOnce({ data: null, error: { message: 'missing premium columns' } })
-      .mockResolvedValueOnce({ data: null, error: { message: 'fallback 2 fail' } })
+      .mockResolvedValueOnce({
+        data: null,
+        error: { message: 'missing premium columns' },
+      })
+      .mockResolvedValueOnce({
+        data: null,
+        error: { message: 'fallback 2 fail' },
+      })
       .mockResolvedValueOnce({
         data: [{ id_korisnika_usluge: 'k1', is_premium: true }],
         error: null,
       });
 
     mockFrom.mockImplementation((table) => {
-      if (table === 'uposlenici') return maybeSingle({ data: { id_uloge: 1 }, error: null });
+      if (table === 'uposlenici')
+        return maybeSingle({ data: { id_uloge: 1 }, error: null });
       if (table === 'uloga') return ulogaLookup;
       if (table === 'v_korisnik_usluge') {
         return selectOnly({
-          data: [{ id_korisnika_usluge: 'k1', ime: 'K', prezime: 'U', email: 'k@example.com' }],
+          data: [
+            {
+              id_korisnika_usluge: 'k1',
+              ime: 'K',
+              prezime: 'U',
+              email: 'k@example.com',
+            },
+          ],
           error: null,
         });
       }
-      if (table === 'v_uposlenici') return selectOnly({ data: [], error: null });
+      if (table === 'v_uposlenici')
+        return selectOnly({ data: [], error: null });
       if (table === 'korisnik_usluge') {
         return {
           select: premiumSelect,
@@ -459,17 +593,24 @@ describe('/api/admin/users POST route', () => {
 
   function baseAdminMock() {
     mockFrom.mockImplementation((table) => {
-      if (table === 'uposlenici') return maybeSingle({ data: { id_uloge: 1 }, error: null });
+      if (table === 'uposlenici')
+        return maybeSingle({ data: { id_uloge: 1 }, error: null });
       if (table === 'uloga') {
         return {
           select: jest.fn().mockReturnValue({
             eq: jest.fn().mockReturnValue({
-              maybeSingle: jest.fn().mockResolvedValue({ data: { naziv: 'Administrator' }, error: null }),
+              maybeSingle: jest
+                .fn()
+                .mockResolvedValue({
+                  data: { naziv: 'Administrator' },
+                  error: null,
+                }),
             }),
           }),
         };
       }
-      if (table === 'admin_user_create_audit') return insertOnly({ data: null, error: null });
+      if (table === 'admin_user_create_audit')
+        return insertOnly({ data: null, error: null });
       if (table === 'korisnik_usluge') return upsertOnly();
       return selectOnly({ data: [], error: null });
     });
@@ -489,13 +630,19 @@ describe('/api/admin/users POST route', () => {
   test('returns 403 when user is not admin', async () => {
     mockSessionGetUser.mockResolvedValue({ data: { user: { id: 'u1' } } });
     mockFrom.mockImplementation((table) => {
-      if (table === 'uposlenici') return maybeSingle({ data: null, error: null });
+      if (table === 'uposlenici')
+        return maybeSingle({ data: null, error: null });
       return maybeSingle({ data: null, error: null });
     });
     const request = new Request('http://localhost/api/admin/users', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ first_name: 'A', last_name: 'B', email: 'ab@example.com', role: 'serviser' }),
+      body: JSON.stringify({
+        first_name: 'A',
+        last_name: 'B',
+        email: 'ab@example.com',
+        role: 'serviser',
+      }),
     });
     const response = await POST(request);
     expect(response.status).toBe(403);
@@ -507,7 +654,12 @@ describe('/api/admin/users POST route', () => {
     const request = new Request('http://localhost/api/admin/users', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ first_name: '', last_name: 'B', email: 'not-email', role: 'x' }),
+      body: JSON.stringify({
+        first_name: '',
+        last_name: 'B',
+        email: 'not-email',
+        role: 'x',
+      }),
     });
     const response = await POST(request);
     expect(response.status).toBe(400);

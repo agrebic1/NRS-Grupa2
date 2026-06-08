@@ -37,9 +37,15 @@ export function HistorijaAktivnostiSekcija({
             className="flex h-8 w-8 items-center justify-center rounded-lg"
             style={{ backgroundColor: 'rgb(var(--first-secondary-rgb)/0.1)' }}
           >
-            <Activity className="h-4 w-4" style={{ color: 'var(--first-secondary)' }} />
+            <Activity
+              className="h-4 w-4"
+              style={{ color: 'var(--first-secondary)' }}
+            />
           </div>
-          <p className="text-sm font-bold" style={{ color: 'var(--first-octonary)' }}>
+          <p
+            className="text-sm font-bold"
+            style={{ color: 'var(--first-octonary)' }}
+          >
             Historija aktivnosti
           </p>
         </div>
@@ -56,8 +62,14 @@ export function HistorijaAktivnostiSekcija({
             onClick={() => setPrikaz('tabela')}
             className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition-colors"
             style={{
-              backgroundColor: prikaz === 'tabela' ? 'rgb(var(--first-secondary-rgb)/0.12)' : 'transparent',
-              color: prikaz === 'tabela' ? 'var(--first-secondary)' : 'var(--first-nonary)',
+              backgroundColor:
+                prikaz === 'tabela'
+                  ? 'rgb(var(--first-secondary-rgb)/0.12)'
+                  : 'transparent',
+              color:
+                prikaz === 'tabela'
+                  ? 'var(--first-secondary)'
+                  : 'var(--first-nonary)',
             }}
           >
             <LayoutList className="h-3.5 w-3.5" />
@@ -70,8 +82,14 @@ export function HistorijaAktivnostiSekcija({
             onClick={() => setPrikaz('timeline')}
             className="flex items-center gap-1.5 rounded-md px-3 py-1.5 text-xs font-semibold transition-colors"
             style={{
-              backgroundColor: prikaz === 'timeline' ? 'rgb(var(--first-secondary-rgb)/0.12)' : 'transparent',
-              color: prikaz === 'timeline' ? 'var(--first-secondary)' : 'var(--first-nonary)',
+              backgroundColor:
+                prikaz === 'timeline'
+                  ? 'rgb(var(--first-secondary-rgb)/0.12)'
+                  : 'transparent',
+              color:
+                prikaz === 'timeline'
+                  ? 'var(--first-secondary)'
+                  : 'var(--first-nonary)',
             }}
           >
             <GitBranch className="h-3.5 w-3.5" />

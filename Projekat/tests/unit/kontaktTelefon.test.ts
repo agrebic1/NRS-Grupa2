@@ -41,7 +41,9 @@ describe('kontaktTelefonSchema', () => {
     const r = kontaktTelefonSchema.safeParse('12 34 56 78');
     expect(r.success).toBe(false);
     if (!r.success) {
-      expect(r.error.errors[0].message).toBe('Unesite ispravan kontakt telefon.');
+      expect(r.error.errors[0].message).toBe(
+        'Unesite ispravan kontakt telefon.',
+      );
     }
   });
 
@@ -54,7 +56,9 @@ describe('kontaktTelefonSchema', () => {
   });
 
   test('prihvata ispravan broj', () => {
-    expect(kontaktTelefonSchema.safeParse('+387 61 000 000').success).toBe(true);
+    expect(kontaktTelefonSchema.safeParse('+387 61 000 000').success).toBe(
+      true,
+    );
   });
 });
 

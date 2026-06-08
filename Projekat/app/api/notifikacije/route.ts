@@ -7,12 +7,18 @@ export const dynamic = 'force-dynamic';
 export async function GET(request: Request) {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return NextResponse.json({ error: 'Niste prijavljeni.' }, { status: 401 });
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user)
+      return NextResponse.json(
+        { error: 'Niste prijavljeni.' },
+        { status: 401 },
+      );
 
-    const url    = new URL(request.url);
+    const url = new URL(request.url);
     const samo_neprocitane = url.searchParams.get('neprocitane') === 'true';
-    const limit  = Math.min(Number(url.searchParams.get('limit') ?? '30'), 50);
+    const limit = Math.min(Number(url.searchParams.get('limit') ?? '30'), 50);
 
     const db = supabase as any;
     let query = db
@@ -25,7 +31,8 @@ export async function GET(request: Request) {
     if (samo_neprocitane) query = query.eq('procitano', false);
 
     const { data, error } = await query;
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error)
+      return NextResponse.json({ error: error.message }, { status: 500 });
 
     const { count } = await db
       .from('notifikacije')
@@ -33,11 +40,14 @@ export async function GET(request: Request) {
       .eq('korisnik_id', user.id)
       .eq('procitano', false);
 
-    return NextResponse.json({ notifikacije: data ?? [], neprocitane: count ?? 0 });
+    return NextResponse.json({
+      notifikacije: data ?? [],
+      neprocitane: count ?? 0,
+    });
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : 'Greška servera.' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -46,8 +56,14 @@ export async function GET(request: Request) {
 export async function PATCH() {
   try {
     const supabase = createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return NextResponse.json({ error: 'Niste prijavljeni.' }, { status: 401 });
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user)
+      return NextResponse.json(
+        { error: 'Niste prijavljeni.' },
+        { status: 401 },
+      );
 
     const db = supabase as any;
     const { error } = await db
@@ -56,12 +72,13 @@ export async function PATCH() {
       .eq('korisnik_id', user.id)
       .eq('procitano', false);
 
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    if (error)
+      return NextResponse.json({ error: error.message }, { status: 500 });
     return NextResponse.json({ success: true });
   } catch (err) {
     return NextResponse.json(
       { error: err instanceof Error ? err.message : 'Greška servera.' },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
