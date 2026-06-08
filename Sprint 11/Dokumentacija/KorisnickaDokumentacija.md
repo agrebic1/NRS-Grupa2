@@ -114,7 +114,7 @@ Sigurnosna napomena: pri prijavi se koriste **neutralne poruke** — sistem ne o
 - **Historija korisnika prikazuje završene, zatvorene, otkazane i odbijene intervencije** (ne uključuje aktivne); aktivne se prate kroz „Moji zahtjevi”. Napredna pretraga historije (po datumu ili tipu kvara) nije dostupna u ovoj verziji.
 - **Detekcija dugog čekanja je klijentska**: računa se u pregledaču i nema push obavijesti; pragovi su po statusu, ali mjere se od trenutka kreiranja zahtjeva.
 - **Stvarno slanje email obavijesti zavisi od konfiguracije** servisa Resend; ako ključ nije postavljen, poruke se ne šalju (u razvoju se ispisuju u konzolu).
-- Aplikacija je dostupna na **bosanskom jeziku**.
+- Aplikacija je dostupna samo na **bosanskom jeziku**.
 
 ---
 
