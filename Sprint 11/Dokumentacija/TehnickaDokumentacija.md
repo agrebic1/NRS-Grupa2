@@ -6,7 +6,7 @@
 
 **Tip aplikacije:** full-stack **web aplikacija** kod koje korisnički dio (stranice) i serverski dio (aplikativna logika i pristup podacima) žive u istom projektu (`Projekat/`), a izvršavaju se u serverless okruženju (Vercel).
 
-**Arhitektonski stil:** monolitna **klijent–server** aplikacija sa **slojevitom** organizacijom. Skladištenje podataka, autentifikacija i pohrana datoteka oslanjaju se na vanjsku „backend kao usluga” platformu (Supabase / PostgreSQL). Kontrola pristupa je **višeslojna**: provjera na ulazu (middleware pri navigaciji), provjera u svakom serverskom pozivu i sigurnosne politike na nivou same baze (Row Level Security). Sistem je projektovan po **Open–Closed** principu — nove funkcionalnosti se dodaju kao novi moduli i komponente, bez prepravljanja jezgra.
+**Arhitektonski stil:** monolitna **klijent–server** aplikacija sa **slojevitom** organizacijom. Skladištenje podataka, autentifikacija i pohrana datoteka oslanjaju se na vanjsku „backend kao usluga” platformu (Supabase / PostgreSQL). Kontrola pristupa je **višeslojna**: provjera na ulazu (middleware pri navigaciji), provjera u svakom serverskom pozivu i sigurnosne politike na nivou same baze (Row Level Security). Sistem je projektovan po **Open–Closed** principu, nove funkcionalnosti se dodaju kao novi moduli i komponente, bez prepravljanja jezgra.
 
 ### Slojevi (konceptualno)
 
