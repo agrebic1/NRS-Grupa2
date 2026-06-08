@@ -49,12 +49,12 @@ Sigurnosna napomena: pri prijavi se koriste **neutralne poruke** — sistem ne o
 
 ### 2. Servisni zahtjevi (Korisnik)
 - **Čarobnjak za novi zahtjev** u **6 koraka**:
-  1. **Vrsta zahtjeva** — kategorija i podkategorija kvara
-  2. **Lokacija** — adresa, opcionalno odabir tačke na mapi ili GPS
-  3. **Termin** — predloženi termini (do 3 slota) ili „nemam preferenciju”
-  4. **Opis** — opis problema (min. 20 znakova), kontakt telefon, opcionalna slika
-  5. **Hitnost** — kratka procjena hitnosti (trijaža) ili premium opcija
-  6. **Pregled** — sažetak prije slanja
+  1. **Vrsta zahtjeva**: kategorija i podkategorija kvara
+  2. **Lokacija**: adresa, opcionalno odabir tačke na mapi ili GPS
+  3. **Termin**: predloženi termini (do 3 slota) ili „nemam preferenciju”
+  4. **Opis**: opis problema (min. 20 znakova), kontakt telefon, opcionalna slika
+  5. **Hitnost**: kratka procjena hitnosti (trijaža) ili premium opcija
+  6. **Pregled**: sažetak prije slanja
 - **Dvoslojne kategorije kvara**: **9 glavnih oblasti** sa **71 podkategorijom** (8 podkategorija po glavnoj kategoriji, uključujući „Ostalo”; kategorija „Ostalo” ima 7 podkategorija, uključujući „Drugo”).
 - **Trijaža (samoprocjena hitnosti)**: 5 pitanja (sigurnost, zastoj, materijalna šteta, ranjivost, obuhvat) na osnovu kojih sistem računa nivo hitnosti (0–110).
 - **Premium zahtjev u čarobnjaku**: korisnik sa **aktivnim** premium paketom može označiti zahtjev kao hitan (preskače trijažu); potrebna je i potvrda uslova korištenja.
