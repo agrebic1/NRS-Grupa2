@@ -26,7 +26,7 @@ Definisati precizan plan rada kroz dekompoziciju zadataka uz pomoć INVEST model
 
 ---
 
-## Hijerarhija zahtjeva
+# Hijerarhija zahtjeva
 
 ```text
 THEME (Tema)
@@ -67,7 +67,8 @@ THEME (Tema)
     │       │
     │       ├── Story: US-06 Pregled vlastitog zahtjeva
     │       ├── Story: US-26 Izmjena vlastitog zahtjeva
-    │       └── Story: US-27 Otkazivanje vlastitog zahtjeva
+    │       ├── Story: US-27 Otkazivanje vlastitog zahtjeva
+    │       └── Story: US-54 Pregled historije intervencija po korisniku usluge
     │
     ├── EPIC: Operativni pregled i obrada intervencija
     │   │
@@ -83,7 +84,8 @@ THEME (Tema)
     │       ├── Story: US-12 Određivanje prioriteta intervencije
     │       ├── Story: US-41 SLA praćenje
     │       ├── Story: US-45 SLA eskalacije
-    │       └── Story: US-42 Izvještaj odziva servisera
+    │       ├── Story: US-42 Izvještaj odziva servisera
+    │       └── Story: US-53 Automatski podsjetnik za intervencije koje dugo čekaju
     │
     ├── EPIC: Planiranje i dodjela intervencija
     │   │
@@ -122,7 +124,8 @@ THEME (Tema)
     │   └── FEATURE: Pregled izvršenog rada i zatvaranje intervencije (PBI-012)
     │       │
     │       ├── Story: US-24 Pregled evidentiranog izvršenog rada
-    │       └── Story: US-25 Potvrda i zatvaranje intervencije
+    │       ├── Story: US-25 Potvrda i zatvaranje intervencije
+    │       └── Story: US-52 Ocjena korisnika nakon zatvorene intervencije
     │
     ├── EPIC: Komunikacija, audit i notifikacije
     │   │
@@ -142,9 +145,10 @@ THEME (Tema)
     │
     └── EPIC: Analitika, optimizacija i unapređenje korisničkog iskustva
         │
-        ├── FEATURE: Geo-preporuka servisera (PBI-016)
+        ├── FEATURE: Geo-preporuka i navigacija servisera (PBI-016)
         │   │
-        │   └── Story: US-48 Geo-preporuka servisera po blizini lokacije intervencije
+        │   ├── Story: US-48 Geo-preporuka servisera po blizini lokacije intervencije
+        │   └── Story: US-51 Bazna lokacija servisera i prikaz rute do intervencije
         │
         ├── FEATURE: Analitički dashboard i KPI metrike (PBI-017)
         │   │
@@ -155,10 +159,9 @@ THEME (Tema)
             └── Story: US-50 Responsive i accessibility unapređenja sistema
 ```
 
+---
 
-# User Stories i Acceptance Criteria
-
-Sažeti pregled user storyja u okviru MVP-a:
+# Sažeti pregled user storyja
 
 | ID    | Naziv                                                    | Kratak opis                                                                                                                                                                                  | Poslovna vrijednost                                                                                         | Prioritet |
 | :---- | :------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------- | :-------: |
@@ -212,8 +215,14 @@ Sažeti pregled user storyja u okviru MVP-a:
 | US-48 | Geo-preporuka servisera po blizini lokacije intervencije | Kao dispečer, želim da mi sistem pri dodjeli preporuči servisere i prema blizini lokacije intervencije, kako bih smanjio vrijeme odziva i troškove izlaska na teren.                         | - kraće vrijeme odziva<br>- bolja raspodjela terenskog rada<br>- efikasnija dodjela servisera               |   Visok   |
 | US-49 | Analitički dashboard sa grafovima i KPI metrikama        | Kao dispečer, želim vizuelni analitički dashboard sa grafovima ključnih pokazatelja, kako bih brzo razumio stanje i opterećenje sistema.                                                     | - bolji pregled performansi<br>- brže donošenje odluka<br>- vizuelna analiza sistema                        |  Srednji  |
 | US-50 | Responsive i accessibility unapređenja sistema           | Kao korisnik sistema, želim da aplikacija bude pregledna, pristupačna i upotrebljiva na različitim uređajima, kako bih mogao efikasno koristiti sistem bez obzira na način pristupa.         | - bolja upotrebljivost<br>- pristupačnost<br>- kvalitetnije korisničko iskustvo                             |  Srednji  |
+| US-51 | Bazna lokacija servisera i prikaz rute do intervencije   | Kao serviser, želim unijeti svoju baznu lokaciju i vidjeti prikaz rute do intervencije na mapi, kako bih mogao lakše planirati dolazak na lokaciju.                                          | - bolja organizacija terena<br>- efikasnije planiranje dolaska<br>- kvalitetnije upravljanje vremenom        |  Srednji  |
+| US-52 | Ocjena korisnika nakon zatvorene intervencije            | Kao korisnik usluge, želim dati ocjenu i komentar nakon zatvorene intervencije, kako bih mogao pružiti povratnu informaciju o kvalitetu usluge.                                              | - povratna informacija<br>- praćenje kvaliteta usluge<br>- unapređenje rada tima                            |  Srednji  |
+| US-53 | Automatski podsjetnik za intervencije koje dugo čekaju   | Kao dispečer, želim da sistem automatski istakne intervencije koje predugo čekaju bez obrade, kako ne bih propustio zahtjeve koji su zapeli u workflowu.                                     | - sprječavanje zaboravljenih zahtjeva<br>- efikasan operativni tok<br>- bolji nadzor sistema                |  Srednji  |
+| US-54 | Pregled historije intervencija po korisniku usluge       | Kao korisnik usluge, želim vidjeti sve svoje prošle intervencije na jednom mjestu, kako bih mogao pratiti historiju servisa svoje imovine.                                                   | - uvid u prethodne zahtjeve<br>- transparentnost sistema<br>- lakše praćenje historije                      |   Nizak   |
 
-U sljedećoj tabeli prikazana je povezanost User Story-ja sa pripadajućim Product Backlog Itemima (PBI), Feature-ima i Epic cjelinama sistema:
+---
+
+# Tabela mapiranja User Story → Feature / PBI → Epic
 
 | User Story | Naziv user storyja                                       | Feature / PBI                                                          | Epic                                                           |
 | ---------- | -------------------------------------------------------- | ---------------------------------------------------------------------- | -------------------------------------------------------------- |
@@ -264,9 +273,13 @@ U sljedećoj tabeli prikazana je povezanost User Story-ja sa pripadajućim Produ
 | US-45      | SLA eskalacije                                           | **PBI-007 – Prioriteti, SLA i operativna kontrola**                    | **Operativni pregled i obrada intervencija**                   |
 | US-46      | Evidencija materijala i dijelova                         | **PBI-011 – Izvršenje i evidencija rada**                              | **Izvršenje intervencija od strane servisera**                 |
 | US-47      | Praćenje intervencije koja nije riješena iz prve         | **PBI-009 – Dodjela i preraspodjela intervencija**                     | **Planiranje i dodjela intervencija**                          |
-| US-48      | Geo-preporuka servisera po blizini lokacije intervencije | **PBI-016 – Geo-preporuka servisera**                                  | **Analitika, optimizacija i unapređenje korisničkog iskustva** |
+| US-48      | Geo-preporuka servisera po blizini lokacije intervencije | **PBI-016 – Geo-preporuka i navigacija servisera**                     | **Analitika, optimizacija i unapređenje korisničkog iskustva** |
 | US-49      | Analitički dashboard sa grafovima i KPI metrikama        | **PBI-017 – Analitički dashboard i KPI metrike**                       | **Analitika, optimizacija i unapređenje korisničkog iskustva** |
 | US-50      | Responsive i accessibility unapređenja sistema           | **PBI-018 – Responsive i accessibility unapređenja**                   | **Analitika, optimizacija i unapređenje korisničkog iskustva** |
+| US-51      | Bazna lokacija servisera i prikaz rute do intervencije   | **PBI-016 – Geo-preporuka i navigacija servisera**                     | **Analitika, optimizacija i unapređenje korisničkog iskustva** |
+| US-52      | Ocjena korisnika nakon zatvorene intervencije            | **PBI-012 – Pregled izvršenog rada i zatvaranje intervencije**         | **Zatvaranje i kontrola intervencija**                         |
+| US-53      | Automatski podsjetnik za intervencije koje dugo čekaju   | **PBI-007 – Prioriteti, SLA i operativna kontrola**                    | **Operativni pregled i obrada intervencija**                   |
+| US-54      | Pregled historije intervencija po korisniku usluge       | **PBI-005 – Pregled i upravljanje vlastitim zahtjevima**               | **Upravljanje zahtjevima za servisne intervencije**            |
 
 
 ## US-01 — Samostalna registracija korisnika usluge
