@@ -1,0 +1,89 @@
+name: Deploy (production)
+
+# Ponovljiv, automatizovan deployment KOMPLETNOG sistema (frontend + backend + baza)
+# na Vercel + Supabase, sa smoke provjerom dostupnosti aplikacije nakon deploya.
+#
+# Pokretanje: GitHub → Actions → "Deploy (production)" → Run workflow (workflow_dispatch).
+# Preduvjet: postavljeni Repository Secrets (vidi Zadnji Sprint/03_CD_Pipeline.md).
+
+on:
+  workflow_dispatch: # ručno, ponovljivo okidanje (demonstracija pipeline-a)
+  # Automatsko okidanje na push u main — odkomentarisati TEK nakon što su svi
+  # secrets postavljeni (inače će workflow padati na svaki push):
+  # push:
+  #   branches: [ main ]
+
+defaults:
+  run:
+    working-directory: Projekat # aplikativni kod je u poddirektoriju repozitorija
+
+env:
+  VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+  VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout koda
+        uses: actions/checkout@v4
+
+      - name: Postavi Node.js 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: Projekat/package-lock.json
+
+      - name: Instalacija zavisnosti
+        run: npm ci
+
+      - name: Quality gate (testovi prije deploya)
+        run: npm test # ne deployamo ako testovi padaju
+
+      # --- BAZA: priprema i primjena migracija na Supabase ---
+      - name: Postavi Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Povezivanje sa Supabase projektom
+        run: supabase link --project-ref "$SUPABASE_PROJECT_REF"
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_PROJECT_REF: ${{ secrets.SUPABASE_PROJECT_REF }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+
+      - name: Primjena migracija (supabase db push)
+        run: supabase db push
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+
+      # --- DEPLOY: build + deploy frontend I backend (jedan Next.js deployment) ---
+      - name: Instalacija Vercel CLI
+        run: npm i -g vercel@latest
+
+      - name: Povuci Vercel env i konfiguraciju (produkcija)
+        run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+      - name: Build aplikacije (frontend + backend, Next.js)
+        run: vercel build --prod --token="$VERCEL_TOKEN"
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+      - name: Deploy na produkciju
+        run: vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+
+      # --- PROVJERA: aplikacija dostupna nakon deploya ---
+      - name: Smoke test (dostupnost aplikacije)
+        run: |
+          echo "Provjera dostupnosti: $PROD_URL"
+          curl -fsS --retry 5 --retry-delay 5 "$PROD_URL" > /dev/null
+          echo "Smoke OK — aplikacija vraća HTTP 2xx i dostupna je."
+        env:
+          PROD_URL: ${{ secrets.PROD_URL }}

@@ -71,12 +71,13 @@ E2E_KORISNIK_EMAIL=test@gmail.com
 E2E_KORISNIK_PASSWORD=123456789Aa@
 ```
 
-## Trenutni status (automatski · mjereno 2026-06-01, Sprint 10)
+## Trenutni status (automatski · mjereno 2026-06-16, Sprint 11)
 
-- `npm test`: **445/445 passed** (321 unit + 124 integration)
-- `npm run test:e2e`: **23/23 passed** (uključujući `rbac.cross-access.spec.ts` · S10-T1; middleware usklađen s multi-uloga pristupom)
+- `npm test`: **573/573 passed** (423 unit + 150 integration)
+- `npm run test:e2e`: **23/23 passed** (zadnji potvrđeni 2026-06-01; uključuje `rbac.cross-access.spec.ts` · S10-T1; middleware usklađen s multi-uloga pristupom) — ponovo pokrenuti sa `E2E_*` kredencijalima prije predaje
+- `npm run test:coverage`: **98.92% stmts · 87.03% branch · 100% funcs · 99.25% lines** (iznad pragova 98/85/99; `test:coverage` prolazi)
 - `npm run test:izvjestaj`: generiše `docs/testing/Izvjestaji/<run>/IZVJESTAJ.md`
-- pokrivenost (`test:coverage`): trenutno ograničena na uži skup fajlova kroz `collectCoverageFrom` u `jest.config.js` — prikazani postotak nije pokrivenost cijelog projekta.
+- napomena: pokrivenost je **namjerno fokusirana** na kritične module (auth/RBAC/admin) kroz `collectCoverageFrom` u `jest.config.js`; UI se pokriva E2E + ručnim testovima i ne uračunava se u Jest coverage — prikazani postotak nije pokrivenost cijelog projekta.
 
 ## Izvještaji i artefakti
 
