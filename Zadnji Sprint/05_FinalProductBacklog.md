@@ -5,7 +5,7 @@
 Ovaj dokument prikazuje **stvarno stanje** projekta na kraju razvoja, ne željeno. Za svaku stavku jasno je označen status, a za svaku stavku koja **nije** potpuno završena naveden je konkretan razlog. Backlog se vodi na dva nivoa:
 
 - **Nivo A -> Product Backlog Items (PBI):** funkcionalne cjeline / epici (rollup).
-- **Nivo B -> User Stories (US-01 … US-54):** granularni, autoritativni status svake priče.
+- **Nivo B -> User Stories (US-01 … US-54):** granularni, autoritativni status svakog user story-ja.
 
 ---
 
@@ -14,8 +14,8 @@ Ovaj dokument prikazuje **stvarno stanje** projekta na kraju razvoja, ne željen
 
 | Status                | Značenje                                                                          |
 | --------------------- | --------------------------------------------------------------------------------- |
-| ✅ **Done**            | Implementirano, testirano i u funkciji u finalnoj verziji                         |
-| 🟨 **Partially Done** | Djelimično implementirano; ključni dio radi, ali nešto nedostaje (razlog naveden) |
+| ✅ **Done**            | Implementirano, testirano i funkcionalno u finalnoj verziji                      |
+| 🟨 **Partially Done** | Djelimično implementirano, ključni dio radi, ali nešto nedostaje (razlog naveden) |
 | ⬜ **Not Done**        | Nije implementirano (razlog naveden)                                              |
 | 🟦 **Deferred**       | Svjesno odgođeno za budući rad / post-MVP (razlog naveden)                        |
 
