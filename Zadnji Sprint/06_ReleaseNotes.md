@@ -116,4 +116,3 @@ Fokus narednih verzija:
 * real-time komunikacija
 * integracija eksternih servisa
 * unapređenje korisničkog iskustva
-
