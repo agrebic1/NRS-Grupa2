@@ -64,27 +64,27 @@ Aplikacija radi u web pregledniku, bez instalacije. Zamjenjuje ručno vođenje n
 
 ### 5.1 Landing stranica i Auth ekrani (`/`)
 
-Početna stranica nudi dvije opcije: **Registracija** (za nove korisnike usluge) i **Prijava** (za postojeće korisnike). Interno osoblje (dispečeri, serviseri) ne registruje se javno — njihove naloge kreira administrator.
+Početna stranica nudi dvije opcije: **Registracija** (za nove korisnike usluge) i **Prijava** (za postojeće korisnike). Interno osoblje (dispečeri, serviseri) ne registruje se javno - njihove naloge kreira administrator.
 
-**Registracija** `/auth/register` — forma sa poljima: ime, prezime, email, broj telefona, lozinka. Nakon uspješnog slanja sistem prikazuje obavijest da je link za potvrdu poslan na email. Bez potvrde emaila prijava zahtjeva nije moguća.  
+**Registracija** `/auth/register` - forma sa poljima: ime, prezime, email, broj telefona, lozinka. Nakon uspješnog slanja sistem prikazuje obavijest da je link za potvrdu poslan na email. Bez potvrde emaila prijava zahtjeva nije moguća.  
 
 <img width="1895" height="911" alt="img" src="04_slike/registracija-1.png" />
 
 <img width="1890" height="906" alt="image" src="04_slike/registracija-2.png" />
 
-<!-- SLIKA: Screenshot forme za registraciju (/auth/register) — prikazati popunjena polja i dugme "Registracija" -->
+<!-- SLIKA: Screenshot forme za registraciju (/auth/register) - prikazati popunjena polja i dugme "Registracija" -->
 
-**Prijava** `/auth/login` — forma sa email i lozinkom. U slučaju greške sistem prikazuje istu neutralnu poruku bez otkrivanja razloga (namjerno, radi sigurnosti).
+**Prijava** `/auth/login` - forma sa email i lozinkom. U slučaju greške sistem prikazuje istu neutralnu poruku bez otkrivanja razloga (namjerno, radi sigurnosti).
 
 <img width="1912" height="898" alt="image" src="04_slike/prijava.png" />
 
-<!-- SLIKA: Screenshot forme za prijavu (/auth/login) — prikazati praznu formu ili primjer greške prijave -->
+<!-- SLIKA: Screenshot forme za prijavu (/auth/login) - prikazati praznu formu ili primjer greške prijave -->
 
-**Odabir uloge** `/odabir-uloge` — prikazuje se samo korisnicima koji imaju više od jedne uloge (npr. serviser koji je ujedno i korisnik usluge). Svaka uloga prikazana je kao kartica s opisom. Nakon odabira sistem preusmjerava na odgovarajući dashboard.
+**Odabir uloge** `/odabir-uloge` - prikazuje se samo korisnicima koji imaju više od jedne uloge (npr. serviser koji je ujedno i korisnik usluge). Svaka uloga prikazana je kao kartica s opisom. Nakon odabira sistem preusmjerava na odgovarajući dashboard.
 
 <img width="1910" height="900" alt="image" src="04_slike/odabir-uloge.png" />
 
-<!-- SLIKA: Screenshot stranice za odabir uloge — prikazati kartice uloga (Korisnik, Serviser, Dispečer, Administrator) -->
+<!-- SLIKA: Screenshot stranice za odabir uloge - prikazati kartice uloga (Korisnik, Serviser, Dispečer, Administrator) -->
 
 ---
 
@@ -93,19 +93,19 @@ Početna stranica nudi dvije opcije: **Registracija** (za nove korisnike usluge)
 Početni ekran za korisnika koji je prijavio kvar. Sadrži:
 
 - **4 KPI kartice** u gornjem dijelu: ukupan broj zahtjeva, broj aktivnih, broj hitnih i sljedeći dolazak servisera.
-- **Moji zahtjevi** — lista kartica zahtjeva koji čekaju obradu (statusi: novi, hitno, u obradi). Svaka kartica prikazuje broj zahtjeva, kategoriju, adresu, datum prijave i trenutni status označen bojom.
-- **Svi zahtjevi** — stranica `/korisnik/zahtjevi` s kompletnom historijom, uključujući završene i otkazane.
+- **Moji zahtjevi** - lista kartica zahtjeva koji čekaju obradu (statusi: novi, hitno, u obradi). Svaka kartica prikazuje broj zahtjeva, kategoriju, adresu, datum prijave i trenutni status označen bojom.
+- **Svi zahtjevi** - stranica `/korisnik/zahtjevi` s kompletnom historijom, uključujući završene i otkazane.
 - Dugme **Prijavi novi kvar** vodi na formu za prijavu.
 
 Korisnik ne vidi interne operativne podatke (napomene dispečera, operativni prioritet).
 
 <img width="1910" height="905" alt="image" src="04_slike/korisnik-dash.png" />
 
-<!-- SLIKA: Screenshot korisničkog dashboarda — prikazati KPI kartice u gornjem dijelu i listu zahtjeva ispod, idealno s jednim aktivnim zahtjevom -->
+<!-- SLIKA: Screenshot korisničkog dashboarda - prikazati KPI kartice u gornjem dijelu i listu zahtjeva ispod, idealno s jednim aktivnim zahtjevom -->
 
 ---
 
-### 5.3 Forma za prijavu zahtjeva — wizard (`/korisnik/zahtjevi/novi`)
+### 5.3 Forma za prijavu zahtjeva - wizard (`/korisnik/zahtjevi/novi`)
 
 Višekoračna forma (wizard) koja vodi korisnika kroz prijavu kvara. Koraci se prikazuju u nizu; nije moguće preskočiti nepopunjen korak.
 
@@ -137,15 +137,15 @@ Višekoračna forma (wizard) koja vodi korisnika kroz prijavu kvara. Koraci se p
 Stranica prikazuje sve informacije o konkretnom zahtjevu: kategorija, adresa, preferirani termin, opis, kontakt, fotografija (ako je priložena), status s vremenskom linijom promjena.
 
 Dostupne akcije prema statusu:
-- **Izmijeni** — vidljivo samo dok je zahtjev u početnom statusu (`na_cekanju`); korisnik može ispraviti opis, adresu, kontakt ili termin, ali ne i kategoriju.
-- **Otkaži** — vidljivo samo u početnom statusu; zahtjeva potvrdu.
+- **Izmijeni** - vidljivo samo dok je zahtjev u početnom statusu (`na_cekanju`); korisnik može ispraviti opis, adresu, kontakt ili termin, ali ne i kategoriju.
+- **Otkaži** - vidljivo samo u početnom statusu; zahtjeva potvrdu.
 
 Nakon što dispečer počne obradu (status prelazi u `u obradi` ili dalje), izmjena i otkazivanje više nisu dostupni.
 
 <img width="1887" height="902" alt="image" src="04_slike/zahtjev-pregled.png" />
 
 
-<!-- SLIKA: Screenshot detalja zahtjeva korisnika — prikazati status badge, osnovne podatke i dugmad "Izmijeni" / "Otkaži" dok je zahtjev u statusu Novi -->
+<!-- SLIKA: Screenshot detalja zahtjeva korisnika - prikazati status badge, osnovne podatke i dugmad "Izmijeni" / "Otkaži" dok je zahtjev u statusu Novi -->
 
 ---
 
@@ -154,11 +154,11 @@ Nakon što dispečer počne obradu (status prelazi u `u obradi` ili dalje), izmj
 Operativni pregled stanja sistema. Sadrži:
 
 - **KPI kartice** s brojevima: Novi (čekaju obradu bez postavljenog prioriteta), U obradi (prioritet postavljen, u wizardu), Potvrđeno (čekaju dodjelu servisera).
-- **Kratke sekcije** s najvažnijim zahtjevima koji zahtijevaju pažnju — klik na karticu otvara detaljnu listu s odgovarajućim filterom.
+- **Kratke sekcije** s najvažnijim zahtjevima koji zahtijevaju pažnju - klik na karticu otvara detaljnu listu s odgovarajućim filterom.
 
 Dashboard ne prikazuje kompletne liste; one su u zasebnim modulima.
 
-<!-- SLIKA: Screenshot dispečerovog dashboarda — prikazati KPI kartice na vrhu i kratke sekcije zahtjeva koji zahtijevaju pažnju -->
+<!-- SLIKA: Screenshot dispečerovog dashboarda - prikazati KPI kartice na vrhu i kratke sekcije zahtjeva koji zahtijevaju pažnju -->
 
 ---
 
@@ -173,11 +173,11 @@ Svaka kartica zahtjeva prikazuje: redni broj, kategoriju, adresu, datum prijave,
 <img width="1892" height="898" alt="image" src="04_slike/dispecer-dash1.png" />
 <img width="1895" height="902" alt="image" src="04_slike/dispecer-dash2.png" />
 
-<!-- SLIKA: Screenshot liste zahtjeva dispečera — prikazati filter traku na vrhu i nekoliko kartica zahtjeva s različitim statusima/fazama -->
+<!-- SLIKA: Screenshot liste zahtjeva dispečera - prikazati filter traku na vrhu i nekoliko kartica zahtjeva s različitim statusima/fazama -->
 
 ---
 
-### 5.7 Wizard obrade zahtjeva — dispečer (`/dispecer/planiranje/[id]`)
+### 5.7 Wizard obrade zahtjeva - dispečer (`/dispecer/planiranje/[id]`)
 
 Višekoračni wizard kojim dispečer obrađuje svaki zahtjev. Prolazi kroz 5 koraka:
 
@@ -189,31 +189,31 @@ Višekoračni wizard kojim dispečer obrađuje svaki zahtjev. Prolazi kroz 5 kor
 | 4 | Pregled naloga | Bira odgovornog servisera s liste dostupnih; opciono i pomoćni serviseri |
 | 5 | Potvrda | Pregledava sve uneseno i potvrđuje; zahtjev prelazi u status *Potvrđeno* |
 
-Ako dispečer odabere manji prioritet od preporučenog, sistem prikazuje upozorenje — dispečer može nastaviti, ali se razlika bilježi.
+Ako dispečer odabere manji prioritet od preporučenog, sistem prikazuje upozorenje - dispečer može nastaviti, ali se razlika bilježi.
 
 <img width="1895" height="902" alt="image" src="04_slike/obrada-1.png" />
 <img width="1895" height="902" alt="image" src="04_slike/obrada-2.png" />
 <img width="1895" height="902" alt="image" src="04_slike/obrada-3.png" />
 <img width="1895" height="902" alt="image" src="04_slike/obrada-4.png" />
 <img width="1895" height="902" alt="image" src="04_slike/obrada-5.png" />
-<!-- SLIKA: Screenshot Koraka 2 čarobnjaka — prikazati listu prioriteta (NISKO do HITNO) s preporučenim prioritetom istaknutim -->
+<!-- SLIKA: Screenshot Koraka 2 čarobnjaka - prikazati listu prioriteta (NISKO do HITNO) s preporučenim prioritetom istaknutim -->
 
-<!-- SLIKA: Screenshot Koraka 4 čarobnjaka — prikazati listu dostupnih servisera s karticama za odabir -->
+<!-- SLIKA: Screenshot Koraka 4 čarobnjaka - prikazati listu dostupnih servisera s karticama za odabir -->
 
 ---
 
-### 5.8 Detalj intervencije — dispečer (`/dispecer/zahtjevi/[id]`)
+### 5.8 Detalj intervencije - dispečer (`/dispecer/zahtjevi/[id]`)
 
 Potpun pregled jedne intervencije: korisnički podaci, adresa s mapom, operativni prioritet, dogovoreni termin, dodijeljeni serviser, evidencija rada (po završetku), napomene, historija aktivnosti.
 
 Dostupne akcije (prema statusu):
-- **Otvori wizard** — dok je u inboxu (Novi / U obradi).
-- **Promijeni servisera** — dok intervencija nije u terminalnom statusu.
-- **Zatvori intervenciju** — kad je serviser završio rad (status `u_izvrsenju`); sistem zahtijeva da postoji evidentiran rad.
-- **Formalno zatvori** — prelaz iz `završeno` u `zatvoreno` (read-only); moguće samo uz evidenciju rada.
+- **Otvori wizard** - dok je u inboxu (Novi / U obradi).
+- **Promijeni servisera** - dok intervencija nije u terminalnom statusu.
+- **Zatvori intervenciju** - kad je serviser završio rad (status `u_izvrsenju`); sistem zahtijeva da postoji evidentiran rad.
+- **Formalno zatvori** - prelaz iz `završeno` u `zatvoreno` (read-only); moguće samo uz evidenciju rada.
 
 <img width="1895" height="902" alt="image" src="04_slike/detalji-zahtjeva.png" />
-<!-- SLIKA: Screenshot detalja intervencije na dispečerskoj strani — prikazati gornji dio s podacima korisnika, status badge i dostupne akcije -->
+<!-- SLIKA: Screenshot detalja intervencije na dispečerskoj strani - prikazati gornji dio s podacima korisnika, status badge i dostupne akcije -->
 
 ---
 
@@ -221,44 +221,44 @@ Dostupne akcije (prema statusu):
 
 Početni ekran za servisera prikazuje listu dodijeljenih intervencija. Svaka kartica sadrži: adresu, kategoriju kvara, dogovoreni termin, status i ime korisnika.
 
-<img width="1895" height="902" alt="image" src="04_slike/detalji-zahtjeva.png" />
-<!-- SLIKA: Screenshot serviserskog dashboarda — prikazati listu kartica dodijeljenih intervencija s različitim statusima -->
+<img width="1895" height="902" alt="image" src="04_slike/serviser-dash.png" />
+<!-- SLIKA: Screenshot serviserskog dashboarda - prikazati listu kartica dodijeljenih intervencija s različitim statusima -->
 
 ---
 
-### 5.10 Detalj zadatka — serviser (`/serviser/intervencije/[id]`)
+### 5.10 Detalj zadatka - serviser (`/serviser/intervencije/[id]`)
 
 Detaljna stranica intervencije za servisera. Prikazuje sve relevantne podatke: opis kvara, adresu, kontakt korisnika, dogovoreni termin i historiju promjena statusa.
 
 Dostupne akcije prema statusu:
-- **Prihvati** — prelaz iz `dodijeljeno` u `u_radu`; serviser potvrđuje da kreće na intervenciju.
-- **Odbij** — dostupno samo dok nije prihvaćeno; obavezno unosi razlog. Dispečer dobiva obavijest i intervencija se vraća na dodjelu.
-- **Počni izvršenje** — prelaz iz `u_radu` u `u_izvrsenju`.
-- **Evidentiraj rad** — unos opisa obavljenog posla, utrošenog vremena i materijala; dostupno u statusu `u_izvrsenju`.
+- **Prihvati** - prelaz iz `dodijeljeno` u `u_radu`; serviser potvrđuje da kreće na intervenciju.
+- **Odbij** - dostupno samo dok nije prihvaćeno; obavezno unosi razlog. Dispečer dobiva obavijest i intervencija se vraća na dodjelu.
+- **Počni izvršenje** - prelaz iz `u_radu` u `u_izvrsenju`.
+- **Evidentiraj rad** - unos opisa obavljenog posla, utrošenog vremena i materijala; dostupno u statusu `u_izvrsenju`.
 
 <img width="1895" height="902" alt="image" src="04_slike/prihvatanje-intervencije.png" />
 
-<!-- SLIKA: Screenshot detalja zadatka na serviserskoj strani — prikazati podatke o intervenciji i dugmad "Prihvati" / "Odbij" dok je status Dodijeljeno -->
+<!-- SLIKA: Screenshot detalja zadatka na serviserskoj strani - prikazati podatke o intervenciji i dugmad "Prihvati" / "Odbij" dok je status Dodijeljeno -->
 <img width="1895" height="902" alt="image" src="04_slike/evidencija-rada.png" />
-<!-- SLIKA: Screenshot forme za evidenciju rada — prikazati polja za opis rada, utrošeno vrijeme i materijal -->
+<!-- SLIKA: Screenshot forme za evidenciju rada - prikazati polja za opis rada, utrošeno vrijeme i materijal -->
 
 ---
 
-### 5.11 Admin panel — upravljanje korisnicima (`/admin/korisnici`)
+### 5.11 Admin panel - upravljanje korisnicima (`/admin/korisnici`)
 
 Lista svih korisnika u sistemu. Za svakog korisnika prikazuje: ime, email, ulogu, status (aktivan/neaktivan/suspendovan) i datum registracije.
 
 Dostupne akcije na pojedinačnom korisniku (`/admin/korisnici/[id]/uredi`):
-- **Promijeni ulogu** — bira se nova uloga iz liste; za dodjelu uloge Administrator prikazuje se upozorenje.
-- **Suspenduj** — unosi se razlog; korisniku se onemogućava pristup uz prikaz poruke o suspenziji.
-- **Aktiviraj** — vraća suspendovani nalog u aktivan status.
+- **Promijeni ulogu** - bira se nova uloga iz liste; za dodjelu uloge Administrator prikazuje se upozorenje.
+- **Suspenduj** - unosi se razlog; korisniku se onemogućava pristup uz prikaz poruke o suspenziji.
+- **Aktiviraj** - vraća suspendovani nalog u aktivan status.
 
 Napomena: interni nalozi (dispečer, serviser) kreiraju se kroz administratorski modul, ne javnom registracijom.
 
-<!-- SLIKA: Screenshot admin liste korisnika — prikazati tabelu korisnika s kolonama ime, email, uloga, status; idealno s jednim suspendovanim nalogom radi ilustracije -->
+<!-- SLIKA: Screenshot admin liste korisnika - prikazati tabelu korisnika s kolonama ime, email, uloga, status; idealno s jednim suspendovanim nalogom radi ilustracije -->
 <img width="1895" height="902" alt="image" src="04_slike/upravljanje-korisnicima.png" />
 <img width="1895" height="902" alt="image" src="04_slike/upravljanje-korisnicima2.png" />
-<!-- SLIKA: Screenshot stranice za uređivanje korisnika (/admin/korisnici/[id]/uredi) — prikazati sekciju "Promjena uloge" s karticama uloga -->
+<!-- SLIKA: Screenshot stranice za uređivanje korisnika (/admin/korisnici/[id]/uredi) - prikazati sekciju "Promjena uloge" s karticama uloga -->
 
 ---
 
@@ -266,27 +266,27 @@ Napomena: interni nalozi (dispečer, serviser) kreiraju se kroz administratorski
 
 ---
 
-### TOK 1 — Korisnik prijavljuje kvar
+### TOK 1 - Korisnik prijavljuje kvar
 
 **Kao korisnik usluge, da bih prijavio kvar, radim:**
 
 1. Prijavim se na `https://nrs-grupa2.vercel.app/` i otvorim **Korisnik** dashboard.
 2. Kliknem **Prijavi novi kvar** (dugme u gornjem desnom uglu dashboarda).
-3. **Korak 1 — Vrsta zahtjeva:** iz liste odaberem glavnu kategoriju (npr. *Vodovod*) i podkategoriju (npr. *Curenje vode*). Kliknem **Dalje**.
-4. **Korak 2 — Lokacija:** unesem adresu kvara (npr. *Ul. Ferhadija 12, Sarajevo*). Opciono mogu kliknuti *Koristi GPS* ili *Preciziraj na mapi*. Kliknem **Dalje**.
-5. **Korak 3 — Preferirani termin:** odaberem datum i vremenski raspon (npr. *ponedjeljak 09:00–12:00*) ili označim *Nemam preferirani termin*. Kliknem **Dalje**.
-6. **Korak 4 — Opis i kontakt:** unesem opis kvara (min. 20 znakova, npr. *Curi voda ispod sudopere, stalno kapa*), kontakt telefon i opciono dodajem fotografiju. Kliknem **Dalje**.
-7. **Korak 5 — Hitnost:** odgovorim na pitanja trijaže (opasnost po sigurnost, uticaj na funkcionisanje, rizik od štete, ranjive osobe, obim uticaja). Kliknem **Dalje**.
+3. **Korak 1 - Vrsta zahtjeva:** iz liste odaberem glavnu kategoriju (npr. *Vodovod*) i podkategoriju (npr. *Curenje vode*). Kliknem **Dalje**.
+4. **Korak 2 - Lokacija:** unesem adresu kvara (npr. *Ul. Ferhadija 12, Sarajevo*). Opciono mogu kliknuti *Koristi GPS* ili *Preciziraj na mapi*. Kliknem **Dalje**.
+5. **Korak 3 - Preferirani termin:** odaberem datum i vremenski raspon (npr. *ponedjeljak 09:00–12:00*) ili označim *Nemam preferirani termin*. Kliknem **Dalje**.
+6. **Korak 4 - Opis i kontakt:** unesem opis kvara (min. 20 znakova, npr. *Curi voda ispod sudopere, stalno kapa*), kontakt telefon i opciono dodajem fotografiju. Kliknem **Dalje**.
+7. **Korak 5 - Hitnost:** odgovorim na pitanja trijaže (opasnost po sigurnost, uticaj na funkcionisanje, rizik od štete, ranjive osobe, obim uticaja). Kliknem **Dalje**.
 8. Na **Pregledu** vidim sažetak svih unesenih podataka. Kliknem **Pošalji zahtjev**.
 
 <img width="1895" height="902" alt="image" src="04_slike/zahtjev-7.png" />
-<!-- SLIKA: Screenshot ekrana potvrde nakon slanja zahtjeva — prikazati poruku s brojem zahtjeva i statusom "Novi" -->
+<!-- SLIKA: Screenshot ekrana potvrde nakon slanja zahtjeva - prikazati poruku s brojem zahtjeva i statusom "Novi" -->
 
 **Očekivani rezultat:** sistem kreira zahtjev, dodjeljuje mu redni broj i prikazuje potvrdu s brojem zahtjeva i statusom *Novi*. Zahtjev je odmah vidljiv u korisničkom dashboardu i dispečerovoj listi aktivnih zahtjeva.
 
 ---
 
-### TOK 2 — Korisnik izmijeni ili otkaže zahtjev
+### TOK 2 - Korisnik izmijeni ili otkaže zahtjev
 
 **Kao korisnik usluge, da bih izmijenio zahtjev koji još nije preuzet u obradu, radim:**
 
@@ -304,33 +304,32 @@ Napomena: interni nalozi (dispečer, serviser) kreiraju se kroz administratorski
 2. Potvrdim akciju u dijalogu.
 
 <img width="1895" height="902" alt="image" src="04_slike/otkazivanje-zahtjeva.png" />
-<!-- SLIKA: Screenshot dijaloga za potvrdu otkazivanja — prikazati modal s porukom upozorenja i dugmadima "Potvrdi" / "Odustani" -->
+<!-- SLIKA: Screenshot dijaloga za potvrdu otkazivanja - prikazati modal s porukom upozorenja i dugmadima "Potvrdi" / "Odustani" -->
 
 **Očekivani rezultat:** status zahtjeva prelazi u *Otkazano*; zahtjev se premješta u historiju i više nije u aktivnom pregledu. Izmjena i otkazivanje nisu dostupni čim dispečer počne obradu.
 
 ---
 
-### TOK 3 — Dispečer obradi zahtjev i dodijeli servisera
+### TOK 3 - Dispečer obradi zahtjev i dodijeli servisera
 
 **Kao dispečer, da bih obradio zahtjev i dodijelio ga serviseru, radim:**
 
 1. Otvorim `/dispecer` dashboard i vidim KPI kartice. U sekciji **Novi** pojavljuje se novi zahtjev.
 2. Kliknem na karticu ili otvorim `/dispecer/zahtjevi` i iz liste odaberem zahtjev.
-3. Kliknem **Otvori čarobnjak** (ili sistem me automatski vodi u čarobnjak).
-4. **Korak 1 — Pregled zahtjeva:** čitam sve korisničke podatke (kategorija, adresa, opis, termin, hitnost, fotografija ako postoji). Kliknem **Dalje**.
-5. **Korak 2 — Operativni prioritet:** sistem mi preporučuje prioritet na osnovu trijaže (npr. *VISOKO*). Mogu prihvatiti preporuku ili odabrati drugi prioritet. Kliknem **Dalje**.
-6. **Korak 3 — Planiranje:** unosim dogovoreni termin — datum i vremenski raspon koji će biti vidljiv serviseru. Kliknem **Dalje**.
-7. **Korak 4 — Pregled naloga:** iz liste dostupnih servisera odaberem odgovornog servisera. Opciono dodajem i pomoćnog servisera. Kliknem **Dalje**.
-8. **Korak 5 — Potvrda:** pregledavam sve uneseno (prioritet, termin, serviser). Kliknem **Potvrdi**.
+3. **Korak 1 - Pregled zahtjeva:** čitam sve korisničke podatke (kategorija, adresa, opis, termin, hitnost, fotografija ako postoji). Kliknem **Dalje**.
+4. **Korak 2 - Operativni prioritet:** sistem mi preporučuje prioritet na osnovu trijaže (npr. *VISOKO*). Mogu prihvatiti preporuku ili odabrati drugi prioritet. Kliknem **Dalje**.
+5. **Korak 3 - Planiranje:** unosim dogovoreni termin - datum i vremenski raspon koji će biti vidljiv serviseru. Kliknem **Dalje**.
+6. **Korak 4 - Pregled naloga:** iz liste dostupnih servisera odaberem odgovornog servisera. Opciono dodajem i pomoćnog servisera. Kliknem **Dalje**.
+7. **Korak 5 - Potvrda:** pregledavam sve uneseno (prioritet, termin, serviser). Kliknem **Potvrdi**.
 
 <img width="1895" height="902" alt="image" src="04_slike/obrada-5.png" />
-<!-- SLIKA: Screenshot Koraka 5 čarobnjaka (Potvrda) — prikazati sažetak odabranog prioriteta, termina i servisera s dugmetom "Potvrdi" -->
+<!-- SLIKA: Screenshot Koraka 5 čarobnjaka (Potvrda) - prikazati sažetak odabranog prioriteta, termina i servisera s dugmetom "Potvrdi" -->
 
 **Očekivani rezultat:** zahtjev prelazi iz dispečerovog inboxa u status *Potvrđeno*, a zatim *Dodijeljeno*. Serviseru se dodjeljuje zadatak koji odmah postaje vidljiv u njegovu dashboardu.
 
 ---
 
-### TOK 4 — Serviser prihvati i izvrši intervenciju
+### TOK 4 - Serviser prihvati i izvrši intervenciju
 
 **Kao serviser, da bih prihvatio i izvršio dodijeljeni zadatak, radim:**
 
@@ -348,14 +347,14 @@ Napomena: interni nalozi (dispečer, serviser) kreiraju se kroz administratorski
 1. Na detaljima zadatka (dok je status *Dodijeljeno*) kliknem **Odbij zadatak**.
 2. Unosim razlog odbijanja. Potvrdim.
 
-<img width="1895" height="902" alt="image" src="04_slike/obrada-5.png" />
-<!-- SLIKA: Screenshot forme za odbijanje zadatka — prikazati padajući meni s razlozima odbijanja i polje za komentar -->
+<img width="1895" height="902" alt="image" src="04_slike/odbijanje-zadatka.png" />
+<!-- SLIKA: Screenshot forme za odbijanje zadatka - prikazati padajući meni s razlozima odbijanja i polje za komentar -->
 
 **Očekivani rezultat:** zadatak se uklanja iz moje liste. Dispečer prima obavijest o odbijanju s razlogom i može dodijeliti intervenciju drugom serviseru.
 
 ---
 
-### TOK 5 — Dispečer zatvori intervenciju
+### TOK 5 - Dispečer zatvori intervenciju
 
 **Kao dispečer, da bih zatvorio završenu intervenciju, radim:**
 
@@ -363,18 +362,18 @@ Napomena: interni nalozi (dispečer, serviser) kreiraju se kroz administratorski
 2. Pregledam evidenciju obavljenog rada u sekciji na dnu stranice.
 
 <img width="1895" height="902" alt="image" src="04_slike/evidencija-dispecer.png" />
-<!-- SLIKA: Screenshot sekcije "Evidencija rada" na detaljima intervencije — prikazati uneseni opis rada, utrošeno vrijeme i materijal koji je serviser dodao -->
+<!-- SLIKA: Screenshot sekcije "Evidencija rada" na detaljima intervencije - prikazati uneseni opis rada, utrošeno vrijeme i materijal koji je serviser dodao -->
 
 3. Kliknem **Zatvori intervenciju**.
    - **Očekivani rezultat:** status prelazi u *Završeno*; korisnik prima obavijest da je intervencija završena.
 4. Za formalno arhiviranje kliknem **Formalno zatvori** (dostupno samo u statusu *Završeno*).
-   - **Očekivani rezultat:** status prelazi u *Zatvoreno*; intervencija postaje read-only — izmjene više nisu moguće ni za koga.
+   - **Očekivani rezultat:** status prelazi u *Zatvoreno*; intervencija postaje read-only - izmjene više nisu moguće ni za koga.
 
 > **Napomena:** formalno zatvaranje nije moguće bez evidentirane historije rada. Ako serviser nije evidentirao rad, sistem blokira akciju i prikazuje odgovarajuću poruku.
 
 ---
 
-### TOK 6 — Administrator kreira interni nalog i dodijeli ulogu
+### TOK 6 - Administrator kreira interni nalog i dodijeli ulogu
 
 **Kao administrator, da bih kreirao nalog za novog servisera ili dispečera, radim:**
 
@@ -400,7 +399,7 @@ Napomena: interni nalozi (dispečer, serviser) kreiraju se kroz administratorski
 2. Unosim razlog suspenzije i potvrdim.
 
 <img width="1895" height="902" alt="image" src="04_slike/suspenzija.png" />
-<!-- SLIKA: Screenshot potvrde uspješne suspenzije — prikazati poruku o uspjehu i ažurirani status korisnika u listi -->
+<!-- SLIKA: Screenshot potvrde uspješne suspenzije - prikazati poruku o uspjehu i ažurirani status korisnika u listi -->
 
 **Očekivani rezultat:** korisnik ne može više da se prijavi i prikazuje mu se poruka *„Vaš nalog je suspendovan. Kontaktirajte administratora."* Historija i podaci ostaju sačuvani.
 
