@@ -1,25 +1,42 @@
 # Završni izvještaj o radu tima
 
+
 ## 1. Svrha projekta
 
-Razviti web aplikaciju koja **digitalizuje cijeli životni ciklus servisne intervencije** od prijave kvara, preko dispečerske trijaže, planiranja i dodjele servisera, do evidencije rada i formalnog zatvaranja uz audit historiju i kontrolu pristupa po ulogama. Cilj je da servisna firma i njeni korisnici imaju jedinstvenu, preglednu i sljedivu platformu umjesto ručnog vođenja naloga.
+Razviti web aplikaciju koja digitalizuje kompletan životni ciklus servisne intervencije od prijave kvara i kreiranja zahtjeva, preko dispečerske trijaže, određivanja prioriteta, planiranja i dodjele servisera, do evidencije rada na terenu, praćenja rokova, izvještavanja i formalnog zatvaranja intervencije.
+
+Cilj projekta je uspostaviti jedinstvenu, preglednu i sljedivu platformu koja povezuje korisnike usluge, dispečere, servisere i administratore, te omogućava efikasnije upravljanje servisnim procesima kroz standardizovane workflow tokove, kontrolu pristupa po ulogama, audit historiju svih značajnih aktivnosti i podršku operativnom odlučivanju kroz izvještaje i analitiku. Krajnji cilj sistema je smanjiti oslanjanje na ručne procedure, povećati transparentnost procesa, unaprijediti organizaciju rada servisne firme i omogućiti kvalitetnije korisničko iskustvo tokom cijelog procesa servisne intervencije.
+
 
 ## 2. Problem koji sistem rješava
 
-Prije InterServ-a servisni nalozi su se vodili **ručno** (telefonski pozivi, papir, tabele), što vodi do izgubljenih zahtjeva, nejasne odgovornosti, nepoštivanja rokova i nedostatka historije. InterServ uvodi:
+Prije InterServ-a servisni zahtjevi i intervencije često su se vodili ručno kroz telefonske pozive, papirne evidencije, e-mail komunikaciju ili jednostavne tabele. Takav način rada dovodi do izgubljenih zahtjeva, nejasne odgovornosti između učesnika procesa, otežanog praćenja statusa intervencija, nepoštivanja rokova i nedostatka pouzdane historije izvršenih aktivnosti.
 
-- standardiziran tok rada s jasnim statusima,
-- **objektivnu trijažu hitnosti (bodovanje 0–110)**,
-- praćenje rokova (**SLA**) i eskalacije,
-- obavijesti u aplikaciji i audit trag svake promjene,
-- izvještaje i analitiku za operativno odlučivanje.
+InterServ uvodi centralizovan i standardiziran sistem za upravljanje servisnim intervencijama koji omogućava:
+
+* jasno definisan tok rada od prijave kvara do zatvaranja intervencije,
+* standardizovane statuse i odgovornosti svih učesnika procesa,
+* objektivnu trijažu hitnosti kroz sistem bodovanja prioriteta (0–110),
+* planiranje i dodjelu servisera uz podršku sistema preporuke,
+* praćenje rokova (SLA), upozorenja i eskalacije,
+* evidenciju rada, materijala, fotografija i aktivnosti na terenu,
+* audit trag i historiju svih značajnih promjena u sistemu,
+* obavijesti unutar aplikacije i povratne informacije korisnika,
+* izvještaje, dashboarde i analitiku za operativno odlučivanje.
+
+Na taj način sistem povećava transparentnost, poboljšava organizaciju rada i omogućava efikasnije upravljanje kompletnim procesom servisnih intervencija.
+
 
 ## 3. Glavne korisničke uloge
 
-- **Korisnik (Klijent):** prijavljuje kvar, prati status, predlaže termine, ocjenjuje, gleda historiju, može aktivirati Premium.
-- **Dispečer:** trijaža, prioritet, planiranje termina, dodjela servisera/tima, zatvaranje, izvještaji/analitika.
-- **Serviser:** dodijeljeni zadaci, statusi na terenu, evidencija rada i materijala, slike, ruta.
-- **Administrator:** upravljanje korisnicima i ulogama, interni nalozi, suspenzija/aktivacija, premium status, odobravanje partnera.
+* **Korisnik (Klijent):** prijavljuje kvar ili zahtjev za intervenciju, prati status svojih zahtjeva, predlaže termine dolaska servisera, pregleda historiju intervencija, ocjenjuje završene intervencije i koristi dodatne pogodnosti kroz Premium paket.
+
+* **Dispečer:** vrši trijažu zahtjeva, određuje prioritet intervencija, planira termine, dodjeljuje servisere ili timove, prati SLA rokove, upravlja operativnim tokom intervencija te koristi dashboarde, izvještaje i analitičke prikaze za donošenje odluka.
+
+* **Serviser:** pregleda dodijeljene intervencije, evidentira rad na terenu, upravlja statusima intervencija, vodi evidenciju utrošenog vremena, materijala i dijelova, dodaje foto dokumentaciju te koristi prikaz rute i lokacije intervencije radi lakše organizacije rada.
+
+* **Administrator:** upravlja korisnicima, ulogama i internim nalozima, vrši aktivaciju i suspenziju korisnika, upravlja Premium statusima, odobrava partnerske organizacije i održava administrativni dio sistema.
+
 
 ## 4. Glavne implementirane funkcionalnosti
 
@@ -71,10 +88,26 @@ Autentikacija + troslojni RBAC · upravljanje korisnicima (admin) · prijava zah
 | **Format dokumentacije** (primjedba PO u Sprintu 9 na prikaz user storyja)     | Standardizacija formata user storyja i sprint artefakata                                                                         |
 
 
+
 ## 9. Šta bi tim unaprijedio da se projekat nastavlja
 
-- Integracija **stvarnog payment gateway-a** (checkout, webhook, neuspjeli payment).
-- **Real-time push** notifikacije (Supabase Realtime) umjesto osvježavanja.
-- **Offline** podrška za terenski rad servisera.
-- Definisanje statusa **SOS Bypass** i navigacijski preciznije rute (komercijalni routing API).
+Ukoliko bi se razvoj projekta nastavio nakon završetka MVP faze, fokus bi bio na daljem unapređenju operativne efikasnosti, automatizacije procesa, analitike i korisničkog iskustva.
 
+Potencijalna unapređenja uključivala bi:
+
+* naprednije analitičke dashboarde sa historijskim trendovima, poređenjima perioda i detaljnijim KPI pokazateljima,
+* proširenje sistema izvještavanja kroz automatsko generisanje i slanje periodičnih izvještaja odgovornim osobama,
+* dodatno unapređenje SLA sistema kroz naprednije modele praćenja performansi i automatske eskalacije,
+* razvoj naprednijeg sistema preporuke servisera koji bi, pored lokacije, uključivao dostupnost, opterećenje, stručnost, historijske performanse i zadovoljstvo korisnika,
+* veći nivo automatizacije dispečerskih aktivnosti kroz automatske prijedloge termina, dodjele i prioritizacije intervencija,
+* integraciju sa eksternim servisima za mape, navigaciju i preciznije planiranje ruta na terenu,
+* podršku za offline rad servisera na terenu sa kasnijom sinhronizacijom podataka,
+* unapređenje notifikacionog sistema kroz real-time obavijesti i push notifikacije,
+* dodatno proširenje mobilnog iskustva i responsive podrške za različite tipove uređaja i veličine ekrana,
+* naprednije upravljanje timovima servisera i planiranje kapaciteta,
+* proširenje sistema ocjenjivanja i praćenja kvaliteta usluge kroz analizu korisničkog zadovoljstva,
+* integraciju sa ERP, CRM ili drugim poslovnim sistemima radi razmjene podataka i automatizacije poslovnih procesa,
+* naprednije sigurnosne mehanizme, audit funkcionalnosti i praćenje sigurnosnih događaja,
+* razvoj prediktivne analitike i modela koji bi na osnovu historijskih podataka mogli predlagati preventivne aktivnosti, procjenjivati rizik probijanja SLA rokova i pomagati pri donošenju operativnih odluka.
+
+Na taj način sistem bi iz funkcionalnog MVP rješenja mogao postepeno prerasti u potpunu platformu za upravljanje servisnim intervencijama i terenskim operacijama.
