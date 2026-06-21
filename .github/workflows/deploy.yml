@@ -61,21 +61,28 @@ jobs:
           SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
 
       # --- DEPLOY: build + deploy frontend I backend (jedan Next.js deployment) ---
+      # Vercel komande se pokreću iz root-a repozitorija jer Vercel sam koristi
+      # Root Directory = "Projekat" iz projekta — pokretanje iz poddirektorija
+      # bi dalo dvostruku putanju (Projekat/Projekat/package.json).
       - name: Instalacija Vercel CLI
         run: npm i -g vercel@latest
+        working-directory: ${{ github.workspace }}
 
       - name: Povuci Vercel env i konfiguraciju (produkcija)
         run: vercel pull --yes --environment=production --token="$VERCEL_TOKEN"
+        working-directory: ${{ github.workspace }}
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
 
       - name: Build aplikacije (frontend + backend, Next.js)
         run: vercel build --prod --token="$VERCEL_TOKEN"
+        working-directory: ${{ github.workspace }}
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
 
       - name: Deploy na produkciju
         run: vercel deploy --prebuilt --prod --token="$VERCEL_TOKEN"
+        working-directory: ${{ github.workspace }}
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
 
