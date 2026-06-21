@@ -7,11 +7,11 @@
 
 | Artefakt                | Putanja u repou                         | Namjena                               |
 | ----------------------- | --------------------------------------- | ------------------------------------- |
-| GitHub Actions workflow | `Projekat/.github/workflows/deploy.yml` | Automatizovan pipeline (CI/CD)        |
+| GitHub Actions workflow | `.github/workflows/deploy.yml`          | Automatizovan pipeline (CI/CD)        |
 | PowerShell skripta      | `Projekat/tools/deploy.ps1`             | Ručni/lokalni ekvivalent istih koraka |
 
 
-Postojeći CI (zasebno): `Projekat/.github/workflows/test.yml` (testovi) i `lint.yml` (lint) rade na svaki push/PR.
+Postojeći CI (zasebno): `.github/workflows/test.yml` (testovi) i `lint.yml` (lint) rade na svaki push/PR. Workflow fajlovi su u **rootu repozitorija** (`.github/workflows/`) jer GitHub Actions otkriva workflow-e samo iz roota; aplikativni kod je u `Projekat/`, na šta workflow-i pokazuju preko `working-directory: Projekat`.
 
 ---
 

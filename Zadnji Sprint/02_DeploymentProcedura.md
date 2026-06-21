@@ -166,7 +166,7 @@ supabase link --project-ref <PROJECT_REF>   # ref se vidi u Dashboard URL-u / su
 
 ## 8. Migracije i seed podaci
 
-Sve SQL migracije su u `**Projekat/supabase/migrations/`** (~50 fajlova: shema, RLS politike, storage bucketi, premium, ocjene, notifikacije…). Primjenjuju se kroz Supabase CLI:
+Sve SQL migracije su u `**Projekat/supabase/migrations/`** (49 fajlova: shema, RLS politike, storage bucketi, premium, ocjene, notifikacije…). Primjenjuju se kroz Supabase CLI:
 
 ```bash
 cd NRS-Grupa2/Projekat
@@ -191,7 +191,7 @@ Sve iz `Projekat/`:
 npm test                 # unit + integration (Jest)
 npm run test:unit        # samo unit
 npm run test:integration # samo integration
-npm run test:coverage    # Jest + coverage (fokusiran na kritične module; prag 98/85/99)
+npm run test:coverage    # Jest + coverage (prag: statements 98 / branches 85 / functions 99 / lines 99)
 npm run test:e2e         # Playwright e2e (zahtijeva E2E_* kredencijale u .env.local)
 npm run test:izvjestaj   # pokrene sve + generiše docs/testing/Izvjestaji/<datum>/IZVJESTAJ.md
 ```
